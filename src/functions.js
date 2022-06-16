@@ -1,18 +1,30 @@
-function toUptime(time) {
-    const days = Math.floor(time / 86400);
-    const hours = Math.floor((time % 86400) / 3600);
-    const minutes = Math.floor((time % 3600) / 60);
-    const seconds = Math.floor(time % 60);
-    const milliseconds = Math.floor((time % 1) * 1000);
+class functions {
+    constructor() {
+        this.toUptime = this.toUptime.bind(this);
+    }
 
-    return { 
-        full: `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`,
-        short: `${hours}h ${minutes}m`,
+    static toUptime(uptime) {
+        const days = Math.floor(uptime / (60 * 60 * 24));
+        const hours = Math.floor((uptime % (60 * 60 * 24)) / (60 * 60));
+        const minutes = Math.floor((uptime % (60 * 60)) / 60);
+        const seconds = Math.floor(uptime % 60);
+        const milliseconds = Math.floor((uptime % 1) * 1000);
 
-        days: days, 
-        hours: hours, 
-        minutes: minutes,
-        seconds: seconds,
-        milliseconds: milliseconds
-    };
+        return { 
+            full: `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`,
+            short: `${hours}h ${minutes}m`,
+
+            days: days, 
+            hours: hours, 
+            minutes: minutes,
+            seconds: seconds,
+            milliseconds: milliseconds
+        };
+    }
+
+    static totalRequests() {
+        // 
+    }
 }
+
+export default functions;
