@@ -3,7 +3,7 @@ class functions {
         this.toUptime = this.toUptime.bind(this);
     }
 
-    static toUptime(uptime) {
+    static async toUptime(uptime) {
         const days = Math.floor(uptime / (60 * 60 * 24));
         const hours = Math.floor((uptime % (60 * 60 * 24)) / (60 * 60));
         const minutes = Math.floor((uptime % (60 * 60)) / 60);
@@ -22,7 +22,7 @@ class functions {
         };
     }
 
-    static totalRequests() {
+    static async totalRequests() {
         // 
     }
 }

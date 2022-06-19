@@ -1,14 +1,15 @@
-import "../styles/globals.css";
-import { useEffect } from "react";
+import "../public/styles/globals.css"
+import Head from "next/head";
 
 function MyApp({ Component, pageProps }) {
-    useEffect(() => {
-        document.body.classList.add("antialiased");
-        document.body.classList.add("bg-slate-900");
-        document.body.id = "home";
-    }, []);
-
-    return <Component {...pageProps} />
+    return ( 
+        <div>
+            <Head>
+                <title>Restorecord</title>
+            </Head>
+            <Component {...pageProps} />
+        </div>
+    )
 }
 
 export default MyApp

@@ -5,18 +5,14 @@ import Link from "next/link";
 export default function Test() {
     return (
         <div>
-            <Head>
-                <title>RestoreCord</title>
-            </Head>
-
-            <main>
+            <div>
                 <h1>
                     Test
                 </h1>
                 <li> 
                     <Link href="/">Home</Link>
                 </li>
-            </main>
+            </div>
             
             <footer>
                 <p>Copyright © {new Date().getFullYear()} RestoreCord</p>
