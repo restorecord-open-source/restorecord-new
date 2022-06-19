@@ -1,0 +1,28 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "sqlite"
+    url      = "file:./database.db"
+}
+
+model accounts {
+    id             Int       @id @default(autoincrement())
+    username       String    @unique
+    email          String    @unique
+    password       String
+    role           String?   @default("free")
+    pfp            String    @default("https://i.imgur.com/w65Dpnw.png")
+    banned         Boolean   @default(false)
+    twoFactor      Boolean   @default(false)
+    googleAuthCode String?
+    darkmode       Boolean   @default(true)
+    expiry         DateTime?
+    admin          Boolean   @default(false)
+    lastIp         String?
+    userId         Int?
+}

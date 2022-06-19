@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "dev": "node db_setup.js && next dev",
+        "dev": "next dev",
         "build": "next build",
         "start": "next build && next start",
         "lint": "next lint"
@@ -13,12 +13,16 @@
         "@fortawesome/free-brands-svg-icons": "^6.1.1",
         "@fortawesome/free-solid-svg-icons": "^6.1.1",
         "@fortawesome/react-fontawesome": "^0.1.18",
+        "@prisma/client": "^3.15.2",
+        "bcrypt": "^5.0.1",
+        "mongodb": "^4.7.0",
         "next": "12.1.6",
+        "next-connect": "^0.12.2",
         "react": "18.2.0",
-        "react-dom": "18.2.0",
-        "sqlite": "^4.1.1"
+        "react-dom": "18.2.0"
     },
     "devDependencies": {
+        "@types/bcrypt": "^5.0.0",
         "@types/node": "^18.0.0",
         "@types/react": "^18.0.13",
         "autoprefixer": "^10.4.7",
@@ -28,6 +32,7 @@
         "eslint-plugin-prettier": "^4.0.0",
         "postcss": "^8.4.14",
         "prettier": "^2.7.0",
+        "prisma": "^3.15.2",
         "tailwindcss": "^3.1.3"
     }
 }
