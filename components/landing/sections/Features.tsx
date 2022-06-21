@@ -1,6 +1,6 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFile, faGear, faNetworkWired, faPen, faUserSlash, faUserXmark } from "@fortawesome/free-solid-svg-icons";
+import { faBan, faFile, faGear, faNetworkWired, faPen, faUserXmark } from "@fortawesome/free-solid-svg-icons";
 
 export default function FeaturesSection() {
     return (
@@ -33,10 +33,9 @@ export default function FeaturesSection() {
                     <p>We offer a premium level Anti VPN, so no one using a VPN or Proxy can verify.</p>
                 </div>
                 <div className="card px-5 pt-10 pb-5 mb-10 rounded-lg shadow-lg transition-all hover:shadow-sm text-center sm:mb-0 bg-slate-800 text-gray-300">
-                    <FontAwesomeIcon className="text-white bg-indigo-600 p-5 rounded-full mb-5" icon={faUserSlash}></FontAwesomeIcon>
+                    <FontAwesomeIcon className="text-white bg-indigo-600 p-5 rounded-full mb-5" icon={faBan}></FontAwesomeIcon>
                     <h4 className="font-bold text-xl mb-2 text-gray-200">IP Ban</h4>
-                    <p>Want to Permanently Ban someone from your Server? We have IP Bans which will help banning a person from your Server.
-                    </p>
+                    <p>Want to Permanently Ban someone from your Server? We have IP Bans which will help banning a person from your Server.</p>
                 </div>
             </div>
         </section>

@@ -13,7 +13,7 @@ datasource db {
 model accounts {
     id             Int       @id @default(autoincrement())
     username       String    @unique
-    email          String    @unique
+    email          String
     password       String
     role           String?   @default("free")
     pfp            String    @default("https://i.imgur.com/w65Dpnw.png")
@@ -24,5 +24,6 @@ model accounts {
     expiry         DateTime?
     admin          Boolean   @default(false)
     lastIp         String?
+    createdAt      DateTime  @default(now())
     userId         Int?
 }
