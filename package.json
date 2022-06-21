@@ -23,6 +23,7 @@
         "yup": "^0.32.11"
     },
     "devDependencies": {
+        "@tailwindcss/forms": "^0.5.2",
         "@types/bcrypt": "^5.0.0",
         "@types/node": "^18.0.0",
         "@types/react": "^18.0.13",

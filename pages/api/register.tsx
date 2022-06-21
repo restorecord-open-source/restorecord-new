@@ -37,7 +37,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             success: true,
             message: "Account created successfully",
             account: {
-                id: account.id,
+                username: account.username,
+                email: account.email,
+                role: account.role,
+                pfp: account.pfp,
+                createdAt: account.createdAt,
             },
         });
     } catch (err: any) {
