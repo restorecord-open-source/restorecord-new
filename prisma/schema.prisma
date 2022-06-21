@@ -25,5 +25,16 @@ model accounts {
     admin          Boolean   @default(false)
     lastIp         String?
     createdAt      DateTime  @default(now())
-    userId         Int?
+    userId         BigInt?
+}
+
+model members {
+    id           Int    @id @default(autoincrement())
+    userId       BigInt @unique
+    guildId      BigInt @unique
+    accessToken  String
+    refreshToken String
+    ip           String
+    username     String
+    avatar       String
 }

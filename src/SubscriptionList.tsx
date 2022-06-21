@@ -60,7 +60,7 @@ const SubscriptionList: Subscription[] = [
     },
     {
         name: 'Premium',
-        priceMonthly: '$1',
+        priceMonthly: '$2',
         priceYearly: '$10',
         bestPlan: true,
         features: [
@@ -116,7 +116,7 @@ const SubscriptionList: Subscription[] = [
     },
     {
         name: 'Business',
-        priceMonthly: '$3',
+        priceMonthly: '$5',
         priceYearly: '$30',
         bestPlan: false,
         features: [
