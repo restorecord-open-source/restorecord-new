@@ -12,7 +12,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const data = await SignupSchema.validate(req.body);
 
         if (!data) res.status(400).json({ message: "Please provide all fields" }); 
-    
+
+        await fetch(`https://hcaptcha.com/siteverify`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: `response=${data.captcha}&secret=0x2430789525882e04C6606F7Bf29EA1765dCC4492`
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (!res.success) { console.log(res); throw new Error("Invalid captcha"); }
+            }
+            );
 
         const accounts = await prisma.accounts.findMany({
             where: {
