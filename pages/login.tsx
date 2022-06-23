@@ -1,41 +1,50 @@
-import NavBar from "../components/landing/nav/navBar"
-import { useEffect, useState, useRef } from "react"
-import HCaptcha from "@hcaptcha/react-hcaptcha";
-import functions from "../src/functions";
+import { useState, useEffect } from "react";
+import NavBar from "../components/landing/nav/navBar";
 import { Toaster } from "react-hot-toast";
-import styles from "../public/styles/register.module.css"
+import styles from "../public/styles/login.module.css";
 import Link from "next/link";
+import functions from "../src/functions";
+import router from "next/router";
 
-export default function Register() {
+export default function Login() {
     const [username, setUsername] = useState("");
-    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    const [token, setToken]: any = useState();
-    const captchaRef: any = useRef();
-
-
-    const onExpire = () => {
-        functions.ToastAlert("Captcha expired", "error");
-    }
-
-    const onError = (err: any) => {
-        functions.ToastAlert(err, "error");
-    }
 
     const handleSubmit = (e: any) => {
         e.preventDefault();
-        captchaRef.current.execute();
+        fetch(`/api/login`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: username,
+                password: password
+            })
+        })
+            .then(res => res.json())
+            .then(res => {
+                if (!res.success) {
+                    functions.ToastAlert(res.message, "error");
+                }
+                else {
+                    functions.ToastAlert(res.message, "success");
+                    localStorage.setItem("token", res.token);
+                    setTimeout(() => router.push("/dashboard"), 1000);
+                }
+            })
+            .catch(err => {
+                functions.ToastAlert(err, "error");
+            });
     }
 
+    
     const handleChange = (e: any) => {
         const { name, value } = e.target;
         switch (name) {
         case "username":
             setUsername(value);
-            break;
-        case "email":
-            setEmail(value);
             break;
         case "password":
             setPassword(value);
@@ -46,41 +55,39 @@ export default function Register() {
     }
 
     useEffect(() => {
-        if (token) {
-            fetch(`/api/register`, {
+        if (localStorage.getItem("token")) {
+            fetch(`/api/checkToken`, {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    username: username,
-                    email: email,
-                    password: password,
-                    captcha: token
-                })
+                    "Content-Type": "application/json",
+                    "Authorization": `${localStorage.getItem("token")}`
+                }
             })
                 .then(res => res.json())
                 .then(res => {
-                    setToken(null);
                     if (res.success) {
-                        functions.ToastAlert("Account created", "success");
-                    } 
-                    else {
-                        functions.ToastAlert(res.message, "error");
+                        functions.ToastAlert("You are already logged in, redirecting", "success");
+                        setTimeout(() => router.push("/dashboard"), 1000);
                     }
+                    else {
+                        localStorage.removeItem("token");
+                    }
+                })
+                .catch(err => {
+                    functions.ToastAlert("Error please check console", "error");
+                    console.log(err);
                 });
         }
-    }, [token, email, username, password]);
-
+    }, []);
 
     return (
         <>
             <NavBar />
             <Toaster />
             <div className={styles.mainWrapper}>
-                <div className={styles.registerWrapper}>
+                <div className={styles.loginWrapper}>
                     <div className={styles.header}>
-                        <h2>Register an Account</h2>
+                        <h2>Login to your Account</h2>
                     </div>
                     <form className={styles.formWrapper} onSubmit={handleSubmit}>
                         <div className={styles.form}>
@@ -99,20 +106,6 @@ export default function Register() {
                                 />
                             </div>
                             <div className={styles.inputWrapper}>
-                                <label htmlFor="email" className="sr-only">
-                                    Email address
-                                </label>
-                                <input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    autoComplete="email-address"
-                                    required
-                                    placeholder="Email address"
-                                    onChange={handleChange}
-                                />
-                            </div>
-                            <div className={styles.inputWrapper}>
                                 <label htmlFor="password" className="sr-only">
                                     Password
                                 </label>
@@ -126,30 +119,20 @@ export default function Register() {
                                     onChange={handleChange}
                                 />
                             </div>
-
-                            <div>
-                                <HCaptcha
-                                    sitekey="748ea2c2-9a8d-4791-b951-af4c52dc1f0f"
-                                    size="invisible"
-                                    onVerify={setToken}
-                                    onError={onError}
-                                    onExpire={onExpire}
-                                    ref={captchaRef}
-                                />
-                            </div>
                             
                             <div className={styles.formTextWrapper}>
                                 <a className={styles.formText}>
-                                    Already have an account? Login <Link href="/login"><span>here</span></Link>.
+                                    Don&#39;t have an account? Register <Link href="/register"><span>here</span></Link>.
                                 </a>
                             </div>
                         </div>
 
+                        
                         <div>
                             <button type="submit" className={styles.formButton}>
-                                Register
+                                Login
                             </button>
-                        </div>  
+                        </div>
                     </form>
                 </div>
             </div>

@@ -9,7 +9,7 @@ export default function SubscriptionPlansSection() {
 
     const [subscriptionType, setSubscriptionType] = useState("monthly");
     const [subscriptionToggle , setSubscriptionToggle] = useState(true);
-    const toggleClass = ' transform translate-x-6';
+    const toggleClass = " transform translate-x-6";
 
     useEffect(() => {
         setSubscriptionType("monthly");
@@ -27,7 +27,7 @@ export default function SubscriptionPlansSection() {
             <div className="flex justify-center">
                 <p className="text-center text-gray-200">Monthly</p>
 
-                <div className={"mx-5 mb-5 md:w-14 md:h-7 w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition-all " + (subscriptionToggle ? 'bg-slate-600' : 'bg-indigo-600')}
+                <div className={"mx-5 mb-5 md:w-14 md:h-7 w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition-all " + (subscriptionToggle ? "bg-slate-600" : "bg-indigo-600")}
                     onClick={() => {
                         setSubscriptionToggle(!subscriptionToggle);
                         subscriptionType === "monthly" ? setSubscriptionType("yearly") : setSubscriptionType("monthly");

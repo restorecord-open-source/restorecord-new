@@ -28,7 +28,7 @@ export default function NavBar() {
                 </div>
 
                 <div x-show="showMenu">
-                    <nav className="navbar mb-0 flex flex-col" style={{ paddingInlineStart: '40px' }}>
+                    <nav className="navbar mb-0 flex flex-col" style={{ paddingInlineStart: "40px" }}>
                         <ul className="flex gap-1 space-x-0 sxl:space-x-6 sx:space-x-12 smx:space-x-20 mdx:space-x-32 transition-all">
                             <li className="font-semibold text-slate-200 hover:text-gray-400 transition-all">
                                 <Link href="/">Home</Link>
