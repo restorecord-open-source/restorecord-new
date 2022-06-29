@@ -6,35 +6,78 @@ generator client {
 }
 
 datasource db {
-    provider = "sqlite"
-    url      = "file:./database.db"
+    provider = "mysql"
+    url      = "mysql://restorecord_db:oNeFHuxBMt6h6z@localhost:3306/restorecord_main"
+
+    // url      = "file:./database.db"
 }
 
 model accounts {
-    id             Int       @id @default(autoincrement())
-    username       String    @unique
+    id             Int          @id @default(autoincrement())
+    username       String       @unique
     email          String
     password       String
-    role           String?   @default("free")
-    pfp            String    @default("https://i.imgur.com/w65Dpnw.png")
-    banned         Boolean   @default(false)
-    twoFactor      Boolean   @default(false)
+    role           String?      @default("free")
+    pfp            String       @default("https://i.imgur.com/w65Dpnw.png")
+    banned         Boolean      @default(false)
+    twoFactor      Boolean      @default(false)
     googleAuthCode String?
-    darkmode       Boolean   @default(true)
+    darkmode       Boolean      @default(true)
     expiry         DateTime?
-    admin          Boolean   @default(false)
+    admin          Boolean      @default(false)
     lastIp         String?
-    createdAt      DateTime  @default(now())
-    userId         BigInt?
+    createdAt      DateTime     @default(now())
+    userId         BigInt?      @db.UnsignedBigInt
+    servers        servers[]
+    customBots     customBots[]
+}
+
+model servers {
+    id          Int        @id @default(autoincrement())
+    name        String     @unique
+    owner       accounts   @relation(fields: [ownerId], references: [id])
+    ownerId     Int
+    guildId     BigInt     @unique @db.UnsignedBigInt
+    roleId      BigInt     @unique @db.UnsignedBigInt
+    redirectUrl String?
+    picture     String?    @default("https://i.imgur.com/w65Dpnw.png")
+    vpncheck    Boolean    @default(false)
+    webhook     String?
+    bgImage     String?
+    description String     @default("Just a Discord Server.")
+    createdAt   DateTime   @default(now())
+    customBot   customBots @relation(fields: [customBotId], references: [id])
+    customBotId Int
+    members     members[]
 }
 
 model members {
-    id           Int    @id @default(autoincrement())
-    userId       BigInt @unique
-    guildId      BigInt @unique
+    id           Int     @id @default(autoincrement())
+    userId       BigInt  @unique @db.UnsignedBigInt
+    guild        servers @relation(fields: [guildId], references: [guildId])
+    guildId      BigInt  @db.UnsignedBigInt
     accessToken  String
     refreshToken String
-    ip           String
+    ip           String?
     username     String
     avatar       String
+}
+
+model customBots {
+    id        Int       @id @default(autoincrement())
+    name      String    @unique
+    clientId  BigInt    @unique @db.UnsignedBigInt
+    botToken  String
+    botSecret String
+    ownerId   Int
+    owner     accounts  @relation(fields: [ownerId], references: [id])
+    servers   servers[]
+}
+
+model news {
+    id        Int      @id @default(autoincrement())
+    title     String   @db.LongText
+    content   String   @db.LongText
+    author    String
+    createdAt DateTime @default(now())
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import NavBar from "../components/landing/nav/navBar";
+import NavBar from "../components/landing/Nav/NavBar";
 import { Toaster } from "react-hot-toast";
 import styles from "../public/styles/login.module.css";
 import Link from "next/link";
@@ -13,7 +13,7 @@ export default function Login() {
 
     const handleSubmit = (e: any) => {
         e.preventDefault();
-        fetch(`/api/login`, {
+        fetch(`/api/v1/auth/login`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -57,7 +57,6 @@ export default function Login() {
     useEffect(() => {
         if (localStorage.getItem("token")) {
             fetch(`/api/checkToken`, {
-                method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `${localStorage.getItem("token")}`
@@ -87,37 +86,22 @@ export default function Login() {
             <div className={styles.mainWrapper}>
                 <div className={styles.loginWrapper}>
                     <div className={styles.header}>
-                        <h2>Login to your Account</h2>
+                        <h2>Log into your Account</h2>
                     </div>
                     <form className={styles.formWrapper} onSubmit={handleSubmit}>
                         <div className={styles.form}>
-                            <div className={styles.inputWrapper}>
-                                <label htmlFor="username" className="sr-only">
-                                    Username
-                                </label>
-                                <input
-                                    id="username"
-                                    name="username"
-                                    type="text"
-                                    autoComplete="username"
-                                    required
-                                    placeholder="Username"
-                                    onChange={handleChange}
-                                />
+                            <div>
+                                <label htmlFor="username" className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Username</label>
+                                <div className="relative mb-6">
+                                    <input name="username" onChange={handleChange} type="text" id="username" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Username" />
+                                </div>
                             </div>
-                            <div className={styles.inputWrapper}>
-                                <label htmlFor="password" className="sr-only">
-                                    Password
-                                </label>
-                                <input
-                                    id="password"
-                                    name="password"
-                                    type="password"
-                                    autoComplete="password"
-                                    required
-                                    placeholder="Password"
-                                    onChange={handleChange}
-                                />
+                            
+                            <div>
+                                <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Password</label>
+                                <div className="flex">
+                                    <input name="password" onChange={handleChange} type="password" id="password" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="••••••••••" />
+                                </div>
                             </div>
                             
                             <div className={styles.formTextWrapper}>

@@ -1,31 +1,26 @@
 {
-  "compilerOptions": {
-    "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-    "incremental": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "moduleResolution": "Node",
-    "resolveJsonModule": true
-  },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "pages/_app.tsx"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+	"compilerOptions": {
+		"target": "es5",
+		"lib": ["dom", "dom.iterable", "esnext", "es2020"],
+		"allowJs": true,
+		"skipLibCheck": true,
+		"strict": true,
+		"forceConsistentCasingInFileNames": true,
+		"noEmit": true,
+		"incremental": true,
+		"esModuleInterop": true,
+		"module": "esnext",
+		"isolatedModules": true,
+		"jsx": "preserve",
+		"moduleResolution": "Node",
+		"resolveJsonModule": true
+	},
+	"include": [
+		"next-env.d.ts",
+		"**/*.ts",
+		"**/*.tsx",
+		"pages/_app.tsx",
+		"components/landing/Nav/TextLogo.stsx"
+	],
+	"exclude": ["node_modules"]
 }

@@ -1,6 +1,4 @@
-import { faX } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 class functions {
     constructor() {

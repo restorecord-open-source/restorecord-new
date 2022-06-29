@@ -1,4 +1,4 @@
-import NavBar from "../components/landing/nav/navBar"
+import NavBar from "../components/landing/Nav/NavBar"
 import { useEffect, useState, useRef } from "react"
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 import functions from "../src/functions";
@@ -47,7 +47,7 @@ export default function Register() {
 
     useEffect(() => {
         if (token) {
-            fetch(`/api/register`, {
+            fetch(`/api/v1/auth/register`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -84,7 +84,28 @@ export default function Register() {
                     </div>
                     <form className={styles.formWrapper} onSubmit={handleSubmit}>
                         <div className={styles.form}>
-                            <div className={styles.inputWrapper}>
+                            <div>
+                                <label htmlFor="username" className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Username</label>
+                                <div className="relative mb-6">
+                                    <input name="username" onChange={handleChange} type="text" id="username" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Username" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Email</label>
+                                <div className="relative mb-6">
+                                    <input name="email" onChange={handleChange} type="email" id="email" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Email" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Password</label>
+                                <div className="flex">
+                                    <input name="password" onChange={handleChange} type="password" id="password" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="••••••••••" />
+                                </div>
+                            </div>
+
+                            {/* <div className={styles.inputWrapper}>
                                 <label htmlFor="username" className="sr-only">
                                     Username
                                 </label>
@@ -125,7 +146,7 @@ export default function Register() {
                                     placeholder="Password"
                                     onChange={handleChange}
                                 />
-                            </div>
+                            </div> */}
 
                             <div>
                                 <HCaptcha

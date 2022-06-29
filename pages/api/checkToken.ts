@@ -1,9 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { PrismaClient } from "@prisma/client";
 import { verify } from "jsonwebtoken";
 import rateLimit from "../../src/rate-limit";
+import { prisma } from "../../src/db";
 
-const prisma = new PrismaClient();
 const limiter = rateLimit({
     interval: 10 * 1000, 
     uniqueTokenPerInterval: 500,
@@ -11,7 +10,7 @@ const limiter = rateLimit({
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) { 
-    if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
+    if (req.method !== "GET") return res.status(405).json({ message: "Method not allowed" });
 
     try {
         await limiter.check(res, "CACHE_TOKEN");
@@ -20,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const valid = verify(token, `${process.env.JWT_SECRET}`);
 
         if (!valid) return res.status(400).json({ success: false });
-        
+
         return res.status(200).json({ success: true });
     }
     catch (err: any) {

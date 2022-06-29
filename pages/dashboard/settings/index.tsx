@@ -1,19 +1,19 @@
 import { useRouter } from "next/router";
-import { useQuery } from "react-query"
-import NavBar from "../../components/dashboard/navBar";
-import functions from "../../src/functions";
-import NavBarLoading from "../../components/dashboard/navBarLoading";
-import { useToken } from "../../src/token";
-import getUser from "../../src/dashboard/getUser";
-import DashBoard from "../../components/dashboard/DashBoard";
+import { useQuery } from "react-query";
+import DashSettings from "../../../components/dashboard/DashSettings";
+import NavBar from "../../../components/dashboard/navBar";
+import NavBarLoading from "../../../components/dashboard/navBarLoading";
+import getUser from "../../../src/dashboard/getUser";
+import functions from "../../../src/functions";
+import { useToken } from "../../../src/token";
 
-export default function Dashboard() {
+export default function Settings() {
     const [ token ]: any = useToken()
     const router = useRouter();
 
     const { data, isError, isLoading } = useQuery('user', async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
-    }), { retry: false,  refetchOnWindowFocus: false });
+    }), { retry: false, refetchOnWindowFocus: false });
 
 
     if (isLoading) {
@@ -28,17 +28,14 @@ export default function Dashboard() {
     if (!data.username) {
         router.push("/login") 
     }
-
+    
     return (
         <>
             <div className="min-h-screen max-h-screen flex">
                 <NavBar user={data.username} />
 
-                <DashBoard user={data.username} />
+                <DashSettings user={data.username} />
             </div>
         </>
     )
 }
-
-
-

@@ -1,3 +1,21 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.loading-bar {
+	z-index: 9999;
+}
+
+:target {
+	scroll-margin-top: 0;
+}
+
+body {
+	scrollbar-color: hsla(0, 0%, 100%, 0.25) transparent;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not(.light):not(.dark) {
+		color-scheme: dark;
+	}
+}

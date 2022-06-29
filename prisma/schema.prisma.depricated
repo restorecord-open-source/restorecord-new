@@ -1,0 +1,446 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    url      = "mysql://restorecord_db:oNeFHuxBMt6h6z@localhost:3306/restorecord_main"
+}
+
+model efmigrationshistory {
+    MigrationId    String @id @db.VarChar(150)
+    ProductVersion String @db.VarChar(32)
+
+    @@map("__efmigrationshistory")
+}
+
+model backup {
+    key                                                     Int               @id @default(autoincrement())
+    guildName                                               String?           @db.LongText
+    creationDate                                            DateTime          @db.DateTime(6)
+    vanityUrl                                               String?           @db.LongText
+    preferredLocale                                         String?           @db.LongText
+    verificationLevel                                       Int
+    systemChannelMessageDeny                                Int
+    defaultMessageNotifications                             Int
+    explicitContentFilterLevel                              Int
+    splashUrl                                               String?           @db.LongText
+    iconUrl                                                 String?           @db.LongText
+    description                                             String?           @db.LongText
+    discoverySplashUrl                                      String?           @db.LongText
+    isWidgetEnabled                                         Boolean?
+    isBoostProgressBarEnabled                               Boolean?
+    afkTimeout                                              Int?
+    bannerUrl                                               String?           @db.LongText
+    afkChannelkey                                           Int?
+    defaultChannelkey                                       Int?
+    publicUpdatesChannelkey                                 Int?
+    rulesChannelkey                                         Int?
+    systemChannelkey                                        Int?
+    widgetChannelkey                                        Int?
+    Userkey                                                 Int?
+    users                                                   users?            @relation(fields: [Userkey], references: [key], onDelete: Restrict, onUpdate: Restrict, map: "FK_Backup_users_Userkey")
+    voicechannel_backup_afkChannelkeyTovoicechannel         voicechannel?     @relation("backup_afkChannelkeyTovoicechannel", fields: [afkChannelkey], references: [key], onDelete: Restrict, onUpdate: Restrict, map: "FK_Backup_VoiceChannel_afkChannelkey")
+    textchannel_backup_defaultChannelkeyTotextchannel       textchannel?      @relation("backup_defaultChannelkeyTotextchannel", fields: [defaultChannelkey], references: [key], onDelete: Restrict, onUpdate: Restrict, map: "FK_Backup_TextChannel_defaultChannelkey")
+    textchannel_backup_publicUpdatesChannelkeyTotextchannel textchannel?      @relation("backup_publicUpdatesChannelkeyTotextchannel", fields: [publicUpdatesChannelkey], references: [key], onDelete: Restrict, onUpdate: Restrict, map: "FK_Backup_TextChannel_publicUpdatesChannelkey")
+    textchannel_backup_rulesChannelkeyTotextchannel         textchannel?      @relation("backup_rulesChannelkeyTotextchannel", fields: [rulesChannelkey], references: [key], onDelete: Restrict, onUpdate: Restrict, map: "FK_Backup_TextChannel_rulesChannelkey")
+    textchannel_backup_systemChannelkeyTotextchannel        textchannel?      @relation("backup_systemChannelkeyTotextchannel", fields: [systemChannelkey], references: [key], onDelete: Restrict, onUpdate: Restrict, map: "FK_Backup_TextChannel_systemChannelkey")
+    textchannel_backup_widgetChannelkeyTotextchannel        textchannel?      @relation("backup_widgetChannelkeyTotextchannel", fields: [widgetChannelkey], references: [key], onDelete: Restrict, onUpdate: Restrict, map: "FK_Backup_TextChannel_widgetChannelkey")
+    categorychannel                                         categorychannel[]
+    emoji                                                   emoji[]
+    guilduser                                               guilduser[]
+    role                                                    role[]
+    textchannel_backupTotextchannel_Backupkey               textchannel[]     @relation("backupTotextchannel_Backupkey")
+    voicechannel_backupTovoicechannel_Backupkey             voicechannel[]    @relation("backupTovoicechannel_Backupkey")
+
+    @@index([Userkey], map: "IX_Backup_Userkey")
+    @@index([afkChannelkey], map: "IX_Backup_afkChannelkey")
+    @@index([defaultChannelkey], map: "IX_Backup_defaultChannelkey")
+    @@index([publicUpdatesChannelkey], map: "IX_Backup_publicUpdatesChannelkey")
+    @@index([rulesChannelkey], map: "IX_Backup_rulesChannelkey")
+    @@index([systemChannelkey], map: "IX_Backup_systemChannelkey")
+    @@index([widgetChannelkey], map: "IX_Backup_widgetChannelkey")
+}
+
+model blacklist {
+    key               Int             @id @default(autoincrement())
+    discordId         BigInt?         @db.UnsignedBigInt
+    ip                String?         @db.LongText
+    reason            String?         @db.LongText
+    ServerSettingskey Int?
+    serversettings    serversettings? @relation(fields: [ServerSettingskey], references: [key], onDelete: Restrict, onUpdate: Restrict, map: "FK_Blacklist_ServerSettings_ServerSettingskey")
+
+    @@index([ServerSettingskey], map: "IX_Blacklist_ServerSettingskey")
+}
+
+model categorychannel {
+    key                Int                  @id @default(autoincrement())
+    id                 BigInt               @db.UnsignedBigInt
+    name               String               @db.LongText
+    position           Int
+    Backupkey          Int?
+    backup             backup?              @relation(fields: [Backupkey], references: [key], onDelete: Restrict, onUpdate: Restrict, map: "FK_CategoryChannel_Backup_Backupkey")
+    channelpermissions channelpermissions[]
+    textchannel        textchannel[]
+    voicechannel       voicechannel[]
+
+    @@index([Backupkey], map: "IX_CategoryChannel_Backupkey")
+}
+
+model channelpermissions {
+    key                     Int              @id @default(autoincrement())
+    targetId                BigInt           @db.UnsignedBigInt
+    permissionTarget        Int
+    AttachFiles             Int
+    Speak                   Int
+    MuteMembers             Int
+    DeafenMembers           Int
+    MoveMembers             Int
+    UseVAD                  Int
+    PrioritySpeaker         Int
+    Stream                  Int
+    UseApplicationCommands  Int
+    ManageWebhooks          Int
+    Connect                 Int
+    RequestToSpeak          Int
+    ManageThreads           Int
+    CreatePublicThreads     Int
+    CreatePrivateThreads    Int
+    UseExternalStickers     Int
+    ManageRoles             Int
+    UseExternalEmojis       Int
+    StartEmbeddedActivities Int
+    ReadMessageHistory      Int
+    MentionEveryone         Int
+    ManageChannel           Int
+    AddReactions            Int
+    CreateInstantInvite     Int
+    SendMessages            Int
+    SendTTSMessages         Int
+    ManageMessages          Int
+    EmbedLinks              Int
+    SendMessagesInThreads   Int
+    ViewChannel             Int
+    useVoiceActivation      Int
+    useSlashCommands        Int
+    usePrivateThreads       Int
+    CategoryChannelkey      Int?
+    TextChannelkey          Int?
+    VoiceChannelkey         Int?
+    categorychannel         categorychannel? @relation(fields: [CategoryChannelkey], references: [key], onDelete: Restrict, onUpdate: Restrict, map: "FK_ChannelPermissions_CategoryChannel_CategoryChannelkey")
+    textchannel             textchannel?     @relation(fields: [TextChannelkey], references: [key], onDelete: Restrict, onUpdate: Restrict, map: "FK_ChannelPermissions_TextChannel_TextChannelkey")
+    voicechannel            voicechannel?    @relation(fields: [VoiceChannelkey], references: [key], onDelete: Restrict, onUpdate: Restrict, map: "FK_ChannelPermissions_VoiceChannel_VoiceChannelkey")
+
+    @@index([CategoryChannelkey], map: "IX_ChannelPermissions_CategoryChannelkey")
+    @@index([TextChannelkey], map: "IX_ChannelPermissions_TextChannelkey")
+    @@index([VoiceChannelkey], map: "IX_ChannelPermissions_VoiceChannelkey")
+}
+
+model custombot {
+    key            Int              @id @default(autoincrement())
+    name           String           @db.LongText
+    token          String           @db.LongText
+    clientSecret   String           @db.LongText
+    clientId       String           @db.LongText
+    urlRedirect    String           @db.LongText
+    botType        Int
+    Userkey        Int?
+    users          users?           @relation(fields: [Userkey], references: [key], onDelete: Restrict, onUpdate: Restrict, map: "FK_CustomBot_users_Userkey")
+    members        members[]
+    serversettings serversettings[]
+
+    @@index([Userkey], map: "IX_CustomBot_Userkey")
+}
+
+model emoji {
+    key       Int     @id @default(autoincrement())
+    name      String? @db.LongText
+    url       String? @db.LongText
+    Backupkey Int?
+    backup    backup? @relation(fields: [Backupkey], references: [key], onDelete: Restrict, onUpdate: Restrict, map: "FK_Emoji_Backup_Backupkey")
+
+    @@index([Backupkey], map: "IX_Emoji_Backupkey")
+}
+
+model errors {
+    id         Int      @id @default(autoincrement())
+    location   String?  @db.LongText
+    message    String?  @db.LongText
+    stackTrace String?  @db.LongText
+    extraInfo  String?  @db.LongText
+    errorTime  DateTime @db.DateTime(6)
+}
+
+model guildmigration {
+    key        Int          @id @default(autoincrement())
+    startTime  DateTime     @db.DateTime(6)
+    totalTime  DateTime     @db.Time(6)
+    statistics statistics[]
+}
+
+model guilduser {
+    key           Int             @id @default(autoincrement())
+    id            BigInt          @db.UnsignedBigInt
+    username      String?         @db.LongText
+    avatarUrl     String?         @db.LongText
+    Backupkey     Int?
+    backup        backup?         @relation(fields: [Backupkey], references: [key], onDelete: Restrict, onUpdate: Restrict, map: "FK_GuildUser_Backup_Backupkey")
+    guilduserrole guilduserrole[]
+
+    @@index([Backupkey], map: "IX_GuildUser_Backupkey")
+}
+
+model guilduserrole {
+    key          Int        @id @default(autoincrement())
+    rolekey      Int
+    GuildUserkey Int?
+    guilduser    guilduser? @relation(fields: [GuildUserkey], references: [key], onDelete: Restrict, onUpdate: Restrict, map: "FK_GuildUserRole_GuildUser_GuildUserkey")
+    role         role       @relation(fields: [rolekey], references: [key], onDelete: Cascade, onUpdate: Restrict, map: "FK_GuildUserRole_Role_rolekey")
+
+    @@index([GuildUserkey], map: "IX_GuildUserRole_GuildUserkey")
+    @@index([rolekey], map: "IX_GuildUserRole_rolekey")
+}
+
+model membermigration {
+    key                     Int          @id @default(autoincrement())
+    startTime               DateTime     @db.DateTime(6)
+    totalTime               DateTime     @db.Time(6)
+    successCount            Int
+    bannedCount             Int
+    tooManyGuildsCount      Int
+    invalidTokenCount       Int
+    alreadyHereCount        Int
+    failedCount             Int
+    totalCount              Int
+    blacklistedCount        Int
+    estimatedCompletionTime DateTime     @db.DateTime(6)
+    statistics              statistics[]
+}
+
+model members {
+    key          Int        @id @default(autoincrement())
+    discordId    BigInt     @db.UnsignedBigInt
+    guildId      BigInt     @db.UnsignedBigInt
+    accessToken  String?    @db.LongText
+    refreshToken String?    @db.LongText
+    ip           String?    @db.LongText
+    avatar       String?    @db.LongText
+    username     String?    @db.LongText
+    creationDate BigInt?    @db.UnsignedBigInt
+    botUsedkey   Int?
+    custombot    custombot? @relation(fields: [botUsedkey], references: [key], onDelete: Restrict, onUpdate: Restrict, map: "FK_members_CustomBot_botUsedkey")
+
+    @@index([botUsedkey], map: "IX_members_botUsedkey")
+}
+
+model message {
+    key            Int          @id @default(autoincrement())
+    position       Int
+    content        String?      @db.LongText
+    username       String?      @db.LongText
+    userId         BigInt       @db.UnsignedBigInt
+    userPicture    String?      @db.LongText
+    TextChannelkey Int?
+    textchannel    textchannel? @relation(fields: [TextChannelkey], references: [key], onDelete: Restrict, onUpdate: Restrict, map: "FK_Message_TextChannel_TextChannelkey")
+
+    @@index([TextChannelkey], map: "IX_Message_TextChannelkey")
+}
+
+model role {
+    key             Int             @id @default(autoincrement())
+    id              BigInt          @db.UnsignedBigInt
+    name            String          @db.LongText
+    icon            String?         @db.LongText
+    color           Int             @db.UnsignedInt
+    isHoisted       Boolean
+    isManaged       Boolean
+    isMentionable   Boolean
+    position        Int
+    isEveryone      Boolean
+    permissionskey  Int
+    Backupkey       Int?
+    backup          backup?         @relation(fields: [Backupkey], references: [key], onDelete: Restrict, onUpdate: Restrict, map: "FK_Role_Backup_Backupkey")
+    rolepermissions rolepermissions @relation(fields: [permissionskey], references: [key], onDelete: Cascade, onUpdate: Restrict, map: "FK_Role_RolePermissions_permissionskey")
+    guilduserrole   guilduserrole[]
+
+    @@index([Backupkey], map: "IX_Role_Backupkey")
+    @@index([permissionskey], map: "IX_Role_permissionskey")
+}
+
+model rolepermissions {
+    key                     Int     @id @default(autoincrement())
+    Speak                   Boolean
+    MuteMembers             Boolean
+    DeafenMembers           Boolean
+    MoveMembers             Boolean
+    UseVAD                  Boolean
+    PrioritySpeaker         Boolean
+    Stream                  Boolean
+    ChangeNickname          Boolean
+    ManageNicknames         Boolean
+    ManageEmojisAndStickers Boolean
+    ManageWebhooks          Boolean
+    Connect                 Boolean
+    UseApplicationCommands  Boolean
+    RequestToSpeak          Boolean
+    ManageEvents            Boolean
+    ManageThreads           Boolean
+    CreatePublicThreads     Boolean
+    CreatePrivateThreads    Boolean
+    UseExternalStickers     Boolean
+    ManageRoles             Boolean
+    UseExternalEmojis       Boolean
+    AttachFiles             Boolean
+    ReadMessageHistory      Boolean
+    CreateInstantInvite     Boolean
+    BanMembers              Boolean
+    KickMembers             Boolean
+    Administrator           Boolean
+    MentionEveryone         Boolean
+    ManageGuild             Boolean
+    AddReactions            Boolean
+    ManageChannels          Boolean
+    ViewGuildInsights       Boolean
+    ViewChannel             Boolean
+    SendMessages            Boolean
+    SendTTSMessages         Boolean
+    ManageMessages          Boolean
+    EmbedLinks              Boolean
+    SendMessagesInThreads   Boolean
+    ViewAuditLog            Boolean
+    StartEmbeddedActivities Boolean
+    useVoiceActivation      Boolean
+    moderateMembers         Boolean
+    role                    role[]
+}
+
+model servers {
+    key            Int            @id @default(autoincrement())
+    ownerkey       Int
+    name           String         @db.LongText
+    guildId        BigInt?        @db.UnsignedBigInt
+    roleId         BigInt?        @db.UnsignedBigInt
+    banned         Boolean
+    settingskey    Int
+    users          users          @relation(fields: [ownerkey], references: [key], onDelete: Cascade, onUpdate: Restrict, map: "FK_servers_users_ownerkey")
+    serversettings serversettings @relation(fields: [settingskey], references: [key], onDelete: Cascade, onUpdate: Restrict, map: "FK_servers_ServerSettings_settingskey")
+    statistics     statistics[]
+
+    @@index([ownerkey], map: "IX_servers_ownerkey")
+    @@index([settingskey], map: "IX_servers_settingskey")
+}
+
+model serversettings {
+    key                    Int         @id @default(autoincrement())
+    autoKickUnVerified     Boolean
+    autoKickUnVerifiedTime Int
+    autoJoin               Boolean
+    verifyDescription      String?     @db.LongText
+    redirectTime           Int
+    vanityUrl              String?     @db.LongText
+    webhookLogType         Int
+    dmOnAutoKick           Boolean
+    autoBlacklist          Boolean
+    redirectUrl            String?     @db.LongText
+    pic                    String      @db.LongText
+    backgroundImage        String?     @db.LongText
+    vpnCheck               Boolean
+    webhook                String?     @db.LongText
+    mainBotkey             Int?
+    custombot              custombot?  @relation(fields: [mainBotkey], references: [key], onDelete: Restrict, onUpdate: Restrict, map: "FK_ServerSettings_CustomBot_mainBotkey")
+    blacklist              blacklist[]
+    servers                servers[]
+
+    @@index([mainBotkey], map: "IX_ServerSettings_mainBotkey")
+}
+
+model statistics {
+    key             Int              @id @default(autoincrement())
+    serverkey       Int
+    guildId         BigInt           @db.UnsignedBigInt
+    MigratedBykey   Int
+    active          Boolean
+    startDate       DateTime         @db.DateTime(6)
+    endDate         DateTime?        @db.DateTime(6)
+    memberStatskey  Int?
+    guildStatskey   Int?
+    users           users            @relation(fields: [MigratedBykey], references: [key], onDelete: Cascade, onUpdate: Restrict, map: "FK_statistics_users_MigratedBykey")
+    guildmigration  guildmigration?  @relation(fields: [guildStatskey], references: [key], onDelete: Restrict, onUpdate: Restrict, map: "FK_statistics_GuildMigration_guildStatskey")
+    membermigration membermigration? @relation(fields: [memberStatskey], references: [key], onDelete: Restrict, onUpdate: Restrict, map: "FK_statistics_MemberMigration_memberStatskey")
+    servers         servers          @relation(fields: [serverkey], references: [key], onDelete: Cascade, onUpdate: Restrict, map: "FK_statistics_servers_serverkey")
+
+    @@index([MigratedBykey], map: "IX_statistics_MigratedBykey")
+    @@index([guildStatskey], map: "IX_statistics_guildStatskey")
+    @@index([memberStatskey], map: "IX_statistics_memberStatskey")
+    @@index([serverkey], map: "IX_statistics_serverkey")
+}
+
+model textchannel {
+    key                                                Int                  @id @default(autoincrement())
+    id                                                 BigInt               @db.UnsignedBigInt
+    name                                               String?              @db.LongText
+    slowModeInterval                                   Int
+    topic                                              String?              @db.LongText
+    categorykey                                        Int?
+    nsfw                                               Boolean
+    archiveAfter                                       Int?
+    position                                           Int
+    locked                                             Boolean
+    archived                                           Boolean
+    synced                                             Boolean
+    Backupkey                                          Int?
+    backup_backupTotextchannel_Backupkey               backup?              @relation("backupTotextchannel_Backupkey", fields: [Backupkey], references: [key], onDelete: Restrict, onUpdate: Restrict, map: "FK_TextChannel_Backup_Backupkey")
+    categorychannel                                    categorychannel?     @relation(fields: [categorykey], references: [key], onDelete: Restrict, onUpdate: Restrict, map: "FK_TextChannel_CategoryChannel_categorykey")
+    backup_backup_defaultChannelkeyTotextchannel       backup[]             @relation("backup_defaultChannelkeyTotextchannel")
+    backup_backup_publicUpdatesChannelkeyTotextchannel backup[]             @relation("backup_publicUpdatesChannelkeyTotextchannel")
+    backup_backup_rulesChannelkeyTotextchannel         backup[]             @relation("backup_rulesChannelkeyTotextchannel")
+    backup_backup_systemChannelkeyTotextchannel        backup[]             @relation("backup_systemChannelkeyTotextchannel")
+    backup_backup_widgetChannelkeyTotextchannel        backup[]             @relation("backup_widgetChannelkeyTotextchannel")
+    channelpermissions                                 channelpermissions[]
+    message                                            message[]
+
+    @@index([Backupkey], map: "IX_TextChannel_Backupkey")
+    @@index([categorykey], map: "IX_TextChannel_categorykey")
+}
+
+model users {
+    key            Int          @id @default(autoincrement())
+    username       String       @db.LongText
+    email          String       @db.LongText
+    password       String       @db.LongText
+    role           String       @db.LongText
+    pfp            String       @db.LongText
+    banned         Boolean
+    googleAuthCode String?      @db.LongText
+    darkmode       Boolean
+    expiry         DateTime?    @db.DateTime(6)
+    createdAt      DateTime     @db.DateTime(6)
+    lastIP         String?      @db.LongText
+    discordId      BigInt?      @db.UnsignedBigInt
+    apiToken       String       @db.LongText
+    backup         backup[]
+    custombot      custombot[]
+    servers        servers[]
+    statistics     statistics[]
+}
+
+model voicechannel {
+    key                                       Int                  @id @default(autoincrement())
+    id                                        BigInt               @db.UnsignedBigInt
+    name                                      String?              @db.LongText
+    userLimit                                 Int?
+    bitrate                                   Int
+    region                                    String?              @db.LongText
+    videoQuality                              String?              @db.LongText
+    position                                  Int
+    categorykey                               Int?
+    synced                                    Boolean
+    Backupkey                                 Int?
+    backup_backupTovoicechannel_Backupkey     backup?              @relation("backupTovoicechannel_Backupkey", fields: [Backupkey], references: [key], onDelete: Restrict, onUpdate: Restrict, map: "FK_VoiceChannel_Backup_Backupkey")
+    categorychannel                           categorychannel?     @relation(fields: [categorykey], references: [key], onDelete: Restrict, onUpdate: Restrict, map: "FK_VoiceChannel_CategoryChannel_categorykey")
+    backup_backup_afkChannelkeyTovoicechannel backup[]             @relation("backup_afkChannelkeyTovoicechannel")
+    channelpermissions                        channelpermissions[]
+
+    @@index([Backupkey], map: "IX_VoiceChannel_Backupkey")
+    @@index([categorykey], map: "IX_VoiceChannel_categorykey")
+}

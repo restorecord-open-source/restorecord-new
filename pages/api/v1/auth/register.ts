@@ -1,11 +1,11 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { PrismaClient } from "@prisma/client";
 import * as bcrypt from "bcrypt";
-import { SignupSchema } from "../../src/schemas";
+import { SignupSchema } from "../../../../src/schemas";
 import dotenv from "dotenv";
+import { prisma } from "../../../../src/db";
+import { accounts } from "@prisma/client";
 dotenv.config({ path: "../../" });
 
-const prisma = new PrismaClient();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) { 
     if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
@@ -29,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
             );
 
-        const accounts = await prisma.accounts.findMany({
+        const accounts: accounts[] = await prisma.accounts.findMany({
             where: {
                 username: data.username
             }

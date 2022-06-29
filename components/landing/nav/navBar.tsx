@@ -1,7 +1,50 @@
 import Link from "next/link";
-import TextLogo from "./textLogo";
+import styles from "../../../public/styles/navBar.module.css";
+import TextLogo from "./TextLogo";
+import { useEffect, useState } from "react";
+import functions from "../../../src/functions";
+import router from "next/router";
 
 export default function NavBar() {
+    const [button, setButten] = useState({
+        text: "Login",
+        href: "/login"
+    });
+
+    const checkSession = async () => {
+        await fetch(`/api/checkToken`, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `${localStorage.getItem("token")}`
+            }
+        })
+            .then(res => res.json())
+            .then(res => {
+                if (!res.success) {
+                    setButten({
+                        text: "Login",
+                        href: "/login"
+                    });
+                }
+                else {
+                    setButten({
+                        text: "Dashboard",
+                        href: "/dashboard"
+                    });
+                }
+            })
+    }
+
+    useEffect(() => {
+        window.addEventListener("storage", async function (e) {
+            checkSession();
+        });
+
+        if (localStorage.getItem("token")) {
+            checkSession();
+        }
+    }, []);
+
     return (
         <header className="header sticky top-0 z-10 flex w-full items-center justify-between py-5 border-b border-slate-800 backdrop-filter backdrop-blur-lg bg-opacity-30 transition-all">
             <div className="logo mx-12 xl:mx-32 hidden md:block cursor-pointer">
@@ -13,15 +56,10 @@ export default function NavBar() {
             <div className="md:hidden mx-8">
                 <div className="flow-root">
                     <TextLogo />
-                    <div>
-                        <Link href="/dashboard">
-                            <button className="float-right ml-1 bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 hover:text-gray-100 transition-all hidden sxl:block">
-                                    Dashboard
-                            </button>
-                        </Link>
-                        <Link href="/register">
-                            <button className="float-right mr-1 bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 hover:text-gray-100 transition-all">
-                                    Signup
+                    <div className={styles.mobileNavWrapper}>
+                        <Link href={button.href}>
+                            <button className={styles.mobileNavButton}>
+                                {button.text}
                             </button>
                         </Link>
                     </div>
@@ -66,14 +104,9 @@ export default function NavBar() {
             </nav>
                 
             <div className="hidden md:flex md:items-center text-gray-200 mx-12 xl:mx-32">
-                <Link href="/dashboard">
-                    <button className="bg-indigo-600 text-white p-2 rounded-b-lg md:rounded-lg md:ml-2 hover:bg-indigo-700 hover:text-gray-100 transition-all">
-                            Dashboard
-                    </button>
-                </Link>
-                <Link href="/register">
-                    <button className="bg-indigo-600 text-white p-2 rounded-b-lg md:rounded-lg md:ml-2 hover:bg-indigo-700 hover:text-gray-100 transition-all">
-                            Signup
+                <Link href={button.href}>
+                    <button className={styles.desktopNavButton}>
+                        {button.text}
                     </button>
                 </Link>
             </div>

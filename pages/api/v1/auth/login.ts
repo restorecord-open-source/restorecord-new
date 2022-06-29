@@ -1,13 +1,12 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { PrismaClient } from "@prisma/client";
 import { sign } from "jsonwebtoken";
 import * as bcrypt from "bcrypt";
-import { LoginSchema } from "../../src/schemas";
+import { LoginSchema } from "../../../../src/schemas";
 import dotenv from "dotenv";
-import rateLimit from "../../src/rate-limit";
+import rateLimit from "../../../../src/rate-limit";
+import { prisma } from "../../../../src/db";
 dotenv.config({ path: "../../" });
 
-const prisma = new PrismaClient();
 
 const limiter = rateLimit({
     interval: 10 * 1000, 
@@ -47,6 +46,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             pfp: account.pfp,
             createdAt: account.createdAt,
         }, `${process.env.JWT_SECRET}`, { expiresIn: "30d" });
+
+        // res.setHeader("Set-Cookie", `token=${token}; HttpOnly; Max-Age=${30 * 24 * 60 * 60}; Path=/`);
 
         return res.status(200).json({
             success: true,

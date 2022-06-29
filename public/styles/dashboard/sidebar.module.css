@@ -1,0 +1,47 @@
+.itemWrapper {
+	@apply flex items-center p-2 text-base font-normal rounded-lg text-white hover:bg-gray-700 transition-all cursor-pointer;
+}
+
+.itemWrapperActive {
+	@apply bg-gray-700 font-medium;
+}
+
+.itemWrapper svg {
+	@apply w-6 h-6 transition duration-75 text-gray-400 group-hover:text-white;
+}
+
+.itemWrapper span {
+	@apply ml-3;
+}
+
+.sideBarMainWrapper {
+	@apply w-56 md:w-64;
+}
+
+.sideBarWrapper {
+	@apply fixed w-56 md:w-64 py-4 px-3 rounded bg-gray-800 min-h-screen max-h-screen h-screen overflow-hidden;
+}
+
+.sideBarTitleWrapper {
+	@apply flex items-center pl-2.5 mb-5;
+}
+
+.sideBarTitleImage {
+	@apply hidden md:block;
+}
+
+.sideBarTitle {
+	@apply self-center text-xl font-bold whitespace-nowrap text-white;
+}
+
+.sideBarTitle span {
+	@apply text-indigo-600;
+}
+
+.itemWrapperNormal {
+	@apply space-y-2;
+}
+
+.itemWrapperSeperator {
+	@apply pt-4 mt-4 space-y-2 border-t border-gray-700;
+}
