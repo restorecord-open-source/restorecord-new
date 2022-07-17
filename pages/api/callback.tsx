@@ -55,7 +55,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                             if (resp.status === 204) {
                                 await addRole(rGuildId.toString(), userId, customBotInfo?.botToken, serverInfo?.roleId.toString())
                                     .then(async (resp) => {
-                                        console.log(resp);
+                                        // console.log(resp);
                                     })
                                     .catch((err) => {
                                         console.log(err);

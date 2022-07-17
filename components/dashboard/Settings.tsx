@@ -28,7 +28,7 @@ export default function DashSettings({ user }: any) {
     function handleSubmit(e: any) {
         e.preventDefault();
 
-        fetch(`/api/v1/settings`, {
+        fetch(`/api/v1/settings/server`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

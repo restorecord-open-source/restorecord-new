@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react"
 import { useQuery } from "react-query";
 
 async function getStats() {
-    return await axios.get(`/api/stats`, {
+    return await axios.get(`/api/v1/stats`, {
         validateStatus: () => true
     })
         .then((res: any) => { return res.data; })
@@ -19,7 +19,7 @@ export default function StatisticsSection() {
     const serversRef: any = useRef();
     const membersRef: any = useRef();
 
-    const { data, isError, isLoading } = useQuery('stats', async () => await getStats(), { retry: false,  refetchOnWindowFocus: false, onSuccess(data) {
+    useQuery('stats', async () => await getStats(), { retry: false, onSuccess(data) {
         accountsRef.current.innerText = data.accounts;
         serversRef.current.innerText = data.servers;
         membersRef.current.innerText = data.members;

@@ -27,7 +27,7 @@ export default function DashCustomBot({ user }: any) {
     function handleSubmit(e: any) {
         e.preventDefault();
 
-        fetch(`/api/v1/bot`, {
+        fetch(`/api/v1/settings/bot`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

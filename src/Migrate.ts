@@ -1,4 +1,5 @@
 import axios from "axios";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 export async function addMember(guildId: string, userId: string, botToken: any, access_token: string, roles: string[]) {
     return await axios.put(`https://discordapp.com/api/guilds/${guildId}/members/${userId}`, {
@@ -12,6 +13,8 @@ export async function addMember(guildId: string, userId: string, botToken: any, 
             "X-RateLimit-Precision": "millisecond",
             "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
         },
+        proxy: false,
+        httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
     })
         .then(async (res: any) => { return res; })
         .catch(async (err: any) => { return err; });
@@ -27,6 +30,8 @@ export async function addRole(guildId: string, userId: string, botToken: any, ro
             "X-RateLimit-Precision": "millisecond",
             "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
         },
+        proxy: false,
+        httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
     })
         .then(async (res: any) => { return res; })
         .catch(async (err: any) => { return err; });
@@ -42,7 +47,9 @@ export async function refreshToken(refreshToken: string, clientId: string, clien
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
             "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
-        }
+        },
+        proxy: false,
+        httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
     })
         .then(async (res: any) => { return res; })
         .catch(async (err: any) => { return err; });
@@ -58,7 +65,9 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
             "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
-        }
+        },
+        proxy: false,
+        httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
     })
         .then(async (resp) => {
             if (resp.data.access_token && resp.data.refresh_token) {

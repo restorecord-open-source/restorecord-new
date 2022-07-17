@@ -77,7 +77,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 let succPulled: number = 0;
                 const pullingProcess = new Promise<void>(async (resolve, reject) => {
                     let membersNew = await shuffle(members);
-                    let delay: number = 1000;
+                    let delay: number = 500;
 
                     for (const member of membersNew) {
                         await sleep(delay);
@@ -162,8 +162,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     });
                 })
                     .then(() => {
-                        console.log(`Pulled ${succPulled} members`);
-                        return res.status(200).json({ success: true, message: `Successfully pulled ${succPulled}/${members.length} members` });
+                        // console.log(`Pulled ${succPulled} members`);
+                        // return res.status(200).json({ success: true, message: `Successfully pulled ${succPulled}/${members.length} members` });
                     })
                     .catch(async (err: Error) => {
                         console.log(`3 ${err}`);
@@ -180,8 +180,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     })
                     
 
-                // await pullingProcess;
-                // return res.status(200).json({ success: true, message: `Successfully pulled ${succPulled}/${members.length} members` });
+                await pullingProcess;
+                return res.status(200).json({ success: true, message: `Successfully pulled ${succPulled}/${members.length} members` });
 
 
                 // if pullingProcess didnt throw error, return success message

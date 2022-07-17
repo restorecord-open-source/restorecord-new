@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { prisma } from "../../src/db";
+import { prisma } from "../../../src/db";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     let accounts: any = await prisma.accounts.count();

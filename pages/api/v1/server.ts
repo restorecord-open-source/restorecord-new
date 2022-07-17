@@ -1,4 +1,3 @@
-import _ from "lodash";
 import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "../../../src/db";
 
@@ -7,14 +6,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         switch (req.method) {
         case "GET":
             try {
-                // const guildId: any = Number.parseInt(req.query.id as any);
                 let server;
 
                 if (!req.query.id) {
                     return res.status(400).json({ success: false, message: "No id provided" });
                 }
 
-                // check if req.query.id is a string
                 if (isNaN(Number.parseInt(req.query.id as any))) {
                     server = await prisma.servers.findFirst({
                         where: {

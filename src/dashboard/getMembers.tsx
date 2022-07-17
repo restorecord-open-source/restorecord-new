@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export default async function getMembers(options: any) {
-    return await axios.get(`/api/v1/members`, {
+    return await axios.get(`/api/v1/server/members`, {
         headers: options,
         validateStatus: () => true
     })

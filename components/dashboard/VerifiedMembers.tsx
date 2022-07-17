@@ -11,7 +11,7 @@ export default function DashUpgrade({ user }: any) {
 
     const { data, isError, isLoading } = useQuery('members', async () => await getMembers({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
-    }), { retry: false, refetchOnWindowFocus: false });
+    }), { retry: false });
 
     if (!user.username || isLoading) {
         return (
@@ -35,18 +35,30 @@ export default function DashUpgrade({ user }: any) {
                     </p>
                 </div>
                 <div className="max-w-screen p-4 w-full rounded-lg border shadow-md bg-gray-900 border-gray-800">
-                    <h2 className="text-white text-3xl font-bold leading-tight mb-4">
-                        Recent verified Members
-                    </h2>
+                    {(Array.isArray(data.members) && data.members.length === 0) ? (
+                        <>
+                            <h2 className="text-gray-100 text-2xl font-bold leading-tight mb-4">
+                                No verified members found.
+                            </h2>
+                        </>
+                    ) : (
+                        <>
+                            <h2 className="text-gray-100 text-2xl font-bold leading-tight mb-4">
+                                Recent verified Members
+                            </h2>
+                        </>
+                    )}
+
                     {Array.isArray(data.members) && data.members.map((item: any) => {
                         return (
                             <>
                                 <div key={item.userId}>
                                     <div className="mb-6 p-6 rounded-lg border shadow-md bg-gray-800 border-gray-700">
-                                        <div className="inline-flex">
+                                        <div className="inline-flex mb-4">
                                             <Image src={`https://cdn.discordapp.com/avatars/${item.userId}/${item.avatar}?size=128`} className="w-10 h-10 rounded-full border-2 border-indigo-600" alt="Profile Picture" width={64} height={64} />
-                                            <h5 className="mb-2 ml-2 text-2xl font-bold tracking-tight text-white flex justify-center items-center">{item.username}</h5>
+                                            <h5 className="ml-2 text-2xl font-bold tracking-tight text-white flex justify-center items-center">{item.username}</h5>
                                         </div>
+                                        {/* <p className="font-normal text-gray-400">IP Address <span className="blur-sm hover:blur-0 transition-all">{item.ip}</span></p> */}
                                         <hr className="border-b border-gray-700" />
                                         <div className="flex justify-between items-center mt-4">
                                             <div className="flex items-center">

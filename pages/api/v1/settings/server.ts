@@ -1,7 +1,7 @@
 import { verify } from "jsonwebtoken";
 import { NextApiRequest, NextApiResponse } from "next";
-import rateLimit from "../../../src/rate-limit";
-import { prisma } from "../../../src/db";
+import rateLimit from "../../../../src/rate-limit";
+import { prisma } from "../../../../src/db";
 
 const limiter = rateLimit({
     interval: 10 * 1000, 
@@ -81,14 +81,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 const data = { ...req.body };
 
-                if (!data.guildId || !data.roleId || !data.serverName || !data.newGuildId || !data.newRoleId || !data.newServerName) {
+                if (!data.guildId || !data.roleId || !data.serverName || !data.newGuildId || !data.newRoleId) {
                     let errors = [];
                     if (!data.guildId) errors.push("Guild Id ");
                     if (!data.roleId) errors.push("Role Id ");
                     if (!data.serverName) errors.push("Server Name ");
                     if (!data.newGuildId) errors.push("New Guild Id ");
                     if (!data.newRoleId) errors.push("New Role Id ");
-                    if (!data.newServerName) errors.push("new Server Name ");
 
                     return res.status(400).json({ success: false, message: `Missing ${errors}` });
                 }
