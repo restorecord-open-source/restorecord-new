@@ -1,5 +1,5 @@
 import Link from "next/link";
-import styles from "../../../public/styles/navBar.module.css";
+import styles from "../../public/styles/navBar.module.css";
 import { useEffect, useState } from "react";
 
 export default function NavBar() {
