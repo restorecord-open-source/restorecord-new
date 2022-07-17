@@ -1,9 +1,8 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @next/next/no-img-element */
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
 import { useQuery } from "react-query";
-import NavBar from "../../components/landing/Nav/NavBar";
+import NavBar from "../../components/landing/nav/NavBar";
 import getServer from "../../src/getServer";
 import styles from "../../public/styles/index.module.css"
 import Link from "next/link";

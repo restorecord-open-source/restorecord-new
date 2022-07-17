@@ -1,4 +1,4 @@
-import NavBar from "../components/landing/Nav/NavBar";
+import NavBar from "../components/landing/nav/NavBar";
 import Footer from "../components/landing/sections/Footer";
 import styles from "../public/styles/index.module.css"
 

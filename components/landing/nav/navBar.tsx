@@ -1,8 +1,6 @@
 import Link from "next/link";
 import styles from "../../../public/styles/navBar.module.css";
 import { useEffect, useState } from "react";
-import functions from "../../../src/functions";
-import router from "next/router";
 
 export default function NavBar() {
     const [button, setButten] = useState({

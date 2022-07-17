@@ -1,4 +1,3 @@
-import { useState } from "react"
 import { useQuery } from "react-query";
 import getNews from "../../src/dashboard/getNews";
 import functions from "../../src/functions";

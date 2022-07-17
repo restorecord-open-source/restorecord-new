@@ -20,7 +20,7 @@
 		"**/*.ts",
 		"**/*.tsx",
 		"pages/_app.tsx",
-		"src/db.ts"
+		"components/landing/nav/TextLogo.stsx
 	],
 	"exclude": ["node_modules"]
 }
