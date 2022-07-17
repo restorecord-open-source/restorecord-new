@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
     provider = "mysql"
-    url      = "mysql://restorecord_db:oNeFHuxBMt6h6z@localhost:3306/rest_main"
+    url      = "mysql://restorecord_db:4%gEQJMg2Qy@@2@localhost:3306/rest_main"
 
     // url      = "file:./database.db"
 }
