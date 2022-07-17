@@ -1,6 +1,5 @@
 import Link from "next/link";
 import styles from "../../../public/styles/navBar.module.css";
-import TextLogo from "./TextLogo";
 import { useEffect, useState } from "react";
 import functions from "../../../src/functions";
 import router from "next/router";
@@ -55,7 +54,11 @@ export default function NavBar() {
 
             <div className="md:hidden mx-8">
                 <div className="flow-root">
-                    <TextLogo />
+                    <div className="cursor-pointer">
+                        <Link href="/">
+                            <h2 className="text-gray-200 font-bold text-xl md:hidden">Restore<span className="text-indigo-600">Cord</span></h2>
+                        </Link>
+                    </div>
                     <div className={styles.mobileNavWrapper}>
                         <Link href={button.href}>
                             <button className={styles.mobileNavButton}>
@@ -86,7 +89,11 @@ export default function NavBar() {
             </div>
 
             <nav className="navbar hidden md:block" id="navbar">
-                <TextLogo />
+                <div className="cursor-pointer">
+                    <Link href="/">
+                        <h2 className="text-gray-200 font-bold text-xl md:hidden">Restore<span className="text-indigo-600">Cord</span></h2>
+                    </Link>
+                </div>
                 <ul className="mb-6 md:mb-0 md:flex">
                     <li className="mb-2 border-b border-gray-200 md:border-0 md:mx-2 font-semibold text-slate-200 hover:text-slate-400 transition-all">
                         <Link href="/">Home</Link>
