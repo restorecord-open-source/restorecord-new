@@ -15,12 +15,6 @@
 		"moduleResolution": "Node",
 		"resolveJsonModule": true
 	},
-	"include": [
-		"next-env.d.ts",
-		"**/*.ts",
-		"**/*.tsx",
-		"pages/_app.tsx",
-		"components/landing/nav/TextLogo.stsx
-	],
+	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "pages/_app.tsx"],
 	"exclude": ["node_modules"]
 }
