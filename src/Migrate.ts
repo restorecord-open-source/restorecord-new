@@ -23,7 +23,9 @@ export async function addRole(guildId: string, userId: string, botToken: any, ro
     }, {
         headers: {
             "Authorization": `Bot ${botToken}`,
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "X-RateLimit-Precision": "millisecond",
+            "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
         },
     })
         .then(async (res: any) => { return res; })
@@ -38,7 +40,8 @@ export async function refreshToken(refreshToken: string, clientId: string, clien
         refresh_token: refreshToken,
     }), {
         headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
         }
     })
         .then(async (res: any) => { return res; })
@@ -53,7 +56,8 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
         refresh_token: refreshToken,
     }), {
         headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
         }
     })
         .then(async (resp) => {
@@ -97,6 +101,8 @@ export async function resolveUser(token: string): Promise<User> {
     const request = await fetch("https://discord.com/api/users/@me", {
         headers: {
             Authorization: `Bearer ${token}`,
+            "X-RateLimit-Precision": "millisecond",
+            "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
         },
     });
 
