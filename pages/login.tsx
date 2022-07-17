@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import NavBar from "../components/landing/nav/NavBar";
+import NavBar from "../components/landing/NavBar";
 import { Toaster } from "react-hot-toast";
 import styles from "../public/styles/login.module.css";
 import Link from "next/link";

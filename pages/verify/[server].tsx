@@ -2,7 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { useRouter } from "next/router";
 import { useQuery } from "react-query";
-import NavBar from "../../components/landing/nav/NavBar";
+import NavBar from "../../components/landing/NavBar";
 import getServer from "../../src/getServer";
 import styles from "../../public/styles/index.module.css"
 import Link from "next/link";

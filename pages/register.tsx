@@ -1,4 +1,4 @@
-import NavBar from "../components/landing/nav/NavBar"
+import NavBar from "../components/landing/NavBar"
 import { useEffect, useState, useRef } from "react"
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 import functions from "../src/functions";

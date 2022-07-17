@@ -1,4 +1,4 @@
-import NavBar from "../components/landing/nav/NavBar";
+import NavBar from "../components/landing/NavBar";
 import styles from "../public/styles/index.module.css"
 
 export default function Privacy() {
