@@ -15,6 +15,6 @@
 		"moduleResolution": "Node",
 		"resolveJsonModule": true
 	},
-	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "pages/_app.tsx"],
+	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
 	"exclude": ["node_modules"]
 }
