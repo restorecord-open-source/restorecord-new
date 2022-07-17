@@ -67,12 +67,11 @@ export default function DashBoard({ user }: any) {
                     })}
                 </div>
 
-                <div className="max-w-screen p-4 mt-4 w-full rounded-lg border shadow-md bg-gray-900 border-gray-800">
+                {/* <div className="max-w-screen p-4 mt-4 w-full rounded-lg border shadow-md bg-gray-900 border-gray-800">
                     <h2 className="text-white text-3xl font-bold leading-tight mb-4">
                         Recent Activities
                     </h2>
-                    
-                </div>
+                </div> */}
             </div>
         </>
     )

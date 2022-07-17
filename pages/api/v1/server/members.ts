@@ -21,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 if (!valid) return res.status(400).json({ success: false });
 
-                const maxCount = req.query.max as string;
+                // const maxCount = req.query.max as string;
 
                 prisma.accounts.findUnique({
                     where: {
