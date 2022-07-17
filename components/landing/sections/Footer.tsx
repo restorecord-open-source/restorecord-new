@@ -1,5 +1,6 @@
 import { faDiscord, faTwitter, faYoutube } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
 
 export default function Footer() {
     return (
@@ -19,12 +20,10 @@ export default function Footer() {
                     </a>
                 </li>
                 <li className="mx-2 sm:mx-0">
-                    <a className="md:pr-4 md:pl-4 pr-1 text-gray-200"
-                        href="/terms">Terms
-                    </a>
+                    <Link className="md:pr-4 md:pl-4 pr-1 text-gray-200" href="/terms">Terms</Link>
                 </li>
                 <li className="mx-2 sm:mx-0">
-                    <a className="md:pr-4 md:pl-4 pr-1 text-gray-200" href="/privacy">Privacy</a>
+                    <Link className="md:pr-4 md:pl-4 pr-1 text-gray-200" href="/privacy">Privacy</Link>
                 </li>
             </ul>
 

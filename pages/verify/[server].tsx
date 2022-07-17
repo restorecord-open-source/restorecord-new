@@ -6,6 +6,7 @@ import { useQuery } from "react-query";
 import NavBar from "../../components/landing/Nav/NavBar";
 import getServer from "../../src/getServer";
 import styles from "../../public/styles/index.module.css"
+import Link from "next/link";
 
 export default function Verify({ status, err }: any) {
     const router = useRouter();
@@ -114,7 +115,7 @@ export default function Verify({ status, err }: any) {
                         </>
                     )}
                     <br/>
-                    By verifying you agree to the <a href="/terms" className="text-indigo-600">Terms of Service</a> and <a href="/privacy" className="text-indigo-600">Privacy Policy</a>
+                    By verifying you agree to the <Link href="/terms" className="text-indigo-600">Terms of Service</Link> and <Link href="/privacy" className="text-indigo-600">Privacy Policy</Link>
                 </div>
             </div>
            
