@@ -12,7 +12,7 @@ export default function NavBar() {
     });
 
     const checkSession = async () => {
-        await fetch(`/api/checkToken`, {
+        await fetch(`/api/v1/user`, {
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `${localStorage.getItem("token")}`

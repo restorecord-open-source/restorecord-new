@@ -1,12 +1,44 @@
 import { useRouter } from "next/router";
+import { useQuery } from "react-query";
+import NavBar from "../../../components/dashboard/navBar";
+import NavBarLoading from "../../../components/dashboard/navBarLoading";
+import DashServerSettings from "../../../components/dashboard/ServerSettings";
+import getUser from "../../../src/dashboard/getUser";
+import functions from "../../../src/functions";
+import { useToken } from "../../../src/token";
 
 export default function Settings() {
     const router = useRouter();
+    const [ token ]: any = useToken()
     const { server } = router.query;
+
+
+    const { data, isError, isLoading } = useQuery('user', async () => await getUser({
+        Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
+    }), { retry: false, refetchOnWindowFocus: false });
+
+
+    if (isLoading) {
+        return <NavBarLoading />;
+    }
+
+    if (isError) {
+        functions.ToastAlert("Something went wrong.", "error")
+        return <NavBarLoading />;
+    }
+
+    if (!data.username) {
+        router.push("/login") 
+    }
+    
 
     return (
         <>
-            <span>{server}</span>
+            <div className="min-h-screen max-h-screen flex">
+                <NavBar user={data} />
+
+                <DashServerSettings user={data} id={server} />
+            </div>
         </>
     )
 }

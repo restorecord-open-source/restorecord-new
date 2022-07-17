@@ -9,8 +9,14 @@ const SubscriptionList: Subscription[] = [
         features: [
             {
                 name: "memberCapacity",
-                value: "100 Restoreable Members",
+                value: "250 Restoreable Members",
                 description: "Maximum number of Restoreable Members",
+                icon: faCheck,
+            },
+            {
+                name: "customBots",
+                value: "Custom Bot",
+                description: "Custom Bot just for you",
                 icon: faCheck,
             },
             {
@@ -38,12 +44,6 @@ const SubscriptionList: Subscription[] = [
                 icon: faX,
             },
             {
-                name: "autoKick",
-                value: "Auto Kick",
-                description: "Automatically kick members if they don\"t verify in a given time",
-                icon: faX,
-            },
-            {
                 name: "serverBackups",
                 value: "Server Backups",
                 description: "Backup all your Server Settings, Channels, Roles and more",
@@ -60,13 +60,19 @@ const SubscriptionList: Subscription[] = [
     {
         name: "Premium",
         priceMonthly: "$2",
-        priceYearly: "$10",
+        priceYearly: "$15",
         bestPlan: true,
         features: [
             {
                 name: "memberCapacity",
-                value: "Unlimited Restoreable Members",
+                value: "5000 Restoreable Members",
                 description: "Maximum number of Restoreable Members",
+                icon: faCheck,
+            },
+            {
+                name: "customBots",
+                value: "Custom Bot",
+                description: "Custom Bot just for you",
                 icon: faCheck,
             },
             {
@@ -91,12 +97,6 @@ const SubscriptionList: Subscription[] = [
                 name: "verificationLogs",
                 value: "Verification Logs",
                 description: "Log all verifications in your server",
-                icon: faCheck,
-            },
-            {
-                name: "autoKick",
-                value: "Auto Kick",
-                description: "Automatically kick members if they don\"t verify in a given time",
                 icon: faCheck,
             },
             {
@@ -116,7 +116,7 @@ const SubscriptionList: Subscription[] = [
     {
         name: "Business",
         priceMonthly: "$5",
-        priceYearly: "$30",
+        priceYearly: "$40",
         bestPlan: false,
         features: [
             {
@@ -126,8 +126,14 @@ const SubscriptionList: Subscription[] = [
                 icon: faCheck,
             },
             {
+                name: "customBots",
+                value: "Custom Bot",
+                description: "Custom Bot just for you",
+                icon: faCheck,
+            },
+            {
                 name: "serverCapacity",
-                value: "5 Servers",
+                value: "Unlimited Servers",
                 description: "Maximum number of Servers you can add",
                 icon: faCheck,
             },
@@ -147,12 +153,6 @@ const SubscriptionList: Subscription[] = [
                 name: "verificationLogs",
                 value: "Verification Logs",
                 description: "Log all verifications in your server",
-                icon: faCheck,
-            },
-            {
-                name: "autoKick",
-                value: "Auto Kick",
-                description: "Automatically kick members if they don\"t verify in a given time",
                 icon: faCheck,
             },
             {

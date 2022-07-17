@@ -7,16 +7,16 @@ generator client {
 
 datasource db {
     provider = "mysql"
-    url      = "mysql://restorecord_db:oNeFHuxBMt6h6z@localhost:3306/restorecord_main"
+    url      = "mysql://restorecord_db:oNeFHuxBMt6h6z@localhost:3306/rest_main"
 
     // url      = "file:./database.db"
 }
 
 model accounts {
     id             Int          @id @default(autoincrement())
-    username       String       @unique
-    email          String
-    password       String
+    username       String       @unique @db.VarChar(255)
+    email          String       @db.LongText()
+    password       String       @db.LongText()
     role           String?      @default("free")
     pfp            String       @default("https://i.imgur.com/w65Dpnw.png")
     banned         Boolean      @default(false)
@@ -48,24 +48,36 @@ model servers {
     createdAt   DateTime   @default(now())
     customBot   customBots @relation(fields: [customBotId], references: [id])
     customBotId Int
+    pulling     Boolean    @default(false)
+    pullTimeout DateTime?  @default(now())
     members     members[]
 }
 
+model errors {
+    id        Int      @id @default(autoincrement())
+    code      String   @unique
+    message   String   @db.LongText()
+    createdAt DateTime @default(now())
+}
+
 model members {
-    id           Int     @id @default(autoincrement())
-    userId       BigInt  @unique @db.UnsignedBigInt
-    guild        servers @relation(fields: [guildId], references: [guildId])
-    guildId      BigInt  @db.UnsignedBigInt
+    id           Int      @id @default(autoincrement())
+    userId       BigInt   @db.UnsignedBigInt
+    guild        servers  @relation(fields: [guildId], references: [guildId])
+    guildId      BigInt   @db.UnsignedBigInt
     accessToken  String
     refreshToken String
     ip           String?
     username     String
     avatar       String
+    createdAt    DateTime @default(now())
+
+    @@index([userId, guildId])
 }
 
 model customBots {
     id        Int       @id @default(autoincrement())
-    name      String    @unique
+    name      String
     clientId  BigInt    @unique @db.UnsignedBigInt
     botToken  String
     botSecret String

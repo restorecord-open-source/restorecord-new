@@ -5,6 +5,7 @@ import functions from "../src/functions";
 import { Toaster } from "react-hot-toast";
 import styles from "../public/styles/register.module.css"
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 export default function Register() {
     const [username, setUsername] = useState("");
@@ -13,6 +14,7 @@ export default function Register() {
 
     const [token, setToken]: any = useState();
     const captchaRef: any = useRef();
+    const router = useRouter();
 
 
     const onExpire = () => {
@@ -64,13 +66,14 @@ export default function Register() {
                     setToken(null);
                     if (res.success) {
                         functions.ToastAlert("Account created", "success");
+                        router.push("/login");
                     } 
                     else {
                         functions.ToastAlert(res.message, "error");
                     }
                 });
         }
-    }, [token, email, username, password]);
+    }, [token, email, username, password, router]);
 
 
     return (
@@ -85,23 +88,23 @@ export default function Register() {
                     <form className={styles.formWrapper} onSubmit={handleSubmit}>
                         <div className={styles.form}>
                             <div>
-                                <label htmlFor="username" className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Username</label>
+                                <label htmlFor="username" className="block mb-2 text-sm font-medium text-gray-300">Username</label>
                                 <div className="relative mb-6">
-                                    <input name="username" onChange={handleChange} type="text" id="username" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Username" />
+                                    <input name="username" onChange={handleChange} type="text" id="username" className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="Username" />
                                 </div>
                             </div>
 
                             <div>
-                                <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Email</label>
+                                <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-300">Email</label>
                                 <div className="relative mb-6">
-                                    <input name="email" onChange={handleChange} type="email" id="email" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Email" />
+                                    <input name="email" onChange={handleChange} type="email" id="email" className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="Email" />
                                 </div>
                             </div>
 
                             <div>
-                                <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Password</label>
+                                <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-300">Password</label>
                                 <div className="flex">
-                                    <input name="password" onChange={handleChange} type="password" id="password" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="••••••••••" />
+                                    <input name="password" onChange={handleChange} type="password" id="password" className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="••••••••••" />
                                 </div>
                             </div>
 

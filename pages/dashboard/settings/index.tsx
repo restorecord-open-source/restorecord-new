@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import { useQuery } from "react-query";
-import DashSettings from "../../../components/dashboard/DashSettings";
+import DashSettings from "../../../components/dashboard/Settings";
 import NavBar from "../../../components/dashboard/navBar";
 import NavBarLoading from "../../../components/dashboard/navBarLoading";
 import getUser from "../../../src/dashboard/getUser";
@@ -32,9 +32,9 @@ export default function Settings() {
     return (
         <>
             <div className="min-h-screen max-h-screen flex">
-                <NavBar user={data.username} />
+                <NavBar user={data} />
 
-                <DashSettings user={data.username} />
+                <DashSettings user={data} />
             </div>
         </>
     )

@@ -32,9 +32,9 @@ export default function Dashboard() {
     return (
         <>
             <div className="min-h-screen max-h-screen flex">
-                <NavBar user={data.username} />
+                <NavBar user={data} />
 
-                <DashBoard user={data.username} />
+                <DashBoard user={data} />
             </div>
         </>
     )

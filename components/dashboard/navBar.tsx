@@ -11,7 +11,7 @@ export default function NavBar({ user }: any) {
         setPathName(window.location.pathname);
     }, [])
 
-    if (!user) {
+    if (!user.username) {
         return (
             <>
                 <aside className={styles.sideBarMainWrapper} aria-label="Sidebar">
@@ -48,6 +48,9 @@ export default function NavBar({ user }: any) {
                         return (
                             <ul className={item.seperator ? `${styles.itemWrapperSeperator}` : `${styles.itemWrapperNormal}`} key={index}>
                                 {item.items.map((item, index) => {
+                                    if (item.admin && !user.admin) {
+                                        return null
+                                    }
                                     return (
                                         <li key={index}>
                                             <Link href={item.href}>

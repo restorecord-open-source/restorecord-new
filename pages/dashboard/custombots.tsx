@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import { useQuery } from "react-query";
-import DashCustomBot from "../../components/dashboard/DashCustomBot";
+import DashCustomBot from "../../components/dashboard/CustomBots";
 import NavBar from "../../components/dashboard/navBar";
 import NavBarLoading from "../../components/dashboard/navBarLoading";
 import getUser from "../../src/dashboard/getUser";
@@ -32,9 +32,9 @@ export default function Custombots() {
     return (
         <>
             <div className="min-h-screen max-h-screen flex">
-                <NavBar user={data.username} />
+                <NavBar user={data} />
 
-                <DashCustomBot user={data.username} />
+                <DashCustomBot user={data} />
             </div>
         </>
     )

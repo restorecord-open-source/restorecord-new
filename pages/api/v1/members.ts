@@ -4,7 +4,7 @@ import rateLimit from "../../../src/rate-limit";
 import { prisma } from "../../../src/db";
 
 const limiter = rateLimit({
-    interval: 10 * 1000, 
+    interval: 10 * 60, 
     uniqueTokenPerInterval: 500,
     limit: 60,
 })
@@ -18,60 +18,48 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 
                 const token = req.headers.authorization as string;
                 const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
-                
+
                 if (!valid) return res.status(400).json({ success: false });
-                
-                prisma.accounts.findFirst({
+
+                prisma.accounts.findUnique({
                     where: {
                         id: valid.id
                     }
                 }).then((account: any) => {
-                    if (!account) return res.status(400).json({ success: false });
-
                     prisma.servers.findMany({
                         where: {
                             ownerId: account.id
                         }
                     }).then((servers: any) => {
-                        prisma.customBots.findMany({
+                        const guildIds = servers.map((server: any) => server.guildId);
+
+                        prisma.members.findMany({
                             where: {
-                                ownerId: account.id
+                                guildId: {
+                                    in: guildIds
+                                }
+                            },
+                            orderBy: {
+                                createdAt: "desc"
                             }
-                        }).then((bots: any) => {
-                            return res.status(200).json({
+                        }).then((members: any) => {
+                            res.status(200).json({
                                 success: true,
-                                username: account.username,
-                                email: account.email,
-                                role: account.role,
-                                admin: account.admin,
-                                pfp: account.pfp,
-                                createdAt: account.createdAt,
-                                servers: servers.map((server: any) => {
+                                members: members.map((member: any) => {
                                     return {
-                                        id: server.id,
-                                        name: server.name,
-                                        guildId: server.guildId.toString(),
-                                        roleId: server.roleId.toString(),
-                                        picture: server.picture,
-                                        description: server.description,
-                                        createdAt: server.createdAt
-                                    }
-                                }),
-                                bots: bots.map((bot: any) => {
-                                    return {
-                                        id: bot.id,
-                                        name: bot.name,
-                                        clientId: bot.clientId.toString(),
-                                        botToken: bot.botToken,
-                                        botSecret: bot.botSecret,
+                                        userId: member.userId.toString(),
+                                        username: member.username,
+                                        avatar: member.avatar,
+                                        ip: member.ip,
+                                        createdAt: member.createdAt,
+                                        guildId: member.guildId.toString(),
+                                        guildName: servers.find((server: any) => server.guildId === member.guildId).name,
                                     }
                                 })
                             });
                         });
                     });
                 });
-                
-                
             }
             catch (err: any) {
                 if (res.getHeader("x-ratelimit-remaining") === "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });

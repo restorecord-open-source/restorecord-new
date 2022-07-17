@@ -9,14 +9,15 @@ dotenv.config({ path: "../../" });
 
 
 const limiter = rateLimit({
-    interval: 10 * 1000, 
+    interval: 10 * 6000, 
     uniqueTokenPerInterval: 500,
-    limit: 20,
+    limit: 10,
 })
   
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) { 
-    if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
+    if (req.method !== "POST") 
+        return res.status(405).json({ message: "Method not allowed" });
 
     try {
         await limiter.check(res, "CACHE_TOKEN");
@@ -58,6 +59,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     catch (err: any) {
         if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
         if (err?.name === "ValidationError") return res.status(400).json({ success: false, message: err.errors[0] });
-        return res.status(400).json({ success: false, message: "Something went wrong", r: res.getHeader("x-ratelimit-remaining") });
+        return res.status(500);
     } 
 }
