@@ -81,6 +81,7 @@ export default function DashSettings({ user }: any) {
     return (
         <>
             <Toaster />
+            
             <div className="lg:mx-32 lg:mt-12 md:mt-8 md:mx-20 w-full">
                 <div className="col-span-12 md:col-span-8 mb-4">
                     <h1 className="text-white text-4xl font-bold leading-tight">
@@ -93,17 +94,18 @@ export default function DashSettings({ user }: any) {
                 <div className="max-w-screen p-4 w-full rounded-lg border shadow-md bg-gray-900 border-gray-800">
                     {!createNewServer && (Array.isArray(user.servers) && user.servers.length > 0) && (
                         <>
-                            <div className="inline-flex">
-                                <h2 className="text-white text-3xl font-bold leading-tight mb-4">
-                                    Your Servers
-                                </h2>
-                                <div className="flex justify-end">
-                                    <button className="btn ml-2" onClick={(e) => {
-                                        console.log(createNewServer);
-                                        setCreateNewServer(true);
-                                        console.log(createNewServer);
-                                    }}> Create New Server </button>
+                            <div className="flex flex-col md:flex-row">
+                                <div className="flex-1">
+                                    <h2 className="text-white text-3xl font-bold leading-tight mb-4">
+                                        Your Servers
+                                    </h2>
                                 </div>
+                                <button className="btn ml-2" onClick={(e) => {
+                                    console.log(createNewServer);
+                                    setCreateNewServer(true);
+                                    console.log(createNewServer);
+                                }}> Create New Server
+                                </button>
                             </div>
                             {user.servers.map((item: any) => {
                                 return (
@@ -172,16 +174,16 @@ export default function DashSettings({ user }: any) {
                     
                     {(createNewServer || (Array.isArray(user.servers) && user.servers.length === 0)) && (
                         <>
-                            <div className="inline-flex">
-                                <h2 className="text-white text-3xl font-bold leading-tight mb-4">
-                                    Create new Server
-                                </h2>
+                            <div className="flex flex-col md:flex-row">
+                                <div className="flex-1">
+                                    <h2 className="text-white text-3xl font-bold leading-tight mb-4">
+                                        Create new Server
+                                    </h2>
+                                </div>
                                 {createNewServer && (
-                                    <div className="flex justify-end">
-                                        <button className="btn ml-2" onClick={(e) => {
-                                            setCreateNewServer(false);
-                                        }}> Back </button>
-                                    </div>
+                                    <button className="btn ml-2" onClick={(e) => {
+                                        setCreateNewServer(false);
+                                    }}> Back </button>
                                 )}
                             </div>
                             {Array.isArray(user.bots) && user.bots.length === 0 && (

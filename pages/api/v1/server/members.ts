@@ -21,6 +21,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 if (!valid) return res.status(400).json({ success: false });
 
+                const maxCount = req.query.max as string;
+
                 prisma.accounts.findUnique({
                     where: {
                         id: valid.id
@@ -29,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     prisma.servers.findMany({
                         where: {
                             ownerId: account.id
-                        }
+                        },
                     }).then((servers: any) => {
                         const guildIds = servers.map((server: any) => server.guildId);
 
@@ -37,11 +39,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             where: {
                                 guildId: {
                                     in: guildIds
-                                }
+                                },
                             },
                             orderBy: {
                                 createdAt: "desc"
-                            }
+                            },
                         }).then((members: any) => {
                             res.status(200).json({
                                 success: true,

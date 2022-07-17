@@ -49,7 +49,7 @@ export default function DashBoard({ user }: any) {
                     {Array.isArray(data.news) && data.news.map((item: any) => {
                         return (
                             <>
-                                <div className="mb-6 p-6 max-w-7xl rounded-lg border shadow-md bg-gray-800 border-gray-700" key={item.id}>
+                                <div className="mb-6 p-6 rounded-lg border shadow-md bg-gray-800 border-gray-700" key={item.id}>
                                     <h5 className="mb-2 text-2xl font-bold tracking-tight text-white">{item.title}</h5>
                                     <p className="mb-3 font-normal text-gray-400 whitespace-pre-line">{item.content}</p>
                                     <hr className="border-b border-gray-700" />
@@ -65,6 +65,13 @@ export default function DashBoard({ user }: any) {
                             </>
                         )
                     })}
+                </div>
+
+                <div className="max-w-screen p-4 mt-4 w-full rounded-lg border shadow-md bg-gray-900 border-gray-800">
+                    <h2 className="text-white text-3xl font-bold leading-tight mb-4">
+                        Recent Activities
+                    </h2>
+                    
                 </div>
             </div>
         </>

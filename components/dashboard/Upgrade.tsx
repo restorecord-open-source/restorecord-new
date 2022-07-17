@@ -49,7 +49,7 @@ export default function DashUpgrade({ user }: any) {
                                 ))}
                             </ul>
 
-                            <a href={`${subscription.name.includes("Free") ? "#" : `https://shop.restorecord.com/product/${subscription.name}`}`} target="_blank" rel="noopener noreferrer" className="bg-indigo-600 border border-indigo-600 block w-full rounded-lg p-3 hover:bg-indigo-700 text-white transition-all">
+                            <a href={`${subscription.name.includes("Free") ? "#" : `https://shop.restorecord.com/product/${subscription.name}`}`} target="_blank" rel="noopener noreferrer" className={`${subscription.name.includes("Free") ? "cursor-not-allowed" : ""} bg-indigo-600 border-indigo-600 border block w-full rounded-lg p-3 hover:bg-indigo-700 text-white transition-all`}>
                                 Select Plan
                             </a>
                         </div>

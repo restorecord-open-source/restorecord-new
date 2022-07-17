@@ -9,8 +9,8 @@ const SubscriptionList: Subscription[] = [
         features: [
             {
                 name: "memberCapacity",
-                value: "250 Restoreable Members",
-                description: "Maximum number of Restoreable Members",
+                value: "250 Restorable Members",
+                description: "Maximum number of Restorable Members",
                 icon: faCheck,
             },
             {
@@ -30,6 +30,12 @@ const SubscriptionList: Subscription[] = [
                 value: "IP Bans",
                 description: "IP Ban members from your server",
                 icon: faCheck,
+            },
+            {
+                name: "proxied",
+                value: "Proxied Requests",
+                description: "All requests sent to Discord are anonymous and proxied",
+                icon: faX,
             },
             {
                 name: "antiVPN",
@@ -65,8 +71,8 @@ const SubscriptionList: Subscription[] = [
         features: [
             {
                 name: "memberCapacity",
-                value: "5000 Restoreable Members",
-                description: "Maximum number of Restoreable Members",
+                value: "5000 Restorable Members",
+                description: "Maximum number of Restorable Members",
                 icon: faCheck,
             },
             {
@@ -88,6 +94,12 @@ const SubscriptionList: Subscription[] = [
                 icon: faCheck,
             },
             {
+                name: "proxied",
+                value: "Proxied Requests",
+                description: "All requests sent to Discord are anonymous and proxied",
+                icon: faCheck,
+            },
+            {
                 name: "antiVPN",
                 value: "Anti VPN & Proxy",
                 description: "Prevent members from using a VPN or Proxy to verify in your server",
@@ -101,7 +113,7 @@ const SubscriptionList: Subscription[] = [
             },
             {
                 name: "serverBackups",
-                value: "Server Backups",
+                value: "Server Backups (Settings, Channels, Roles)",
                 description: "Backup all your Server Settings, Channels, Roles and more",
                 icon: faCheck,
             },
@@ -116,13 +128,13 @@ const SubscriptionList: Subscription[] = [
     {
         name: "Business",
         priceMonthly: "$5",
-        priceYearly: "$40",
+        priceYearly: "$30",
         bestPlan: false,
         features: [
             {
                 name: "memberCapacity",
-                value: "Unlimited Restoreable Members",
-                description: "Maximum number of Restoreable Members",
+                value: "Unlimited Restorable Members",
+                description: "Maximum number of Restorable Members",
                 icon: faCheck,
             },
             {
@@ -144,6 +156,12 @@ const SubscriptionList: Subscription[] = [
                 icon: faCheck,
             },
             {
+                name: "proxied",
+                value: "Proxied Requests",
+                description: "All requests sent to Discord are anonymous and proxied",
+                icon: faCheck,
+            },
+            {
                 name: "antiVPN",
                 value: "Anti VPN & Proxy",
                 description: "Prevent members from using a VPN or Proxy to verify in your server",
@@ -151,13 +169,13 @@ const SubscriptionList: Subscription[] = [
             },
             {
                 name: "verificationLogs",
-                value: "Verification Logs",
+                value: "Advanced Verification Logs",
                 description: "Log all verifications in your server",
                 icon: faCheck,
             },
             {
                 name: "serverBackups",
-                value: "Server Backups",
+                value: "Server Backups (Everything)",
                 description: "Backup all your Server Settings, Channels, Roles and more",
                 icon: faCheck,
             },

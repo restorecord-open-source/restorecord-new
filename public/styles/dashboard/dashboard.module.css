@@ -1,6 +1,5 @@
 .loader {
 	@apply flex justify-center items-center h-screen transition-all;
-	/* fade in from the top */
 	animation: fadeInFromTop 0.5s ease-in-out;
 }
 
