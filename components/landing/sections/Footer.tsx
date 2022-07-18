@@ -26,11 +26,6 @@ export default function Footer() {
             </ul>
 
             <ul className="flex items-center justify-center my-5">
-                {/* <li className="mx-1">
-                    <a href="https://discord.gg/restorecordbot">
-                        <FontAwesomeIcon icon={faDiscord} className="text-xl hover:text-gray-400 text-gray-200 transition-all cursor-pointer" />
-                    </a>
-                </li> */}
                 <li className="mx-1">
                     <a href="https://www.youtube.com/channel/UCdO4LjbTjSJWxP9VQg7ZNXw">
                         <FontAwesomeIcon icon={faYoutube} className="text-xl hover:text-gray-400 text-gray-200 transition-all cursor-pointer" />

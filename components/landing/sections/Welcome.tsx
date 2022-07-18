@@ -14,11 +14,11 @@ export default function WelcomeSection() {
                     </button>
                 </Link>
                 <p className="absolute -top-3 -right-2 bg-green-500 py-1 px-2 rounded-full text-white text-xs">only $15/yearly</p>
-                {/* <Link href="https://discord.gg/restorecordbot">
+                <Link href="https://community.restorecord.com">
                     <button className="block w-44 text-indigo-600 text-center mt-4">
-                        Support Server
+                        Forums
                     </button>
-                </Link> */}
+                </Link>
             </div>
         </section>
     )
