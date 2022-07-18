@@ -79,7 +79,7 @@ export default function NavBar() {
                                 <Link href="/#stats">Statistics</Link>
                             </li>
                             <li className="font-semibold text-slate-200 hover:text-gray-400 transition-all">
-                                <a href="/api/support" target="_blank">Support</a>
+                                <a href="https://community.restorecord.com" target="_blank" rel="noreferrer">Support</a>
                             </li>
                         </ul>
                     </nav>
@@ -103,7 +103,7 @@ export default function NavBar() {
                         <Link href="/#stats">Statistics</Link>
                     </li>
                     <li className="mb-2 border-b border-gray-200 md:border-0 md:mx-2 font-semibold text-slate-200 hover:text-slate-400 transition-all">
-                        <a href="/api/support" target="_blank">Support</a>
+                        <a href="https://community.restorecord.com" target="_blank" rel="noreferrer">Support</a>
                     </li>
                 </ul>
             </nav>

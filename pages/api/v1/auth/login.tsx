@@ -22,19 +22,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
         await limiter.check(res, "CACHE_TOKEN");
 
-        const data = await LoginSchema.validate(req.body);
+        // const data = await LoginSchema.validate(req.body);
+
+        const data = {...req.body};
+
+        if (!data.username || !data.password) {
+            return res.status(400).json({ message: "Missing username or password" });
+        }
+
+        if (data.password.length !== 60) {
+            return res.status(400).json({ message: "Invalid password" });
+        }
+
+        if (data.username.length < 3 || data.username.length > 30) {
+            return res.status(400).json({ message: "Username must be between 3 and 30 characters" });
+        }
 
         if (!data) return res.status(400).json({ message: "Please provide all fields" });
 
-        const accounts = await prisma.accounts.findMany({
+        const account = await prisma.accounts.findFirst({
             where: {
-                username: data.username
+                username: data.username.toLowerCase()
             }
         });
 
-        if (accounts.length === 0) return res.status(400).json({ message: "Account not found" });
+        if (!account) return res.status(400).json({ message: "Account not found" });
 
-        const account = accounts[0];
         const isValid = await bcrypt.compare(data.password, account.password);
 
         if (!isValid) return res.status(400).json({ message: "Some Credentials are incorrect" });
