@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { sign } from "jsonwebtoken";
 import * as bcrypt from "bcrypt";
-import { LoginSchema } from "../../../../src/schemas";
 import dotenv from "dotenv";
 import rateLimit from "../../../../src/rate-limit";
 import { prisma } from "../../../../src/db";
@@ -21,8 +20,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     try {
         await limiter.check(res, "CACHE_TOKEN");
-
-        // const data = await LoginSchema.validate(req.body);
 
         const data = {...req.body};
 

@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import * as bcrypt from "bcrypt";
-import { SignupSchema } from "../../../../src/schemas";
 import dotenv from "dotenv";
 import { prisma } from "../../../../src/db";
 import { accounts } from "@prisma/client";
