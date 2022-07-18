@@ -29,11 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (!data.username || !data.password) {
             return res.status(400).json({ message: "Missing username or password" });
         }
-
-        if (data.password.length !== 60) {
-            return res.status(400).json({ message: "Invalid password" });
-        }
-
+        
         if (data.username.length < 3 || data.username.length > 30) {
             return res.status(400).json({ message: "Username must be between 3 and 30 characters" });
         }
