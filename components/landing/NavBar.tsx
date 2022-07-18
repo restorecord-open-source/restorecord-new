@@ -37,8 +37,12 @@ export default function NavBar() {
             checkSession();
         });
 
-        if (localStorage.getItem("token")) {
-            checkSession();
+        try {
+            if (localStorage.getItem("token")) {
+                checkSession();
+            }
+        } catch (error) {
+            console.log(error);
         }
     }, []);
 

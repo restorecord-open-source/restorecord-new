@@ -1,10 +1,10 @@
-/* eslint-disable @next/next/no-img-element */
 import axios from "axios";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { Toaster } from "react-hot-toast";
 import functions from "../../src/functions";
 import { useToken } from "../../src/token";
+import Image from "next/future/image";
 
 export default function DashSettings({ user }: any) {
     const [token]: any = useToken();
@@ -112,7 +112,7 @@ export default function DashSettings({ user }: any) {
                                     <>
                                         <div className="mb-6 p-6 rounded-lg border shadow-md bg-gray-800 border-gray-700" key={item.id}>
                                             <div className="inline-flex">
-                                                <img className="w-10 h-10 p-1 rounded-full ring-2 ring-gray-500" src={item.picture} alt="Server Image" />
+                                                <Image src={item.picture} alt="icon" className="w-10 h-10 rounded-full ring-2 ring-gray-500 p-1" width={48} height={48} loading="lazy" />
                                                 <h5 className="mb-2 ml-2 text-2xl font-bold tracking-tight text-white">{item.name}</h5>
                                             </div>
                                             <p className="font-normal text-gray-400">{item.description}</p>

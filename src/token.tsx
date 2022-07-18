@@ -7,9 +7,13 @@ export const TokenProvider = ({children}: any) => {
 
     useEffect(() => {
         if (process.browser) {
-            const savedToken = localStorage.getItem('token')
-            if (!token && savedToken) {
-                setToken(savedToken)
+            try {
+                const savedToken = localStorage.getItem('token')
+                if (!token && savedToken) {
+                    setToken(savedToken)
+                }
+            } catch (error) {
+                console.log(error)
             }
         }
     }, [])

@@ -55,27 +55,32 @@ export default function Login() {
     }
 
     useEffect(() => {
-        if (localStorage.getItem("token")) {
-            fetch(`/api/v1/user`, {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `${localStorage.getItem("token")}`
-                }
-            })
-                .then(res => res.json())
-                .then(res => {
-                    if (res.success) {
-                        functions.ToastAlert("You are already logged in, redirecting", "success");
-                        setTimeout(() => router.push("/dashboard"), 1000);
-                    }
-                    else {
-                        localStorage.removeItem("token");
+        try {
+            if (localStorage.getItem("token")) {
+                fetch(`/api/v1/user`, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `${localStorage.getItem("token")}`
                     }
                 })
-                .catch(err => {
-                    functions.ToastAlert("Error please check console", "error");
-                    console.log(err);
-                });
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.success) {
+                            functions.ToastAlert("You are already logged in, redirecting", "success");
+                            setTimeout(() => router.push("/dashboard"), 1000);
+                        }
+                        else {
+                            localStorage.removeItem("token");
+                        }
+                    })
+                    .catch(err => {
+                        functions.ToastAlert("Error please check console", "error");
+                        console.log(err);
+                    });
+            }
+        }
+        catch (error) {
+            console.log(error);
         }
     }, []);
 

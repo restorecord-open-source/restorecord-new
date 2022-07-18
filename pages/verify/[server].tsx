@@ -1,11 +1,11 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-/* eslint-disable @next/next/no-img-element */
 import { useRouter } from "next/router";
 import { useQuery } from "react-query";
 import NavBar from "../../components/landing/NavBar";
 import getServer from "../../src/getServer";
 import styles from "../../public/styles/index.module.css"
 import Link from "next/link";
+import Image from "next/future/image";
 
 export default function Verify({ status, err }: any) {
     const router = useRouter();
@@ -67,7 +67,7 @@ export default function Verify({ status, err }: any) {
                     </div>
 
                     <div className="flex flex-col items-center justify-center pt-5">
-                        <img src={data.server.picture} className="smx:w-36 smx:h-36 w-24 h-24 rounded-full border-2 border-indigo-600" alt="Server Picture" />
+                        <Image src={data.server.picture} width={128} height={128} loading="lazy" className="smx:w-36 smx:h-36 w-24 h-24 rounded-full border-2 border-indigo-600" alt="Server Picture" />
                     </div>
 
                     <div className="smx:pt-6 pt-4">
@@ -77,8 +77,8 @@ export default function Verify({ status, err }: any) {
                                 </>
                             ) : (
                                 <a href={`https://discord.com/oauth2/authorize?client_id=${data.server.clientId}&redirect_uri=https://restorecord.com/api/callback&response_type=code&scope=identify+guilds.join&state=${data.server.guildId}&prompt=none`}>
-                                    <button className="focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-indigo-800 text-white transition-all">
-                                    Verify
+                                    <button className="focus:ring-4 sm:font-medium font-bold rounded-lg sm:text-sm text-xl px-5 py-2.5 mr-2 mb-2 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-indigo-800 text-white transition-all">
+                                        Verify
                                     </button>
                                 </a>
                             )}
@@ -91,7 +91,7 @@ export default function Verify({ status, err }: any) {
                     </div>
                 </div>
             ) : (
-                <div className="flex flex-col items-center justify-center pt-24">
+                <div className="flex flex-col items-center justify-center">
                     <div className="text-white text-4xl font-bold text-center">
                         Server does not exist
                     </div>
@@ -103,8 +103,8 @@ export default function Verify({ status, err }: any) {
                 </div>
             )}
 
-            <div className="sticky inset-x-0 p-4 bottom-0 text-center">
-                <div className="text-gray-500 text-medium pt-2">
+            <div className="sticky inset-x-0 p-4 bottom-0 text-center sm:pt-0">
+                <div className="text-gray-500 text-medium pt-2 sm:text-sm text-lg">
                     {data.success ? (
                         <>
                             Server created by {data.server.owner} at {new Date(data.server.createdAt).toLocaleString()}
@@ -124,7 +124,7 @@ export default function Verify({ status, err }: any) {
 
 export function getServerSideProps({ req }: any) {
     if (req) {
-        const cookies = req.headers.cookie;
+        const cookies = req.headers.cookie ? req.headers.cookie : "";
 
         // if (cookies.includes("verified=true")) {
         //     return { props: { status: "finished", } }
