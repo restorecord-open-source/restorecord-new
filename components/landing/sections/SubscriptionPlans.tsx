@@ -1,11 +1,10 @@
-import { faCheck, faX } from "@fortawesome/free-solid-svg-icons";
+import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import SubscriptionList from "../../../src/SubscriptionList";
+import Link from "next/link";
 
 export default function SubscriptionPlansSection() {
-
-    // subscriptionType: "monthly" | "yearly" = "monthly";
 
     const [subscriptionType, setSubscriptionType] = useState("monthly");
     const [subscriptionToggle , setSubscriptionToggle] = useState(true);
@@ -57,9 +56,17 @@ export default function SubscriptionPlansSection() {
                             ))}
                         </ul>
 
-                        <a href="https://restorecord.sell.app" className="bg-indigo-600 border border-indigo-600 block w-full rounded-lg p-3 hover:bg-indigo-700 text-white transition-all">
-                            Select Plan
-                        </a>
+                        {subscription.name === "Free" ? (
+                            <Link href="/register">
+                                <a className="bg-indigo-600 border border-indigo-600 block w-full rounded-lg p-3 hover:bg-indigo-700 text-white transition-all">
+                                    Register
+                                </a>
+                            </Link>
+                        ) : (
+                            <a target="_blank" rel="noreferrer" href={`https://restorecord.sell.app/product/${subscription.name.toLowerCase()}`} className="bg-indigo-600 border border-indigo-600 block w-full rounded-lg p-3 hover:bg-indigo-700 text-white transition-all">
+                                Purchase
+                            </a>
+                        )}
                     </div>
                 ))}
             </div>
