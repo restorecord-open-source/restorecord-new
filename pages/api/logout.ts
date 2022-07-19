@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "../../src/db";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
+    if (req.method !== "GET") return res.status(405).json({ message: "Method not allowed" });
 
     const token = req.headers.authorization as string;
     const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
