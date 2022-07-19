@@ -1,26 +1,25 @@
-import "../public/styles/globals.css"
+import "../public/styles/globals.css";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useEffect, useState } from 'react';
-import { QueryClientProvider, QueryClient } from 'react-query';
+import { useEffect } from "react";
+import { QueryClientProvider, QueryClient } from "react-query";
 import { TokenProvider } from "../src/token";
-
 import ProgressBar from "@badrap/bar-of-progress";
+import Script from "next/script";
 
 const progress = new ProgressBar({
     size: 2,
     color: "#4f46e5",
     className: "loading-bar",
-    delay: 100,
+    delay: 50,
 });
-
 
 const queryClient = new QueryClient();
 
 function MyApp({ Component, pageProps }: any) {
     const router = useRouter();
 
-    useEffect(() => {        
+    useEffect(() => {
         router.events.on("routeChangeStart", progress.start);
         router.events.on("routeChangeComplete", progress.finish);
         router.events.on("routeChangeError", progress.finish);
@@ -32,7 +31,7 @@ function MyApp({ Component, pageProps }: any) {
         };
     }, [router]);
 
-    return ( 
+    return (
         <>
             <Head>
                 <title>Restorecord</title>
@@ -47,13 +46,19 @@ function MyApp({ Component, pageProps }: any) {
                 <meta name="apple-mobile-web-app-title" content="Restorecord" />
                 <meta name="application-name" content="Restorecord" />
             </Head>
+            <Script id="tp" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: `
+                    (function(w,d,s,r,n){w.TrustpilotObject=n;w[n]=w[n]||function(){(w[n].q=w[n].q||[]).push(arguments)};
+                    a=d.createElement(s);a.async=1;a.src=r;a.type='text/java'+s;f=d.getElementsByTagName(s)[0];
+                    f.parentNode.insertBefore(a,f)})(window,document,'script', 'https://invitejs.trustpilot.com/tp.min.js', 'tp');
+                    tp('register', 'XTDXMBOXirXRukvr');
+            ` }} />
             <QueryClientProvider client={queryClient}>
                 <TokenProvider>
                     <Component {...pageProps} />
                 </TokenProvider>
             </QueryClientProvider>
         </>
-    )
+    );
 }
 
-export default MyApp
+export default MyApp;
