@@ -61,7 +61,7 @@ export default function Verify({ status, err }: any) {
                             </>
                         ) : (
                             <>
-                                You&#39;re Verifying in <span className="text-indigo-600">{data.server.name}</span>
+                                You&#39;re verifying in <span className="text-indigo-600">{data.server.name}</span>
                             </>
                         )}
                     </div>

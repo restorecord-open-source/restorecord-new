@@ -78,9 +78,9 @@ export default function DashCustomBot({ user }: any) {
     return (
         <>
             <Toaster />
-            <div className="lg:mx-32 lg:mt-12 md:mt-8 md:mx-20 w-full">
+            <div className="sm:mr-28 sm:ml-32 sm:mt-12 ml-6 mr-8 mt-8 w-full">
                 <div className="col-span-12 md:col-span-8 mb-4">
-                    <h1 className="text-white text-4xl font-bold leading-tight">
+                    <h1 className="text-white sm:text-4xl text-2xl font-bold leading-tight">
                         Custom Bots
                     </h1>
                     <p className="text-gray-500 text-base leading-tight">
@@ -92,7 +92,7 @@ export default function DashCustomBot({ user }: any) {
                         <>
                             <div className="flex flex-col md:flex-row">
                                 <div className="flex-1">
-                                    <h2 className="text-white text-3xl font-bold leading-tight mb-4">
+                                    <h2 className="text-white sm:text-3xl text-xl font-bold leading-tight mb-4">
                                         Your Bots
                                     </h2>
                                 </div>
@@ -129,7 +129,7 @@ export default function DashCustomBot({ user }: any) {
                         <>
                             <div className="flex flex-col md:flex-row">
                                 <div className="flex-1">
-                                    <h2 className="text-white text-3xl font-bold leading-tight mb-4">
+                                    <h2 className="text-white sm:text-3xl text-xl font-bold leading-tight mb-4">
                                         Create a new Bot 
                                     </h2>
                                 </div>

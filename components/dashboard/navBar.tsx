@@ -1,3 +1,5 @@
+import { faBars } from "@fortawesome/free-solid-svg-icons"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import styles from "../../public/styles/dashboard/sidebar.module.css"
@@ -38,11 +40,24 @@ export default function NavBar({ user }: any) {
 
     return (
         <>
-            <aside className={styles.sideBarMainWrapper} aria-label="Sidebar">
+            {/* burger menu */}
+            <FontAwesomeIcon id="menu" className={styles.sideBurgerMenu} icon={faBars} onClick={() => {
+                document.querySelector("#sidebar")?.classList.toggle(styles.sideBarOpen);
+                document.querySelector("#menu")?.classList.toggle(styles.sideBurgerClose);
+            } } />
+
+            <aside className={styles.sideBarMainWrapper} aria-label="Sidebar" id="sidebar">
                 <div className={styles.sideBarWrapper}>
-                    <span className={styles.sideBarTitleWrapper}>
-                        <span className={styles.sideBarTitle}>Restore<span>Cord</span></span>
-                    </span>
+                    <div className="inline-flex">
+                        <FontAwesomeIcon id="close" className={styles.sideBurgerMenuClose} icon={faBars} onClick={() => {
+                            document.querySelector("#sidebar")?.classList.toggle(styles.sideBarOpen);
+                            document.querySelector("#menu")?.classList.toggle(styles.sideBurgerClose);
+                        } } />
+
+                        <span className={styles.sideBarTitleWrapper}>
+                            <span className={styles.sideBarTitle}>Restore<span>Cord</span></span>
+                        </span>
+                    </div>
                     
                     {navItemWrappers.map((item, index) => {
                         return (
