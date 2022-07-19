@@ -156,11 +156,9 @@ export default function DashSettings({ user }: any) {
                                                                 });
                                                         }
                                                     }>Pull Members</button>
-                                                    <button className="ml-2 focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-indigo-800 text-white transition-all;" onClick={
-                                                        () => {
-                                                            router.push(`/dashboard/settings/${item.guildId}`)
-                                                        }
-                                                    }>Edit</button>
+                                                    <button className="ml-2 focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-indigo-800 text-white transition-all;" onClick={() => { router.push(`/dashboard/settings/${item.guildId}`)} }>
+                                                        Edit
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>

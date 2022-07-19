@@ -126,16 +126,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 });
 
                 if (data.newServerName !== data.serverName) { 
-                    if (multipleCheck?.name.toLowerCase() === data.newServerName.toLowerCase()) 
-                        return res.status(400).json({ success: false, message: "Server name is already in use" }); 
+                    if (multipleCheck?.name.toLowerCase() === data.serverName.toLowerCase()) return res.status(400).json({ success: false, message: "Server name is already in use" }); 
                 }
                 if (data.newGuildId !== data.guildId) {
-                    if (multipleCheck?.guildId === BigInt(data.newGuildId)) 
-                        return res.status(400).json({ success: false, message: "Guild ID is already in use" });
+                    if (multipleCheck?.guildId === BigInt(data.guildId)) return res.status(400).json({ success: false, message: "Guild ID is already in use" });
                 }
                 if (data.newRoleId !== data.roleId) {
-                    if (multipleCheck?.roleId === BigInt(data.newRoleId)) 
-                        return res.status(400).json({ success: false, message: "Role ID is already in use" });
+                    if (multipleCheck?.roleId === BigInt(data.roleId)) return res.status(400).json({ success: false, message: "Role ID is already in use" });
                 }
 
 

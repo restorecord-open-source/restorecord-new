@@ -13,84 +13,186 @@ const limiter = rateLimit({
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) { 
-    if (req.method !== "POST") 
-        return res.status(405).json({ message: "Method not allowed" });
+    return new Promise(async resolve => {
+        switch (req.method) {
+        case "POST":
+            try {
+                await limiter.check(res, 5, "CACHE_TOKEN");
 
-    try {
-        await limiter.check(res, 5, "CACHE_TOKEN");
+                const data = { ...req.body };
 
-        const data = { ...req.body };
-
-        const token = req.headers.authorization as string;
-        const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
+                const token = req.headers.authorization as string;
+                const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
                 
-        if (!valid) return res.status(400).json({ success: false, message: "Invalid Token" });
+                if (!valid) return res.status(400).json({ success: false, message: "Invalid Token" });
 
-        const sess = await prisma.sessions.findMany({
-            where: {
-                accountId: valid.id,
-            }
-        }); 
+                const sess = await prisma.sessions.findMany({
+                    where: {
+                        accountId: valid.id,
+                    }
+                }); 
 
-        if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
+                if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
 
-        if (!data.botName || !data.botToken || !data.botSecret || !data.clientId) return res.status(400).json({ success: false, message: "Missing required fields." });
-        if (isNaN(Number(data.clientId))) return res.status(400).json({ success: false, message: "Invalid clientId." });
-
-
-        const bot = await prisma.customBots.findFirst({
-            where: {
-                OR: [
-                    { name: data.botName },
-                    { clientId: Number(data.clientId) },
-                    { botSecret: data.botSecret },
-                    { botToken: data.botToken },
-                ],
-            },
-        });
-
-        if (bot?.clientId === BigInt(data.clientId)) return res.status(400).json({ success: false, message: "Client Id is already in use" });
-        if (bot?.botSecret.toLowerCase() === data.botSecret.toLowerCase()) return res.status(400).json({ success: false, message: "Client Secret is already in use" });
-        if (bot?.botToken.toLowerCase() === data.botToken.toLowerCase()) return res.status(400).json({ success: false, message: "Bot Token is already in use" });
+                if (!data.botName || !data.botToken || !data.botSecret || !data.clientId) return res.status(400).json({ success: false, message: "Missing required fields." });
+                if (isNaN(Number(data.clientId))) return res.status(400).json({ success: false, message: "Invalid clientId." });
 
 
-        // check for valid bot token and check if the bot client id matches discords response
+                const bot = await prisma.customBots.findFirst({
+                    where: {
+                        OR: [
+                            { name: data.botName },
+                            { clientId: Number(data.clientId) },
+                            { botSecret: data.botSecret },
+                            { botToken: data.botToken },
+                        ],
+                    },
+                });
 
-        const botData = await axios.get(`https://discordapp.com/api/users/@me`, {
-            headers: {
-                Authorization: `Bot ${data.botToken}`,
-            },
-            validateStatus: () => true,
-        });
+                if (bot?.clientId === BigInt(data.clientId)) return res.status(400).json({ success: false, message: "Client Id is already in use" });
+                if (bot?.botSecret.toLowerCase() === data.botSecret.toLowerCase()) return res.status(400).json({ success: false, message: "Client Secret is already in use" });
+                if (bot?.botToken.toLowerCase() === data.botToken.toLowerCase()) return res.status(400).json({ success: false, message: "Bot Token is already in use" });
 
-        if (botData.status !== 200) return res.status(400).json({ success: false, message: "Invalid Bot Token" });
 
-        if (botData.data.id !== data.clientId) return res.status(400).json({ success: false, message: "Client Id does not match the Bots Client Id" });
+                const botData = await axios.get(`https://discordapp.com/api/users/@me`, {
+                    headers: {
+                        Authorization: `Bot ${data.botToken}`,
+                    },
+                    validateStatus: () => true,
+                });
+
+                if (botData.status !== 200) return res.status(400).json({ success: false, message: "Invalid Bot Token" });
+
+                if (botData.data.id !== data.clientId) return res.status(400).json({ success: false, message: "Client Id does not match the Bots Client Id" });
                 
 
-        const newBot = await prisma.customBots.create({
-            data: {
-                name: data.botName,
-                clientId: BigInt(data.clientId),
-                botSecret: data.botSecret,
-                botToken: data.botToken,
-                ownerId: valid.id,
-            }
-        });
+                const newBot = await prisma.customBots.create({
+                    data: {
+                        name: data.botName,
+                        clientId: BigInt(data.clientId),
+                        botSecret: data.botSecret,
+                        botToken: data.botToken,
+                        ownerId: valid.id,
+                    }
+                });
 
-        return res.status(200).json({ success: true, message: "Bot created successfully", bot: {
-            id: newBot.id,
-            name: newBot.name,
-            clientId: newBot.clientId.toString(),
-            botSecret: newBot.botSecret,
-            botToken: newBot.botSecret,
-        } });
-    }
-    catch (err: any) {
-        console.log(err);
-        if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
-        if (err?.name === "" || err?.name === "JsonWebTokenError") return res.status(400).json({ success: false, message: "User not logged in" }); 
-        if (err?.name === "ValidationError") return res.status(400).json({ success: false, message: err.message, });
-        return res.status(400).json({ success: false, message: "Something went wrong" });
-    }
+                return res.status(200).json({ success: true, message: "Bot created successfully", bot: {
+                    id: newBot.id,
+                    name: newBot.name,
+                    clientId: newBot.clientId.toString(),
+                    botSecret: newBot.botSecret,
+                    botToken: newBot.botSecret,
+                } });
+            }
+            catch (err: any) {
+                console.log(err);
+                if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
+                if (err?.name === "" || err?.name === "JsonWebTokenError") return res.status(400).json({ success: false, message: "User not logged in" }); 
+                if (err?.name === "ValidationError") return res.status(400).json({ success: false, message: err.message, });
+                return res.status(400).json({ success: false, message: "Something went wrong" });
+            }
+            break;
+        case "PATCH": 
+            try {
+                await limiter.check(res, 5, "CACHE_TOKEN");
+
+                const data = { ...req.body };
+
+                if (!data.botName || !data.botSecret || !data.botToken || !data.newBotName || !data.newBotSecret || !data.newBotToken) {
+                    let errors = [];
+
+                    if (!data.botName) errors.push("Bot Name");
+                    if (!data.botSecret) errors.push("Bot Secret");
+                    if (!data.botToken) errors.push("Bot Token");
+
+                    if (!data.newBotName) errors.push("New Bot Name");
+                    if (!data.newBotSecret) errors.push("New Bot Secret");
+                    if (!data.newBotToken) errors.push("New Bot Token");
+
+                    return res.status(400).json({ success: false, message: `Missing ${errors}` });
+                }
+
+                const token = req.headers.authorization as string;
+                const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
+                
+                if (!valid) return res.status(400).json({ success: false, message: "Invalid Token" });
+
+                const sess = await prisma.sessions.findMany({
+                    where: {
+                        accountId: valid.id,
+                    }
+                }); 
+
+                if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
+
+                const multipleCheck = await prisma.customBots.findFirst({
+                    where: {
+                        OR: [
+                            { name: data.newBotName },
+                            { botSecret: data.newBotSecret },
+                            { botToken: data.newBotToken },
+                        ],
+                    },
+                });
+
+                if (data.newBotName !== data.botName) { 
+                    if (multipleCheck?.name.toLowerCase() == data.botName.toLowerCase()) return res.status(400).json({ success: false, message: "Bot name is already in use" }); 
+                }
+                if (data.newBotSecret !== data.botSecret) {
+                    if (multipleCheck?.botSecret === data.botSecret) return res.status(400).json({ success: false, message: "Bot Secret is already in use" });
+                }
+                if (data.newBotToken !== data.botToken) {
+                    if (multipleCheck?.botToken === data.botToken) return res.status(400).json({ success: false, message: "Bot Token is already in use" });
+                }
+
+
+                const botData = await axios.get(`https://discordapp.com/api/users/@me`, {
+                    headers: {
+                        Authorization: `Bot ${data.botToken}`,
+                    },
+                    validateStatus: () => true,
+                });
+
+                if (botData.status !== 200) return res.status(400).json({ success: false, message: "Invalid Bot Token" });
+
+                const bot = await prisma.customBots.findFirst({
+                    where: {
+                        AND: [
+                            { ownerId: valid.id },
+                            { name: data.botName },
+                            { botSecret: data.botSecret },
+                            { botToken: data.botToken },
+                        ],
+                    },
+                });
+
+                if (!bot) return res.status(400).json({ success: false, message: "Server not found" });
+
+                const newBot = await prisma.customBots.update({
+                    where: {
+                        id: bot.id,
+                    },
+                    data: {
+                        name: data.newBotName,
+                        botSecret: data.newBotSecret,
+                        botToken: data.newBotToken,
+                    }
+                });
+                return res.status(200).json({ success: true, message: "Bot successfully Updated", bot: {
+                    id: newBot.id,
+                    name: newBot.name,
+                    clientId: newBot.clientId.toString(),
+                    botSecret: newBot.botSecret,
+                    botToken: newBot.botSecret,
+                } });
+            }
+            catch (err: any) {
+                console.log(err);
+                if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
+                if (err?.name === "" || err?.name === "JsonWebTokenError") return res.status(400).json({ success: false, message: "User not logged in" }); 
+                if (err?.name === "ValidationError") return res.status(400).json({ success: false, message: err.message, });
+                return res.status(400).json({ success: false, message: "Something went wrong" });
+            }
+        }
+    });
 }

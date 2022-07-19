@@ -54,7 +54,7 @@ export default function DashUpgrade({ user }: any) {
                             <>
                                 <div key={item.userId}>
                                     <div className="mb-6 p-6 rounded-lg border shadow-md bg-gray-800 border-gray-700">
-                                        <div className="inline-flex mb-4">
+                                        <div className="inline-flex">
                                             {item.avatar.length > 1 ? (
                                                 <Image loading="lazy" src={`https://cdn.discordapp.com/avatars/${item.userId}/${item.avatar}?size=128`} className="w-10 h-10 rounded-full border-2 border-indigo-600" alt="Profile Picture" width={64} height={64} />
                                             ) : (

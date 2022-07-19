@@ -113,9 +113,9 @@ export default function DashCustomBot({ user }: any) {
                                                     <button className="btn" onClick={() => { router.push(`https://discord.com/api/oauth2/authorize?client_id=${item.clientId}&permissions=8&scope=bot`) }}>
                                                         Invite
                                                     </button>
-                                                    {/* <button className="btn" onClick={() => { router.push(`/dashboard/settings/${item.clientId}`) }}>
+                                                    <button className="btn" onClick={() => { router.push(`/dashboard/custombots/${item.clientId}`) }}>
                                                         Edit
-                                                    </button> */}
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
