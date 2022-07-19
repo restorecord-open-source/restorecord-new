@@ -46,12 +46,6 @@ function MyApp({ Component, pageProps }: any) {
                 <meta name="apple-mobile-web-app-title" content="Restorecord" />
                 <meta name="application-name" content="Restorecord" />
             </Head>
-            <Script id="tp" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: `
-                    (function(w,d,s,r,n){w.TrustpilotObject=n;w[n]=w[n]||function(){(w[n].q=w[n].q||[]).push(arguments)};
-                    a=d.createElement(s);a.async=1;a.src=r;a.type='text/java'+s;f=d.getElementsByTagName(s)[0];
-                    f.parentNode.insertBefore(a,f)})(window,document,'script', 'https://invitejs.trustpilot.com/tp.min.js', 'tp');
-                    tp('register', 'XTDXMBOXirXRukvr');
-            ` }} />
             <QueryClientProvider client={queryClient}>
                 <TokenProvider>
                     <Component {...pageProps} />
