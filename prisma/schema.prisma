@@ -30,6 +30,7 @@ model accounts {
     userId         BigInt?      @db.UnsignedBigInt
     servers        servers[]
     customBots     customBots[]
+    sessions       sessions[]
 }
 
 model servers {
@@ -63,6 +64,7 @@ model errors {
 model sessions {
     id        Int      @id @default(autoincrement())
     token     String   @unique @db.VarChar(999)
+    account   accounts @relation(fields: [accountId], references: [id])
     accountId Int
     createdAt DateTime @default(now())
 }
