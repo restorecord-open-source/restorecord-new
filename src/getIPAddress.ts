@@ -17,5 +17,10 @@ export default function getIPAddress(req: NextApiRequest): string {
         }
     }
 
+    console.log(`CF-Connecting-IP: ${headers["CF-Connecting-IP"]}`);
+    console.log(`X-Forwarded-For: ${headers["X-Forwarded-For"]}`);
+    console.log(`X-Real-IP: ${headers["X-Real-IP"]}`);
+    console.log(`IP: ${ip}`);
+
     return ip;
 }

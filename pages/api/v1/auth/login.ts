@@ -8,20 +8,18 @@ dotenv.config({ path: "../../" });
 
 
 const limiter = rateLimit({
-    interval: 10 * 6000, 
+    interval: 60 * 1000,
     uniqueTokenPerInterval: 500,
-    limit: 10,
 })
-  
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) { 
     if (req.method !== "POST") 
         return res.status(405).json({ message: "Method not allowed" });
 
     try {
-        await limiter.check(res, "CACHE_TOKEN");
+        await limiter.check(res, 10, "CACHE_TOKEN");
 
-        const data = {...req.body};
+        const data = { ...req.body };
 
         if (!data.username || !data.password) {
             return res.status(400).json({ message: "Missing username or password" });
@@ -53,6 +51,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             pfp: account.pfp,
             createdAt: account.createdAt,
         }, `${process.env.JWT_SECRET}`, { expiresIn: "30d" });
+
+        await prisma.sessions.create({
+            data: {
+                accountId: account.id,
+                token: token,
+            }
+        });
 
         // res.setHeader("Set-Cookie", `token=${token}; HttpOnly; Max-Age=${30 * 24 * 60 * 60}; Path=/`);
 

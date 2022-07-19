@@ -4,9 +4,8 @@ import rateLimit from "../../../src/rate-limit";
 import { prisma } from "../../../src/db";
 
 const limiter = rateLimit({
-    interval: 10 * 1000, 
+    interval: 60 * 1000,
     uniqueTokenPerInterval: 500,
-    limit: 15,
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -14,12 +13,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         switch (req.method) {
         case "GET":
             try {
-                // await limiter.check(res, "CACHE_TOKEN");
+                await limiter.check(res, 60, "CACHE_TOKEN");
                 
                 const token = req.headers.authorization as string;
                 const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
 
                 if (!valid) return res.status(400).json({ success: false });
+
+                const sess = await prisma.sessions.findMany({
+                    where: {
+                        accountId: valid.id,
+                    }
+                }); 
+
+                if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
 
                 prisma.news.findMany({
                     orderBy: {
@@ -30,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 });
             }
             catch (err: any) {
-                if (res.getHeader("X-RateLimit-Remaining") === "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
+                if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 if (err?.name === "" || err?.name === "JsonWebTokenError") return res.status(400).json({ success: false, message: "User not logged in" }); 
                 return res.status(400).json({ success: false, message: "Something went wrong" });
             }

@@ -118,14 +118,12 @@ export default function DashSettings({ user }: any) {
                                             <p className="font-normal text-gray-400">{item.description}</p>
                                             <div className="mb-3 font-normal">
                                                 Verification URL(s)
-                                                <p className="text-sky-400 cursor-pointer hover:text-sky-600 transition-all" onClick={() => {
-                                                    navigator.clipboard.writeText(`${window.location.origin}/verify/${encodeURIComponent(item.name)}`);
-                                                    functions.ToastAlert("Copied to clipboard", "success");
-                                                }}>{window.location.origin}/verify/{encodeURIComponent(item.name)}</p>
-                                                <p className="text-sky-400 cursor-pointer hover:text-sky-600 transition-all" onClick={() => {
-                                                    navigator.clipboard.writeText(`${window.location.origin}/verify/${encodeURIComponent(item.guildId)}`);
-                                                    functions.ToastAlert("Copied to clipboard", "success");
-                                                }}>{window.location.origin}/verify/{encodeURIComponent(item.guildId)}</p>
+                                                <p>
+                                                    <a target="_blank" rel="noreferrer" href={`${window.location.origin}/verify/${encodeURIComponent(item.name)}`} className="text-sky-400 cursor-pointer hover:text-sky-600 transition-all">{window.location.origin}/verify/{encodeURIComponent(item.name)}</a>
+                                                </p>
+                                                <p>
+                                                    <a target="_blank" rel="noreferrer" href={`${window.location.origin}/verify/${encodeURIComponent(item.guildId)}`} className="text-sky-400 cursor-pointer hover:text-sky-600 transition-all">{window.location.origin}/verify/{encodeURIComponent(item.guildId)}</a>
+                                                </p>
                                             </div>
                                             <hr className="border-b border-gray-700" />
                                             <div className="flex justify-between items-center mt-4">
@@ -209,9 +207,9 @@ export default function DashSettings({ user }: any) {
                                     </div>
                                     <div className="grid gap-6 grid-cols-2">
                                         <div>
-                                            <label htmlFor="guildId" className="block mb-2 text-sm font-medium text-gray-300">Guild Id</label>
+                                            <label htmlFor="guildId" className="block mb-2 text-sm font-medium text-gray-300">Server Id</label>
                                             <div className="relative mb-6">
-                                                <input onChange={handleChange} required name="guildId" type="text" id="guildId" className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" pattern="[0-9]{17-18}" placeholder="Guild Id" />
+                                                <input onChange={handleChange} required name="guildId" type="text" id="guildId" className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" pattern="[0-9]{17-18}" placeholder="Server Id" />
                                             </div>
                                         </div>
                                         <div>

@@ -18,10 +18,18 @@ export default function Footer() {
                     </a>
                 </li>
                 <li className="mx-2 sm:mx-0">
-                    <Link className="md:pr-4 md:pl-4 pr-1 text-gray-200" href="/terms">Terms</Link>
+                    <Link href="/terms">
+                        <a className="md:pr-4 md:pl-4 pr-1 text-gray-200">
+                            Terms
+                        </a>
+                    </Link>
                 </li>
                 <li className="mx-2 sm:mx-0">
-                    <Link className="md:pr-4 md:pl-4 pr-1 text-gray-200" href="/privacy">Privacy</Link>
+                    <Link href="/privacy">
+                        <a className="md:pr-4 md:pl-4 pr-1 text-gray-200">
+                            Privacy
+                        </a>
+                    </Link>
                 </li>
             </ul>
 

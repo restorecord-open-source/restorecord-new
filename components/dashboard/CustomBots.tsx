@@ -47,7 +47,7 @@ export default function DashCustomBot({ user }: any) {
                 }
                 else {
                     functions.ToastAlert(res.message, "success");
-                    router.push(`/dashboard/custombots`);
+                    document.location.reload();
                 }
             })
             .catch(err => {
@@ -110,7 +110,7 @@ export default function DashCustomBot({ user }: any) {
                                             <div className="flex justify-between items-center mt-4">
                                                 <div></div>
                                                 <div className="flex items-center">
-                                                    <button className="btn" onClick={() => { router.push(`https://discord.com/api/oauth2/authorize?client_id=${item.clientId}&permissions=8&scope=applications.commands%20bot%20identify`) }}>
+                                                    <button className="btn" onClick={() => { router.push(`https://discord.com/api/oauth2/authorize?client_id=${item.clientId}&permissions=8&scope=bot`) }}>
                                                         Invite
                                                     </button>
                                                     {/* <button className="btn" onClick={() => { router.push(`/dashboard/settings/${item.clientId}`) }}>
@@ -146,7 +146,7 @@ export default function DashCustomBot({ user }: any) {
                                         e.preventDefault();
                                         navigator.clipboard.writeText(`${window.location.origin}/api/callback`);
                                         functions.ToastAlert("Copied to clipboard", "success");
-                                    }}>{window.location.origin}/api/callback</button> <button className="text-xs opacity-30 hover:opacity-100 ease-linear transition-all" onClick={(e) => {
+                                    }}>{window.location.origin}/api/callback</button> <button className="text-black font-bold ease-linear transition-all" onClick={(e) => {
                                         e.preventDefault();
                                         window.open(`https://docs.restorecord.com/guides/create-a-custom-bot/#setup-oauth2-redirect`, "_blank");
                                     }}>(Tutorial)</button></div>

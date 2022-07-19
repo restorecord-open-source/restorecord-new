@@ -88,7 +88,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 refreshToken: data.refresh_token,
                                 ip: IPAddr,
                                 username: account.username + "#" + account.discriminator,
-                                avatar: account.avatar,
+                                avatar: account.avatar ? account.avatar : (account.discriminator as any % 5).toString(),
                             },
                         });
                     } else {
@@ -101,7 +101,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 refreshToken: data.refresh_token,
                                 ip: IPAddr,
                                 username: account.username + "#" + account.discriminator,
-                                avatar: account.avatar,
+                                avatar: account.avatar ? account.avatar : (account.discriminator as any % 5).toString(),
                                 createdAt: new Date(),
                             },
                         });

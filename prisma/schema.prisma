@@ -18,7 +18,7 @@ model accounts {
     email          String       @db.LongText()
     password       String       @db.LongText()
     role           String?      @default("free")
-    pfp            String       @default("https://i.imgur.com/w65Dpnw.png")
+    pfp            String       @default("https://cdn.restorecord.com/logo512.png")
     banned         Boolean      @default(false)
     twoFactor      Boolean      @default(false)
     googleAuthCode String?
@@ -57,6 +57,13 @@ model errors {
     id        Int      @id @default(autoincrement())
     code      String   @unique
     message   String   @db.LongText()
+    createdAt DateTime @default(now())
+}
+
+model sessions {
+    id        Int      @id @default(autoincrement())
+    token     String   @unique @db.VarChar(999)
+    accountId Int
     createdAt DateTime @default(now())
 }
 

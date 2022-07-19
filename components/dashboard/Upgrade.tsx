@@ -49,9 +49,20 @@ export default function DashUpgrade({ user }: any) {
                                 ))}
                             </ul>
 
-                            <a href={`${subscription.name.includes("Free") ? "#" : `https://shop.restorecord.com/product/${subscription.name}`}`} target="_blank" rel="noopener noreferrer" className={`${subscription.name.includes("Free") ? "cursor-not-allowed" : ""} bg-indigo-600 border-indigo-600 border block w-full rounded-lg p-3 hover:bg-indigo-700 text-white transition-all`}>
+                            {/* show all subscription types if user.role == subscription.name then disable the button */}
+                            {user.role.toLowerCase() === subscription.name.toLowerCase() ? (
+                                <button className={`cursor-not-allowed bg-indigo-800 border-indigo-800 border block w-full rounded-lg p-3 text-white transition-all`}>
+                                    Current
+                                </button>
+                            ) : (
+                                <a href={`${subscription.name.includes("Free") ? "#" : `https://shop.restorecord.com/product/${subscription.name}`}`} target="_blank" rel="noopener noreferrer" className={`${subscription.name.includes("Free") ? "cursor-not-allowed" : ""} bg-indigo-600 border-indigo-600 border block w-full rounded-lg p-3 hover:bg-indigo-700 text-white transition-all`}>
+                                    Purchase
+                                </a> 
+                            )}
+
+                            {/* <a href={`${subscription.name.includes("Free") ? "#" : `https://shop.restorecord.com/product/${subscription.name}`}`} target="_blank" rel="noopener noreferrer" className={`${subscription.name.includes("Free") ? "cursor-not-allowed" : ""} bg-indigo-600 border-indigo-600 border block w-full rounded-lg p-3 hover:bg-indigo-700 text-white transition-all`}>
                                 Select Plan
-                            </a>
+                            </a> */}
                         </div>
                     ))}
                 </div>

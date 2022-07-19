@@ -1,9 +1,7 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Toaster } from "react-hot-toast";
-import { useQuery } from "react-query";
 import functions from "../../src/functions";
-import getServer from "../../src/getServer";
 import { useToken } from "../../src/token";
 
 export default function DashServerSettings({ user, id }: any) {
@@ -125,7 +123,7 @@ export default function DashServerSettings({ user, id }: any) {
                                     </div>
                                     <div className="grid gap-6 grid-cols-2">
                                         <div>
-                                            <label htmlFor="guildId" className="block mb-2 text-sm font-medium text-gray-300">Guild Id</label>
+                                            <label htmlFor="guildId" className="block mb-2 text-sm font-medium text-gray-300">Server Id</label>
                                             <div className="relative mb-6">
                                                 <input onChange={handleChange} required placeholder={server.guildId} name="guildId" type="text" id="guildId" className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"/>
                                             </div>
