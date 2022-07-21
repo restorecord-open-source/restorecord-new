@@ -1,6 +1,6 @@
 import { verify } from "jsonwebtoken";
 import { NextApiRequest, NextApiResponse } from "next";
-import { prisma } from "../../src/db";
+import { prisma } from "../../../src/db";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== "GET") return res.status(405).json({ message: "Method not allowed" });
@@ -8,7 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const token = req.headers.authorization as string;
     const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
 
-    if (!valid) return res.status(400).json({ success: false });
+    if (!valid) return res.status(400).json({ success: false, message: "Invalid Token" });
 
     const sess = await prisma.sessions.findMany({
         where: {
@@ -24,5 +24,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
     });
 
-    return res.redirect("/");
+    return res.status(200).json({ success: true, message: "Logged out" });
 }

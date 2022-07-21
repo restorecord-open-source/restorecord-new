@@ -41,7 +41,7 @@ model servers {
     guildId     BigInt     @unique @db.UnsignedBigInt
     roleId      BigInt     @unique @db.UnsignedBigInt
     redirectUrl String?
-    picture     String?    @default("https://i.imgur.com/w65Dpnw.png")
+    picture     String?    @default("https://cdn.restorecord.com/logo512.png")
     vpncheck    Boolean    @default(false)
     webhook     String?
     bgImage     String?

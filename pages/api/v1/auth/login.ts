@@ -43,14 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         if (!isValid) return res.status(400).json({ message: "Some Credentials are incorrect" });
 
-        const token = sign({
-            id: account.id,
-            username: account.username,
-            email: account.email,
-            role: account.role,
-            pfp: account.pfp,
-            createdAt: account.createdAt,
-        }, `${process.env.JWT_SECRET}`, { expiresIn: "30d" });
+        const token = sign({ id: account.id, }, `${process.env.JWT_SECRET}`, { expiresIn: "30d" });
 
         await prisma.sessions.create({
             data: {

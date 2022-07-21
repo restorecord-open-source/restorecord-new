@@ -59,18 +59,16 @@ export default function DashUpgrade({ user }: any) {
                                                 <Image loading="lazy" src={`https://cdn.discordapp.com/avatars/${item.userId}/${item.avatar}?size=128`} className="w-10 h-10 rounded-full border-2 border-indigo-600" alt="Profile Picture" width={64} height={64} />
                                             ) : (
                                                 <Image loading="lazy" src={`https://cdn.discordapp.com/embed/avatars/${item.avatar}.png`} className="w-10 h-10 rounded-full border-2 border-indigo-600" alt="Profile Picture" width={64} height={64} />
-                                            )
-                                            }
+                                            )}
                                             <h5 className="ml-2 text-2xl font-bold tracking-tight text-white flex justify-center items-center">{item.username}</h5>
                                         </div>
-                                        {/* <p className="font-normal text-gray-400">IP Address <span className="blur-sm hover:blur-0 transition-all">{item.ip}</span></p> */}
                                         <hr className="border-b border-gray-700" />
                                         <div className="flex justify-between items-center mt-4">
                                             <div className="flex items-center">
                                                 <svg className="h-6 w-6 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                                 <span className="ml-2 text-sm text-gray-500">{new Date(item.createdAt).toLocaleString()}</span>
                                                 <span style={{borderRight: "2px solid #374151", color: "transparent", marginLeft: "0.5rem"}}>​</span>
-                                                <span className="ml-2 text-sm text-gray-500">{item.guildName} ({item.guildId})</span>
+                                                <span className="ml-2 text-sm text-gray-500">{item.guildName} ({item.guildId}) {(item.ip && !(item.ip.includes("127.0.0.1") || item.ip.includes("::1"))) && ( <p className="font-normal text-gray-500">IP Address <span className="blur-[0.2rem] hover:blur-0 transition-all">{item.ip}</span></p>)}</span>
                                             </div>
                                         </div>
                                     </div>

@@ -14,13 +14,21 @@ export default function DashBoard({ user }: any) {
 
     const { data, isError, isLoading } = useQuery('news', async () => await getNews({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
-    }), { retry: false,  refetchOnWindowFocus: false });
+    }), { retry: false });
 
     const { data: data2, isError: isError2, isLoading: isLoading2 } = useQuery('members', async () => await getMembers({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
-    }), { retry: false,  refetchOnWindowFocus: false });
+    }), { retry: false });
 
-    if (isError || isError2 || isLoading || isLoading2) {
+    if (isLoading || isLoading2) {
+        return (
+            <>
+                <span className="text-white">Loading...</span>
+            </>
+        )
+    }
+
+    if (isError || isError2) {
         functions.ToastAlert("Something went wrong.", "error")
         return (
             <>
@@ -195,7 +203,7 @@ export default function DashBoard({ user }: any) {
                             Recent Activity
                         </h2>
                         <p className="text-gray-500 text-base leading-tight mb-6">
-                            Last 3 verified members.
+                            Last {data2.members.length > 3 ? 3 : data2.members.length} verified members.
                         </p>
 
                         {Array.isArray(data2.members) && data2.members.map((item: any) => {
@@ -222,11 +230,13 @@ export default function DashBoard({ user }: any) {
                             );
                         })}
 
-                        <Link href="/dashboard/members">
-                            <button className=" bg-indigo-600 border-indigo-600 border block w-full rounded-lg p-3 hover:bg-indigo-700 text-white transition-all">
-                                Show More
-                            </button>
-                        </Link>
+                        {Array.isArray(data2.members) && data2.members.length > 3 && (
+                            <Link href="/dashboard/members">
+                                <button className=" bg-indigo-600 border-indigo-600 border block w-full rounded-lg p-3 hover:bg-indigo-700 text-white transition-all">
+                                    Show More
+                                </button>
+                            </Link>
+                        )}
                     </div>
                 </div>
 

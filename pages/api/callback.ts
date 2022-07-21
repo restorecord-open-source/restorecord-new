@@ -38,7 +38,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
             },
         });
 
-        exchange(code as string, "https://restorecord.com/api/callback", customBotInfo?.clientId, customBotInfo?.botSecret).then(async (data) => {
+        exchange(code as string, "https://beta.restorecord.com/api/callback", customBotInfo?.clientId, customBotInfo?.botSecret).then(async (data) => {
            
             if (!data.error) {
                 let account = data.access_token ? await resolveUser(data.access_token) : null;

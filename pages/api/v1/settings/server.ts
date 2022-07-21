@@ -35,11 +35,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 
                 if (!valid) return res.status(400).json({ success: false, message: "Invalid Token" });
 
-                const sess = await prisma.sessions.findMany({
-                    where: {
-                        accountId: valid.id,
-                    }
-                }); 
+                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, } });
+                const account = await prisma.accounts.findFirst({ where: { id: valid.id, } });
 
                 if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
 
@@ -57,6 +54,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 if (server?.name.toLowerCase() === data.serverName.toLowerCase()) return res.status(400).json({ success: false, message: "Server name is already in use" });
                 if (server?.guildId === BigInt(data.guildId)) return res.status(400).json({ success: false, message: "Guild ID is already in use" });
                 if (server?.roleId === BigInt(data.roleId)) return res.status(400).json({ success: false, message: "Role ID is already in use" });
+
+                const accountServers = await prisma.servers.findMany({ where: { ownerId: valid.id, } });
+
+                if (account?.role === "free" && accountServers.length >= 1) 
+                    return res.status(400).json({ success: false, message: "You can't have more than 1 server." });
+                if (account?.role === "premium" && accountServers.length >= 5)
+                    return res.status(400).json({ success: false, message: "You can't have more than 5 servers." });
 
                 const newServer = await prisma.servers.create({
                     data: {
@@ -107,11 +111,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 
                 if (!valid) return res.status(400).json({ success: false, message: "Invalid Token" });
 
-                const sess = await prisma.sessions.findMany({
-                    where: {
-                        accountId: valid.id,
-                    }
-                }); 
+                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, } }); 
 
                 if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
 

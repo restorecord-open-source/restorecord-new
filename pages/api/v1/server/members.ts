@@ -20,11 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 if (!valid) return res.status(400).json({ success: false });
 
-                const sess = await prisma.sessions.findMany({
-                    where: {
-                        accountId: valid.id,
-                    }
-                }); 
+                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, } }); 
 
                 if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
 
@@ -59,7 +55,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                         userId: member.userId.toString(),
                                         username: member.username,
                                         avatar: member.avatar,
-                                        ip: member.ip,
+                                        ip: account.role !== "free" ? member.ip : null,
                                         createdAt: member.createdAt,
                                         guildId: member.guildId.toString(),
                                         guildName: servers.find((server: any) => server.guildId === member.guildId).name,

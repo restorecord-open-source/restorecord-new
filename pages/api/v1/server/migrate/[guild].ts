@@ -22,11 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 
         if (!valid) return res.status(400).json({ success: false });
 
-        const sess = await prisma.sessions.findMany({
-            where: {
-                accountId: valid.id,
-            }
-        }); 
+        const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, } }); 
 
         if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
 
@@ -197,9 +193,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             // .finally(() => {
             //     return res.status(200).json({ success: true, message: `Successfully pulled ${succPulled}/${members.length} members` });
             // });
-                
-                
 
+            
         return res.status(200).json({ success: true, message: `Started Pull Process` });
     }
     catch (err: any) {
