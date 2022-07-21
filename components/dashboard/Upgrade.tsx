@@ -1,7 +1,11 @@
+
+import '@fortawesome/fontawesome-svg-core/styles.css';
+import { config } from '@fortawesome/fontawesome-svg-core';
+config.autoAddCss = false;
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/router";
 import { useToken } from "../../src/token";
 import { Toaster } from "react-hot-toast";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import SubscriptionList from "../../src/SubscriptionList";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 
