@@ -50,16 +50,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 if (bot?.botToken.toLowerCase() === data.botToken.toLowerCase()) return res.status(400).json({ success: false, message: "Bot Token is already in use" });
 
 
-                const botData = await axios.get(`https://discordapp.com/api/users/@me`, {
+                const botData = await axios.get(`https://discord.com/api/users/@me`, {
                     headers: {
                         Authorization: `Bot ${data.botToken}`,
                     },
                     validateStatus: () => true,
                 });
 
-                if (botData.status !== 200) return res.status(400).json({ success: false, message: "Invalid Bot Token" });
+                if (botData.status != 200) return res.status(400).json({ success: false, message: "Invalid Bot Token" });
 
-                if (botData.data.id !== data.clientId) return res.status(400).json({ success: false, message: "Client Id does not match the Bots Client Id" });
+                if (botData.data.id != data.clientId) return res.status(400).json({ success: false, message: "Client Id does not match the Bots Client Id" });
 
                 const accountBot = await prisma.customBots.findMany({
                     where: {
@@ -149,14 +149,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 }
 
 
-                const botData = await axios.get(`https://discordapp.com/api/users/@me`, {
+                const botData = await axios.get(`https://discord.com/api/users/@me`, {
                     headers: {
                         Authorization: `Bot ${data.botToken}`,
                     },
                     validateStatus: () => true,
                 });
 
-                if (botData.status !== 200) return res.status(400).json({ success: false, message: "Invalid Bot Token" });
+                if (botData.status != 200) return res.status(400).json({ success: false, message: "Invalid Bot Token" });
 
                 const bot = await prisma.customBots.findFirst({
                     where: {

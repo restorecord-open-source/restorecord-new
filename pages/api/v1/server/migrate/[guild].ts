@@ -121,6 +121,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             member.userId.toString(), member.id, guildId.toString(), 
                             bot?.botToken, server.roleId, member.refreshToken,
                             bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
+                        throw new Error("Missing permissions https://docs.restorecord.com/troubleshooting/missing-permission");
 
                         // refreshToken(member.refreshToken, bot?.clientId.toString(), bot?.botSecret).then(async (resp) => {
                         //     if (resp.data.access_token && resp.data.refresh_token) {
