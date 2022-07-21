@@ -76,7 +76,7 @@ export default function Verify({ status, err }: any) {
                                 <>
                                 </>
                             ) : (
-                                <a href={`https://discord.com/oauth2/authorize?client_id=${data.server.clientId}&redirect_uri=https://reestorecord.com/api/callback&response_type=code&scope=identify+guilds.join&state=${data.server.guildId}&prompt=none`}>
+                                <a href={`https://discord.com/oauth2/authorize?client_id=${data.server.clientId}&redirect_uri=https://restorecord.com/api/callback&response_type=code&scope=identify+guilds.join&state=${data.server.guildId}&prompt=none`}>
                                     <button className="focus:ring-4 sm:font-medium font-bold rounded-lg sm:text-sm text-xl px-5 py-2.5 mr-2 mb-2 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-indigo-800 text-white transition-all">
                                         Verify
                                     </button>
