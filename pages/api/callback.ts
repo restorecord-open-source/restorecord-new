@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "../../src/db";
-import getIPAddress from "../../src/getIPAddress";
+import { getIPAddress } from "../../src/getIPAddress";
 import { addMember, addRole, exchange, resolveUser } from "../../src/Migrate";
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
