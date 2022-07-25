@@ -47,7 +47,7 @@ export default function NavBar() {
     }, []);
 
     return (
-        <header className="header sticky top-0 z-10 flex w-full items-center justify-between py-5 border-b border-slate-800 backdrop-filter backdrop-blur-lg bg-opacity-30 transition-all">
+        <header className="header sticky top-0 z-10 md:flex w-full items-center justify-between py-5 border-b border-slate-800 backdrop-filter backdrop-blur-lg bg-opacity-30 transition-all">
             <div className="logo mx-12 xl:mx-32 hidden md:block cursor-pointer">
                 <Link href="/">
                     <h2 className="text-gray-200 font-bold text-xl">Restore<span className="text-indigo-600">Cord</span></h2>
@@ -55,24 +55,22 @@ export default function NavBar() {
             </div>
 
             <div className="md:hidden mx-8">
-                <div className="flow-root">
-                    <div className="cursor-pointer">
+                <div className="flex flex-row">
+                    <div className="cursor-pointer flex-1">
                         <Link href="/">
                             <h2 className="text-gray-200 font-bold text-xl md:hidden">Restore<span className="text-indigo-600">Cord</span></h2>
                         </Link>
                     </div>
-                    <div className={styles.mobileNavWrapper}>
-                        <Link href={button.href}>
-                            <button className={styles.mobileNavButton}>
-                                {button.text}
-                            </button>
-                        </Link>
-                    </div>
+                    <Link href={button.href}>
+                        <button className="bg-indigo-700 hover:bg-indigo-800 focus:ring-4 focus:ring-indigo-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-indigo-600 dark:hover:bg-indigo-700 focus:outline-none dark:focus:ring-indigo-800 text-white transition-all">
+                            {button.text}
+                        </button>
+                    </Link>
                 </div>
 
                 <div x-show="showMenu">
-                    <nav className="navbar mb-0 flex flex-col" style={{ paddingInlineStart: "40px" }}>
-                        <ul className="flex gap-1 space-x-0 sxl:space-x-6 sx:space-x-12 smx:space-x-20 mdx:space-x-32 transition-all">
+                    <nav className="flex flex-col navbar mb-0 items-center">
+                        <ul className="flex gap-4 transition-all">
                             <li className="font-semibold text-slate-200 hover:text-gray-400 transition-all">
                                 <Link href="/">Home</Link>
                             </li>

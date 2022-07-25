@@ -4,7 +4,7 @@ export default function Document() {
     return (
         <Html className="scroll-smooth" style={{ overflow: "overlay" }}>
             <Head />
-            <body className="antialiased bg-slate-900">
+            <body className="antialiased dark:bg-slate-900">
                 <Main />
                 <NextScript />
             </body>

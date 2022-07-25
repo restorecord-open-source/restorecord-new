@@ -35,7 +35,7 @@ const SubscriptionList: Subscription[] = [
                 name: "proxied",
                 value: "Proxied Requests",
                 description: "All requests sent to Discord are anonymous and proxied",
-                icon: faX,
+                icon: faCheck,
             },
             {
                 name: "antiVPN",

@@ -87,7 +87,7 @@ export default function DashServerSettings({ user, id }: any) {
     return (
         <>
             <Toaster />
-            <div className="sm:mr-28 sm:ml-32 sm:mt-12 ml-6 mr-8 mt-8 w-full">
+            <div className="xl:mr-28 sm:ml-32 sm:mt-12 ml-6 mr-8 mt-10 w-full transition-all">
                 <div className="col-span-12 md:col-span-8 mb-4">
                     <h1 className="text-white sm:text-4xl text-2xl font-bold leading-tight">
                         Change Server Settings

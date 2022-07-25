@@ -23,7 +23,40 @@ export default function DashBoard({ user }: any) {
     if (isLoading || isLoading2) {
         return (
             <>
-                <span className="text-white">Loading...</span>
+                <div className="xl:mr-28 sm:ml-32 sm:mt-12 ml-6 mr-8 mt-10 w-full transition-all animate-pulse shadow">
+                    <div className="col-span-12 md:col-span-8 mb-4">
+                        <div className="h-3.5 rounded-full bg-gray-600 w-36 mb-2"></div>
+                        <div className="h-2.5 rounded-full bg-gray-800 w-72 mb-2"></div>
+                    </div>
+                    <div className="p-4 space-y-4 max-w-screen rounded-lg border border-gray-800 divide-y divide-gray-800">
+                        <div className="mb-6 p-6 rounded-lg border shadow-md bg-gray-800 border-gray-700">
+                            <div className="h-4 rounded-full bg-gray-500 w-40 mb-4"></div>
+                            <div className="w-full">
+                                <div className="h-2 rounded-full bg-gray-700 max-w-[1280px] mb-2.5"></div>
+                                <div className="h-2 rounded-full bg-gray-600 max-w-[720px] mb-2.5"></div>
+                                <div className="h-2 rounded-full bg-gray-600 max-w-[540px] mb-2.5"></div>
+                                <div className="h-2 rounded-full bg-gray-700 max-w-[660px] mb-2.5"></div>
+                                <div className="h-2 rounded-full bg-gray-600 max-w-[570px] mb-2.5"></div>
+                                <div className="h-2 rounded-full bg-gray-700 max-w-[1180px] mb-2.5"></div>
+                                <div className="h-2 rounded-full bg-gray-600 max-w-[920px] mb-2.5"></div>
+                                <div className="h-2 rounded-full bg-gray-700 max-w-[1240px] mb-2.5"></div>
+                                <div className="h-2 rounded-full bg-gray-700 max-w-[670px] mb-2.5"></div>
+                                <div className="h-2 rounded-full bg-gray-600 max-w-[820px] mb-2.5"></div>
+                                <div className="h-2 rounded-full bg-gray-700 max-w-[490px] mb-2.5"></div>
+                                <div className="h-2 rounded-full bg-gray-600 max-w-[530px] mb-2.5"></div>
+                            </div>
+                            <hr className="border-b border-gray-700" />
+                            <div className="flex justify-between items-center mt-4">
+                                <div className="flex items-center">
+                                    <svg className="h-6 w-6 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <div className="ml-2 h-3 rounded-full bg-gray-600 w-44"></div>
+                                    <span style={{borderRight: "2px solid #374151", color: "transparent", marginLeft: "0.5rem"}}>​</span>
+                                    <div className="ml-2 h-3 rounded-full bg-gray-600 w-32"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </>
         )
     }
@@ -32,7 +65,40 @@ export default function DashBoard({ user }: any) {
         functions.ToastAlert("Something went wrong.", "error")
         return (
             <>
-                <span className="text-white">Loading...</span>
+                <div className="xl:mr-28 sm:ml-32 sm:mt-12 ml-6 mr-8 mt-10 w-full transition-all animate-pulse shadow">
+                    <div className="col-span-12 md:col-span-8 mb-4">
+                        <div className="h-3.5 rounded-full bg-gray-600 w-36 mb-2"></div>
+                        <div className="h-2.5 rounded-full bg-gray-800 w-72 mb-2"></div>
+                    </div>
+                    <div className="p-4 space-y-4 max-w-screen rounded-lg border border-gray-800 divide-y divide-gray-800">
+                        <div className="mb-6 p-6 rounded-lg border shadow-md bg-gray-800 border-gray-700">
+                            <div className="h-4 rounded-full bg-gray-500 w-40 mb-4"></div>
+                            <div className="w-full">
+                                <div className="h-2 rounded-full bg-gray-700 max-w-[1280px] mb-2.5"></div>
+                                <div className="h-2 rounded-full bg-gray-600 max-w-[720px] mb-2.5"></div>
+                                <div className="h-2 rounded-full bg-gray-600 max-w-[540px] mb-2.5"></div>
+                                <div className="h-2 rounded-full bg-gray-700 max-w-[660px] mb-2.5"></div>
+                                <div className="h-2 rounded-full bg-gray-600 max-w-[570px] mb-2.5"></div>
+                                <div className="h-2 rounded-full bg-gray-700 max-w-[1180px] mb-2.5"></div>
+                                <div className="h-2 rounded-full bg-gray-600 max-w-[920px] mb-2.5"></div>
+                                <div className="h-2 rounded-full bg-gray-700 max-w-[1240px] mb-2.5"></div>
+                                <div className="h-2 rounded-full bg-gray-700 max-w-[670px] mb-2.5"></div>
+                                <div className="h-2 rounded-full bg-gray-600 max-w-[820px] mb-2.5"></div>
+                                <div className="h-2 rounded-full bg-gray-700 max-w-[490px] mb-2.5"></div>
+                                <div className="h-2 rounded-full bg-gray-600 max-w-[530px] mb-2.5"></div>
+                            </div>
+                            <hr className="border-b border-gray-700" />
+                            <div className="flex justify-between items-center mt-4">
+                                <div className="flex items-center">
+                                    <svg className="h-6 w-6 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <div className="ml-2 h-3 rounded-full bg-gray-600 w-44"></div>
+                                    <span style={{borderRight: "2px solid #374151", color: "transparent", marginLeft: "0.5rem"}}>​</span>
+                                    <div className="ml-2 h-3 rounded-full bg-gray-600 w-32"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </>
         )
     }
@@ -141,7 +207,7 @@ export default function DashBoard({ user }: any) {
     };
 
 
-    if (!user.username || isLoading) {
+    if (!user.username) {
         return (
             <>
                 <span className="text-white">Loading...</span>
@@ -151,7 +217,7 @@ export default function DashBoard({ user }: any) {
 
     return (
         <>
-            <div className="sm:mr-28 sm:ml-32 sm:mt-12 ml-6 mr-8 mt-8 w-full">
+            <div className="xl:mr-28 sm:ml-32 sm:mt-12 ml-6 mr-8 mt-10 w-full transition-all">
                 <div className="col-span-12 md:col-span-8 mb-4">
                     <h1 className="text-white sm:text-4xl text-2xl font-bold leading-tight">
                         Dashboard
@@ -160,32 +226,8 @@ export default function DashBoard({ user }: any) {
                         Latest news, updates, and statistics.
                     </p>
                 </div>
-                <div className="max-w-screen p-4 w-full rounded-lg border shadow-md bg-gray-900 border-gray-800">
-                    <h2 className="text-white sm:text-3xl text-xl font-bold leading-tight mb-4">
-                        Updates
-                    </h2>
-                    {Array.isArray(data.news) && data.news.map((item: any) => {
-                        return (
-                            <>
-                                <div className="mb-6 p-6 rounded-lg border shadow-md bg-gray-800 border-gray-700" key={item.id}>
-                                    <h5 className="mb-2 text-2xl font-bold tracking-tight text-white">{item.title}</h5>
-                                    <p className="mb-3 font-normal text-gray-400 whitespace-pre-line">{item.content}</p>
-                                    <hr className="border-b border-gray-700" />
-                                    <div className="flex justify-between items-center mt-4">
-                                        <div className="flex items-center">
-                                            <svg className="h-6 w-6 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                            <span className="ml-2 text-sm text-gray-500">{new Date(item.createdAt).toUTCString()}</span>
-                                            <span style={{borderRight: "2px solid #374151", color: "transparent", marginLeft: "0.5rem"}}>​</span>
-                                            <span className="ml-2 text-sm text-gray-500">{item.author}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </>
-                        )
-                    })}
-                </div>
-
-                <div className="grid lg:grid-cols-2 grid-cols-1 content-start mt-6 gap-4 pb-24">
+                
+                <div className="grid lg:grid-cols-2 grid-cols-1 content-start mt-6 gap-4 pb-4">
                     <div className="max-w-screen p-4 w-full rounded-lg border shadow-md bg-gray-900 border-gray-800">
                         <h2 className="text-white sm:text-3xl text-xl font-bold leading-tight mb-4">
                             Statistics
@@ -212,21 +254,19 @@ export default function DashBoard({ user }: any) {
                             }
 
                             return (
-                                <>
-                                    <div key={item.userId}>
-                                        <div className="mb-6 p-6 rounded-lg border shadow-md bg-gray-800 border-gray-700">
-                                            <div className="inline-flex">
-                                                {item.avatar.length > 1 ? (
-                                                    <Image loading="lazy" src={`https://cdn.discordapp.com/avatars/${item.userId}/${item.avatar}?size=128`} className="w-10 h-10 rounded-full border-2 border-indigo-600" alt="Profile Picture" width={64} height={64} />
-                                                ) : (
-                                                    <Image loading="lazy" src={`https://cdn.discordapp.com/embed/avatars/${item.avatar}.png`} className="w-10 h-10 rounded-full border-2 border-indigo-600" alt="Profile Picture" width={64} height={64} />
-                                                )
-                                                }
-                                                <h5 className="ml-2 text-2xl font-bold tracking-tight text-white flex justify-center items-center">{item.username}</h5>
-                                            </div>
+                                <div key={item.userId}>
+                                    <div className="mb-6 p-6 rounded-lg border shadow-md bg-gray-800 border-gray-700">
+                                        <div className="inline-flex">
+                                            {item.avatar.length > 1 ? (
+                                                <Image loading="lazy" src={`https://cdn.discordapp.com/avatars/${item.userId}/${item.avatar}?size=128`} className="w-10 h-10 rounded-full border-2 border-indigo-600" alt="Profile Picture" width={64} height={64} />
+                                            ) : (
+                                                <Image loading="lazy" src={`https://cdn.discordapp.com/embed/avatars/${item.avatar}.png`} className="w-10 h-10 rounded-full border-2 border-indigo-600" alt="Profile Picture" width={64} height={64} />
+                                            )
+                                            }
+                                            <h5 className="break-all ml-2 text-2xl font-bold tracking-tight text-white flex justify-center items-center">{item.username}</h5>
                                         </div>
                                     </div>
-                                </>
+                                </div>
                             );
                         })}
 
@@ -239,6 +279,30 @@ export default function DashBoard({ user }: any) {
                         )}
                     </div>
                 </div>
+
+                <div className="max-w-screen p-4 w-full rounded-lg border shadow-md bg-gray-900 border-gray-800">
+                    <h2 className="text-white sm:text-3xl text-xl font-bold leading-tight mb-4">
+                        Updates
+                    </h2>
+                    {Array.isArray(data.news) && data.news.map((item: any) => {
+                        return (
+                            <div className="mb-6 p-6 rounded-lg border shadow-md bg-gray-800 border-gray-700" key={item.id}>
+                                <h5 className="mb-2 text-2xl font-bold tracking-tight text-white">{item.title}</h5>
+                                <p className="break-words mb-3 font-normal text-gray-400 whitespace-pre-line">{item.content}</p>
+                                <hr className="border-b border-gray-700" />
+                                <div className="flex justify-between items-center mt-4">
+                                    <div className="flex items-center">
+                                        <svg className="h-6 w-6 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        <span className="ml-2 text-sm text-gray-500">{new Date(item.createdAt).toUTCString()}</span>
+                                        <span style={{borderRight: "2px solid #374151", color: "transparent", marginLeft: "0.5rem"}}>​</span>
+                                        <span className="ml-2 text-sm text-gray-500">{item.author}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    })}
+                </div>
+
 
 
                 {/* <div className="max-w-screen p-4 mt-4 w-full rounded-lg border shadow-md bg-gray-900 border-gray-800">

@@ -1,6 +1,7 @@
 import { verify } from "jsonwebtoken";
 import { NextApiResponse, NextApiRequest } from "next";
 import { prisma } from "../../../../../src/db";
+import getIPAddress, { getBrowser, getPlatform } from "../../../../../src/getIPAddress";
 import { addMember, addRole, refreshTokenAddDB, shuffle, sleep } from "../../../../../src/Migrate";
 import rateLimit from "../../../../../src/rate-limit";
 
@@ -78,21 +79,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         let succPulled: number = 0;
         const pullingProcess = new Promise<void>(async (resolve, reject) => {
             let membersNew = await shuffle(members);
-            let delay: number = 500;
+            let delay: number = 300;
 
-            for (const member of membersNew) {
-                const server = await prisma.servers.findFirst({
-                    where: {
-                        AND: [
-                            { ownerId: account.id },
-                            { guildId: BigInt(guildId) }
-                        ]
-                    }
-                });
+            await prisma.logs.create({
+                data: {
+                    title: "Started Pulling",
+                    body: `${account.username} started pulling to ${server.name}, ip: ${getIPAddress(req)}, device: ${getPlatform(req.headers["user-agent"] ?? "")} (${getBrowser(req.headers["user-agent"] ?? "")})`,
+                }
+            });
 
-                if (!server) return;
-                if (!server.pulling) return;
-                    
+            for (const member of membersNew) {                    
                 await sleep(delay);
                 console.log(`Adding ${member.username} to ${server.name}`);
                 await addMember(server.guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, [BigInt(server.roleId).toString()]).then(async (resp: any) => {
@@ -117,6 +113,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }
                     switch (resp.status) {
                     case 403:
+                        console.log(resp?.data);
                         refreshTokenAddDB( 
                             member.userId.toString(), member.id, guildId.toString(), 
                             bot?.botToken, server.roleId, member.refreshToken,

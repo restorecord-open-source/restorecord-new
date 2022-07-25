@@ -25,7 +25,7 @@ export default function DashUpgrade({ user }: any) {
         <>
             <Toaster />
 
-            <div className="sm:mr-28 sm:ml-32 sm:mt-12 ml-6 mr-8 mt-8 w-full">
+            <div className="xl:mr-28 sm:ml-32 sm:mt-12 ml-6 mr-8 mt-10 w-full transition-all">
                 <div className="col-span-12 md:col-span-8 mb-4">
                     <h1 className="text-white sm:text-4xl text-2xl font-bold leading-tight">
                         Upgrade
@@ -34,9 +34,9 @@ export default function DashUpgrade({ user }: any) {
                         Upgrade your account to get more features.
                     </p>
                 </div>
-                <div className="grid grid-cols-1 gap-5 lg:grid-cols-3 rounded-lg border shadow-md bg-gray-900 border-gray-800 p-4">
+                <div className="max-w-screen w-full grid grid-cols-1 sm:gap-5 gap-1 lg:grid-cols-3 rounded-lg border shadow-md bg-gray-900 border-gray-800 p-4">
                     {SubscriptionList.map((subscription, index) => (
-                        <div className={`mb-6 p-6 rounded-lg border shadow-md bg-gray-800 border-gray-700 text-center`} key={index}>
+                        <div className={`sm:mb-6 sm:p-6 mb-4 p-4 rounded-lg border shadow-md bg-gray-800 border-gray-700 text-center`} key={index}>
                             <h3 className="font-bold text-2xl mb-5 text-gray-200">{subscription.name}</h3>
 
                             <h5 className="text-5xl text-gray-200 font-bold">

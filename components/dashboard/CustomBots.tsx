@@ -78,7 +78,7 @@ export default function DashCustomBot({ user }: any) {
     return (
         <>
             <Toaster />
-            <div className="sm:mr-28 sm:ml-32 sm:mt-12 ml-6 mr-8 mt-8 w-full">
+            <div className="xl:mr-28 sm:ml-32 sm:mt-12 ml-6 mr-8 mt-10 w-full transition-all">
                 <div className="col-span-12 md:col-span-8 mb-4">
                     <h1 className="text-white sm:text-4xl text-2xl font-bold leading-tight">
                         Custom Bots
@@ -96,30 +96,30 @@ export default function DashCustomBot({ user }: any) {
                                         Your Bots
                                     </h2>
                                 </div>
-                                <button className="btn ml-2" onClick={(e) => {
+                                <button className="sm:ml-2 ml-0 transition-all bg-indigo-700 hover:bg-indigo-800 focus:ring-4 focus:ring-indigo-300 font-medium rounded-lg text-sm sm:px-5 px-0 py-2.5 sm:mr-2 mr-0 mb-2 dark:bg-indigo-600 dark:hover:bg-indigo-700 focus:outline-none dark:focus:ring-indigo-800 text-white" onClick={(e) => {
                                     setcreateNewBot(true);
                                 }}> Create New Bot </button>
                             </div>
                             {user.bots.map((item: any) => {
                                 return (
-                                    <>
-                                        <div className="mb-6 p-6 rounded-lg border shadow-md bg-gray-800 border-gray-700"  key={item.id}>
-                                            <h5 className="mb-2 text-2xl font-bold tracking-tight text-white">{item.name}</h5>
-                                            <p className="mb-3 font-normal text-gray-400 whitespace-pre-line">{item.clientId}</p>
-                                            <hr className="border-b border-gray-700" />
-                                            <div className="flex justify-between items-center mt-4">
-                                                <div></div>
-                                                <div className="flex items-center">
-                                                    <button className="btn" onClick={() => { router.push(`https://discord.com/api/oauth2/authorize?client_id=${item.clientId}&permissions=8&scope=bot`) }}>
+                                    <div className="mb-6 p-6 rounded-lg border shadow-md bg-gray-800 border-gray-700"  key={item.id}>
+                                        <h5 className="mb-2 text-2xl font-bold tracking-tight text-white">{item.name}</h5>
+                                        <p className="mb-3 font-normal text-gray-400 whitespace-pre-line">{item.clientId}</p>
+                                        <hr className="border-b border-gray-700" />
+                                        <div className="sm:flex justify-between items-center mt-4">
+                                            <div></div>
+                                            <div className="flex items-center flex-col sm:flex-row">
+                                                <button className="w-full sm:w-auto btn">
+                                                    <a href={`https://discord.com/api/oauth2/authorize?client_id=${item.clientId}&permissions=8&scope=bot`} target="_blank" rel="noreferrer">
                                                         Invite
-                                                    </button>
-                                                    <button className="btn" onClick={() => { router.push(`/dashboard/custombots/${item.clientId}`) }}>
-                                                        Edit
-                                                    </button>
-                                                </div>
+                                                    </a>
+                                                </button>
+                                                <button className="w-full sm:w-auto btn" onClick={() => { router.push(`/dashboard/custombots/${item.clientId}`) }}>
+                                                    Edit
+                                                </button>
                                             </div>
                                         </div>
-                                    </>
+                                    </div>
                                 )
                             })}
                         </>

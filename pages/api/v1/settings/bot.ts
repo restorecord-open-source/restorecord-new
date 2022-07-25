@@ -138,14 +138,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     },
                 });
 
-                if (data.newBotName !== data.botName) { 
-                    if (multipleCheck?.name.toLowerCase() == data.botName.toLowerCase()) return res.status(400).json({ success: false, message: "Bot name is already in use" }); 
-                }
-                if (data.newBotSecret !== data.botSecret) {
-                    if (multipleCheck?.botSecret === data.botSecret) return res.status(400).json({ success: false, message: "Bot Secret is already in use" });
-                }
-                if (data.newBotToken !== data.botToken) {
-                    if (multipleCheck?.botToken === data.botToken) return res.status(400).json({ success: false, message: "Bot Token is already in use" });
+                if (multipleCheck) {
+                    if (data.newBotName !== data.botName) { 
+                        if (multipleCheck.name.toLowerCase() === data.newBotName.toLowerCase()) return res.status(400).json({ success: false, message: "Bot name is already in use" }); 
+                    }
+                    if (data.newBotSecret !== data.botSecret) {
+                        if (multipleCheck.botSecret === data.newBotSecret) return res.status(400).json({ success: false, message: "Bot Secret is already in use" });
+                    }
+                    if (data.newBotToken !== data.botToken) {
+                        if (multipleCheck.botToken === data.newBotToken) return res.status(400).json({ success: false, message: "Bot Token is already in use" });
+                    }
                 }
 
 

@@ -35,10 +35,10 @@ function MyApp({ Component, pageProps }: any) {
         <>
             <Head>
                 <title>Restorecord</title>
-                <meta name="description" content="RestoreCord is a Recovery Service, it can Backup and Restore your Servers Members, Channels, Categorys, Roles and much more" />
+                <meta name="description" content="RestoreCord is a Recovery Service, it can Backup and Restore your Servers Members, Channels, Categories, Roles and much more" />
                 <meta name="keywords" content="restorecord, discord, backup, restore, backup service, savecord, letoa, restorebot" />
                 <meta property="og:title" content="RestoreCord - The Recovery Service" />
-                <meta property="og:description" content="RestoreCord is a Recovery Service, it can Backup and Restore your Servers Members, Channels, Categorys, Roles and do much more" />
+                <meta property="og:description" content="RestoreCord is a Recovery Service, it can Backup and Restore your Servers Members, Channels, Categories, Roles and do much more" />
                 <meta property="og:url" content="https://restorecord.com" />
                 <meta name="theme-color" content="#4f46e5" />
                 <meta name="apple-mobile-web-app-status-bar-style" content="#4f46e5" />

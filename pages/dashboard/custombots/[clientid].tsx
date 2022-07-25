@@ -28,9 +28,8 @@ export default function CustomSettings() {
     }
 
     if (!data.username) {
-        router.push("/login") 
+        return router.push("/login") 
     }
-    
 
     return (
         <>

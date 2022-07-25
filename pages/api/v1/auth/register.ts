@@ -3,6 +3,7 @@ import * as bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import { prisma } from "../../../../src/db";
 import { accounts } from "@prisma/client";
+import getIPAddress from "../../../../src/getIPAddress";
 dotenv.config({ path: "../../" });
 
 
@@ -61,6 +62,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             },
         });
 
+        await prisma.logs.create({
+            data: {
+                title: "New Account Created",
+                body: `${account.username} created an account from ${getIPAddress(req)}, email: ${account.email}, device: ${getPlatform(req.headers["user-agent"] ?? "")} (${getBrowser(req.headers["user-agent"] ?? "")})`,
+            }
+        });
+
         return res.status(200).json({ 
             success: true,
             message: "Account created successfully",
@@ -70,6 +78,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 role: account.role,
                 pfp: account.pfp,
                 createdAt: account.createdAt,
+                lastIp: getIPAddress(req),
             },
         });
     } catch (err: any) {

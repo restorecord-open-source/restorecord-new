@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import Vouches from "../../../src/randomTP";
 
 export default function TestimonialsSection() {
     return (
@@ -22,6 +23,28 @@ export default function TestimonialsSection() {
             </div>
 
             <div className="cards px-10 mt-16 grid grid-cols-1 gap-5">
+                {/* {Vouches.sort(() => Math.random() - 0.5).slice(0, 3).map((vouch) => {
+                    return (
+                        <div key={vouch.owner.hash} className="card flex justify-between pl-6 pr-6 md:pl-16 md:pr-16 p-5 rounded-lg shadow-lg transition-all hover:shadow-sm bg-slate-800 text-white">
+                            <div>
+                                <h2 className="font-bold text-xl mb-3">{vouch.title}</h2>
+                                <p className="mr-5 mb-3">{vouch.description}</p>
+                                <h6 className="font-bold text-gray-200">
+                                    <a href={`https://www.trustpilot.com/users/${vouch.owner.hash}`}>{vouch.owner.name}</a>
+                                </h6>
+                            </div>
+
+                            <div>
+                                <a href={`https://www.trustpilot.com/users/${vouch.owner.hash}`}>
+                                    <div className="flex items-center justify-center w-12 h-12 font-bold rounded-full select-none text-black bg-cyan-100">
+                                        {vouch.owner.name.split(" ").slice(0, 2).map((name) => name[0])}
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    )
+                })} */}
+                
                 <div className="card flex justify-between pl-6 pr-6 md:pl-16 md:pr-16 p-5 rounded-lg shadow-lg transition-all hover:shadow-sm bg-slate-800 text-white">
                     <div>
                         <h2 className="font-bold text-xl mb-3">Perfect uptime, support and features.</h2>

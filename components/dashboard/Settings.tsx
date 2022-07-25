@@ -82,7 +82,7 @@ export default function DashSettings({ user }: any) {
         <>
             <Toaster />
             
-            <div className="sm:mr-28 sm:ml-32 sm:mt-12 ml-6 mr-8 mt-8 w-full">
+            <div className="xl:mr-28 sm:ml-32 sm:mt-12 ml-6 mr-8 mt-10 w-full transition-all">
                 <div className="col-span-12 md:col-span-8 mb-4">
                     <h1 className="text-white sm:text-4xl text-2xl font-bold leading-tight">
                         Settings
@@ -100,7 +100,7 @@ export default function DashSettings({ user }: any) {
                                         Your Servers
                                     </h2>
                                 </div>
-                                <button className="btn ml-2" onClick={(e) => {
+                                <button className="sm:ml-2 ml-0 transition-all bg-indigo-700 hover:bg-indigo-800 focus:ring-4 focus:ring-indigo-300 font-medium rounded-lg text-sm sm:px-5 px-0 py-2.5 sm:mr-2 mr-0 mb-2 dark:bg-indigo-600 dark:hover:bg-indigo-700 focus:outline-none dark:focus:ring-indigo-800 text-white" onClick={(e) => {
                                     console.log(createNewServer);
                                     setCreateNewServer(true);
                                     console.log(createNewServer);
@@ -109,60 +109,58 @@ export default function DashSettings({ user }: any) {
                             </div>
                             {user.servers.map((item: any) => {
                                 return (
-                                    <>
-                                        <div className="mb-6 p-6 rounded-lg border shadow-md bg-gray-800 border-gray-700" key={item.id}>
-                                            <div className="inline-flex">
-                                                <Image src={item.picture} alt="icon" className="w-10 h-10 rounded-full ring-2 ring-gray-500 p-1" width={48} height={48} loading="lazy" />
-                                                <h5 className="mb-2 ml-2 text-2xl font-bold tracking-tight text-white">{item.name}</h5>
+                                    <div className="mb-6 p-6 rounded-lg border shadow-md bg-gray-800 border-gray-700" key={item.id}>
+                                        <div className="inline-flex">
+                                            <Image src={item.picture} alt="icon" className="w-10 h-10 rounded-full ring-2 ring-gray-500 p-1" width={48} height={48} loading="lazy" />
+                                            <h5 className="mb-2 ml-2 text-2xl font-bold tracking-tight text-white">{item.name}</h5>
+                                        </div>
+                                        <p className="font-normal text-gray-400">{item.description}</p>
+                                        <div className="mb-3 font-normal">
+                                            Verification URL(s)
+                                            <p>
+                                                <a target="_blank" rel="noreferrer" href={`${window.location.origin}/verify/${encodeURIComponent(item.name)}`} className="break-all text-sky-400 cursor-pointer hover:text-sky-600 transition-all">{window.location.origin}/verify/{encodeURIComponent(item.name)}</a>
+                                            </p>
+                                            <p>
+                                                <a target="_blank" rel="noreferrer" href={`${window.location.origin}/verify/${encodeURIComponent(item.guildId)}`} className="break-all text-sky-400 cursor-pointer hover:text-sky-600 transition-all">{window.location.origin}/verify/{encodeURIComponent(item.guildId)}</a>
+                                            </p>
+                                        </div>
+                                        <hr className="border-b border-gray-700" />
+                                        <div className="sm:flex justify-between items-center mt-4">
+                                            <div className="sm:flex hidden items-center">
+                                                <svg className="h-6 w-6 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                <span className="ml-2 text-sm text-gray-500">{new Date(item.createdAt).toUTCString()}</span>
                                             </div>
-                                            <p className="font-normal text-gray-400">{item.description}</p>
-                                            <div className="mb-3 font-normal">
-                                                Verification URL(s)
-                                                <p>
-                                                    <a target="_blank" rel="noreferrer" href={`${window.location.origin}/verify/${encodeURIComponent(item.name)}`} className="text-sky-400 cursor-pointer hover:text-sky-600 transition-all">{window.location.origin}/verify/{encodeURIComponent(item.name)}</a>
-                                                </p>
-                                                <p>
-                                                    <a target="_blank" rel="noreferrer" href={`${window.location.origin}/verify/${encodeURIComponent(item.guildId)}`} className="text-sky-400 cursor-pointer hover:text-sky-600 transition-all">{window.location.origin}/verify/{encodeURIComponent(item.guildId)}</a>
-                                                </p>
-                                            </div>
-                                            <hr className="border-b border-gray-700" />
-                                            <div className="flex justify-between items-center mt-4">
-                                                <div className="flex items-center">
-                                                    <svg className="h-6 w-6 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                                    <span className="ml-2 text-sm text-gray-500">{new Date(item.createdAt).toUTCString()}</span>
-                                                </div>
-                                                <div className="flex items-center">
-                                                    <button className="ml-2 focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-indigo-800 text-white transition-all;" onClick={
-                                                        () => {
-                                                            functions.ToastAlert("Please wait, this may take a while depending on the size of your server.", "info");
-                                                            axios.get(`/api/v1/server/migrate/${item.guildId}`,
-                                                                {
-                                                                    headers: {
-                                                                        "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
-                                                                    },
-                                                                    validateStatus: () => true
-                                                                })
-                                                                .then(res => {
-                                                                    if (!res.data.success) {
-                                                                        functions.ToastAlert(res.data.message, "error");
-                                                                    }
-                                                                    else {
-                                                                        functions.ToastAlert(res.data.message, "success");
-                                                                    }
-                                                                })
-                                                                .catch(err => {
-                                                                    console.log(err);
-                                                                    functions.ToastAlert("", "error");
-                                                                });
-                                                        }
-                                                    }>Pull Members</button>
-                                                    <button className="ml-2 focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-indigo-800 text-white transition-all;" onClick={() => { router.push(`/dashboard/settings/${item.guildId}`)} }>
+                                            <div className="flex items-center flex-col sm:flex-row">
+                                                <button className="w-full sm:w-auto ml-0 sm:ml-2 focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-indigo-800 text-white transition-all" onClick={
+                                                    () => {
+                                                        functions.ToastAlert("Please wait, this may take a while depending on the size of your server.", "info");
+                                                        axios.get(`/api/v1/server/migrate/${item.guildId}`,
+                                                            {
+                                                                headers: {
+                                                                    "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                                },
+                                                                validateStatus: () => true
+                                                            })
+                                                            .then(res => {
+                                                                if (!res.data.success) {
+                                                                    functions.ToastAlert(res.data.message, "error");
+                                                                }
+                                                                else {
+                                                                    functions.ToastAlert(res.data.message, "success");
+                                                                }
+                                                            })
+                                                            .catch(err => {
+                                                                console.log(err);
+                                                                functions.ToastAlert("", "error");
+                                                            });
+                                                    }
+                                                }>Pull Members</button>
+                                                <button className="w-full sm:w-auto ml-0 sm:ml-2 focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-indigo-800 text-white transition-all;" onClick={() => { router.push(`/dashboard/settings/${item.guildId}`)} }>
                                                         Edit
-                                                    </button>
-                                                </div>
+                                                </button>
                                             </div>
                                         </div>
-                                    </>
+                                    </div>
                                 )
                             })}
                         </>

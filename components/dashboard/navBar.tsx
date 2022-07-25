@@ -40,7 +40,6 @@ export default function NavBar({ user }: any) {
 
     return (
         <>
-            {/* burger menu */}
             <FontAwesomeIcon id="menu" className={styles.sideBurgerMenu} icon={faBars} onClick={() => {
                 document.querySelector("#sidebar")?.classList.toggle(styles.sideBarOpen);
                 document.querySelector("#menu")?.classList.toggle(styles.sideBurgerClose);

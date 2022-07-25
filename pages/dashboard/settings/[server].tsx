@@ -12,7 +12,6 @@ export default function Settings() {
     const [ token ]: any = useToken()
     const { server } = router.query;
 
-
     const { data, isError, isLoading } = useQuery('user', async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
     }), { retry: false, refetchOnWindowFocus: false });
@@ -28,9 +27,8 @@ export default function Settings() {
     }
 
     if (!data.username) {
-        router.push("/login") 
+        return router.push("/login") 
     }
-    
 
     return (
         <>

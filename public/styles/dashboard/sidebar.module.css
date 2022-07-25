@@ -16,20 +16,21 @@
 
 .sideBarMainWrapper {
 	z-index: 9999;
-	@apply w-0 sm:w-64 invisible sm:visible;
+	@apply w-0 sm:w-64 hidden sm:block;
 }
 
 .sideBarWrapper {
 	z-index: 9999;
-	@apply fixed sm:w-64 w-72 py-4 px-3 rounded bg-gray-800 min-h-screen max-h-screen h-screen overflow-hidden;
+	@apply left-0 fixed sm:w-64 w-72 py-4 px-3 rounded bg-gray-800 min-h-screen max-h-screen h-screen overflow-hidden;
 }
 
 .sideBarOpen {
-	@apply visible;
+	@apply block;
 }
 
 .sideBurgerMenu {
-	@apply sm:hidden block pt-4 pl-4 w-8 h-8 text-gray-400 focus:text-white;
+	position: absolute;
+	@apply sm:hidden block pt-4 pl-3 w-6 h-6 text-gray-400 focus:text-white;
 }
 
 .sideBurgerMenuClose {
@@ -37,7 +38,7 @@
 }
 
 .sideBurgerClose {
-	@apply hidden;
+	@apply invisible;
 }
 
 .sideBarTitleWrapper {

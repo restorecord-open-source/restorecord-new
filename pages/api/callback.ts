@@ -38,7 +38,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
             },
         });
 
-        exchange(code as string, "https://restorecord.com/api/callback", customBotInfo?.clientId, customBotInfo?.botSecret).then(async (data) => {
+        exchange(code as string, `https://${req.headers.host}/api/callback`, customBotInfo?.clientId, customBotInfo?.botSecret).then(async (data) => {
            
             if (!data.error) {
                 let account = data.access_token ? await resolveUser(data.access_token) : null;
@@ -48,14 +48,20 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                 if (account) {
                     addMember(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, data.access_token, [BigInt(serverInfo?.roleId).toString()])
                         .then(async (resp) => {
-                            if (resp?.response?.status === 403) {
-                                res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=30;`);
-                                return res.redirect(`/verify/${state}`);
+                            if (resp?.status == 403) {
+                                res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=15;`);
+                                return res.redirect(`https://restorecord.com/verify/${state}`);
+                            }
+                            if (resp?.response?.status == 403) {
+                                res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=15;`);
+                                return res.redirect(`https://restorecord.com/verify/${state}`);
                             }
                             if (resp.status === 204) {
                                 await addRole(rGuildId.toString(), userId, customBotInfo?.botToken, serverInfo?.roleId.toString())
                                     .then(async (resp) => {
-                                        // console.log(resp);
+                                        console.log(resp);
+                                        res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
+                                        return res.redirect(`https://restorecord.com/verify/${state}`);
                                     })
                                     .catch((err) => {
                                         console.log(err);
@@ -106,10 +112,13 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                             },
                         });
                     }
+
+                    res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
+                    return res.redirect(`https://restorecord.com/verify/${state}`);    
                 }
 
-                res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=5;`);
-                return res.redirect(`/verify/${state}`);
+                // res.setHeader("Set-Cookie", `RC_err=000; Path=/; Max-Age=3;`);
+                // return res.redirect(`/verify/${state}`);
             } else {
                 return res.status(400).json({
                     status: "error",

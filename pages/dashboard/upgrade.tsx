@@ -26,15 +26,16 @@ export default function Upgrade() {
     }
 
     if (!data.username) {
-        router.push("/login") 
+        return router.push("/login") 
     }
-    
 
     return (
-        <div className="min-h-screen max-h-screen flex">
-            <NavBar user={data}/>
+        <>
+            <div className="min-h-screen max-h-screen flex">
+                <NavBar user={data}/>
 
-            <DashUpgrade user={data}/>
-        </div>
+                <DashUpgrade user={data}/>
+            </div>
+        </>
     )
 }

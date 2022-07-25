@@ -25,13 +25,13 @@
         "jsonwebtoken": "^8.5.1",
         "lru-cache": "^7.13.1",
         "next": "^12.2.0",
+        "node-mailjet": "^5.1.0",
         "react": "18.2.0",
         "react-apexcharts": "^1.4.0",
         "react-dom": "18.2.0",
         "react-hot-toast": "^2.2.0",
         "react-query": "^3.39.1",
-        "sharp": "^0.30.7",
-        "yup": "^0.32.11"
+        "sharp": "^0.30.7"
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.2",
@@ -41,6 +41,7 @@
         "@types/lru-cache": "^7.10.10",
         "@types/next": "^9.0.0",
         "@types/node": "^18.0.3",
+        "@types/node-fetch": "^2.6.2",
         "@types/react": "^18.0.14",
         "@types/react-query": "^1.2.9",
         "autoprefixer": "^10.4.7",

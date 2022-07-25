@@ -26,7 +26,7 @@ export default function Dashboard() {
     }
 
     if (!data.username) {
-        router.push("/login") 
+        return router.push("/login") 
     }
 
     return (
