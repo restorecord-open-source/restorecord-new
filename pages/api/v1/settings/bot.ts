@@ -153,7 +153,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 const botData = await axios.get(`https://discord.com/api/users/@me`, {
                     headers: {
-                        Authorization: `Bot ${data.botToken}`,
+                        Authorization: `Bot ${data.newBotToken}`,
                     },
                     validateStatus: () => true,
                 });
