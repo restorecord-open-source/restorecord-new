@@ -1,7 +1,7 @@
 import { verify } from "jsonwebtoken";
 import { NextApiResponse, NextApiRequest } from "next";
 import { prisma } from "../../../../../src/db";
-import getIPAddress, { getBrowser, getPlatform } from "../../../../../src/getIPAddress";
+import { getIPAddress, getBrowser, getPlatform } from "../../../../../src/getIPAddress";
 import { addMember, addRole, refreshTokenAddDB, shuffle, sleep } from "../../../../../src/Migrate";
 import rateLimit from "../../../../../src/rate-limit";
 

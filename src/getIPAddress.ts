@@ -1,6 +1,6 @@
 import { NextApiRequest } from "next";
 
-export default function getIPAddress(req: NextApiRequest): string {
+export function getIPAddress(req: NextApiRequest): string {
     let ip: any;
     const headers = req.headers;
 

@@ -4,7 +4,7 @@ import * as bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import rateLimit from "../../../../src/rate-limit";
 import { prisma } from "../../../../src/db";
-import getIPAddress, { getBrowser, getPlatform } from "../../../../src/getIPAddress";
+import { getIPAddress, getBrowser, getPlatform } from "../../../../src/getIPAddress";
 import { ProxyCheck } from "../../../../src/proxycheck";
 import { Email } from "../../../../src/email";
 dotenv.config({ path: "../../" });

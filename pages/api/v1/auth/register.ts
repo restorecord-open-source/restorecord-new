@@ -3,7 +3,7 @@ import * as bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import { prisma } from "../../../../src/db";
 import { accounts } from "@prisma/client";
-import getIPAddress from "../../../../src/getIPAddress";
+import { getIPAddress, getBrowser, getPlatform } from "../../../../src/getIPAddress";
 dotenv.config({ path: "../../" });
 
 
