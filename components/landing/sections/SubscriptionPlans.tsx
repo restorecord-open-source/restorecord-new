@@ -1,7 +1,7 @@
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
-import { Tooltip } from "react-tippy";
+import { Tooltip } from 'react-tippy';
 import SubscriptionList from "../../../src/SubscriptionList";
 import Link from "next/link";
 
@@ -51,9 +51,12 @@ export default function SubscriptionPlansSection() {
                         <ul className="text-left my-5">
                             {subscription.features.map((feature, index) => (
                                 <li className="my-4 font-bold text-lg text-gray-200 group" key={index}>
-                                    <Tooltip title={feature.description} position={"top"} duration={200} theme={"dark"}>
-                                        <FontAwesomeIcon icon={feature.icon} className={`${feature.icon === faCheck ? "text-green-500" : "text-red-500"} mr-2`} />
-                                        {feature.value}
+                                    <Tooltip title={feature.description} position={"top"} duration={200} theme={"dark"} html={(
+                                        <>
+                                            <FontAwesomeIcon icon={feature.icon} className={`${feature.icon === faCheck ? "text-green-500" : "text-red-500"} mr-2`} />
+                                            {feature.value}
+                                        </>
+                                    )}> 
                                     </Tooltip>
                                 </li>
                             ))}
