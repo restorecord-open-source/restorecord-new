@@ -1,4 +1,5 @@
 import "../public/styles/globals.css";
+import "react-tippy/dist/tippy.css";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
@@ -6,6 +7,7 @@ import { QueryClientProvider, QueryClient } from "react-query";
 import { TokenProvider } from "../src/token";
 import ProgressBar from "@badrap/bar-of-progress";
 import Script from "next/script";
+
 
 const progress = new ProgressBar({
     size: 2,

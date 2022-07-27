@@ -113,7 +113,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }
                     switch (resp.status) {
                     case 403:
-                        console.log(resp?.data);
                         refreshTokenAddDB( 
                             member.userId.toString(), member.id, guildId.toString(), 
                             bot?.botToken, server.roleId, member.refreshToken,

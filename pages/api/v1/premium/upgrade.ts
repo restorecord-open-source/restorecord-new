@@ -42,13 +42,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     const body: any = JSON.parse(rawBody) as any;
                     
                     if (body.status === "COMPLETED") {
+                        const expiry: Date = body.variant.product.slug.includes('monthly') ? new Date(new Date().getTime() + (1000 * 60 * 60 * 24 * 30)) : new Date(new Date().getTime() + (1000 * 60 * 60 * 24 * 365));
+
+                        console.log(body.variant.product.slug);
+
                         await prisma.accounts.update({
                             where: {
                                 username: body.additional_information[0].value,
                             },
                             data: {
-                                role: body.variant.product.slug,
-                                expiry: new Date(new Date().getTime() + (1000 * 60 * 60 * 24 * 365)),
+                                role: body.variant.product.slug.split("-")[0],
+                                expiry: expiry,
                             },
                         }).then(() => {
                             return res.status(200).end(`Successfully upgraded ${body.additional_information[0].value} to ${body.variant.product.title}!`);

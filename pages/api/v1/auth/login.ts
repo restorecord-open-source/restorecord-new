@@ -131,7 +131,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             }
                         ]
                     }).then(() => {
-                        console.log("Email sent");
+                        // console.log("Email sent");
                     }).catch((err: any) => {
                         console.log(err);
                     })

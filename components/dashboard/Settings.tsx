@@ -101,9 +101,7 @@ export default function DashSettings({ user }: any) {
                                     </h2>
                                 </div>
                                 <button className="sm:ml-2 ml-0 transition-all bg-indigo-700 hover:bg-indigo-800 focus:ring-4 focus:ring-indigo-300 font-medium rounded-lg text-sm sm:px-5 px-0 py-2.5 sm:mr-2 mr-0 mb-2 dark:bg-indigo-600 dark:hover:bg-indigo-700 focus:outline-none dark:focus:ring-indigo-800 text-white" onClick={(e) => {
-                                    console.log(createNewServer);
                                     setCreateNewServer(true);
-                                    console.log(createNewServer);
                                 }}> Create New Server
                                 </button>
                             </div>

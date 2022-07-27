@@ -59,7 +59,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                             if (resp.status === 204) {
                                 await addRole(rGuildId.toString(), userId, customBotInfo?.botToken, serverInfo?.roleId.toString())
                                     .then(async (resp) => {
-                                        console.log(resp);
+                                        if (resp.status !== 204) {
+                                            res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=15;`);
+                                            return res.redirect(`https://restorecord.com/verify/${state}`);
+                                        }
                                         res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
                                         return res.redirect(`https://restorecord.com/verify/${state}`);
                                     })
@@ -92,7 +95,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 // guildId: serverInfo[0].id,
                                 accessToken: data.access_token,
                                 refreshToken: data.refresh_token,
-                                ip: IPAddr,
+                                ip: IPAddr ?? "127.0.0.1",
                                 username: account.username + "#" + account.discriminator,
                                 avatar: account.avatar ? account.avatar : (account.discriminator as any % 5).toString(),
                             },
@@ -105,7 +108,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                             data: {
                                 accessToken: data.access_token,
                                 refreshToken: data.refresh_token,
-                                ip: IPAddr,
+                                ip: IPAddr ?? "127.0.0.1",
                                 username: account.username + "#" + account.discriminator,
                                 avatar: account.avatar ? account.avatar : (account.discriminator as any % 5).toString(),
                                 createdAt: new Date(),
