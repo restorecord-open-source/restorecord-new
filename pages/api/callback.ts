@@ -50,21 +50,21 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                         .then(async (resp) => {
                             if (resp?.status == 403) {
                                 res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=15;`);
-                                return res.redirect(`https://restorecord.com/verify/${state}`);
+                                return res.redirect(`/verify/${state}`);
                             }
                             if (resp?.response?.status == 403) {
                                 res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=15;`);
-                                return res.redirect(`https://restorecord.com/verify/${state}`);
+                                return res.redirect(`/verify/${state}`);
                             }
                             if (resp.status === 204) {
                                 await addRole(rGuildId.toString(), userId, customBotInfo?.botToken, serverInfo?.roleId.toString())
                                     .then(async (resp) => {
                                         if (resp.status !== 204) {
                                             res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=15;`);
-                                            return res.redirect(`https://restorecord.com/verify/${state}`);
+                                            return res.redirect(`/verify/${state}`);
                                         }
                                         res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
-                                        return res.redirect(`https://restorecord.com/verify/${state}`);
+                                        return res.redirect(`/verify/${state}`);
                                     })
                                     .catch((err) => {
                                         console.log(err);
@@ -87,12 +87,12 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                         await prisma.members.create({
                             data: {
                                 userId: userId,
-                                guild: {
-                                    connect: {
-                                        guildId: serverInfo?.guildId,
-                                    },
-                                },
-                                // guildId: serverInfo[0].id,
+                                // guild: {
+                                //     connect: {
+                                //         guildId: serverInfo?.guildId,
+                                //     },
+                                // },
+                                guildId: serverInfo?.guildId,
                                 accessToken: data.access_token,
                                 refreshToken: data.refresh_token,
                                 ip: IPAddr ?? "127.0.0.1",
@@ -106,6 +106,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 id: user.id
                             },
                             data: {
+                                guildId: serverInfo?.guildId,
                                 accessToken: data.access_token,
                                 refreshToken: data.refresh_token,
                                 ip: IPAddr ?? "127.0.0.1",
@@ -116,8 +117,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                         });
                     }
 
-                    res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
-                    return res.redirect(`https://restorecord.com/verify/${state}`);    
+                    // res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
+                    // return res.redirect(`https://restorecord.com/verify/${state}`);
                 }
 
                 // res.setHeader("Set-Cookie", `RC_err=000; Path=/; Max-Age=3;`);
