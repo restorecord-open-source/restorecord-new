@@ -84,7 +84,7 @@ export default function Verify({ status, err }: any) {
                                 </a>
                             )}
                             {/* 
-                            <button className="bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 focus:outline-none dark:focus:ring-red-800 text-white transition-all">
+                            <button className="focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-red-800 text-white transition-all">
                                 Unlink
                             </button> 
                             */}
@@ -98,7 +98,7 @@ export default function Verify({ status, err }: any) {
                     </div>
                     <button onClick={() => {
                         window.history.back();
-                    }} className="transition-all text-white bg-primary-600 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:focus:ring-primary-900 my-4">
+                    }} className="transition-all text-white bg-primary-600 hover:bg-primary-800 focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center focus:ring-primary-900 my-4">
                         Go Back
                     </button>
                 </div>
