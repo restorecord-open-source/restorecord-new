@@ -63,8 +63,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                             res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=15;`);
                                             return res.redirect(`/verify/${state}`);
                                         }
-                                        res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
-                                        return res.redirect(`/verify/${state}`);
                                     })
                                     .catch((err) => {
                                         console.log(err);
@@ -116,6 +114,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                             },
                         });
                     }
+
+                    res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
+                    return res.redirect(`/verify/${state}`);
+
 
                     // res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
                     // return res.redirect(`https://restorecord.com/verify/${state}`);

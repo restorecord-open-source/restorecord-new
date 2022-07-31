@@ -24,7 +24,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
 
-                // const maxCount = req.query.max as string;
+                const serverId: any = req.query.guild;
 
                 prisma.accounts.findUnique({
                     where: {
@@ -36,7 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             ownerId: account.id
                         },
                     }).then((servers: any) => {
-                        const guildIds = servers.map((server: any) => server.guildId);
+                        const guildIds = serverId ? [BigInt(serverId)] : servers.map((server: any) => server.guildId);
 
                         prisma.members.findMany({
                             where: {
@@ -63,6 +63,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                 })
                             });
                         });
+
                     });
                 });
             }

@@ -4,14 +4,16 @@ import { useToken } from "../../src/token";
 import Image from "next/future/image";
 import { useQuery } from "react-query";
 import getMembers from "../../src/dashboard/getMembers";
+import { useEffect, useState } from "react";
 
 export default function DashUpgrade({ user }: any) {
     const [token]: any = useToken();
     const router = useRouter();
+    const [serverId, setServerId] = useState("");
 
-    const { data, isError, isLoading } = useQuery('members', async () => await getMembers({
+    const { data, isError, isLoading, refetch } = useQuery('members', async () => await getMembers({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
-    }), { retry: false });
+    }, serverId), { retry: false });
 
     if (!user.username || isLoading) {
         return (
@@ -20,6 +22,16 @@ export default function DashUpgrade({ user }: any) {
             </>
         );
     }
+
+    function handleSelect(e: any) {
+        if (e.target.value !== "") {
+            // if target value is all then set serverId to null
+            setServerId(e.target.value === "all" ? null : e.target.value);
+            refetch();
+        }
+    }
+
+
 
     return (
         <>
@@ -35,23 +47,39 @@ export default function DashUpgrade({ user }: any) {
                     </p>
                 </div>
                 <div className="max-w-screen p-4 w-full rounded-lg border shadow-md bg-gray-900 border-gray-800">
-                    {(Array.isArray(data.members) && data.members.length === 0) ? (
-                        <>
-                            <h2 className="text-gray-100 text-2xl font-bold leading-tight mb-4">
-                                No verified members found.
-                            </h2>
-                        </>
-                    ) : (
-                        <>
-                            <h2 className="text-gray-100 text-2xl font-bold leading-tight mb-4">
-                                Recent verified Members
-                            </h2>
-                        </>
-                    )}
+                    <div className="flex flex-col md:flex-row">
+                        {(Array.isArray(data.members) && data.members.length === 0) ? (
+                            <>
+                                <div className="flex-1">
+                                    <h2 className="text-gray-100 sm:text-2xl text-lg font-bold leading-tight mb-4">
+                                        No verified members found.
+                                    </h2>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div className="flex-1">
+                                    <h2 className="text-gray-100 sm:text-2xl text-lg font-bold leading-tight mb-4">
+                                        Showing {data.members.length} verified members.
+                                    </h2>
+                                </div>
+                                
+                                {/* <label htmlFor="server" className="font-medium leading-tight flex items-center justify-center h-11">Select a Server</label>
+                                <select id="server" onChange={(e) => handleSelect(e)} className="mb-4 sm:ml-2 ml-0 sm:w-52 w-full border text-sm rounded-lg p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="all">All Servers</option>
+                                    {Array.isArray(user.servers) && user.servers.map((server: any) => {
+                                        return (
+                                            <option key={server.id} value={server.guildId}>{server.name}</option>
+                                        )
+                                    })}
+                                </select> */}
+                            </>
+                        )}
+                    </div>
 
                     {Array.isArray(data.members) && data.members.map((item: any) => {
                         return (
-                            <div key={item.userId}>
+                            <div key={item.id}>
                                 <div className="mb-6 p-6 rounded-lg border shadow-md bg-gray-800 border-gray-700">
                                     <div className="inline-flex">
                                         {item.avatar.length > 1 ? (
