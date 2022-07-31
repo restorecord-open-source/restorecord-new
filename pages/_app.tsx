@@ -1,38 +1,21 @@
-import "../public/styles/globals.css";
-import "react-tippy/dist/tippy.css";
 import Head from "next/head";
-import { useRouter } from "next/router";
-import { useEffect } from "react";
 import { QueryClientProvider, QueryClient } from "react-query";
+import { Router } from "next/router";
 import { TokenProvider } from "../src/token";
-import ProgressBar from "@badrap/bar-of-progress";
-import Script from "next/script";
+import NProgress from "nprogress";
+import "react-tippy/dist/tippy.css";
+import "nprogress/nprogress.css";
+import "../public/styles/globals.css";
 
+NProgress.configure({ showSpinner: false });
 
-const progress = new ProgressBar({
-    size: 2,
-    color: "#4f46e5",
-    className: "loading-bar",
-    delay: 50,
-});
+Router.events.on("routeChangeStart", () => NProgress.start());
+Router.events.on("routeChangeComplete", () => NProgress.done());
+Router.events.on("routeChangeError", () => NProgress.done());
 
 const queryClient = new QueryClient();
 
 function MyApp({ Component, pageProps }: any) {
-    const router = useRouter();
-
-    useEffect(() => {
-        router.events.on("routeChangeStart", progress.start);
-        router.events.on("routeChangeComplete", progress.finish);
-        router.events.on("routeChangeError", progress.finish);
-
-        return () => {
-            router.events.off("routeChangeStart", progress.start);
-            router.events.off("routeChangeComplete", progress.finish);
-            router.events.off("routeChangeError", progress.finish);
-        };
-    }, [router]);
-
     return (
         <>
             <Head>

@@ -10,7 +10,6 @@
         "lint": "next lint"
     },
     "dependencies": {
-        "@badrap/bar-of-progress": "^0.2.1",
         "@fortawesome/fontawesome-svg-core": "^6.1.1",
         "@fortawesome/free-brands-svg-icons": "^6.1.1",
         "@fortawesome/free-solid-svg-icons": "^6.1.1",
@@ -26,6 +25,7 @@
         "lru-cache": "^7.13.1",
         "next": "^12.2.0",
         "node-mailjet": "^5.1.0",
+        "nprogress": "^0.2.0",
         "react": "18.2.0",
         "react-apexcharts": "^1.4.0",
         "react-dom": "18.2.0",
@@ -43,6 +43,7 @@
         "@types/next": "^9.0.0",
         "@types/node": "^18.0.3",
         "@types/node-fetch": "^2.6.2",
+        "@types/nprogress": "^0.2.0",
         "@types/react": "^18.0.14",
         "@types/react-query": "^1.2.9",
         "autoprefixer": "^10.4.7",

@@ -92,6 +92,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 await sleep(delay);
                 console.log(`Adding ${member.username} to ${server.name}`);
                 await addMember(server.guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, [BigInt(server.roleId).toString()]).then(async (resp: any) => {
+                    console.log(resp?.response?.status);
+                    console.log(resp?.status);
+                    
                     if (resp?.response?.status) {
                         switch (resp.response.status) {
                         case 429:   
@@ -106,8 +109,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             }
                             break;
                         case 403:
-                            // return res.status(400).json({ success: false, message: "Missing permissions" });
-                            throw new Error("Missing permissions https://docs.restorecord.com/troubleshooting/missing-permission");
+                            refreshTokenAddDB( 
+                                member.userId.toString(), member.id, guildId.toString(), 
+                                bot?.botToken, server.roleId, member.refreshToken,
+                                bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
                             break;
                         }
                     }
@@ -117,7 +122,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             member.userId.toString(), member.id, guildId.toString(), 
                             bot?.botToken, server.roleId, member.refreshToken,
                             bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
-                        throw new Error("Missing permissions https://docs.restorecord.com/troubleshooting/missing-permission");
 
                         // refreshToken(member.refreshToken, bot?.clientId.toString(), bot?.botSecret).then(async (resp) => {
                         //     if (resp.data.access_token && resp.data.refresh_token) {
