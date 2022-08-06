@@ -19,7 +19,7 @@ function MyApp({ Component, pageProps }: any) {
     return (
         <>
             <Head>
-                <title>Restorecord</title>
+                <title>RestoreCord</title>
                 <meta name="description" content="RestoreCord is a Recovery Service, it can Backup and Restore your Servers Members, Channels, Categories, Roles and much more" />
                 <meta name="keywords" content="restorecord, discord, backup, restore, backup service, savecord, letoa, restorebot" />
                 <meta property="og:title" content="RestoreCord - The Recovery Service" />
@@ -28,8 +28,9 @@ function MyApp({ Component, pageProps }: any) {
                 <meta name="theme-color" content="#4f46e5" />
                 <meta name="apple-mobile-web-app-status-bar-style" content="#4f46e5" />
                 <meta name="apple-mobile-web-app-capable" content="yes" />
-                <meta name="apple-mobile-web-app-title" content="Restorecord" />
-                <meta name="application-name" content="Restorecord" />
+                <meta name="apple-mobile-web-app-title" content="RestoreCord" />
+                <meta name="application-name" content="RestoreCord" />
+                <link rel="canonical" href="https://restorecord.com" />
             </Head>
             <QueryClientProvider client={queryClient}>
                 <TokenProvider>

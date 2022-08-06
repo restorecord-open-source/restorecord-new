@@ -6,6 +6,7 @@ import { Toaster } from "react-hot-toast";
 import styles from "../public/styles/register.module.css"
 import Link from "next/link";
 import { useRouter } from "next/router";
+import Head from "next/head";
 
 export default function Register() {
     const [username, setUsername] = useState("");
@@ -17,6 +18,7 @@ export default function Register() {
     const router = useRouter();
 
 
+
     const onExpire = () => {
         functions.ToastAlert("Captcha expired", "error");
     }
@@ -25,7 +27,7 @@ export default function Register() {
         functions.ToastAlert(err, "error");
     }
 
-    const handleSubmit = (e: any) => {
+    const onSubmit = (e: any) => {
         e.preventDefault();
         captchaRef.current.execute();
     }
@@ -66,7 +68,7 @@ export default function Register() {
                     setToken(null);
                     if (res.success) {
                         functions.ToastAlert("Account created", "success");
-                        router.push("/login");
+                        router.push("/login?username=" + encodeURIComponent(username));
                     } 
                     else {
                         functions.ToastAlert(res.message, "error");
@@ -75,36 +77,40 @@ export default function Register() {
         }
     }, [token, email, username, password, router]);
 
-
     return (
         <>
+            <Head>
+                <title>RestoreCord | Register</title>
+                <meta name="description" content="Create an account for RestoreCord, the Best option to Backup and Restore your Discord Servers Settings, Channels, Roles, etc." />
+            </Head>
+
             <NavBar />
             <Toaster />
             <div className={styles.mainWrapper}>
                 <div className={styles.registerWrapper}>
                     <div className={styles.header}>
-                        <h2>Register an Account</h2>
+                        <h1>Register an Account</h1>
                     </div>
-                    <form className={styles.formWrapper} onSubmit={handleSubmit}>
+                    <form className={styles.formWrapper} onSubmit={onSubmit}>
                         <div className={styles.form}>
                             <div>
                                 <label htmlFor="username" className="block mb-2 text-sm font-medium text-gray-300">Username</label>
                                 <div className="relative mb-6">
-                                    <input name="username" onChange={handleChange} type="text" id="username" className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="Username" />
+                                    <input name="username" onChange={handleChange} type="text" id="username" className="transition-all border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="User" />
                                 </div>
                             </div>
 
                             <div>
                                 <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-300">Email</label>
                                 <div className="relative mb-6">
-                                    <input name="email" onChange={handleChange} type="email" id="email" className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="Email" />
+                                    <input name="email" onChange={handleChange} type="email" id="email" className="transition-all border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="johndoe@gmail.com" />
                                 </div>
                             </div>
 
                             <div>
                                 <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-300">Password</label>
-                                <div className="flex">
-                                    <input name="password" onChange={handleChange} type="password" id="password" className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="••••••••••" />
+                                <div className="relative">
+                                    <input name="password" onChange={handleChange} type="password" id="password" className="transition-all border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="••••••••••" />
                                 </div>
                             </div>
 
@@ -164,7 +170,9 @@ export default function Register() {
                             
                             <div className={styles.formTextWrapper}>
                                 <a className={styles.formText}>
-                                    Already have an account? Login <Link href="/login"><span>here</span></Link>.
+                                    Already have an account? <Link href="/login"><span>Login</span></Link>.
+                                    <br/>
+                                    By clicking Register, you agree to our <Link href="/terms"><span>Terms</span></Link> and <Link href="/privacy"><span>Privacy Policy</span></Link>.
                                 </a>
                             </div>
                         </div>

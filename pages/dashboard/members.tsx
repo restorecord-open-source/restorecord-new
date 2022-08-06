@@ -12,8 +12,8 @@ export default function Members() {
     const router = useRouter();
 
     const { data, isError, isLoading } = useQuery('user', async () => await getUser({
-        Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
-    }), { retry: false,  refetchOnWindowFocus: false });
+        Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
+    }), { retry: false, refetchOnWindowFocus: false });
 
 
     if (isLoading) {
@@ -26,7 +26,7 @@ export default function Members() {
     }
 
     if (!data.username) {
-        return router.push("/login") 
+        return router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
     }
 
     return (

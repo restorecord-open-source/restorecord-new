@@ -94,7 +94,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                     <!DOCTYPE html>
                                     <html>
                                     	<head>
-                                    		<title>Restorecord</title>
+                                    		<title>RestoreCord</title>
                                     	</head>
                                     	<body>
                                     		<h1 style="text-align: center; margin-top: 1.5rem; line-height: 2rem; font-size: 2.25rem; font-weight: 600; margin-bottom: 1rem; color: rgb(79, 70, 229);">
@@ -147,6 +147,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
     }
     catch (err: any) {
+        console.log(err);
         if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
         if (err?.name === "ValidationError") return res.status(400).json({ success: false, message: err.errors[0] });
         return res.status(500);

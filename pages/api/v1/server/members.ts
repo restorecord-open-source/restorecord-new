@@ -52,6 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                 success: true,
                                 members: members.map((member: any) => {
                                     return {
+                                        id: member.id,
                                         userId: member.userId.toString(),
                                         username: member.username,
                                         avatar: member.avatar,

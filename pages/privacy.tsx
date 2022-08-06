@@ -1,9 +1,15 @@
+import Head from "next/head";
 import NavBar from "../components/landing/NavBar";
 import styles from "../public/styles/index.module.css"
 
 export default function Privacy() {
     return (
         <>
+            <Head>
+                <title>RestoreCord | Privacy Policy</title>
+                <meta name="description" content="What information does RestoreCord have? We only collect information that is necessary to provide you with the services you request." />
+            </Head>
+
             <NavBar />
 
             <section className="py-20 px-10">

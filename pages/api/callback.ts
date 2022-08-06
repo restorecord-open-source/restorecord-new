@@ -85,11 +85,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                         await prisma.members.create({
                             data: {
                                 userId: userId,
-                                // guild: {
-                                //     connect: {
-                                //         guildId: serverInfo?.guildId,
-                                //     },
-                                // },
                                 guildId: serverInfo?.guildId,
                                 accessToken: data.access_token,
                                 refreshToken: data.refresh_token,

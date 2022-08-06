@@ -1,5 +1,6 @@
 import { faDiscord, faTwitter, faYoutube } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Head from "next/head";
 import Link from "next/link";
 
 export default function Footer() {
@@ -45,7 +46,7 @@ export default function Footer() {
                     </a>
                 </li>
             </ul>
-
+            
             <div className="text-center">
                 <p className="text-gray-400">© {new Date().getFullYear()} RestoreCord. All rights reserved.</p>
             </div>

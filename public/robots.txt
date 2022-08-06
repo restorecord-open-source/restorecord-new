@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /_next/
+Disallow: /static/
+Disallow: /api/
+Disallow: /verify/
+Disallow: /admin/

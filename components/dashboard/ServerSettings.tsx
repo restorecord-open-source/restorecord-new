@@ -57,7 +57,6 @@ export default function DashServerSettings({ user, id }: any) {
                 else {
                     functions.ToastAlert(res.message, "success");
                     router.push("/dashboard/settings");
-                    // setTimeout(() => router.push(`/dashboard/settings/${guildId}`), 1000);
                 }
             })
             .catch(err => {

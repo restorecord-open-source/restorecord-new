@@ -62,9 +62,11 @@ export default function NavBar() {
                         </Link>
                     </div>
                     <Link href={button.href}>
-                        <button className="focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-indigo-800 text-white transition-all">
-                            {button.text}
-                        </button>
+                        <a href={button.href}>
+                            <button className="focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-indigo-800 text-white transition-all">
+                                {button.text}
+                            </button>
+                        </a>
                     </Link>
                 </div>
 
@@ -112,9 +114,11 @@ export default function NavBar() {
                 
             <div className="hidden md:flex md:items-center text-gray-200 mx-12 xl:mx-32">
                 <Link href={button.href}>
-                    <button className={styles.desktopNavButton}>
-                        {button.text}
-                    </button>
+                    <a href={button.href}>
+                        <button className={styles.desktopNavButton}>
+                            {button.text}
+                        </button>
+                    </a>
                 </Link>
             </div>
 

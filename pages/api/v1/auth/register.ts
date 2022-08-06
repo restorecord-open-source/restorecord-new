@@ -23,9 +23,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(400).json({ success: false, message: `Missing ${errors}` });
         }
 
-        // length check
         if (data.username.length < 3 || data.username.length > 20) return res.status(400).json({ success: false, message: "Username must be between 3 and 20 characters" });
-        if (data.password.length < 6 || data.password.length > 20) return res.status(400).json({ success: false, message: "Password must be between 6 and 20 characters" });
+        if (data.password.length < 6 || data.password.length > 45) return res.status(400).json({ success: false, message: "Password must be between 6 and 45 characters" });
         if (data.email.length < 6 || data.email.length > 50) return res.status(400).json({ success: false, message: "Email must be between 6 and 50 characters" });
         
 

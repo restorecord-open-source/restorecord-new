@@ -1,3 +1,4 @@
+import Head from "next/head";
 import NavBar from "../components/landing/NavBar";
 import Footer from "../components/landing/sections/Footer";
 import styles from "../public/styles/index.module.css"
@@ -5,6 +6,11 @@ import styles from "../public/styles/index.module.css"
 export default function Terms() {
     return (
         <>
+            <Head>
+                <title>RestoreCord | Terms of Service</title>
+                <meta name="description" content="Terms of Service for RestoreCord, a Discord Service to Backup and Restore your Discord Server Settings, Members, Channels, Categories, Roles and much more" />
+            </Head>
+
             <NavBar/>
 
             <section className="py-20 px-10">

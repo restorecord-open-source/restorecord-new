@@ -57,7 +57,6 @@ export default function DashBotSettings({ user, id }: any) {
                 else {
                     functions.ToastAlert(res.message, "success");
                     router.push("/dashboard/custombots");
-                    // setTimeout(() => router.push(`/dashboard/settings/${guildId}`), 1000);
                 }
             })
             .catch(err => {

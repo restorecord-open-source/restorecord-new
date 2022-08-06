@@ -26,7 +26,7 @@ export default function Upgrade() {
     }
 
     if (!data.username) {
-        return router.push("/login") 
+        return router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
     }
 
     return (
