@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: false,
+    poweredByHeader: false,
     images: {
         domains: [ 'cdn.restorecord.com', 'restorerecord.com',  'cdn.discordapp.com', 'cdn.discord.com', 'i.imgur.com' ],
     },

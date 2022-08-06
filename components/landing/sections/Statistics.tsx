@@ -20,9 +20,9 @@ export default function StatisticsSection() {
     const membersRef: any = useRef();
 
     useQuery('stats', async () => await getStats(), { retry: false, onSuccess(data) {
-        accountsRef.current.innerText = data.accounts;
-        serversRef.current.innerText = data.servers;
-        membersRef.current.innerText = data.members;
+        accountsRef.current.innerText = data.accounts.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        serversRef.current.innerText = data.servers.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        membersRef.current.innerText = data.members.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
         accountsRef.current.classList.remove(...accountsRef.current.classList);
         serversRef.current.classList.remove(...serversRef.current.classList);
