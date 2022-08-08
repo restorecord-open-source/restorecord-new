@@ -2,6 +2,15 @@ import axios from "axios";
 import { HttpsProxyAgent } from "https-proxy-agent";
 
 export async function sendWebhook(webhookUrl: string, content: string, username: string, avatarUrl: string) {
+    return await axios.post(webhookUrl, {
+        username: username,
+        content: content,
+        avatar_url: avatarUrl,
+    }, {
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
 }
 
 export async function addMember(guildId: string, userId: string, botToken: any, access_token: string, roles: string[]) {
