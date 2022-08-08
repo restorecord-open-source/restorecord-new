@@ -21,7 +21,7 @@ export default function DashSettings({ user }: any) {
     const [description, setDescription] = useState("");
     const [bgimage, setBgimage] = useState("");
 
-    const [modalGuildId, setModalGuildId] = useState("0");
+    const [modalGuildId, setModalGuildId] = useState("1");
 
     const [isOpen, setIsOpen] = useState(false)
 
