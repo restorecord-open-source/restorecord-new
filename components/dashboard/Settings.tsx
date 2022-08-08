@@ -141,7 +141,7 @@ export default function DashSettings({ user }: any) {
                                             </div>
                                         </div>
                                         <div>
-                                            <label htmlFor="webhook" className="block mb-2 text-sm font-medium text-gray-300">Webhook Logs</label>
+                                            <label htmlFor="webhook" className="block mb-2 text-sm font-medium text-gray-300">Webhook Logs (Not available)</label>
                                             <div className="relative mb-6">
                                                 <input defaultValue={user?.servers?.find((e: any) => e.guildId === modalGuildId)?.webhook} required onPaste={handleChange} onChange={handleChange} name="webhook" type="text" id="webhook" pattern="^.*(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-zA-Z0-9_-]+)$" className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="https://discordapp.com/api/webhooks/10963827193122..." />
                                             </div>
@@ -155,7 +155,7 @@ export default function DashSettings({ user }: any) {
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <label htmlFor="bgimage" className="block mb-2 text-sm font-medium text-gray-300">Background Image</label>
+                                                    <label htmlFor="bgimage" className="block mb-2 text-sm font-medium text-gray-300">Background Image (Not available)</label>
                                                     <div className="relative mb-6">
                                                         <input defaultValue={user?.servers?.find((e: any) => e.guildId === modalGuildId)?.bgImage} required onPaste={handleChange} onChange={handleChange} name="bgimage" type="text" id="bgimage" className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="https://i.imgur.com/5RaXq8u.jpg" />
                                                     </div>
