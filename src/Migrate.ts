@@ -106,7 +106,7 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
         }).catch(async (err: any) => {
             console.log(`${err}`);
         });
-        console.log(`[refreshTokenAddDB] unauth ${err?.status}: (memid: ${memberId})`);
+        console.log(`[refreshTokenAddDB] unauth ${err}: (memid: ${memberId})`);
     });
 }
 
