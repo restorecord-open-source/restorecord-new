@@ -80,26 +80,34 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
         },
         proxy: false,
         httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
-    })
-        .then(async (resp) => {
-            if (resp.data.access_token && resp.data.refresh_token) {
-                await prisma.members.update({
-                    where: {
-                        id: memberId,
-                    },
-                    data: {
-                        accessToken: resp.data.access_token,
-                        refreshToken: resp.data.refresh_token
-                    }
-                }).catch(async (err: any) => {
-                    console.log(err);
-                });
-                await addMember(guildId, userId, botToken, resp.data.access_token, [BigInt(roleId).toString()])
+    }).then(async (resp) => {
+        if (resp.data.access_token && resp.data.refresh_token) {
+            await prisma.members.update({
+                where: {
+                    id: memberId,
+                },
+                data: {
+                    accessToken: resp.data.access_token,
+                    refreshToken: resp.data.refresh_token
+                }
+            }).catch(async (err: any) => {
+                console.log(`${err}`);
+            });
+            await addMember(guildId, userId, botToken, resp.data.access_token, [BigInt(roleId).toString()])
+        }
+    }).catch(async (err) => { 
+        await prisma.members.update({
+            where: {
+                id: memberId,
+            },
+            data: {
+                accessToken: "unauthorized",
             }
-        })
-        .catch(async (err) => { 
-            console.log(err);
+        }).catch(async (err: any) => {
+            console.log(`${err}`);
         });
+        console.log(`[refreshTokenAddDB] unauth ${err?.status}: (memid: ${memberId})`);
+    });
 }
 
 export async function exchange(excode: string, redirectUri: string, clientId: any, clientSecret: any) {

@@ -94,8 +94,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 }
             }
         }).catch(err => {
-            console.log(err);
+            console.log(`membercheck ${err}`);
         });
+
+        for (const member of members) {
+            if (member.accessToken === "unauthorized") {
+                members.splice(members.indexOf(member), 1);
+            }
+        }
+
 
         let succPulled: number = 0;
         const pullingProcess = new Promise<void>(async (resolve, reject) => {

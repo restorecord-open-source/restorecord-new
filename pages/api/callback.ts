@@ -57,11 +57,11 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 await addRole(rGuildId.toString(), userId, customBotInfo?.botToken, serverInfo?.roleId.toString())
                                     .then(async (resp) => {
                                         console.log(resp?.status);
-                                        if (resp.status !== 204) {
-                                            res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=15;`);
+                                        if (resp.status === 204) {
+                                            res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
                                             return res.redirect(`/verify/${state}`);
                                         } else {
-                                            res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
+                                            res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=15;`);
                                             return res.redirect(`/verify/${state}`);
                                         }
                                     })
@@ -102,6 +102,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 avatar: account.avatar ? account.avatar : (account.discriminator as any % 5).toString(),
                             },
                         });
+
+                        res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
+                        return res.redirect(`/verify/${state}`);
                     } else {
                         await prisma.members.update({
                             where: {
@@ -119,6 +122,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 createdAt: new Date(),
                             },
                         });
+
+                        res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
+                        return res.redirect(`/verify/${state}`);
                     }
 
                     // res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
