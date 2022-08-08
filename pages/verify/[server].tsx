@@ -6,6 +6,7 @@ import getServer from "../../src/getServer";
 import styles from "../../public/styles/index.module.css"
 import Link from "next/link";
 import Image from "next/future/image";
+import Head from "next/head";
 
 export default function Verify({ status, err }: any) {
     const router = useRouter();
@@ -35,10 +36,13 @@ export default function Verify({ status, err }: any) {
 
     return (
         <>
-            <div className="md:block hidden">
+            <Head>
+                <title>Verify in {guildId}</title>
+            </Head>
+
+            <div className="lg:block hidden">
                 <NavBar />
-            </div>
-            
+            </div>            
             
             {data.success ? (
                 <div className={styles.verifyFade}>
@@ -65,10 +69,12 @@ export default function Verify({ status, err }: any) {
                                 You&#39;re verifying in <span className="text-indigo-600">{data.server.name}</span>
                             </>
                         )}
+                        {/* description */}
+                        <p className="text-lg text-gray-600 mt-2">{data.server.description}</p>
                     </div>
 
                     <div className="flex flex-col items-center justify-center pt-5">
-                        <Image src={data.server.picture} width={128} height={128} loading="lazy" className="smx:w-36 smx:h-36 w-24 h-24 rounded-full border-2 border-indigo-600" alt="Server Picture" />
+                        <Image src={data.server.picture} width={512} height={512} loading="lazy" className="smx:w-36 smx:h-36 w-24 h-24 rounded-full border-2 border-indigo-600 object-cover" alt="Server Picture" />
                     </div>
 
                     <div className="smx:pt-6 pt-4">

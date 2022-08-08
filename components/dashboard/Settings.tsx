@@ -1,10 +1,11 @@
 import axios from "axios";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { Toaster } from "react-hot-toast";
 import functions from "../../src/functions";
 import { useToken } from "../../src/token";
 import Image from "next/future/image";
+import { Dialog, Transition } from '@headlessui/react'
 
 export default function DashSettings({ user }: any) {
     const [token]: any = useToken();
@@ -14,6 +15,23 @@ export default function DashSettings({ user }: any) {
     const [guildId, setGuildId] = useState("");
     const [roleId, setRoleId] = useState("");
     const [customBot, setCustomBot] = useState("");
+
+    const [picture, setPicture] = useState("");
+    const [webhook, setWebhook] = useState("");
+    const [description, setDescription] = useState("");
+    const [bgimage, setBgimage] = useState("");
+
+    const [modalGuildId, setModalGuildId] = useState("0");
+
+    const [isOpen, setIsOpen] = useState(false)
+
+    function closeModal() {
+        setIsOpen(false)
+    }
+  
+    function openModal() {
+        setIsOpen(true)
+    }
 
     const [createNewServer, setCreateNewServer] = useState(false);
 
@@ -25,21 +43,22 @@ export default function DashSettings({ user }: any) {
         )
     }
 
-    function handleSubmit(e: any) {
+    function handleSubmit(e: any, body: any, method: string = "POST") {
         e.preventDefault();
 
         fetch(`/api/v1/settings/server`, {
-            method: "POST",
+            method: method,
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
             },
-            body: JSON.stringify({
-                serverName: serverName,
-                guildId: guildId,
-                roleId: roleId,
-                customBot: customBot,
-            })
+            body: JSON.stringify(body),
+            // body: JSON.stringify({
+            //     serverName: serverName,
+            //     guildId: guildId,
+            //     roleId: roleId,
+            //     customBot: customBot,
+            // })
         })
             .then(res => res.json())
             .then(res => {
@@ -48,9 +67,11 @@ export default function DashSettings({ user }: any) {
                 }
                 else {
                     functions.ToastAlert(res.message, "success");
-                    document.location.reload();
-                    // router.push("/dashboard/settings");
-                    // setTimeout(() => router.push(`/dashboard/settings/${guildId}`), 1000);
+                    if (res.server) {
+                        document.querySelector(`div#server_${res.server.id}>.inline-flex>img`)?.removeAttribute("srcset");
+                        document.querySelector(`div#server_${res.server.id}>.inline-flex>img`)?.setAttribute("src", res.server.picture);
+                        document.querySelector(`#server_${res.server.id} > p`)!.innerHTML = res.server.description;
+                    }
                 }
             })
             .catch(err => {
@@ -73,6 +94,18 @@ export default function DashSettings({ user }: any) {
         case "customBot":
             setCustomBot(e.target.value);
             break;
+        case "picture":
+            setPicture(e.target.value);
+            break;
+        case "webhook":
+            setWebhook(e.target.value);
+            break;
+        case "description":
+            setDescription(e.target.value);
+            break;
+        case "bgimage":
+            setBgimage(e.target.value);
+            break;
         default:
             break;
         }
@@ -81,6 +114,103 @@ export default function DashSettings({ user }: any) {
     return (
         <>
             <Toaster />
+
+            <Transition appear show={isOpen} as={Fragment}>
+                <Dialog as="div" className="relative z-[99999]" onClose={closeModal}>
+                    <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0" >
+                        <div className="fixed inset-0 bg-black bg-opacity-50" />
+                    </Transition.Child>
+
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center p-4 text-center">
+                            <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
+                                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-slate-900 p-8 text-left align-middle shadow-xl transition-all">
+                                    <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-white">
+                                        Actions
+                                        {/* close btn */}
+                                        <button className="absolute top-0 right-0 m-6 text-white" onClick={closeModal}>
+                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                        </button>
+                                    </Dialog.Title>
+
+                                    <form method="POST" className="mt-4 text-base leading-6 text-gray-400" onSubmit={(e) => {e.preventDefault(); handleSubmit(e, { picture: picture, webhook: webhook, description: description, bgimage: bgimage, guildId: modalGuildId, }, "PATCH")}}>
+                                        <div>
+                                            <label htmlFor="picture" className="block mb-2 text-sm font-medium text-gray-300">Picture</label>
+                                            <div className="relative mb-6">
+                                                <input defaultValue={user.servers.find((e: any) => e.guildId === modalGuildId).picture} required onPaste={handleChange} onChange={handleChange} name="picture" type="text" id="picture" pattern="^https?://i.imgur.com(?:/[^/#?]+)+\.(?:jpg|gif|png|jpeg)$" className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="https://i.imgur.com/3Ben2fI.png" />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label htmlFor="webhook" className="block mb-2 text-sm font-medium text-gray-300">Webhook Logs</label>
+                                            <div className="relative mb-6">
+                                                <input defaultValue={user.servers.find((e: any) => e.guildId === modalGuildId).webhook} required onPaste={handleChange} onChange={handleChange} name="webhook" type="text" id="webhook" pattern="^.*(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-zA-Z0-9_-]+)$" className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="https://discordapp.com/api/webhooks/10963827193122..." />
+                                            </div>
+                                        </div>
+                                        {user.role === "business" &&
+                                            <>
+                                                <div>
+                                                    <label htmlFor="description" className="block mb-2 text-sm font-medium text-gray-300">Description</label>
+                                                    <div className="relative mb-6">
+                                                        <input defaultValue={user.servers.find((e: any) => e.guildId === modalGuildId).description} required onPaste={handleChange} onChange={handleChange} name="description" type="text" id="description" max={255} maxLength={255} className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="Gaming Server for COD and Minecraft" />
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label htmlFor="bgimage" className="block mb-2 text-sm font-medium text-gray-300">Background Image</label>
+                                                    <div className="relative mb-6">
+                                                        <input defaultValue={user.servers.find((e: any) => e.guildId === modalGuildId).bgImage} required onPaste={handleChange} onChange={handleChange} name="bgimage" type="text" id="bgimage" className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="https://i.imgur.com/5RaXq8u.jpg" />
+                                                    </div>
+                                                </div>
+                                            </>
+                                        }
+                                        <button type="submit" className="mt-4 transition-all relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                            Save
+                                        </button>
+                                        {/* <button className="mt-4 transition-all relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                                Backup Server
+                                            </button>
+                                            <button className="mt-4 transition-all relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                                Restore Server
+                                            </button> */}
+                                    </form>
+
+                                    <button onClick={
+                                        () => {
+                                            functions.ToastAlert("Please wait, this may take a while depending on the size of your server.", "info");
+                                            axios.get(`/api/v1/server/migrate/${modalGuildId}`,
+                                                {
+                                                    headers: {
+                                                        "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                    },
+                                                    validateStatus: () => true
+                                                })
+                                                .then(res => {
+                                                    if (!res.data.success) {
+                                                        functions.ToastAlert(res.data.message, "error");
+                                                    }
+                                                    else {
+                                                        functions.ToastAlert(res.data.message, "success");
+                                                    }
+                                                })
+                                                .catch(err => {
+                                                    console.log(err);
+                                                    functions.ToastAlert("", "error");
+                                                });
+                                        }
+                                    } className="mt-4 transition-all relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-500/95 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                        Pull Members
+                                    </button>
+
+                                    {/* <div className="mt-4">
+                                        <button type="button" className="w-full sm:w-auto focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-indigo-800 text-white transition-all" onClick={closeModal}>
+                                            Got it, thanks!
+                                        </button>
+                                    </div> */}
+                                </Dialog.Panel>
+                            </Transition.Child>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition>
             
             <div className="xl:mr-28 sm:ml-32 sm:mt-12 ml-6 mr-8 mt-10 w-full transition-all">
                 <div className="col-span-12 md:col-span-8 mb-4">
@@ -107,9 +237,9 @@ export default function DashSettings({ user }: any) {
                             </div>
                             {user.servers.map((item: any) => {
                                 return (
-                                    <div className="mb-6 p-6 rounded-lg border shadow-md bg-gray-800 border-gray-700" key={item.id}>
+                                    <div className="mb-6 p-6 rounded-lg border shadow-md bg-gray-800 border-gray-700" key={item.id} id={`server_${item.id}`}>
                                         <div className="inline-flex">
-                                            <Image src={item.picture} alt="icon" className="w-10 h-10 rounded-full ring-2 ring-gray-500 p-1" width={48} height={48} loading="lazy" />
+                                            <Image src={item.picture} alt="icon" className="w-10 h-10 rounded-full ring-2 ring-gray-500 p-1 object-cover" width={256} height={256} loading="lazy" />
                                             <h5 className="mb-2 ml-2 text-2xl font-bold tracking-tight text-white">{item.name}</h5>
                                         </div>
                                         <p className="font-normal text-gray-400">{item.description}</p>
@@ -129,7 +259,11 @@ export default function DashSettings({ user }: any) {
                                                 <span className="ml-2 text-sm text-gray-500">{new Date(item.createdAt).toUTCString()}</span>
                                             </div>
                                             <div className="flex items-center flex-col sm:flex-row">
-                                                <button className="w-full sm:w-auto ml-0 sm:ml-2 focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-indigo-800 text-white transition-all" onClick={
+                                                <button onClick={() => { openModal(); setModalGuildId(item.guildId); }} className="w-full sm:w-auto ml-0 sm:ml-2 focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-indigo-800 text-white transition-all">
+                                                    Actions
+                                                </button>
+                                                {/* <button className="w-full sm:w-auto ml-0 sm:ml-2 focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-indigo-800 text-white transition-all" 
+                                                onClick={
                                                     () => {
                                                         functions.ToastAlert("Please wait, this may take a while depending on the size of your server.", "info");
                                                         axios.get(`/api/v1/server/migrate/${item.guildId}`,
@@ -152,7 +286,7 @@ export default function DashSettings({ user }: any) {
                                                                 functions.ToastAlert("", "error");
                                                             });
                                                     }
-                                                }>Pull Members</button>
+                                                }>Pull Members</button> */}
                                                 <button className="w-full sm:w-auto ml-0 sm:ml-2 focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-indigo-800 text-white transition-all;" onClick={() => { router.push(`/dashboard/settings/${item.guildId}`)} }>
                                                         Edit
                                                 </button>
@@ -192,24 +326,24 @@ export default function DashSettings({ user }: any) {
                             )}
                             
                             <div className="mb-6 p-6 rounded-lg border shadow-md bg-gray-800 border-gray-700">
-                                <form method="POST" onSubmit={handleSubmit}>
+                                <form method="POST" onSubmit={(e) => {e.preventDefault(); handleSubmit(e, { serverName: serverName, guildId: guildId, roleId: roleId, customBot: customBot })}}>
                                     <div>
                                         <label htmlFor="serverName" className="block mb-2 text-sm font-medium text-gray-300">Server Name</label>
                                         <div className="relative mb-6">
-                                            <input onChange={handleChange} required name="serverName" type="text" id="serverName" className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="Server Name" />
+                                            <input onChange={handleChange} onPaste={handleChange} required name="serverName" type="text" id="serverName" className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="Server Name" />
                                         </div>
                                     </div>
                                     <div className="grid gap-6 grid-cols-2">
                                         <div>
                                             <label htmlFor="guildId" className="block mb-2 text-sm font-medium text-gray-300">Server Id</label>
                                             <div className="relative mb-6">
-                                                <input onChange={handleChange} required name="guildId" type="text" id="guildId" className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" pattern="[0-9]{17-18}" placeholder="Server Id" />
+                                                <input onChange={handleChange} onPaste={handleChange} required name="guildId" type="text" id="guildId" className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" pattern="[0-9]{17-18}" placeholder="Server Id" />
                                             </div>
                                         </div>
                                         <div>
                                             <label htmlFor="roleId" className="block mb-2 text-sm font-medium text-gray-300">Role Id</label>
                                             <div className="relative mb-6">
-                                                <input onChange={handleChange} required name="roleId" type="text" id="roleId" className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" pattern="[0-9]{17-18}" placeholder="Role Id" />
+                                                <input onChange={handleChange} onPaste={handleChange} required name="roleId" type="text" id="roleId" className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" pattern="[0-9]{17-18}" placeholder="Role Id" />
                                             </div>
                                         </div>
                                     </div>

@@ -38,15 +38,15 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
             },
         });
 
-        exchange(code as string, `https://${req.headers.host}/api/callback`, customBotInfo?.clientId, customBotInfo?.botSecret).then(async (data) => {
-           
-            if (!data.error) {
-                let account = data.access_token ? await resolveUser(data.access_token) : null;
+        exchange(code as string, `https://${req.headers.host}/api/callback`, customBotInfo?.clientId, customBotInfo?.botSecret).then(async (resp) => {
+            
+            if (resp.status === 200) {
+                let account = resp.data.access_token ? await resolveUser(resp.data.access_token) : null;
 
                 const userId: any = BigInt(account?.id as any);
 
                 if (account) {
-                    addMember(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, data.access_token, [BigInt(serverInfo?.roleId).toString()])
+                    addMember(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, resp.data.access_token, [BigInt(serverInfo?.roleId).toString()])
                         .then(async (resp) => {
                             if (resp?.status == 403) {
                                 res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=15;`);
@@ -86,8 +86,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                             data: {
                                 userId: userId,
                                 guildId: serverInfo?.guildId,
-                                accessToken: data.access_token,
-                                refreshToken: data.refresh_token,
+                                accessToken: resp.access_token,
+                                refreshToken: resp.refresh_token,
                                 ip: IPAddr ?? "127.0.0.1",
                                 username: account.username + "#" + account.discriminator,
                                 avatar: account.avatar ? account.avatar : (account.discriminator as any % 5).toString(),
@@ -96,12 +96,11 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                     } else {
                         await prisma.members.update({
                             where: {
-                                id: user.id
+                                id: user.id,
                             },
                             data: {
-                                guildId: serverInfo?.guildId,
-                                accessToken: data.access_token,
-                                refreshToken: data.refresh_token,
+                                accessToken: resp.access_token,
+                                refreshToken: resp.refresh_token,
                                 ip: IPAddr ?? "127.0.0.1",
                                 username: account.username + "#" + account.discriminator,
                                 avatar: account.avatar ? account.avatar : (account.discriminator as any % 5).toString(),
@@ -121,9 +120,19 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                 // res.setHeader("Set-Cookie", `RC_err=000; Path=/; Max-Age=3;`);
                 // return res.redirect(`/verify/${state}`);
             } else {
+                let error_detail;
+                const err = resp?.response?.data?.error_description;
+                
+
+                if (err.includes("Invalid \"redirect_uri\" in request.")) {
+                    error_detail = "Redirect is missing, follow this: https://docs.restorecord.com/guides/create-a-custom-bot/#setup-oauth2-redirect"
+                } else {
+                    error_detail = err;
+                }
+
                 return res.status(400).json({
                     status: "error",
-                    message: data,
+                    message: error_detail,
                 });
             }
         });

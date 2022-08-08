@@ -57,6 +57,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                         roleId: server.roleId.toString(),
                                         picture: server.picture,
                                         description: server.description,
+                                        webhook: server.webhook,
+                                        bgImage: server.bgImage,
                                         createdAt: server.createdAt
                                     }
                                 }),

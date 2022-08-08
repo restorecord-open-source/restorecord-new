@@ -76,10 +76,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         });
 
+        fetch(`https://discord.com/api/v9/guilds/${server.guildId}/members?limit=1000`, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bot ${bot.botToken}`,
+                "Content-Type": "application/json"
+            }
+        }).then(async (res) => {
+            if (res.status === 200) {
+                const data = await res.json();
+                for (const memberData of data) {
+                    const member = members.find(m => m.userId == memberData.user.id);
+                    if (member) {
+                        members.splice(members.indexOf(member), 1);
+                    } else {
+                    }
+                }
+            }
+        }).catch(err => {
+            console.log(err);
+        });
+
         let succPulled: number = 0;
         const pullingProcess = new Promise<void>(async (resolve, reject) => {
             let membersNew = await shuffle(members);
-            let delay: number = 300;
+            let delay: number = 500;
 
             await prisma.logs.create({
                 data: {
@@ -88,12 +109,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 }
             });
 
-            for (const member of membersNew) {                    
-                await sleep(delay);
+            for (const member of membersNew) {  
                 console.log(`Adding ${member.username} to ${server.name}`);
                 await addMember(server.guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, [BigInt(server.roleId).toString()]).then(async (resp: any) => {
-                    console.log(resp?.response?.status);
-                    console.log(resp?.status);
+                    console.log(resp?.response?.status ?? "");
+                    console.log(resp?.status ?? "");
                     
                     if (resp?.response?.status) {
                         switch (resp.response.status) {
@@ -164,6 +184,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                     return res.status(400).json({ success: false, message: err?.message ? err?.message : "Something went wrong" });
                 });
+
+                await sleep(delay);
             }
             await prisma.servers.update({
                 where: {
@@ -180,15 +202,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             })
             .catch(async (err: Error) => {
                 console.log(`3 ${err}`);
-                await prisma.servers.update({
-                    where: {
-                        id: server.id
-                    },
-                    data: {
-                        pulling: false
-                    }
-                });
-
                 // return res.status(400).json({ success: false, message: err?.message ? err.message : "Something went wrong" });
             })
             // .finally(() => {

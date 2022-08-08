@@ -1,6 +1,9 @@
 import axios from "axios";
 import { HttpsProxyAgent } from "https-proxy-agent";
 
+export async function sendWebhook(webhookUrl: string, content: string, username: string, avatarUrl: string) {
+}
+
 export async function addMember(guildId: string, userId: string, botToken: any, access_token: string, roles: string[]) {
     return await axios.put(`https://discordapp.com/api/guilds/${guildId}/members/${userId}`, {
         access_token: access_token,
@@ -73,37 +76,39 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
             if (resp.data.access_token && resp.data.refresh_token) {
                 await prisma.members.update({
                     where: {
-                        id: memberId
+                        id: memberId,
                     },
                     data: {
                         accessToken: resp.data.access_token,
                         refreshToken: resp.data.refresh_token
                     }
+                }).catch(async (err: any) => {
+                    console.log(err);
                 });
                 await addMember(guildId, userId, botToken, resp.data.access_token, [BigInt(roleId).toString()])
             }
         })
-        .catch(async (err) => { console.log(err); });
+        .catch(async (err) => { 
+            console.log(err);
+        });
 }
 
-export async function exchange(code: string, redirect_uri: string, client_id: any, client_secret: any) {
-    const request = await fetch("https://discord.com/api/oauth2/token", {
-        method: "POST",
+export async function exchange(excode: string, redirectUri: string, clientId: any, clientSecret: any) {
+    return await axios.post("https://discord.com/api/oauth2/token", new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        grant_type: "authorization_code",
+        code: excode,
+        redirect_uri: redirectUri,
+        scope: "identify+guilds.join",
+    }), {
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
         },
-
-        body: new URLSearchParams({
-            client_id: client_id,
-            client_secret: client_secret,
-            grant_type: "authorization_code",
-            code: code,
-            redirect_uri: redirect_uri,
-            scope: "identify+guilds.join",
-        }),
-    });
-
-    return await request.json();
+    })
+        .then(async (res: any) => { return res; })
+        .catch(async (err: any) => { return err; });
 }
 
 export async function resolveUser(token: string): Promise<User> {

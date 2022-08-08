@@ -88,8 +88,9 @@ model members {
     username     String
     avatar       String
     createdAt    DateTime @default(now())
+    // @@index([userId, guildId])
 
-    @@index([userId, guildId])
+    @@unique([userId, guildId])
 }
 
 model blacklist {
