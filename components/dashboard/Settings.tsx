@@ -337,13 +337,13 @@ export default function DashSettings({ user }: any) {
                                         <div>
                                             <label htmlFor="guildId" className="block mb-2 text-sm font-medium text-gray-300">Server Id</label>
                                             <div className="relative mb-6">
-                                                <input onChange={handleChange} onPaste={handleChange} required name="guildId" type="text" id="guildId" className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" pattern="[0-9]{17-18}" placeholder="Server Id" />
+                                                <input onChange={handleChange} onPaste={handleChange} required name="guildId" type="text" id="guildId" className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="Server Id" />
                                             </div>
                                         </div>
                                         <div>
                                             <label htmlFor="roleId" className="block mb-2 text-sm font-medium text-gray-300">Role Id</label>
                                             <div className="relative mb-6">
-                                                <input onChange={handleChange} onPaste={handleChange} required name="roleId" type="text" id="roleId" className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" pattern="[0-9]{17-18}" placeholder="Role Id" />
+                                                <input onChange={handleChange} onPaste={handleChange} required name="roleId" type="text" id="roleId" className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="Role Id" />
                                             </div>
                                         </div>
                                     </div>
