@@ -174,7 +174,7 @@ export default function VerifiedMembers({ user }: any) {
                                                                         
                                                                         setTimeout(() => {
                                                                             setLoading(false);
-                                                                        }, 500);
+                                                                        }, 200);
                                                                     })
                                                                     .catch((err): any => {
                                                                         setNotiTextE(err.message);

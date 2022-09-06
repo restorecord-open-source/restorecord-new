@@ -126,7 +126,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 if (!customBot) return res.status(400).json({ success: false, message: "No custom bot found." });
 
-                fetch(`https://discord.com/api/users/@me`, {
+                await fetch(`https://discord.com/api/users/@me`, {
                     headers: {
                         Authorization: `Bot ${customBot.botToken}`,
                         "X-RateLimit-Precision": "millisecond",
@@ -137,7 +137,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     return res.status(400).json({ success: false, message: "Bot token is invalid." });
                 });
 
-                fetch(`https://discord.com/api/guilds/${server.guildId}/members?limit=1000`, {
+                await fetch(`https://discord.com/api/guilds/${server.guildId}/members?limit=1000`, {
                     method: "GET",
                     headers: {
                         "Authorization": `Bot ${customBot.botToken}`,
@@ -149,6 +149,62 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         for (const memberData of data) {
                             if (memberData.user.id == member.userId) {
                                 return res.status(200).json({ success: true, message: "Member already in server." });
+                            } else {
+                                addMember(server.guildId.toString(), member.userId.toString(), customBot.botToken, member.accessToken, [BigInt(server.roleId).toString()]).then(async (resp: any) => {
+                                    console.log(resp?.response?.status ?? "");
+                                    console.log(resp?.status ?? "");
+                            
+                                    if (resp?.response?.status) {
+                                        switch (resp.response.status) {
+                                        case 429:   
+                                            const retryAfter = resp.response.headers["retry-after"];
+                                            console.log(`Rate limited: ${retryAfter}`);
+                                            if (retryAfter) {
+                                                const retry = parseInt(retryAfter);
+                                                setTimeout(async () => {
+                                                    await addMember(server.guildId.toString(), member.userId.toString(), customBot.botToken, member.accessToken, [BigInt(server.roleId).toString()])
+                                                }, retry);
+                                            }
+                                            break;
+                                        case 403:
+                                            refreshTokenAddDB( 
+                                                member.userId.toString(), member.id, member.guildId.toString(), 
+                                                customBot?.botToken, server.roleId, member.refreshToken,
+                                                customBot?.clientId.toString(), customBot.botSecret.toString(), prisma);
+                                            break;
+                                        }
+                                    }
+                                    switch (resp.status) {
+                                    case 403:
+                                        refreshTokenAddDB(member.userId.toString(), member.id, member.guildId.toString(), customBot.botToken, server.roleId, member.refreshToken, customBot.clientId.toString(), customBot.botSecret.toString(), prisma);
+                                        break;
+                                    case 407:
+                                        console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);
+                                        break;
+                                    case 204:
+                                        await addRole(server.guildId.toString(), member.userId.toString(), customBot.botToken, BigInt(server.roleId).toString());
+                                        break;
+                                    case 201:
+                                        break;
+                                    default:
+                                        console.log(`Unknown status code: ${resp.status}`);
+                                        break;
+                                    }
+                                }).catch(async (err: Error) => {
+                                    console.error(err);
+                                    await prisma.servers.update({
+                                        where: {
+                                            id: server.id
+                                        },
+                                        data: {
+                                            pulling: false
+                                        }
+                                    });
+                
+                                    return res.status(400).json({ success: false, message: err?.message ? err?.message : "Something went wrong" });
+                                });
+
+                                return res.status(200).json({ success: true, message: "Member added to server." });
                             }
                         }
                     }
@@ -156,60 +212,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     console.error(err);
                 });
 
-                await addMember(server.guildId.toString(), member.userId.toString(), customBot.botToken, member.accessToken, [BigInt(server.roleId).toString()]).then(async (resp: any) => {
-                    console.log(resp?.response?.status ?? "");
-                    console.log(resp?.status ?? "");
-            
-                    if (resp?.response?.status) {
-                        switch (resp.response.status) {
-                        case 429:   
-                            const retryAfter = resp.response.headers["retry-after"];
-                            console.log(`Rate limited: ${retryAfter}`);
-                            if (retryAfter) {
-                                const retry = parseInt(retryAfter);
-                                setTimeout(async () => {
-                                    await addMember(server.guildId.toString(), member.userId.toString(), customBot.botToken, member.accessToken, [BigInt(server.roleId).toString()])
-                                }, retry);
-                            }
-                            break;
-                        case 403:
-                            refreshTokenAddDB( 
-                                member.userId.toString(), member.id, member.guildId.toString(), 
-                                customBot?.botToken, server.roleId, member.refreshToken,
-                                customBot?.clientId.toString(), customBot.botSecret.toString(), prisma);
-                            break;
-                        }
-                    }
-                    switch (resp.status) {
-                    case 403:
-                        refreshTokenAddDB(member.userId.toString(), member.id, member.guildId.toString(), customBot.botToken, server.roleId, member.refreshToken, customBot.clientId.toString(), customBot.botSecret.toString(), prisma);
-                        break;
-                    case 407:
-                        console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);
-                        break;
-                    case 204:
-                        await addRole(server.guildId.toString(), member.userId.toString(), customBot.botToken, BigInt(server.roleId).toString());
-                        break;
-                    case 201:
-                        break;
-                    default:
-                        break;
-                    }
-                }).catch(async (err: Error) => {
-                    await prisma.servers.update({
-                        where: {
-                            id: server.id
-                        },
-                        data: {
-                            pulling: false
-                        }
-                    });
-
-                    return res.status(400).json({ success: false, message: err?.message ? err?.message : "Something went wrong" });
-                });
                 
-                return res.status(200).json({ success: true, message: "Member added. " });
-
             }
             catch (err: any) {
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
