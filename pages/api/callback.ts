@@ -202,6 +202,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 avatar: account.avatar ? account.avatar : (account.discriminator as any % 5).toString(),
                             },
                         });
+
+                        res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
+                        return res.redirect(`/verify/${state}`);
                     } else {
                         await prisma.members.update({
                             where: {
@@ -219,6 +222,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 createdAt: new Date(),
                             },
                         });
+
+                        res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
+                        return res.redirect(`/verify/${state}`);
                     }
 
                     // res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
