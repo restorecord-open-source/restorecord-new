@@ -92,13 +92,13 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
                         refreshToken: resp.data.refresh_token
                     }
                 }).catch(async (err: any) => {
-                    console.log(err);
+                    console.error(err);
                 });
                 await addMember(guildId, userId, botToken, resp.data.access_token, [BigInt(roleId).toString()])
             }
         })
         .catch(async (err) => { 
-            console.log(err);
+            console.error(err);
         });
 }
 
@@ -142,7 +142,7 @@ export async function resolveUser(token: string): Promise<User> {
 interface User {
 	id: number;
 	username: string;
-	discriminator: string;
+	discriminator: any;
 	avatar: string;
 	bot?: boolean;
 	system?: boolean;

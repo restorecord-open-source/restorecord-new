@@ -1,4 +1,5 @@
-import { faCheck, faX } from "@fortawesome/free-solid-svg-icons";
+import Check from "@mui/icons-material/Check"
+import Clear from "@mui/icons-material/Clear"
 
 const SubscriptionList: Subscription[] = [
     {
@@ -11,55 +12,67 @@ const SubscriptionList: Subscription[] = [
                 name: "memberCapacity",
                 value: "250 Restorable Members",
                 description: "Maximum number of Restorable Members",
-                icon: faCheck,
-            },
-            {
-                name: "customBots",
-                value: "Custom Bot",
-                description: "Custom Bot just for you",
-                icon: faCheck,
+                icon: <Check sx={{ color: "#22c55e" }} />,
             },
             {
                 name: "serverCapacity",
                 value: "1 Server",
                 description: "Maximum number of Servers you can add",
-                icon: faCheck,
+                icon: <Check sx={{ color: "#22c55e" }} />,
+            },
+            {
+                name: "customBots",
+                value: "Custom Bot",
+                description: "Custom Bot just for you",
+                icon: <Check sx={{ color: "#22c55e" }} />,
             },
             {
                 name: "ipBans",
                 value: "IP Bans",
                 description: "IP Ban members from your server",
-                icon: faCheck,
+                icon: <Check sx={{ color: "#22c55e" }} />,
             },
             {
                 name: "proxied",
                 value: "Proxied Requests",
                 description: "All requests sent to Discord are anonymous and proxied",
-                icon: faCheck,
+                icon: <Check sx={{ color: "#22c55e" }} />,
             },
             {
                 name: "antiVPN",
                 value: "Anti VPN & Proxy",
                 description: "Prevent members from using a VPN or Proxy to verify in your server",
-                icon: faX,
+                icon: <Clear sx={{ color: "#ef4444" }} />,
             },
             {
                 name: "verificationLogs",
                 value: "Verification Logs",
                 description: "Log all verifications in your server",
-                icon: faX,
+                icon: <Clear sx={{ color: "#ef4444" }} />,
             },
             {
                 name: "serverBackups",
                 value: "Server Backups",
                 description: "Backup all your Server Settings, Channels, Roles and more",
-                icon: faX,
+                icon: <Clear sx={{ color: "#ef4444" }} />,
             },
             {
                 name: "customization",
                 value: "Customization",
                 description: "Customize your verify page with your own color, icon and background",
-                icon: faX,
+                icon: <Clear sx={{ color: "#ef4444" }} />,
+            },
+            {
+                name: "onlineStatus",
+                value: "Online Status",
+                description: "Shows your bot as online in the Member List",
+                icon: <Clear sx={{ color: "#ef4444" }} />,
+            },
+            {
+                name: "botCommands",
+                value: "Bot Commands",
+                description: "Send verify embed, pull members and more directly from Discord",
+                icon: <Clear sx={{ color: "#ef4444" }} />,
             }
         ]
     },
@@ -73,55 +86,67 @@ const SubscriptionList: Subscription[] = [
                 name: "memberCapacity",
                 value: "5000 Restorable Members",
                 description: "Maximum number of Restorable Members",
-                icon: faCheck,
-            },
-            {
-                name: "customBots",
-                value: "Custom Bot",
-                description: "Custom Bot just for you",
-                icon: faCheck,
+                icon: <Check sx={{ color: "#22c55e" }} />,
             },
             {
                 name: "serverCapacity",
                 value: "5 Servers",
                 description: "Maximum number of Servers you can add",
-                icon: faCheck,
+                icon: <Check sx={{ color: "#22c55e" }} />,
+            },
+            {
+                name: "customBots",
+                value: "Custom Bot",
+                description: "Custom Bot just for you",
+                icon: <Check sx={{ color: "#22c55e" }} />,
             },
             {
                 name: "ipBans",
                 value: "IP Bans",
                 description: "IP Ban members from your server",
-                icon: faCheck,
+                icon: <Check sx={{ color: "#22c55e" }} />,
             },
             {
                 name: "proxied",
                 value: "Proxied Requests",
                 description: "All requests sent to Discord are anonymous and proxied",
-                icon: faCheck,
+                icon: <Check sx={{ color: "#22c55e" }} />,
             },
             {
                 name: "antiVPN",
                 value: "Anti VPN & Proxy",
                 description: "Prevent members from using a VPN or Proxy to verify in your server",
-                icon: faCheck,
+                icon: <Check sx={{ color: "#22c55e" }} />,
             },
             {
                 name: "verificationLogs",
                 value: "Verification Logs",
                 description: "Log all verifications in your server",
-                icon: faCheck,
+                icon: <Check sx={{ color: "#22c55e" }} />,
             },
             {
                 name: "serverBackups",
-                value: "Server Backups (Settings, Channels, Roles)",
+                value: "Server Backup",
                 description: "Backup all your Server Settings, Channels, Roles and more",
-                icon: faCheck,
+                icon: <Check sx={{ color: "#22c55e" }} />,
             },
             {
                 name: "customization",
                 value: "Customization",
                 description: "Customize your verify page with your own color, icon and background",
-                icon: faX,
+                icon: <Clear sx={{ color: "#ef4444" }} />,
+            },
+            {
+                name: "onlineStatus",
+                value: "Online Status",
+                description: "Shows your bot as online in the Member List",
+                icon: <Clear sx={{ color: "#ef4444" }} />,
+            },
+            {
+                name: "botCommands",
+                value: "Bot Commands",
+                description: "Send verify embed, pull members and more directly from Discord",
+                icon: <Clear sx={{ color: "#ef4444" }} />,
             }
         ]
     },
@@ -133,57 +158,69 @@ const SubscriptionList: Subscription[] = [
         features: [
             {
                 name: "memberCapacity",
-                value: "Unlimited Restorable Members",
+                value: "500k Restorable Members",
                 description: "Maximum number of Restorable Members",
-                icon: faCheck,
+                icon: <Check sx={{ color: "#22c55e" }} />,
+            },
+            {
+                name: "serverCapacity",
+                value: "250 Servers",
+                description: "Maximum number of Servers you can add",
+                icon: <Check sx={{ color: "#22c55e" }} />,
             },
             {
                 name: "customBots",
                 value: "Custom Bot",
                 description: "Custom Bot just for you",
-                icon: faCheck,
-            },
-            {
-                name: "serverCapacity",
-                value: "Unlimited Servers",
-                description: "Maximum number of Servers you can add",
-                icon: faCheck,
+                icon: <Check sx={{ color: "#22c55e" }} />,
             },
             {
                 name: "ipBans",
                 value: "IP Bans",
                 description: "IP Ban members from your server",
-                icon: faCheck,
+                icon: <Check sx={{ color: "#22c55e" }} />,
             },
             {
                 name: "proxied",
                 value: "Proxied Requests",
                 description: "All requests sent to Discord are anonymous and proxied",
-                icon: faCheck,
+                icon: <Check sx={{ color: "#22c55e" }} />,
             },
             {
                 name: "antiVPN",
                 value: "Anti VPN & Proxy",
                 description: "Prevent members from using a VPN or Proxy to verify in your server",
-                icon: faCheck,
+                icon: <Check sx={{ color: "#22c55e" }} />,
             },
             {
                 name: "verificationLogs",
                 value: "Advanced Verification Logs",
                 description: "Log all verifications in your server",
-                icon: faCheck,
+                icon: <Check sx={{ color: "#22c55e" }} />,
             },
             {
                 name: "serverBackups",
-                value: "Server Backups (Everything)",
+                value: "Full Server Backup",
                 description: "Backup all your Server Settings, Channels, Roles and more",
-                icon: faCheck,
+                icon: <Check sx={{ color: "#22c55e" }} />,
             },
             {
                 name: "customization",
                 value: "Customization",
                 description: "Customize your verify page with your own color, icon and background",
-                icon: faCheck,
+                icon: <Check sx={{ color: "#22c55e" }} />,
+            },
+            {
+                name: "onlineStatus",
+                value: "Online Status",
+                description: "Shows your bot as online in the Member List",
+                icon: <Check sx={{ color: "#22c55e" }} />,
+            },
+            {
+                name: "botCommands",
+                value: "Bot Commands",
+                description: "Send verify embed, pull members and more directly from Discord",
+                icon: <Check sx={{ color: "#22c55e" }} />,
             }
         ]
     },

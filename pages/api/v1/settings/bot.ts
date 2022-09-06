@@ -18,6 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         case "POST":
             try {
                 await limiter.check(res, 5, "CACHE_TOKEN");
+                if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
 
                 const data = { ...req.body };
 
@@ -30,6 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 const account = await prisma.accounts.findFirst({ where: { id: valid.id, } });
 
                 if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
+                if (!account) return res.status(400).json({ success: false, message: "Account not found" });
                 if (!data.botName || !data.botToken || !data.botSecret || !data.clientId) return res.status(400).json({ success: false, message: "Missing required fields." });
                 if (isNaN(Number(data.clientId))) return res.status(400).json({ success: false, message: "Invalid clientId." });
 
@@ -67,10 +69,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }
                 });
 
-                if (account?.role === "free")
+                if (account.role === "free")
                     if (accountBot.length >= 1) return res.status(400).json({ success: false, message: "You can't have more than 1 bot." });
-                if (account?.role === "premium")
+                if (account.role === "premium")
                     if (accountBot.length >= 5) return res.status(400).json({ success: false, message: "You can't have more than 5 bots." });
+                if (data.publicKey && account.role !== "business")
+                    return res.status(400).json({ success: false, message: "This feature is only available to Business subscribers." });
                 
 
                 const newBot = await prisma.customBots.create({
@@ -80,6 +84,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         botSecret: data.botSecret,
                         botToken: data.botToken,
                         ownerId: valid.id,
+                        publicKey: data.publicKey,
                     }
                 });
 
@@ -92,7 +97,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 } });
             }
             catch (err: any) {
-                console.log(err);
+                console.error(err);
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 if (err?.name === "" || err?.name === "JsonWebTokenError") return res.status(400).json({ success: false, message: "User not logged in" }); 
                 if (err?.name === "ValidationError") return res.status(400).json({ success: false, message: err.message, });
@@ -102,6 +107,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         case "PATCH": 
             try {
                 await limiter.check(res, 5, "CACHE_TOKEN");
+                if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
 
                 const data = { ...req.body };
 
@@ -150,6 +156,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }
                 }
 
+                const oldBot = await prisma.customBots.findFirst({
+                    where: {
+                        AND: [
+                            { name: data.botName },
+                            { botSecret: data.botSecret },
+                            { botToken: data.botToken },
+                            { ownerId: valid.id },
+                        ],
+                    },
+                });
+
+                if (!oldBot) return res.status(400).json({ success: false, message: "Bot not found" });
+
 
                 const botData = await axios.get(`https://discord.com/api/users/@me`, {
                     headers: {
@@ -159,6 +178,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 });
 
                 if (botData.status != 200) return res.status(400).json({ success: false, message: "Invalid Bot Token" });
+
+                if (botData.data.id != oldBot.clientId.toString()) return res.status(400).json({ success: false, message: "Token does not match the Bots Client Id" });
 
                 const bot = await prisma.customBots.findFirst({
                     where: {
@@ -192,7 +213,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 } });
             }
             catch (err: any) {
-                console.log(err);
+                console.error(err);
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 if (err?.name === "" || err?.name === "JsonWebTokenError") return res.status(400).json({ success: false, message: "User not logged in" }); 
                 if (err?.name === "ValidationError") return res.status(400).json({ success: false, message: err.message, });

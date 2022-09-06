@@ -1,6 +1,12 @@
 {
-    "extends": ["next/core-web-vitals", "plugin:prettier/recommended"],
-    "rules": {
-      "indent": ["error", 4]
-    }
+	"extends": ["next/core-web-vitals", "plugin:prettier/recommended"],
+	"rules": {
+		"indent": ["error", 4],
+		"no-restricted-imports": [
+			"error",
+			{
+				"patterns": ["@mui/*/*/*", "!@mui/material/test-utils/*"]
+			}
+		]
+	}
 }

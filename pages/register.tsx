@@ -1,30 +1,49 @@
-import NavBar from "../components/landing/NavBar"
-import { useEffect, useState, useRef } from "react"
-import HCaptcha from "@hcaptcha/react-hcaptcha";
-import functions from "../src/functions";
-import { Toaster } from "react-hot-toast";
-import styles from "../public/styles/register.module.css"
-import Link from "next/link";
 import { useRouter } from "next/router";
+import { useEffect, useState, useRef } from "react"
+
+import NavBar from "../components/landing/NavBar"
+import HCaptcha from "@hcaptcha/react-hcaptcha";
+import Link from "next/link";
 import Head from "next/head";
+import MuiLink from "@mui/material/Link";
+import Footer from "../components/landing/Footer";
+
+import Container from "@mui/material/Container";
+import Grid from "@mui/material/Grid";
+import TextField from "@mui/material/TextField";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 
 export default function Register() {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
+    const [openS, setOpenS] = useState(false);
+    const [openE, setOpenE] = useState(false);
+    const [notiTextS, setNotiTextS] = useState("X");
+    const [notiTextE, setNotiTextE] = useState("X");
+
     const [token, setToken]: any = useState();
     const captchaRef: any = useRef();
     const router = useRouter();
+    
 
 
 
     const onExpire = () => {
-        functions.ToastAlert("Captcha expired", "error");
+        setNotiTextE("Captcha expired");
+        setOpenE(true);
+        // functions.ToastAlert("Captcha expired", "error");
     }
 
     const onError = (err: any) => {
-        functions.ToastAlert(err, "error");
+        setNotiTextE(err);
+        setOpenE(true);
+        // functions.ToastAlert(err, "error");
     }
 
     const onSubmit = (e: any) => {
@@ -67,11 +86,15 @@ export default function Register() {
                 .then(res => {
                     setToken(null);
                     if (res.success) {
-                        functions.ToastAlert("Account created", "success");
+                        setNotiTextS("Account created");
+                        setOpenS(true);
+                        // functions.ToastAlert("Account created", "success");
                         router.push("/login?username=" + encodeURIComponent(username));
                     } 
                     else {
-                        functions.ToastAlert(res.message, "error");
+                        setNotiTextE(res.message);
+                        setOpenE(true);
+                        // functions.ToastAlert(res.message, "error");
                     }
                 });
         }
@@ -79,20 +102,122 @@ export default function Register() {
 
     return (
         <>
-            <Head>
-                <title>RestoreCord | Register</title>
-                <meta name="description" content="Create an account for RestoreCord, the Best option to Backup and Restore your Discord Servers Settings, Channels, Roles, etc." />
-            </Head>
+            <Box sx={{ minHeight: "100vh", flexDirection: "column", display: "flex" }}>
+                <Container maxWidth="lg" sx={{ mx: "auto", justifyContent: "center", alignItems: "center" }}>
 
-            <NavBar />
-            <Toaster />
-            <div className={styles.mainWrapper}>
-                <div className={styles.registerWrapper}>
-                    <div className={styles.header}>
+                    <NavBar />
+
+                    <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+                        <Alert elevation={6} variant="filled" severity="error">
+                            {notiTextE}
+                        </Alert>
+                    </Snackbar>
+
+                    <Snackbar open={openS} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenS(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+                        <Alert elevation={6} variant="filled" severity="success">
+                            {notiTextS}
+                        </Alert>
+                    </Snackbar>
+
+                    <Box sx={{ width: "100%", maxWidth: "500px", mx: "auto", mt: "3rem" }}>
+                        <Typography variant="h4" component="h1" align="center" sx={{ fontWeight: "bold" }} gutterBottom>
+                            Register an Account
+                        </Typography>
+
+                        <form onSubmit={onSubmit}>
+                            <Box sx={{ width: "100%", maxWidth: "500px", mx: "auto", mt: "3rem" }}>
+                                <TextField
+                                    variant="outlined"
+                                    margin="normal"
+                                    required
+                                    fullWidth
+                                    id="username"
+                                    label="Username"
+                                    name="username"
+                                    autoComplete="username"
+                                    InputProps={{ inputProps: { minLength: 3, maxLength: 20 } }}
+                                    autoFocus
+                                    value={username}
+                                    onChange={handleChange}
+                                />
+                                <TextField
+                                    variant="outlined"
+                                    margin="normal"
+                                    required
+                                    fullWidth
+                                    id="email"
+                                    label="Email Address"
+                                    type="email"
+                                    name="email"
+                                    autoComplete="email"
+                                    InputProps={{ inputProps: { minLength: 6, maxLength: 50 } }}
+                                    value={email}
+                                    onChange={handleChange}
+                                />
+                                <TextField
+                                    variant="outlined"
+                                    margin="normal"
+                                    required
+                                    fullWidth
+                                    name="password"
+                                    label="Password"
+                                    type="password"
+                                    id="password"
+                                    InputProps={{ inputProps: { minLength: 6, maxLength: 45 } }}
+                                    autoComplete="password"
+                                    value={password}
+                                    onChange={handleChange}
+                                />
+                                <HCaptcha
+                                    sitekey="748ea2c2-9a8d-4791-b951-af4c52dc1f0f"
+                                    size="invisible"
+                                    theme="dark"
+                                    onVerify={setToken}
+                                    onError={onError}
+                                    onExpire={onExpire}
+                                    ref={captchaRef}
+                                />
+                                <Button
+                                    type="submit"
+                                    fullWidth
+                                    variant="contained"
+                                    color="primary"
+                                    sx={{ mt: "1rem", mb: "0.5rem" }}
+                                >
+                                    Register
+                                </Button>
+                                <Grid container>
+                                    <Grid item xs>
+                                        <Typography variant="body2" gutterBottom>
+                                            You agree to our{" "}
+                                            <Link href="/terms">
+                                                <MuiLink variant="body2" component="a" href="/terms">Terms of Service</MuiLink>
+                                            </Link>
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item>
+                                        <Link href="/login">
+                                            <MuiLink variant="body2" component="a" href="/login">
+                                                Already have an account? Sign In
+                                            </MuiLink>
+                                        </Link>
+                                    </Grid>
+                                </Grid>
+                            </Box>
+                        </form>
+                    </Box>
+                </Container>
+
+                <Footer />
+            </Box>
+
+            {/* <div>
+                <div>
+                    <div>
                         <h1>Register an Account</h1>
                     </div>
-                    <form className={styles.formWrapper} onSubmit={onSubmit}>
-                        <div className={styles.form}>
+                    <form onSubmit={onSubmit}>
+                        <div>
                             <div>
                                 <label htmlFor="username" className="block mb-2 text-sm font-medium text-gray-300">Username</label>
                                 <div className="relative mb-6">
@@ -114,49 +239,6 @@ export default function Register() {
                                 </div>
                             </div>
 
-                            {/* <div className={styles.inputWrapper}>
-                                <label htmlFor="username" className="sr-only">
-                                    Username
-                                </label>
-                                <input
-                                    id="username"
-                                    name="username"
-                                    type="text"
-                                    autoComplete="username"
-                                    required
-                                    placeholder="Username"
-                                    onChange={handleChange}
-                                />
-                            </div>
-                            <div className={styles.inputWrapper}>
-                                <label htmlFor="email" className="sr-only">
-                                    Email address
-                                </label>
-                                <input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    autoComplete="email-address"
-                                    required
-                                    placeholder="Email address"
-                                    onChange={handleChange}
-                                />
-                            </div>
-                            <div className={styles.inputWrapper}>
-                                <label htmlFor="password" className="sr-only">
-                                    Password
-                                </label>
-                                <input
-                                    id="password"
-                                    name="password"
-                                    type="password"
-                                    autoComplete="password"
-                                    required
-                                    placeholder="Password"
-                                    onChange={handleChange}
-                                />
-                            </div> */}
-
                             <div>
                                 <HCaptcha
                                     sitekey="748ea2c2-9a8d-4791-b951-af4c52dc1f0f"
@@ -168,8 +250,8 @@ export default function Register() {
                                 />
                             </div>
                             
-                            <div className={styles.formTextWrapper}>
-                                <a className={styles.formText}>
+                            <div>
+                                <a>
                                     Already have an account? <Link href="/login"><span>Login</span></Link>.
                                     <br/>
                                     By clicking Register, you agree to our <Link href="/terms"><span>Terms</span></Link> and <Link href="/privacy"><span>Privacy Policy</span></Link>.
@@ -178,13 +260,13 @@ export default function Register() {
                         </div>
 
                         <div>
-                            <button type="submit" className={styles.formButton}>
+                            <button type="submit">
                                 Register
                             </button>
                         </div>  
                     </form>
                 </div>
-            </div>
+            </div> */}
         </>
     )
 }

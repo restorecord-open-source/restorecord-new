@@ -4,7 +4,6 @@ import rateLimit from "../../../../src/rate-limit";
 import { prisma } from "../../../../src/db";
 
 const limiter = rateLimit({
-    interval: 10 * 60, 
     uniqueTokenPerInterval: 500,
 })
 
@@ -14,6 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         case "GET":
             try {
                 limiter.check(res, 60, "CACHE_TOKEN");
+                if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 
                 const token = req.headers.authorization as string;
                 const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
@@ -36,7 +36,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             ownerId: account.id
                         },
                     }).then((servers: any) => {
-                        const guildIds = serverId ? [BigInt(serverId)] : servers.map((server: any) => server.guildId);
+                        // check if serverId is valid bigint
+                        let guildIds: any = [];
+
+                        if (serverId !== undefined && serverId.toLowerCase() === "all") {
+                            guildIds = servers.map((server: any) => server.guildId);
+                        } else {
+                            guildIds = serverId ? [BigInt(serverId)] : servers.map((server: any) => server.guildId);
+                        }
 
                         prisma.members.findMany({
                             where: {

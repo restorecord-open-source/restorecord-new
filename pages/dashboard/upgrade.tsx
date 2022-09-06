@@ -2,10 +2,10 @@ import { useRouter } from "next/router";
 import { useQuery } from "react-query";
 import DashUpgrade from "../../components/dashboard/Upgrade";
 import NavBar from "../../components/dashboard/navBar";
-import NavBarLoading from "../../components/dashboard/navBarLoading";
 import getUser from "../../src/dashboard/getUser";
-import functions from "../../src/functions";
 import { useToken } from "../../src/token";
+import Box from "@mui/material/Box";
+import Toolbar from "@mui/material/Toolbar";
 
 export default function Upgrade() {
     const [ token ]: any = useToken()
@@ -17,25 +17,27 @@ export default function Upgrade() {
 
 
     if (isLoading) {
-        return <NavBarLoading />;
+        return <div>Loading...</div>
     }
 
     if (isError) {
-        functions.ToastAlert("Something went wrong.", "error")
-        return <NavBarLoading />;
+        return <div>Error</div>
     }
 
     if (!data.username) {
-        return router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
+        router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
+
+        return <p>Loading...</p>
     }
 
     return (
         <>
-            <div className="min-h-screen max-h-screen flex">
-                <NavBar user={data}/>
-
-                <DashUpgrade user={data}/>
-            </div>
+            <Box sx={{ display: "flex" }}>
+                <NavBar user={data}>
+                    <Toolbar />
+                    <DashUpgrade user={data}/>
+                </NavBar>
+            </Box>
         </>
     )
 }

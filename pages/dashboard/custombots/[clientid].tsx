@@ -1,10 +1,10 @@
+import Box from "@mui/material/Box";
+import Toolbar from "@mui/material/Toolbar";
 import { useRouter } from "next/router";
 import { useQuery } from "react-query";
 import DashBotSettings from "../../../components/dashboard/BotSettings";
 import NavBar from "../../../components/dashboard/navBar";
-import NavBarLoading from "../../../components/dashboard/navBarLoading";
 import getUser from "../../../src/dashboard/getUser";
-import functions from "../../../src/functions";
 import { useToken } from "../../../src/token";
 
 export default function CustomSettings() {
@@ -19,25 +19,28 @@ export default function CustomSettings() {
 
 
     if (isLoading) {
-        return <NavBarLoading />;
+        return <div>Loading...</div>
     }
 
     if (isError) {
-        functions.ToastAlert("Something went wrong.", "error")
-        return <NavBarLoading />;
+        return <div>Error</div>
     }
 
     if (!data.username) {
-        return router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
+        router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
+
+        return <p>Loading...</p>
     }
 
     return (
         <>
-            <div className="min-h-screen max-h-screen flex">
-                <NavBar user={data} />
-
-                <DashBotSettings user={data} id={clientid} />
-            </div>
+            <Box sx={{ display: "flex" }}>
+                <NavBar>
+                    <Toolbar />
+                    <DashBotSettings user={data} id={clientid} />
+                </NavBar>
+            </Box>
         </>
+        
     )
 }

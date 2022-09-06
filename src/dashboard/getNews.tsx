@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 
 export default async function getNews(options: any) {
     return await axios.get(`/api/v1/news`, {

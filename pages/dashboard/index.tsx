@@ -1,11 +1,20 @@
 import { useRouter } from "next/router";
 import { useQuery } from "react-query"
-import NavBar from "../../components/dashboard/navBar";
-import functions from "../../src/functions";
-import NavBarLoading from "../../components/dashboard/navBarLoading";
 import { useToken } from "../../src/token";
+
+import NavBar from "../../components/dashboard/navBar";
 import getUser from "../../src/dashboard/getUser";
 import DashBoard from "../../components/dashboard/DashBoard";
+
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import CssBaseline from "@mui/material/CssBaseline";
+import Drawer from "@mui/material/Drawer";
+import IconButton from "@mui/material/IconButton";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import Menu from "@mui/icons-material/Menu";
+
 
 export default function Dashboard() {
     const [ token ]: any = useToken()
@@ -13,32 +22,31 @@ export default function Dashboard() {
 
     const { data, isError, isLoading } = useQuery('user', async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
-    }), { retry: false,  refetchOnWindowFocus: false });
+    }), { retry: false,  refetchOnWindowFocus: true });
 
 
     if (isLoading) {
-        return <NavBarLoading />;
+        return <div>Loading...</div>
     }
 
     if (isError) {
-        functions.ToastAlert("Something went wrong.", "error")
-        return <NavBarLoading />;
+        return <div>Error</div>
     }
 
     if (!data.username) {
-        return router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
+        router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
+
+        return <p>Loading...</p>
     }
 
     return (
         <>
-            <div className="min-h-screen max-h-screen flex">
-                <NavBar user={data} />
-
-                <DashBoard user={data} />
-            </div>
+            <Box sx={{ display: "flex" }}>
+                <NavBar user={data}>
+                    <Toolbar />
+                    <DashBoard user={data} />
+                </NavBar>
+            </Box>
         </>
     )
 }
-
-
-

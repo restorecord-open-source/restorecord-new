@@ -1,78 +1,52 @@
-import { faCheck } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useState } from "react";
 import SubscriptionList from "../../../src/SubscriptionList";
-import Link from "next/link";
-import CustomToolTip from "../../CustomToolTip";
+import Typography from "@mui/material/Typography";
+import Grid from "@mui/material/Grid";
+import Card from "@mui/material/Card";
+import CardHeader from "@mui/material/CardHeader";
+import CardContent from "@mui/material/CardContent";
+import Box from "@mui/material/Box";
+import CardActions from "@mui/material/CardActions";
+import Button from "@mui/material/Button";
 
 export default function SubscriptionPlansSection() {
-
-    const [subscriptionType, setSubscriptionType] = useState("monthly");
-    const [subscriptionToggle , setSubscriptionToggle] = useState(true);
-    const toggleClass = " transform translate-x-6";
-
-    useEffect(() => {
-        setSubscriptionType("monthly");
-    }, []);
-
     return (
-        
-        <section className="pt-20" id="pricing">
-            <div className="px-10 text-center mb-5">
-                <h4 className="font-bold text-3xl mb-1 text-gray-200">
-                    Our Subscription Plans
-                </h4>
-            </div>
+        <>
+            <Typography variant="h3" component="h2" sx={{ textAlign: "center", marginTop: 24, fontWeight: "semibold" }} id="pricing">
+                Our Plans
+            </Typography>
+            <Typography color="grey.600" variant="h6" component="h2" sx={{ textAlign: "center", fontWeight: "normal", marginBottom: "2.5rem" }}>
+                Ready to get started? Check out our plans below.
+            </Typography>
 
-            <div className="flex justify-center">
-                <p className="text-center text-gray-200">Monthly</p>
-
-                <div className={"mx-5 mb-5 md:w-14 md:h-7 w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition-all " + (subscriptionToggle ? "bg-slate-600" : "bg-indigo-600")}
-                    onClick={() => {
-                        setSubscriptionToggle(!subscriptionToggle);
-                        subscriptionType === "monthly" ? setSubscriptionType("yearly") : setSubscriptionType("monthly");
-                    }}>
-                    <div className={"bg-white md:w-5 md:h-5 h-4 w-4 rounded-full shadow-md transform transition-all " +  (subscriptionToggle ? null : toggleClass)} />
-                </div>
-
-                <p className="text-center text-gray-200">Yearly</p>
-            </div>
-
-            <div className="grid grid-cols-1 gap-5 px-10 sm:grid-cols-1 lg:grid-cols-3 xl:px-32">
-                {SubscriptionList.map((subscription, index) => (
-                    <div className={`${subscription.bestPlan ? "border-indigo-600 border-4" : "border-gray-400 border-2"} text-center rounded-lg shadow-lg p-6`} key={index}>
-                        <h3 className="font-bold text-2xl mb-5 text-gray-200">{subscription.name}</h3>
-
-                        <h5 className="text-5xl text-gray-200 font-bold">
-                            {subscriptionType === "monthly" ? subscription.priceMonthly : subscription.priceYearly}
-                            <span className="text-gray-200 text-base font-semibold">/{subscriptionType}</span>
-                        </h5>
-
-                        <ul className="text-left my-5">
-                            {subscription.features.map((feature, index) => (
-                                <li className="my-4 font-bold text-lg text-gray-200 group" key={index}>
-                                    <CustomToolTip title={feature.description} position={"top"} duration={200} theme={"dark"}>
-                                        <FontAwesomeIcon icon={feature.icon} className={`${feature.icon === faCheck ? "text-green-500" : "text-red-500"} mr-2`} />
-                                        {feature.value}
-                                    </CustomToolTip>
-                                </li>
-                            ))}
-                        </ul>
-
-                        {subscription.name === "Free" ? (
-                            <Link href="/register">
-                                <a className="bg-indigo-600 border border-indigo-600 block w-full rounded-lg p-3 hover:bg-indigo-700 text-white transition-all">
-                                    Register
-                                </a>
-                            </Link>
-                        ) : (
-                            <a target="_blank" rel="noreferrer" href={`https://restorecord.sell.app/product/${subscription.name.toLowerCase()}`} className="bg-indigo-600 border border-indigo-600 block w-full rounded-lg p-3 hover:bg-indigo-700 text-white transition-all">
-                                Purchase
-                            </a>
-                        )}
-                    </div>
+            <Grid container spacing={2} alignItems="flex-end">
+                {SubscriptionList.map((tier) => (
+                    <Grid item key={tier.name} xs={12} md={4}>
+                        <Card>
+                            <CardHeader title={tier.name} titleTypographyProps={{ align: "center" }} subheaderTypographyProps={{ align: "center", }} sx={{ bgColor: "grey.700" }} />
+                            <CardContent>
+                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "baseline", mb: 2 }}>
+                                    <Typography component="h2" variant="h3" color="text.primary" sx={{ fontWeight: "500" }}>
+                                        {tier.priceYearly}
+                                    </Typography>
+                                    <Typography variant="h6" color="text.secondary">
+                                        /yearly
+                                    </Typography>
+                                </Box>
+                                {tier.features.map((feature) => (
+                                    <Typography variant="subtitle1" align="left" key={feature.name} sx={{ fontWeight: "400" }}>
+                                        {feature.icon} {feature.value}
+                                    </Typography>
+                                ))}
+                            </CardContent>
+                            <CardActions>
+                                <Button fullWidth variant={tier.name === "Premium" ? "contained" : "outlined"} sx={{ fontWeight: "600" }}>
+                                    {tier.priceYearly === "$0" ? "Sign Up" : "Purchase"}
+                                </Button>
+                            </CardActions>
+                        </Card>
+                    </Grid>
                 ))}
-            </div>
-        </section>
+            </Grid>
+        </>
     )
 }
