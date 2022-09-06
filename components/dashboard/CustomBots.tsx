@@ -1,8 +1,23 @@
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { Toaster } from "react-hot-toast";
-import functions from "../../src/functions";
+import { useQuery } from "react-query";
 import { useToken } from "../../src/token";
+
+import Container from "@mui/material/Container";
+import Paper from "@mui/material/Paper";
+import CardContent from "@mui/material/CardContent";
+import Typography from "@mui/material/Typography";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
+import Grid from "@mui/material/Grid";
+import Button from "@mui/material/Button";
+import Avatar from "@mui/material/Avatar";
+import Stack from "@mui/material/Stack";
+import Skeleton from "@mui/material/Skeleton";
+import TextField from "@mui/material/TextField";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import { Link } from "@mui/material";
 
 export default function DashCustomBot({ user }: any) {
     const [token]: any = useToken();
@@ -12,16 +27,46 @@ export default function DashCustomBot({ user }: any) {
     const [clientId, setclientId] = useState("");
     const [botSecret, setbotSecret] = useState("");
     const [botToken, setbotToken] = useState("");
+    const [publicKey, setpublicKey] = useState("");
 
     const [createNewBot, setcreateNewBot] = useState(false);
 
+    const [openS, setOpenS] = useState(false);
+    const [openE, setOpenE] = useState(false);
+    const [notiTextS, setNotiTextS] = useState("X");
+    const [notiTextE, setNotiTextE] = useState("X");
 
-    if (!user.username) {
-        return (
-            <>
-                <span className="text-white">Loading...</span>
-            </>
-        )
+    const { data, isError, isLoading, refetch } = useQuery("getCustomBotInfo", async() => {
+        if (user.bots && user.bots.length > 0) {
+            for (const bot of user.bots) {
+                await fetch(`https://discord.com/api/users/@me`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bot ${bot.botToken}`,
+                    },
+                })
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.id) {
+                            if (res.avatar === null) {
+                                bot.avatar = `https://cdn.discordapp.com/embed/avatars/${res.discriminator % 5}.png`;
+                            } else {
+                                bot.avatar = `https://cdn.discordapp.com/avatars/${res.id}/${res.avatar}.png`;
+                            }
+                            bot.username = `${res.username}#${res.discriminator}`;
+                            bot.clientId = res.id;
+                            return bot;
+                        }
+                    }).catch(err => {
+                        console.error(err);
+                    })
+            }
+        }
+    });
+
+    if (isError) {
+        return <p>Error</p>
     }
 
     function handleSubmit(e: any) {
@@ -38,22 +83,28 @@ export default function DashCustomBot({ user }: any) {
                 clientId: clientId,
                 botToken: botToken,
                 botSecret: botSecret,
+                publicKey: publicKey,
             })
         })
             .then(res => res.json())
             .then(res => {
                 if (!res.success) {
-                    functions.ToastAlert(res.message, "error");
+                    setNotiTextE(res.message);
+                    setOpenE(true);
                 }
                 else {
-                    functions.ToastAlert(res.message, "success");
-                    document.location.reload();
+                    setNotiTextS(res.message);
+                    setOpenS(true);
+                    setTimeout(() => {
+                        router.reload();
+                    }, 1500);
                 }
             })
             .catch(err => {
-                functions.ToastAlert(err, "error");
+                console.error(err);
+                setNotiTextE(err.message);
+                setOpenE(true);
             });
-
     }
 
     function handleChange(e: any) {
@@ -70,6 +121,9 @@ export default function DashCustomBot({ user }: any) {
         case "botSecret":
             setbotSecret(e.target.value);
             break;
+        case "publicKey":
+            setpublicKey(e.target.value);
+            break;
         default:
             break;
         }
@@ -77,8 +131,115 @@ export default function DashCustomBot({ user }: any) {
 
     return (
         <>
-            <Toaster />
-            <div className="xl:mr-28 sm:ml-32 sm:mt-12 ml-6 mr-8 mt-10 w-full transition-all">
+            <Container maxWidth="xl">
+                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                    <CardContent>
+                        <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                            Custom Bots
+                        </Typography>
+
+                        <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+                            <Alert elevation={6} variant="filled" severity="error">
+                                {notiTextE}
+                            </Alert>
+                        </Snackbar>
+
+                        <Snackbar open={openS} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenS(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+                            <Alert elevation={6} variant="filled" severity="success">
+                                {notiTextS}
+                            </Alert>
+                        </Snackbar>
+
+
+                        {(Array.isArray(user.bots) && user.bots.length > 0) && !createNewBot && (
+                            <>
+                                <Button variant="contained" sx={{ mb: 2 }} onClick={() => setcreateNewBot(true)}>
+                                    Create New Bot
+                                </Button>
+                                {user.bots.map((item: any) => {
+                                    return (
+                                        <Paper key={item.id} variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                                            <CardContent>
+                                                <Grid container spacing={3} direction="row" justifyContent={"space-between"}>
+                                                    <Grid item>
+                                                        <div style={{ display: "inline-flex", alignItems: "center" }}>
+                                                            <Avatar alt={item.username} src={item.avatar} sx={{ mr: "0.5rem" }} />
+                                                            {item.username ? (
+                                                                <Typography variant="h6" sx={{ fontWeight: "500" }}>
+                                                                    {item.username}
+                                                                </Typography>
+                                                            ) : (
+                                                                <Skeleton variant="text" width={150} />
+                                                            )}
+                                                        </div>
+                                                        <Typography variant="body2" color="textSecondary">
+                                                            {item.username ? (
+                                                                <>
+                                                                    {item.name} - {item.clientId}
+                                                                </>
+                                                            ) : (
+                                                                <Skeleton variant="text" width={190} height={20} />
+                                                            )}
+                                                        </Typography>
+                                                    </Grid>
+                                                    <Grid item xs={12} sm={12} md={3} lg={2} xl={1}>
+                                                        <Stack spacing={1} direction="column" justifyContent={"space-between"}>
+                                                            {item.username ? (
+                                                                <>
+                                                                    <Button variant="contained" onClick={() => { router.push(`/dashboard/custombots/${item.clientId}`) }}>
+                                                                        Edit
+                                                                    </Button>
+                                                                    <Button variant="contained" sx={{ background: "#43a047", "&:hover": { background: "#388e3c" } }} href={`https://discord.com/oauth2/authorize?client_id=${item.clientId}&scope=bot%20applications.commands&permissions=8`} target="_blank">
+                                                                        Invite
+                                                                    </Button>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <Skeleton variant="rectangular" width={100} height={36} sx={{ borderRadius: "4px" }} />
+                                                                    <Skeleton variant="rectangular" width={100} height={36} sx={{ borderRadius: "4px" }} />
+                                                                </>
+                                                            )}
+                                                        </Stack>
+                                                    </Grid>
+                                                </Grid>
+                                            </CardContent>
+                                        </Paper>
+                                    );
+                                })}
+                            </>
+                        )}
+
+                        {(createNewBot || (Array.isArray(user.bots) && user.bots.length === 0)) && (
+                            <>
+                                <Button variant="contained" sx={{ mb: 2 }} onClick={() => setcreateNewBot(false)}>
+                                    Go Back
+                                </Button>
+                                <Paper variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                                    <CardContent>
+                                        <Stack spacing={1} direction="column" justifyContent={"space-between"}>
+                                            <Alert variant="filled" severity="error">Before you create a bot, make sure you have read the <Link href="https://docs.restorecord.com/guides/create-a-custom-bot/" target="_blank">documentation</Link> and added a redirect/interaction URL to your bot.</Alert>
+                                            <TextField label="Bot Name" name="botName" value={botName} onChange={handleChange} required />
+                                            <TextField label="Client ID" name="clientId" value={clientId} onChange={handleChange} required />
+                                            <TextField label="Bot Token" name="botToken" value={botToken} onChange={handleChange} required />
+                                            <TextField label="Bot Secret" name="botSecret" value={botSecret} onChange={handleChange} required />
+                                            {user.role === "business" && (
+                                                <TextField label="Public Key" name="publicKey" value={publicKey} onChange={handleChange} required />
+                                            )}
+                                            <Button variant="contained" onClick={(e: any) => handleSubmit(e)}>
+                                                Create Bot
+                                            </Button>
+                                        </Stack>
+                                    </CardContent>
+                                </Paper>
+                            </>
+                        )}
+
+
+                    </CardContent>
+                </Paper>
+            </Container>
+
+            {/* <div className="xl:mr-28 sm:ml-32 sm:mt-12 ml-6 mr-8 mt-10 w-full transition-all">
                 <div className="col-span-12 md:col-span-8 mb-4">
                     <h1 className="text-white sm:text-4xl text-2xl font-bold leading-tight">
                         Custom Bots
@@ -187,9 +348,9 @@ export default function DashCustomBot({ user }: any) {
                             </div>
                         </>
                     )}
-                                          
+
                 </div>
-            </div>
+            </div> */}
         </>
     )
 }

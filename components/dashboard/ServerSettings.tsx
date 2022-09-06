@@ -1,8 +1,18 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { Toaster } from "react-hot-toast";
-import functions from "../../src/functions";
 import { useToken } from "../../src/token";
+
+import Container from "@mui/material/Container";
+import Paper from "@mui/material/Paper";
+import CardContent from "@mui/material/CardContent";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import Grid from "@mui/material/Grid";
+import TextField from "@mui/material/TextField";
+import Switch from "@mui/material/Switch";
+import Stack from "@mui/material/Stack";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 
 export default function DashServerSettings({ user, id }: any) {
     const [token]: any = useToken();
@@ -11,24 +21,27 @@ export default function DashServerSettings({ user, id }: any) {
     const [serverName, setServerName] = useState("");
     const [guildId, setGuildId] = useState("");
     const [roleId, setRoleId] = useState("");
+    const [webhook, setWebhook] = useState("");
+    const [webhookcheck, setWebhookCheck] = useState(false);
+    const [vpncheck, setVpnCheck] = useState(false);
 
     const server = user.servers.find((server: any) => server.guildId === id);
+    
+    const [openS, setOpenS] = useState(false);
+    const [openE, setOpenE] = useState(false);
+    const [notiTextS, setNotiTextS] = useState("X");
+    const [notiTextE, setNotiTextE] = useState("X");
 
     useEffect(() => {
         if (server) {
             setServerName(server.name);
             setGuildId(server.guildId);
             setRoleId(server.roleId);
+
+            setWebhookCheck(server.webhook);
+            setVpnCheck(server.vpncheck);
         }
     }, [server]);
-
-    if (!user.username) {
-        return (
-            <>
-                <span className="text-white">Loading...</span>
-            </>
-        )
-    }
 
     function handleSubmit(e: any) {
         e.preventDefault();
@@ -43,6 +56,9 @@ export default function DashServerSettings({ user, id }: any) {
                 newServerName: serverName,
                 newGuildId: guildId,
                 newRoleId: roleId,
+                newWebhook: webhook,
+                newWebhookCheck: webhookcheck,
+                newVpn: vpncheck,
                 
                 serverName: server.name,
                 guildId: server.guildId,
@@ -52,15 +68,24 @@ export default function DashServerSettings({ user, id }: any) {
             .then(res => res.json())
             .then(res => {
                 if (!res.success) {
-                    functions.ToastAlert(res.message, "error");
+                    setNotiTextE(res.message);
+                    setOpenE(true);
+                    // functions.ToastAlert(res.message, "error");
                 }
                 else {
-                    functions.ToastAlert(res.message, "success");
-                    router.push("/dashboard/settings");
+                    setNotiTextS(res.message);
+                    setOpenS(true);
+                    setTimeout(() => {
+                        router.push("/dashboard/settings");
+                    }, 1500);
+                    // functions.ToastAlert(res.message, "success");
+                    // router.push("/dashboard/settings");
                 }
             })
             .catch(err => {
-                functions.ToastAlert(err, "error");
+                setNotiTextE(err.message);
+                setOpenE(true);
+                // functions.ToastAlert(err, "error");
             });
 
     }
@@ -76,6 +101,15 @@ export default function DashServerSettings({ user, id }: any) {
         case "roleId":
             setRoleId(e.target.value);
             break;
+        case "webhookcheck":
+            setWebhookCheck(e.target.checked);
+            break;
+        case "webhook":
+            setWebhook(e.target.value);
+            break;
+        case "vpncheck":
+            setVpnCheck(e.target.checked);
+            break;
         default:
             break;
         }
@@ -85,7 +119,122 @@ export default function DashServerSettings({ user, id }: any) {
 
     return (
         <>
-            <Toaster />
+            <Container maxWidth="xl">
+                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                    <CardContent>
+                        <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                            Change Server Settings
+                        </Typography>
+
+                        <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+                            <Alert elevation={6} variant="filled" severity="error">
+                                {notiTextE}
+                            </Alert>
+                        </Snackbar>
+
+                        <Snackbar open={openS} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenS(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+                            <Alert elevation={6} variant="filled" severity="success">
+                                {notiTextS}
+                            </Alert>
+                        </Snackbar>
+                        
+                        {(user.servers.find((server: any) => server.guildId === id)) ? (
+                            <>
+                                <Grid container spacing={3} direction="row" justifyContent={"space-between"}>
+                                    <Grid item>
+                                        <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                            Editing {server.name}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item>
+                                        <Button variant="contained" sx={{ mb: 2 }} onClick={() => { router.push(`/dashboard/settings/`)} }>
+                                            Go Back
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+
+                                <form onSubmit={handleSubmit}>
+                                    <Grid container spacing={3} direction="column">
+                                        <Grid item>
+                                            <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                                Server Name
+                                            </Typography>
+                                            <TextField fullWidth variant="outlined" name="serverName" value={serverName} onChange={handleChange} />
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                                Guild ID
+                                            </Typography>
+                                            <TextField fullWidth variant="outlined" name="guildId" value={guildId} onChange={handleChange} />
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                                Role ID
+                                            </Typography>
+                                            <TextField fullWidth variant="outlined" name="roleId" value={roleId} onChange={handleChange} />
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                                Server Description
+                                            </Typography>
+                                            <TextField fullWidth variant="outlined" name="description" value={server.description} onChange={handleChange} />
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                                Server Icon
+                                            </Typography>
+                                            <TextField fullWidth variant="outlined" name="picture" value={server.picture} onChange={handleChange} />
+                                        </Grid>
+                                        <Grid item>
+                                            <Stack direction="row" spacing={1}>
+                                                <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                                    Webhook Logs
+                                                </Typography>
+                                                <Switch onChange={handleChange} name="webhookcheck" inputProps={{ "aria-label": "controlled" }} defaultChecked={server.webhook} />
+                                            </Stack>
+                                            {webhookcheck ? (
+                                                <TextField fullWidth variant="outlined" name="webhook" value={server.webhook} onChange={handleChange} />
+                                            ) : ( <></>)}
+                                        </Grid>
+                                        {webhookcheck ? (
+                                            <Grid item>
+                                                <Stack direction="row" spacing={1}>
+                                                    <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                                    VPN Check
+                                                    </Typography>
+                                                    <Switch onChange={handleChange} name="vpncheck" inputProps={{ "aria-label": "controlled" }} defaultChecked={server.vpn} />
+                                                </Stack>
+                                            </Grid>
+                                        ) : ( <></>)}
+                                        <Grid item>
+                                            <Button variant="contained" type="submit" sx={{ mb: 2 }} fullWidth>
+                                                Save Changes
+                                            </Button>
+                                        </Grid>
+                                    </Grid>
+                                </form>
+                            </>
+                        ) : (
+                            <>
+                                <Grid container spacing={3} direction="row" justifyContent={"space-between"}>
+                                    <Grid item>
+                                        <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                            You do not have access to this server
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item>
+                                        <Button variant="contained" sx={{ mb: 2 }} onClick={() => { router.push(`/dashboard/settings/`)} }>
+                                            Go Back
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+                            </>
+                        )}
+                    </CardContent>
+                </Paper>
+            </Container>
+
+            {/* <Toaster />
             <div className="xl:mr-28 sm:ml-32 sm:mt-12 ml-6 mr-8 mt-10 w-full transition-all">
                 <div className="col-span-12 md:col-span-8 mb-4">
                     <h1 className="text-white sm:text-4xl text-2xl font-bold leading-tight">
@@ -150,7 +299,7 @@ export default function DashServerSettings({ user, id }: any) {
                             
                                           
                 </div>
-            </div>
+            </div> */}
         </>
     )
 }

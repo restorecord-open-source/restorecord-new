@@ -1,11 +1,13 @@
 import { useRouter } from "next/router";
 import { useQuery } from "react-query";
-import NavBar from "../../components/dashboard/navBar";
-import NavBarLoading from "../../components/dashboard/navBarLoading";
-import getUser from "../../src/dashboard/getUser";
-import functions from "../../src/functions";
 import { useToken } from "../../src/token";
+
+import NavBar from "../../components/dashboard/navBar";
+import getUser from "../../src/dashboard/getUser";
 import ErrorPage from "../_error";
+
+import Box from "@mui/material/Box";
+import Toolbar from "@mui/material/Toolbar";
 
 export default function Admin() {
     const [ token ]: any = useToken()
@@ -17,16 +19,17 @@ export default function Admin() {
 
 
     if (isLoading) {
-        return <NavBarLoading />;
+        return <div>Loading...</div>
     }
 
     if (isError) {
-        functions.ToastAlert("Something went wrong.", "error")
-        return <NavBarLoading />;
+        return <div>Error</div>
     }
 
     if (!data.username) {
-        return router.push(`/login?redirect_to=${encodeURIComponent("/dashboard")}`);
+        router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
+
+        return <p>Loading...</p>
     }
 
     if (!data.admin) {
@@ -35,9 +38,12 @@ export default function Admin() {
 
     return (
         <>
-            <div className="min-h-screen max-h-screen flex">
-                <NavBar user={data} />
-            </div>
+            <Box sx={{ display: "flex" }}>
+                <NavBar user={data}>
+                    <Toolbar />
+                    
+                </NavBar>
+            </Box>
         </>
     )
 }

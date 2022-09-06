@@ -1,22 +1,22 @@
 import { useRouter } from "next/router";
-import { useToken } from "../../../src/token";
-import { useQuery } from "react-query";
+import { useQuery } from "react-query"
+import { useToken } from "../../src/token";
 
-import NavBar from "../../../components/dashboard/navBar";
-import DashServerSettings from "../../../components/dashboard/ServerSettings";
-import getUser from "../../../src/dashboard/getUser";
+import NavBar from "../../components/dashboard/navBar";
+import getUser from "../../src/dashboard/getUser";
+import Account from "../../components/dashboard/Account";
 
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 
-export default function Settings() {
-    const router = useRouter();
+export default function AccountSettings() {
     const [ token ]: any = useToken()
-    const { server } = router.query;
+    const router = useRouter();
 
     const { data, isError, isLoading } = useQuery('user', async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
-    }), { retry: false, refetchOnWindowFocus: false });
+    }), { retry: false,  refetchOnWindowFocus: true });
+
 
     if (isLoading) {
         return <div>Loading...</div>
@@ -31,13 +31,13 @@ export default function Settings() {
 
         return <p>Loading...</p>
     }
-    
+
     return (
         <>
             <Box sx={{ display: "flex" }}>
-                <NavBar>
+                <NavBar user={data}>
                     <Toolbar />
-                    <DashServerSettings user={data} id={server} />
+                    <Account user={data} />
                 </NavBar>
             </Box>
         </>

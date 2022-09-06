@@ -3,49 +3,181 @@ import { useRouter } from "next/router";
 import { useQuery } from "react-query";
 import NavBar from "../../components/landing/NavBar";
 import getServer from "../../src/getServer";
-import styles from "../../public/styles/index.module.css"
 import Link from "next/link";
-import Image from "next/future/image";
 import Head from "next/head";
+import Typography from "@mui/material/Typography";
+import Container from "@mui/material/Container";
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
+import Skeleton from "@mui/material/Skeleton";
+import Avatar from "@mui/material/Avatar";
+import theme from "../../src/theme";
+import Button from "@mui/material/Button";
+import CheckCircle from "@mui/icons-material/CheckCircle";
+import Tooltip from "@mui/material/Tooltip";
+import Fade from "@mui/material/Fade";
+import Alert from "@mui/material/Alert";
+import AlertTitle from "@mui/material/AlertTitle";
 
 export default function Verify({ status, err }: any) {
     const router = useRouter();
     const guildId = router.query.server;
-    
-    if (!guildId) {
-        return (
-            <>
-                <NavBar />
-                <h1 className="text-center">Loading...</h1>
-            </>
-        )
-    }
 
     const { data, isLoading, error } = useQuery("server", async () => {
         return await getServer(guildId);
     }, { retry: false, refetchOnWindowFocus: false });
 
-    if (isLoading || error) {
+    if (error) {
         return (
             <>
-                <NavBar />
-                <h1 className="text-center">Loading...</h1>
+                <Typography variant="h1">
+                    Error
+                </Typography>
             </>
         )
     }
 
     return (
         <>
-            <Head>
-                <title>Verify in {guildId}</title>
-            </Head>
+            {isLoading ? ( <></> ) : (
+                <>
+                    {data.success ? (
+                        <Box sx={{ backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${data.server.bg})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", height: "100vh", width: "100vw", position: "absolute", top: "0", left: "0", zIndex: "-1", filter: "blur(0.5rem)" }} />
+                    ) : ( <></> )}
+                </>
+            )}
 
-            <div className="lg:block hidden">
+            <Container maxWidth="lg">
+                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", flexDirection: "column" }}>
+                    <Paper sx={{ borderRadius: "1rem", padding: "2rem", marginTop: "1rem", width: { xs: "100%", md: "50%" }, marginBottom: "2rem", boxShadow: "5px 5px 10px 5px rgba(0, 0, 0, 0.5)" }}>
+
+                        {isLoading ? ( <></> ) : (
+                            <>
+                                {status === "finished" ? (
+                                    <Alert severity="success" variant="filled" sx={{ mb: 2 }}>
+                                        <AlertTitle>Success</AlertTitle>
+                                        You have successfully verified in <b>{data.server.name}</b>!
+                                    </Alert>
+                                ) : ( <></> )}
+                            </>
+                        )}
+
+                        {isLoading ? ( <></> ) : (
+                            <>
+                                {err === "403" ? (
+                                    <Alert severity="error" variant="filled" sx={{ mb: 2 }}>
+                                        <AlertTitle>Error</AlertTitle>
+                                        Seems like this bot hasn&#39;t been setup correctly, please contact the owner telling him the bot is <b><code>Missing Permission</code></b>.
+                                    </Alert>
+                                ) : ( <></> )}
+
+                                {err === "306" ? (
+                                    <Alert severity="error" variant="filled" sx={{ mb: 2 }}>
+                                        <AlertTitle>Error</AlertTitle>
+                                        VPN or Proxy detected, please disable it and try again.
+                                    </Alert>
+                                ) : ( <></> )}
+                            </>
+                        )}
+                        
+
+                        {/* Server name */}
+                        {isLoading ? (
+                            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                <Skeleton animation="wave" variant="text" width="20rem" height="56px" />
+                            </Box>
+                        ) : (
+                            <>
+                                {data.success ? (
+                                    <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                        <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={data.server.name} placement="top" disableInteractive>
+                                            <Typography variant="h1" component="h1" sx={{ fontWeight: "700", fontSize: { xs: "1.5rem", md: "3rem" }, pl: "1rem", mr: "1rem" }}>
+                                                {data.server.name}
+                                            </Typography>
+                                        </Tooltip>
+
+                                        {/* {data.server.verified && (
+                                            <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={`Verified`} placement="top" disableInteractive>
+                                                <CheckCircle sx={{ color: theme.palette.grey[500], width: "2rem", height: "2rem" }} />
+                                            </Tooltip>
+                                        )} */}
+                                    </Box>
+                                ) : ( 
+                                    <>
+                                        <Typography variant="h1" component="h1" sx={{ textAlign: "center", fontWeight: "700", fontSize: { xs: "1.5rem", md: "3rem" } }}>
+                                            Server not found
+                                        </Typography>
+                                    </>
+                                )}
+                            </>
+                        )}
+
+                        {/* Server description */}
+                        {isLoading ? (
+                            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                <Skeleton animation="wave" variant="text" width="10rem" height="48px" />
+                            </Box>
+                        ) : (
+                            <>
+                                {data.success && (
+                                    <Typography variant="body1" component="p" sx={{ textAlign: "center", fontSize: { xs: "1rem", md: "1.75rem" } }}>
+                                        {data.server.description}
+                                    </Typography>
+                                )}
+                            </>
+                        )}
+
+                        {/* Server avatar */}
+                        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", mt: "1rem" }}>
+                            {isLoading ? (
+                                <Skeleton animation="wave" variant="circular" width="122px" height="122px" />
+                            ) : (
+                                <>
+                                    {data.success && (
+                                        <Avatar src={data.server.icon} sx={{ border: `0.175rem solid ${theme.palette.primary.main}`, width: { xs: "6rem", md: "8rem" }, height: { xs: "6rem", md: "8rem" } }} />
+                                    )}
+                                </>
+                            )}
+                        </Box>
+
+                        {/* verify button */}
+                        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                            {isLoading ? (
+                                <Skeleton animation="wave" variant="text" width="100%" height="56px" sx={{ width: "100%", marginTop: "2rem" }} />
+                            ) : (
+                                <>
+                                    {data.success && (
+                                        <Button variant="contained" color="primary" href={`https://discord.com/oauth2/authorize?client_id=${data.server.clientId}&redirect_uri=${window.location.origin}/api/callback&response_type=code&scope=identify+guilds.join&state=${data.server.guildId}`} sx={{ width: "100%", marginTop: "2rem" }}>
+                                            Verify
+                                        </Button>
+                                    )}
+                                </>
+                            )}
+                        </Box>
+                    </Paper>
+
+                    {/* creation date */}
+                    {isLoading ? (
+                        <Skeleton animation="wave" variant="text" width="7.5rem" height="24px" />
+                    ) : (
+                        <>
+                            {data.success && (
+                                <Typography variant="body1" component="p" sx={{ textAlign: "center", mt: 1 }}>
+                                    Created on {new Date(data.server.createdAt).toLocaleDateString()} by {data.server.owner}
+                                </Typography>
+                            )}
+                        </>
+                    )}
+                </Box>
+            </Container>
+            
+
+            {/* <div className="lg:block hidden">
                 <NavBar />
-            </div>            
+            </div>
             
             {data.success ? (
-                <div className={styles.verifyFade}>
+                <div>
                     {err === "403" ? (
                         <div className="flex p-4 mb-4 text-sm rounded-lg bg-red-200 text-red-800" role="alert">
                             <svg className="inline flex-shrink-0 mr-3 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"></path></svg>
@@ -69,7 +201,6 @@ export default function Verify({ status, err }: any) {
                                 You&#39;re verifying in <span className="text-indigo-600">{data.server.name}</span>
                             </>
                         )}
-                        {/* description */}
                         <p className="text-lg text-gray-600 mt-2">{data.server.description}</p>
                     </div>
 
@@ -89,11 +220,9 @@ export default function Verify({ status, err }: any) {
                                     </button>
                                 </a>
                             )}
-                            {/* 
                             <button className="focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-red-800 text-white transition-all">
                                 Unlink
-                            </button> 
-                            */}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -124,7 +253,7 @@ export default function Verify({ status, err }: any) {
                     By verifying you agree to the <Link href="/terms" className="text-indigo-600">Terms of Service</Link> and <Link href="/privacy" className="text-indigo-600">Privacy Policy</Link>
                 </div>
             </div>
-           
+            */}
         </>
     )
 }

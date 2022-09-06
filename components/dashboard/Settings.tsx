@@ -1,11 +1,35 @@
-import axios from "axios";
 import { useRouter } from "next/router";
-import { Fragment, useState } from "react";
-import { Toaster } from "react-hot-toast";
-import functions from "../../src/functions";
+import { useState } from "react";
+import { stringAvatar } from "../../src/functions";
 import { useToken } from "../../src/token";
-import Image from "next/future/image";
-import { Dialog, Transition } from '@headlessui/react'
+
+import Link from "next/link";
+import axios from "axios";
+
+import Button from "@mui/material/Button";
+import CardContent from "@mui/material/CardContent";
+import Container from "@mui/material/Container";
+import Grid from "@mui/material/Grid";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
+import Avatar from "@mui/material/Avatar";
+import Stack from "@mui/material/Stack";
+import Alert from "@mui/material/Alert";
+import Snackbar from "@mui/material/Snackbar";
+import MuiLink from "@mui/material/Link";
+import theme from "../../src/theme";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogActions from "@mui/material/DialogActions";
+import CloseIcon from "@mui/icons-material/Close";
+import IconButton from "@mui/material/IconButton";
+import TextField from "@mui/material/TextField";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 
 export default function DashSettings({ user }: any) {
     const [token]: any = useToken();
@@ -23,25 +47,13 @@ export default function DashSettings({ user }: any) {
 
     const [modalGuildId, setModalGuildId] = useState("1");
 
-    const [isOpen, setIsOpen] = useState(false)
-
-    function closeModal() {
-        setIsOpen(false)
-    }
-  
-    function openModal() {
-        setIsOpen(true)
-    }
+    const [openS, setOpenS] = useState(false);
+    const [openE, setOpenE] = useState(false);
+    const [notiTextS, setNotiTextS] = useState("X");
+    const [notiTextE, setNotiTextE] = useState("X");
 
     const [createNewServer, setCreateNewServer] = useState(false);
-
-    if (!user.username) {
-        return (
-            <>
-                <span className="text-white">Loading...</span>
-            </>
-        )
-    }
+    const [confirmDelete, setConfirmDelete] = useState(false);
 
     function handleSubmit(e: any, body: any, method: string = "POST") {
         e.preventDefault();
@@ -63,19 +75,22 @@ export default function DashSettings({ user }: any) {
             .then(res => res.json())
             .then(res => {
                 if (!res.success) {
-                    functions.ToastAlert(res.message, "error");
+                    setNotiTextE(res.message);
+                    setOpenE(true);
                 }
                 else {
-                    functions.ToastAlert(res.message, "success");
-                    if (res.server) {
-                        document.querySelector(`div#server_${res.server.id}>.inline-flex>img`)?.removeAttribute("srcset");
-                        document.querySelector(`div#server_${res.server.id}>.inline-flex>img`)?.setAttribute("src", res.server.picture);
-                        document.querySelector(`#server_${res.server.id} > p`)!.innerHTML = res.server.description;
-                    }
+                    setNotiTextS(res.message);
+                    setOpenS(true);
+
+                    setTimeout(() => {
+                        router.reload();
+                    }, 2500);
                 }
             })
             .catch(err => {
-                functions.ToastAlert(err, "error");
+                console.error(err);
+                setNotiTextE(err.message);
+                setOpenE(true);
             });
 
     }
@@ -113,7 +128,219 @@ export default function DashSettings({ user }: any) {
 
     return (
         <>
-            <Toaster />
+            <Container maxWidth="xl">
+                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                    <CardContent>
+                        <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                            Settings
+                        </Typography>
+
+                        <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+                            <Alert elevation={6} variant="filled" severity="error">
+                                {notiTextE}
+                            </Alert>
+                        </Snackbar>
+
+                        <Snackbar open={openS} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenS(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+                            <Alert elevation={6} variant="filled" severity="success">
+                                {notiTextS}
+                            </Alert>
+                        </Snackbar>
+                        
+                        <Dialog open={confirmDelete} onClose={() => setConfirmDelete(false)} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" fullWidth maxWidth="sm">
+                            <DialogTitle id="alert-dialog-title">{"Are you sure you?"}
+                                <IconButton aria-label="close" onClick={() => setConfirmDelete(false)} sx={{ position: 'absolute', right: 8, top: 8, color: theme.palette.grey[500] }}>
+                                    <CloseIcon />
+                                </IconButton>
+                            </DialogTitle>
+                            <DialogContent>
+                                <DialogContentText id="alert-dialog-description">
+                                    <Typography variant="body1" sx={{ fontWeight: "500", color: theme.palette.error.main }}>
+                                        This action cannot be undone.
+                                    </Typography>
+
+                                    Deleting this server will remove:
+                                    <ul>
+                                        <li>All Backups</li>
+                                        <li>All Verified Members</li>
+                                        <li>All Customized Settings</li>
+                                    </ul>
+                                </DialogContentText>
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={() => {
+                                    setConfirmDelete(false);
+
+                                    axios.delete(`/api/v1/server/${modalGuildId}`, { headers: {
+                                        "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                    },
+                                    validateStatus: () => true
+                                    })
+                                        .then(res => {
+                                            if (!res.data.success) {
+                                                setNotiTextE(res.data.message);
+                                                setOpenE(true);
+                                            }
+                                            else {
+                                                setNotiTextS(res.data.message);
+                                                setOpenS(true);
+                                                document.querySelector(`div#server_${modalGuildId}`)?.remove();
+                                            }
+                                        })
+                                        .catch(err => {
+                                            setNotiTextE(err.message);
+                                            setOpenE(true);
+                                            console.error(err);
+                                        });
+                                } } color="error">
+                                    Delete
+                                </Button>
+                                <Button onClick={() => setConfirmDelete(false)} color="primary" autoFocus>
+                                    Cancel
+                                </Button>
+                            </DialogActions>
+                        </Dialog>
+
+                        {!createNewServer && (Array.isArray(user.servers) && user.servers.length > 0) && (
+                            <>
+                                <Button variant="contained" sx={{ mb: 2 }} onClick={() => setCreateNewServer(true)}>
+                                    Create New Server
+                                </Button>
+                                {user.servers.map((item: any) => {
+                                    return (
+                                        <Paper key={item.id} variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }} id={`server_${item.guildId}`}>
+                                            <CardContent>
+                                                <Grid container spacing={3} direction="row" justifyContent={"space-between"}>
+                                                    <Grid item>
+                                                        <div style={{ display: "inline-flex", alignItems: "center" }}>
+                                                            {item.picture === "https://cdn.restorecord.com/logo512.png" ? (
+                                                                <Avatar {...stringAvatar(item.name, { sx: { mr: "0.5rem" } })}></Avatar>
+                                                            ) : (
+                                                                <Avatar src={item.picture} alt={item.serverName} sx={{ mr: "0.5rem" }} />
+                                                            )}
+                                                            <Typography variant="h6" sx={{ fontWeight: "500", wordBreak: "break-all" }}>
+                                                                {item.name}
+                                                            </Typography>
+                                                        </div>
+                                                        <Typography variant="body2" color="textSecondary">
+                                                            {item.description}
+                                                        </Typography>
+                                                        <Typography variant="body2" color="white" sx={{ wordBreak: "break-word" }}>
+                                                            Verification URL
+                                                            <MuiLink color={theme.palette.primary.light} href={`/verify/${encodeURIComponent(item.name)}`} rel="noopener noreferrer" target="_blank">
+                                                                <br/>
+                                                                {window.location.origin}/verify/{encodeURIComponent(item.name)}
+                                                            </MuiLink>
+                                                        </Typography>
+                                                    </Grid>
+                                                    <Grid item xs={12} sm={12} md={3} lg={2} xl={1}>
+                                                        <Stack spacing={1} direction="column" justifyContent={"space-between"}>
+                                                            <Button variant="contained" onClick={() => { router.push(`/dashboard/settings/${item.guildId}`)} }>
+                                                                Edit
+                                                            </Button>
+                                                            <Button variant="contained" sx={{ background: "#43a047", "&:hover": { background: "#388e3c" } }} onClick={() => {
+                                                                axios.put(`/api/v1/server/${item.guildId}`, {}, { 
+                                                                    headers: {
+                                                                        "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                                    },
+                                                                    validateStatus: () => true
+                                                                })
+                                                                    .then(res => {
+                                                                        if (!res.data.success) {
+                                                                            setNotiTextE(res.data.message);
+                                                                            setOpenE(true);
+                                                                        }
+                                                                        else {
+                                                                            setNotiTextS(res.data.message);
+                                                                            setOpenS(true);
+                                                                        }
+                                                                    })
+                                                                    .catch((err): any => {
+                                                                        setNotiTextE(err.message);
+                                                                        setOpenE(true);
+                                                                        console.error(err);
+                                                                    });
+                                                            }}>Migrate</Button>
+                                                            <Button variant="contained" color="error" onClick={() => {
+                                                                // axios.delete(`/api/v1/server/${item.id}`, { headers: {
+                                                                //     "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                                // },
+                                                                // validateStatus: () => true
+                                                                // })
+                                                                //     .then(res => {
+                                                                //         if (!res.data.success) {
+                                                                //             setNotiTextE(res.data.message);
+                                                                //             setOpenE(true);
+                                                                //         }
+                                                                //         else {
+                                                                //             setNotiTextS(res.data.message);
+                                                                //             setOpenS(true);
+                                                                //         }
+                                                                //     })
+                                                                //     .catch(err => {
+                                                                //         setNotiTextE(err.message);
+                                                                //         setOpenE(true);
+                                                                //         console.error(err);
+                                                                //     });
+
+                                                                setModalGuildId(item.guildId);
+
+                                                                setConfirmDelete(true);
+                                                            }
+                                                            }>Delete</Button>
+                                                        </Stack>
+                                                    </Grid>
+                                                </Grid>
+                                            </CardContent>
+                                        </Paper>
+                                    );
+                                })}
+                            </>
+                        )}
+
+                        {(createNewServer || (Array.isArray(user.servers) && user.servers.length === 0)) && (
+                            <>
+                                <Button variant="contained" sx={{ mb: 2 }} onClick={() => setCreateNewServer(false)}>
+                                    Go Back
+                                </Button>
+                                <Paper variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                                    <CardContent>
+                                        <Stack spacing={1} direction="column" justifyContent={"space-between"}>
+                                            {user.bots.length === 0 && (
+                                                <Alert variant="filled" severity="error">
+                                                    You don&apos;t have any bots to add to this server. You can add bots to your account{" "}
+                                                    <MuiLink color={theme.palette.primary.light} href="/dashboard/custombots" rel="noopener noreferrer" target="_blank">
+                                                        here
+                                                    </MuiLink>.
+                                                </Alert>
+                                            )}
+                                            <TextField label="Server Name" variant="outlined" value={serverName} onChange={(e) => setServerName(e.target.value)} required />
+                                            <TextField label="Server Id" variant="outlined" value={guildId} onChange={(e) => setGuildId(e.target.value)} required />
+                                            <TextField label="Role Id" variant="outlined" value={roleId} onChange={(e) => setRoleId(e.target.value)} required />
+                                            <FormControl fullWidth variant="outlined" required>
+                                                <InputLabel id="bot-select-label">Custom Bot</InputLabel>
+                                                <Select labelId="bot-select-label" label="Custom Bot" value={customBot} onChange={(e) => setCustomBot(e.target.value as string)} required>
+                                                    {user.bots.map((item: any) => {
+                                                        return (
+                                                            <MenuItem key={item.id} value={item.id}>
+                                                                {item.name}
+                                                            </MenuItem>
+                                                        );
+                                                    })}
+                                                </Select>
+                                            </FormControl>
+                                            <Button variant="contained" onClick={(e: any) => handleSubmit(e, { serverName, guildId, roleId, customBot, })}>Create</Button>
+                                        </Stack>
+                                    </CardContent>
+                                </Paper>
+                            </>
+                        )}
+
+                    </CardContent>
+                </Paper>
+            </Container>
+
+            {/* <Toaster />
 
             <Transition appear show={isOpen} as={Fragment}>
                 <Dialog as="div" className="relative z-[99999]" onClose={closeModal}>
@@ -127,7 +354,6 @@ export default function DashSettings({ user }: any) {
                                 <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-slate-900 p-8 text-left align-middle shadow-xl transition-all">
                                     <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-white">
                                         Actions
-                                        {/* close btn */}
                                         <button className="absolute top-0 right-0 m-6 text-white" onClick={closeModal}>
                                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                         </button>
@@ -165,12 +391,6 @@ export default function DashSettings({ user }: any) {
                                         <button type="submit" className="mt-4 transition-all relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                             Save
                                         </button>
-                                        {/* <button className="mt-4 transition-all relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                                Backup Server
-                                            </button>
-                                            <button className="mt-4 transition-all relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                                Restore Server
-                                            </button> */}
                                     </form>
 
                                     <button onClick={
@@ -192,7 +412,7 @@ export default function DashSettings({ user }: any) {
                                                     }
                                                 })
                                                 .catch(err => {
-                                                    console.log(err);
+                                                    console.error(err);
                                                     functions.ToastAlert("", "error");
                                                 });
                                         }
@@ -200,11 +420,6 @@ export default function DashSettings({ user }: any) {
                                         Pull Members
                                     </button>
 
-                                    {/* <div className="mt-4">
-                                        <button type="button" className="w-full sm:w-auto focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-indigo-800 text-white transition-all" onClick={closeModal}>
-                                            Got it, thanks!
-                                        </button>
-                                    </div> */}
                                 </Dialog.Panel>
                             </Transition.Child>
                         </div>
@@ -262,31 +477,6 @@ export default function DashSettings({ user }: any) {
                                                 <button onClick={() => { openModal(); setModalGuildId(item.guildId); }} className="w-full sm:w-auto ml-0 sm:ml-2 focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-indigo-800 text-white transition-all">
                                                     Actions
                                                 </button>
-                                                {/* <button className="w-full sm:w-auto ml-0 sm:ml-2 focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-indigo-800 text-white transition-all" 
-                                                onClick={
-                                                    () => {
-                                                        functions.ToastAlert("Please wait, this may take a while depending on the size of your server.", "info");
-                                                        axios.get(`/api/v1/server/migrate/${item.guildId}`,
-                                                            {
-                                                                headers: {
-                                                                    "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
-                                                                },
-                                                                validateStatus: () => true
-                                                            })
-                                                            .then(res => {
-                                                                if (!res.data.success) {
-                                                                    functions.ToastAlert(res.data.message, "error");
-                                                                }
-                                                                else {
-                                                                    functions.ToastAlert(res.data.message, "success");
-                                                                }
-                                                            })
-                                                            .catch(err => {
-                                                                console.log(err);
-                                                                functions.ToastAlert("", "error");
-                                                            });
-                                                    }
-                                                }>Pull Members</button> */}
                                                 <button className="w-full sm:w-auto ml-0 sm:ml-2 focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-indigo-800 text-white transition-all;" onClick={() => { router.push(`/dashboard/settings/${item.guildId}`)} }>
                                                         Edit
                                                 </button>
@@ -367,7 +557,7 @@ export default function DashSettings({ user }: any) {
                     )}
                                           
                 </div>
-            </div>
+            </div> */}
         </>
     )
 }

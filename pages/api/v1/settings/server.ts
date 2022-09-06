@@ -14,6 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         case "POST":
             try {
                 limiter.check(res, 15, "CACHE_TOKEN");
+                if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
 
                 const data = { ...req.body };
 
@@ -29,7 +30,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 if (isNaN(Number(data.guildId)) || isNaN(Number(data.roleId))) return res.status(400).json({ success: false, message: "Invalid Server Id or Role Id" });
 
-
                 const token = req.headers.authorization as string;
                 const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
                 
@@ -44,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 const server = await prisma.servers.findFirst({
                     where: {
                         OR: [
-                            { name: data.newServerName },
+                            { name: data.serverName },
                             { guildId: BigInt(data.guildId) },
                             { roleId: BigInt(data.roleId) },
                         ],
@@ -81,7 +81,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 } });
             }
             catch (err: any) {
-                console.log(err);
+                console.error(err);
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 if (err?.name === "" || err?.name === "JsonWebTokenError") return res.status(400).json({ success: false, message: "User not logged in" }); 
                 if (err?.name === "ValidationError") return res.status(400).json({ success: false, message: err.message, });
@@ -91,6 +91,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         case "PATCH":
             try {
                 limiter.check(res, 15, "CACHE_TOKEN");
+                if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
 
                 const data = { ...req.body };
 
@@ -151,6 +152,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             name: data.newServerName,
                             guildId: BigInt(data.newGuildId as any),
                             roleId: BigInt(data.newRoleId as any),
+                            webhook: data.newWebhookCheck ? data.newWebhook : null,
+                            vpncheck: data.newVpn ? data.newVpn : server.vpncheck,
                         }
                     });
 
@@ -214,7 +217,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 }
             }
             catch (err: any) {
-                console.log(err);
+                console.error(err);
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 if (err?.name === "" || err?.name === "JsonWebTokenError") return res.status(400).json({ success: false, message: "User not logged in" }); 
                 if (err?.name === "ValidationError") return res.status(400).json({ success: false, message: err.message, });

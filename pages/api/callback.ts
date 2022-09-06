@@ -1,7 +1,9 @@
+import axios from "axios";
 import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "../../src/db";
 import { getIPAddress } from "../../src/getIPAddress";
 import { addMember, addRole, exchange, resolveUser } from "../../src/Migrate";
+import { ProxyCheck } from "../../src/proxycheck";
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
     return new Promise(async (resolve, reject) => {
@@ -46,29 +48,133 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                 const userId: any = BigInt(account?.id as any);
 
                 if (account) {
-                    addMember(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, resp.data.access_token, [BigInt(serverInfo?.roleId).toString()])
-                        .then(async (resp) => {
-                            console.log(resp?.status);
-                            if (resp?.status === 403 || resp?.response?.status === 403 || resp?.response?.data?.code === "50013") {
-                                res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=15;`);
-                                return res.redirect(`/verify/${state}`);
-                            }
-                            else if (resp?.status === 204 || resp?.response?.status === 204) {
-                                await addRole(rGuildId.toString(), userId, customBotInfo?.botToken, serverInfo?.roleId.toString())
-                                    .then(async (resp) => {
-                                        console.log(resp?.status);
-                                        if (resp.status !== 204) {
-                                            res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=15;`);
-                                            return res.redirect(`/verify/${state}`);
-                                        }
-                                    })
-                                    .catch((err) => {
-                                        console.log(err);
-                                    })
-                            }
-                        }).catch((err) => {
-                            console.log(err);
-                        });
+                    if (serverInfo.webhook) {
+                        const createdAt: number = account.id / 4194304 + 1420070400000;
+                        const pCheck = await ProxyCheck.check(IPAddr, { vpn: true, asn: true });
+
+                        console.log(pCheck);
+                        
+                        if (serverInfo.vpncheck && pCheck[IPAddr].proxy === "yes") {
+                            let operator = pCheck[IPAddr].operator.url ? `[\`${pCheck[IPAddr].operator.name}\`](${pCheck[IPAddr].operator.url})` : pCheck[IPAddr].operator.name;
+
+                            await axios.post(serverInfo.webhook, {
+                                content: `<@${userId}> (${account.username}#${account.discriminator})`,
+                                embeds: [
+                                    {
+                                        title: "Failed VPN Check",
+                                        timestamp: new Date().toISOString(),
+                                        color: 0xff0000,
+                                        author: {
+                                            name: `${account.username}#${account.discriminator}`,
+                                            url: `https://discord.id/?prefill=${account.id}`,
+                                            icon_url: account.avatar ? `https://cdn.discordapp.com/avatars/${account.id}/${account.avatar}.png` : `https://cdn.discordapp.com/embed/avatars/${account.discriminator % 5}.png`,
+                                        },
+                                        fields: [
+                                            {
+                                                name: ":bust_in_silhouette: User:",
+                                                value: `${userId}`,
+                                                inline: true,   
+                                            },
+                                            {
+                                                name: ":earth_americas: Client IP:",
+                                                value: `||${IPAddr}||`,
+                                                inline: true,
+                                            }, 
+                                            {
+                                                name: ":clock1: Account Age:",
+                                                value: `<t:${Math.floor(createdAt / 1000)}:R>`,
+                                                inline: true,
+                                            },
+                                            {
+                                                name: `:flag_${pCheck[IPAddr].isocode.toLowerCase()}: IP Info:`,
+                                                value: `**Country:** \`${pCheck[IPAddr].country}\`\n**Provider:** \`${pCheck[IPAddr].provider}\``,
+                                                inline: true,
+                                            },
+                                            {
+                                                name: ":globe_with_meridians: Connection Info:",
+                                                value: `**Type**: \`${pCheck[IPAddr].type}\`\n**VPN**: \`${pCheck[IPAddr].proxy}\`\n**Operator**: ${operator}`,
+                                                inline: true,
+                                            }
+                                        ]
+                                    }
+                                ],
+                            });
+
+                            res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=15;`);
+                            return res.redirect(`/verify/${state}`);
+                        }
+                        else {
+                            await axios.post(serverInfo.webhook, {
+                                content: `<@${userId}> (${account.username}#${account.discriminator})`,
+                                embeds: [
+                                    {
+                                        title: "Successfully Verified",
+                                        timestamp: new Date().toISOString(),
+                                        color: 0x52ef52,
+                                        author: {
+                                            name: `${account.username}#${account.discriminator}`,
+                                            url: `https://discord.id/?prefill=${account.id}`,
+                                            icon_url: account.avatar ? `https://cdn.discordapp.com/avatars/${account.id}/${account.avatar}.png` : `https://cdn.discordapp.com/embed/avatars/${account.discriminator % 5}.png`,
+                                        },
+                                        fields: [
+                                            {
+                                                name: ":bust_in_silhouette: User:",
+                                                value: `${userId}`,
+                                                inline: true,   
+                                            },
+                                            {
+                                                name: ":earth_americas: Client IP:",
+                                                value: `||${IPAddr}||`,
+                                                inline: true,
+                                            }, 
+                                            {
+                                                name: ":clock1: Account Age:",
+                                                value: `<t:${Math.floor(createdAt / 1000)}:R>`,
+                                                inline: true,
+                                            },
+                                            {
+                                                name: `:flag_${pCheck[IPAddr].isocode.toLowerCase()}: IP Info:`,
+                                                value: `**Country:** \`${pCheck[IPAddr].country}\`\n**Provider:** \`${pCheck[IPAddr].provider}\``,
+                                                inline: true,
+                                            },
+                                            {
+                                                name: ":globe_with_meridians: Connection Info:",
+                                                value: `**Type**: \`${pCheck[IPAddr].type}\`\n**VPN**: \`${pCheck[IPAddr].proxy}\``,
+                                                inline: true,
+                                            }
+                                        ]
+                                    }
+                                ],
+                            });
+                        }
+                    }
+
+                    addMember(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, resp.data.access_token, [BigInt(serverInfo?.roleId).toString()]).then(async (resp) => {
+                        console.log(resp?.status);
+                        if (resp?.status === 403 || resp?.response?.status === 403 || resp?.response?.data?.code === "50013") {
+                            res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=15;`);
+                            return res.redirect(`/verify/${state}`);
+                        }
+                        else if (resp?.status === 204 || resp?.response?.status === 204) {
+                            await addRole(rGuildId.toString(), userId, customBotInfo?.botToken, serverInfo?.roleId.toString()).then(async (resp) => {
+                                console.log(resp?.status);
+                                if (resp.status !== 204) {
+                                    res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=15;`);
+                                    return res.redirect(`/verify/${state}`);
+                                } else {
+                                    res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
+                                    return res.redirect(`/verify/${state}`);
+                                }
+                            }).catch((err) => {
+                                console.error(err);
+                            })
+                        } else {
+                            res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
+                            return res.redirect(`/verify/${state}`);
+                        }
+                    }).catch((err) => {
+                        console.error(err);
+                    });
 
                     const user = await prisma.members.findFirst({
                         where: {

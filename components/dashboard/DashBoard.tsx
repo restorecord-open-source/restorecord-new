@@ -1,16 +1,31 @@
 import { useQuery } from "react-query";
-import getNews from "../../src/dashboard/getNews";
-import functions from "../../src/functions";
 import { useToken } from "../../src/token"
-import dynamic from 'next/dynamic'
-import getMembers from "../../src/dashboard/getMembers";
-import Image from "next/future/image";
-import Link from "next/link";
-const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
+import getMembers from "../../src/dashboard/getMembers";
+import getNews from "../../src/dashboard/getNews";
+import dynamic from "next/dynamic";
+import Link from "next/link";
+
+import Avatar from "@mui/material/Avatar";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Container from "@mui/material/Container";
+import Grid from "@mui/material/Grid";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
+import ListItemText from "@mui/material/ListItemText";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
+import Skeleton from "@mui/material/Skeleton";
+
+const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 export default function DashBoard({ user }: any) {
     const [token]: any = useToken();
+
+    let memberArr: any = [];
 
     const { data, isError, isLoading } = useQuery('news', async () => await getNews({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
@@ -20,87 +35,27 @@ export default function DashBoard({ user }: any) {
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
     }), { retry: false });
 
-    if (isLoading || isLoading2) {
-        return (
-            <>
-                <div className="xl:mr-28 sm:ml-32 sm:mt-12 ml-6 mr-8 mt-10 w-full transition-all animate-pulse shadow">
-                    <div className="col-span-12 md:col-span-8 mb-4">
-                        <div className="h-3.5 rounded-full bg-gray-600 w-36 mb-2"></div>
-                        <div className="h-2.5 rounded-full bg-gray-800 w-72 mb-2"></div>
-                    </div>
-                    <div className="p-4 space-y-4 max-w-screen rounded-lg border border-gray-800 divide-y divide-gray-800">
-                        <div className="mb-6 p-6 rounded-lg border shadow-md bg-gray-800 border-gray-700">
-                            <div className="h-4 rounded-full bg-gray-500 w-40 mb-4"></div>
-                            <div className="w-full">
-                                <div className="h-2 rounded-full bg-gray-700 max-w-[1280px] mb-2.5"></div>
-                                <div className="h-2 rounded-full bg-gray-600 max-w-[720px] mb-2.5"></div>
-                                <div className="h-2 rounded-full bg-gray-600 max-w-[540px] mb-2.5"></div>
-                                <div className="h-2 rounded-full bg-gray-700 max-w-[660px] mb-2.5"></div>
-                                <div className="h-2 rounded-full bg-gray-600 max-w-[570px] mb-2.5"></div>
-                                <div className="h-2 rounded-full bg-gray-700 max-w-[1180px] mb-2.5"></div>
-                                <div className="h-2 rounded-full bg-gray-600 max-w-[920px] mb-2.5"></div>
-                                <div className="h-2 rounded-full bg-gray-700 max-w-[1240px] mb-2.5"></div>
-                                <div className="h-2 rounded-full bg-gray-700 max-w-[670px] mb-2.5"></div>
-                                <div className="h-2 rounded-full bg-gray-600 max-w-[820px] mb-2.5"></div>
-                                <div className="h-2 rounded-full bg-gray-700 max-w-[490px] mb-2.5"></div>
-                                <div className="h-2 rounded-full bg-gray-600 max-w-[530px] mb-2.5"></div>
-                            </div>
-                            <hr className="border-b border-gray-700" />
-                            <div className="flex justify-between items-center mt-4">
-                                <div className="flex items-center">
-                                    <svg className="h-6 w-6 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                    <div className="ml-2 h-3 rounded-full bg-gray-600 w-44"></div>
-                                    <span style={{borderRight: "2px solid #374151", color: "transparent", marginLeft: "0.5rem"}}>​</span>
-                                    <div className="ml-2 h-3 rounded-full bg-gray-600 w-32"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </>
-        )
-    }
+    const timeArr = Array.from({ length: 14 }, (_, i) => {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        return date.toLocaleDateString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+        });
+    }).reverse();
 
-    if (isError || isError2) {
-        functions.ToastAlert("Something went wrong.", "error")
-        return (
-            <>
-                <div className="xl:mr-28 sm:ml-32 sm:mt-12 ml-6 mr-8 mt-10 w-full transition-all animate-pulse shadow">
-                    <div className="col-span-12 md:col-span-8 mb-4">
-                        <div className="h-3.5 rounded-full bg-gray-600 w-36 mb-2"></div>
-                        <div className="h-2.5 rounded-full bg-gray-800 w-72 mb-2"></div>
-                    </div>
-                    <div className="p-4 space-y-4 max-w-screen rounded-lg border border-gray-800 divide-y divide-gray-800">
-                        <div className="mb-6 p-6 rounded-lg border shadow-md bg-gray-800 border-gray-700">
-                            <div className="h-4 rounded-full bg-gray-500 w-40 mb-4"></div>
-                            <div className="w-full">
-                                <div className="h-2 rounded-full bg-gray-700 max-w-[1280px] mb-2.5"></div>
-                                <div className="h-2 rounded-full bg-gray-600 max-w-[720px] mb-2.5"></div>
-                                <div className="h-2 rounded-full bg-gray-600 max-w-[540px] mb-2.5"></div>
-                                <div className="h-2 rounded-full bg-gray-700 max-w-[660px] mb-2.5"></div>
-                                <div className="h-2 rounded-full bg-gray-600 max-w-[570px] mb-2.5"></div>
-                                <div className="h-2 rounded-full bg-gray-700 max-w-[1180px] mb-2.5"></div>
-                                <div className="h-2 rounded-full bg-gray-600 max-w-[920px] mb-2.5"></div>
-                                <div className="h-2 rounded-full bg-gray-700 max-w-[1240px] mb-2.5"></div>
-                                <div className="h-2 rounded-full bg-gray-700 max-w-[670px] mb-2.5"></div>
-                                <div className="h-2 rounded-full bg-gray-600 max-w-[820px] mb-2.5"></div>
-                                <div className="h-2 rounded-full bg-gray-700 max-w-[490px] mb-2.5"></div>
-                                <div className="h-2 rounded-full bg-gray-600 max-w-[530px] mb-2.5"></div>
-                            </div>
-                            <hr className="border-b border-gray-700" />
-                            <div className="flex justify-between items-center mt-4">
-                                <div className="flex items-center">
-                                    <svg className="h-6 w-6 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                    <div className="ml-2 h-3 rounded-full bg-gray-600 w-44"></div>
-                                    <span style={{borderRight: "2px solid #374151", color: "transparent", marginLeft: "0.5rem"}}>​</span>
-                                    <div className="ml-2 h-3 rounded-full bg-gray-600 w-32"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </>
-        )
+    if (data2) {
+        memberArr = data2.members.length > 0 ? Array.from({ length: 14 }, (_, i) => {
+            if (data2) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                return data2.members.filter((member: any) => {
+                    const createdAt = new Date(member.createdAt);
+                    return createdAt.getDate() === date.getDate() && createdAt.getMonth() === date.getMonth() && createdAt.getFullYear() === date.getFullYear();
+                }).length;
+            }
+        }).reverse() : [];
     }
 
     const apexChart: any = {
@@ -127,8 +82,8 @@ export default function DashBoard({ user }: any) {
                 enabled: false
             },
             stroke: {
-                curve: 'smooth',
-                colors: ['#3d36b2'],
+                curve: "smooth",
+                colors: ['#4f46e5'],
             },
             legend: {
                 horizontalAlign: 'left'
@@ -140,13 +95,30 @@ export default function DashBoard({ user }: any) {
                 },
             },
             fill: {
-                colors: ['#3d36b2'],
+                colors: ['#4f46e5'],
             },
             tooltip: {
                 theme: 'dark',
+                // remove the dot
+                marker: {
+                    show: false
+                },
+                onDatasetHover: {
+                    highlightDataSeries: false,
+                },
             },
             noData: {
                 text: 'No data',
+                align: 'center',
+                verticalAlign: 'middle',
+                offsetX: 0,
+                offsetY: 0,
+                style: {
+                    color: '#fff',
+                    fontSize: '14px',
+                    fontFamily: 'Roboto',
+                    fontWeight: 'bold'
+                },
             },
             xaxis: {
                 labels: {
@@ -155,17 +127,7 @@ export default function DashBoard({ user }: any) {
                 tooltip: {
                     enabled: false
                 },
-                categories: [
-                    ...Array.from({ length: 14 }, (_, i) => {
-                        const date = new Date();
-                        date.setDate(date.getDate() - i);
-                        return date.toLocaleDateString('en-US', {
-                            weekday: 'short',
-                            month: 'short',
-                            day: 'numeric',
-                        });
-                    }).reverse(),
-                ]
+                categories: timeArr
             },
             yaxis: {
                 show: true,
@@ -190,127 +152,175 @@ export default function DashBoard({ user }: any) {
         series: [
             {
                 name: "Verified Members",
-                data: [
-                    ...Array.from({ length: 14 }, (_, i) => {
-                        if (data2) {
-                            const date = new Date();
-                            date.setDate(date.getDate() - i);
-                            return data2.members.filter((member: any) => {
-                                const createdAt = new Date(member.createdAt);
-                                return createdAt.getDate() === date.getDate() && createdAt.getMonth() === date.getMonth() && createdAt.getFullYear() === date.getFullYear();
-                            }).length;
-                        }
-                    }).reverse(),
-                ]
+                data: memberArr
             }
         ]
     };
 
-
     if (!user.username) {
         return (
             <>
-                <span className="text-white">Loading...</span>
+                <p>Loading...</p>
             </>
         )
     }
 
     return (
         <>
-            <div className="xl:mr-28 sm:ml-32 sm:mt-12 ml-6 mr-8 mt-10 w-full transition-all">
-                <div className="col-span-12 md:col-span-8 mb-4">
-                    <h1 className="text-white sm:text-4xl text-2xl font-bold leading-tight">
-                        Dashboard
-                    </h1>
-                    <p className="text-gray-500 text-base leading-tight">
-                        Latest news, updates, and statistics.
-                    </p>
-                </div>
-                
-                <div className="grid lg:grid-cols-2 grid-cols-1 content-start mt-6 gap-4 pb-4">
-                    <div className="max-w-screen p-4 w-full rounded-lg border shadow-md bg-gray-900 border-gray-800">
-                        <h2 className="text-white sm:text-3xl text-xl font-bold leading-tight mb-4">
-                            Statistics
-                        </h2>
-                        <p className="text-gray-500 text-base leading-tight">
-                            All Members verified within the last 14 days.
-                        </p>
-                        
-                        <Chart options={apexChart.options} series={apexChart.series} type="area" height="425" />
-                    </div>
-
-                
-                    <div className="max-w-screen p-4 w-full rounded-lg border shadow-md bg-gray-900 border-gray-800">
-                        <h2 className="text-white sm:text-3xl text-xl font-bold leading-tight mb-4">
-                            Recent Activity
-                        </h2>
-                        <p className="text-gray-500 text-base leading-tight mb-6">
-                            Last {data2.members.length > 3 ? 3 : data2.members.length} verified members.
-                        </p>
-
-                        {Array.isArray(data2.members) && data2.members.map((item: any) => {
-                            if (data2.members.indexOf(item) > 2) {
-                                return null;
-                            }
-
-                            return (
-                                <div key={item.id}>
-                                    <div className="mb-6 p-6 rounded-lg border shadow-md bg-gray-800 border-gray-700">
-                                        <div className="inline-flex">
-                                            {item.avatar.length > 1 ? (
-                                                <Image loading="lazy" src={`https://cdn.discordapp.com/avatars/${item.userId}/${item.avatar}?size=128`} className="w-10 h-10 rounded-full border-2 border-indigo-600" alt="Profile Picture" width={64} height={64} />
-                                            ) : (
-                                                <Image loading="lazy" src={`https://cdn.discordapp.com/embed/avatars/${item.avatar}.png`} className="w-10 h-10 rounded-full border-2 border-indigo-600" alt="Profile Picture" width={64} height={64} />
+            <Container maxWidth="xl">
+                {/* make a grid with 2 sides and on smaller screens put them in a row */}
+                <Grid container spacing={3}>
+                    <Grid item xs={12} md={6}>
+                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%" }}>
+                            <CardContent>
+                                {isLoading2 ? (
+                                    <>
+                                        <Skeleton animation="wave" variant="text" width={140} height={42} sx={{ mb: 2 }} />
+                                        <Skeleton animation="wave" variant="text" width={320} height={24} />
+                                    </>
+                                ) : (
+                                    <>
+                                        <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                                            Statistics
+                                        </Typography>
+                                        <Typography variant="body1" color={"grey.200"}>
+                                            All Members verified within the last 14 days.
+                                        </Typography>
+                                    </>
+                                )}
+                                <Chart options={apexChart.options} series={apexChart.series} type="area" height={350} />
+                            </CardContent>
+                        </Paper>
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%" }}>
+                            <CardContent>
+                                {isLoading2 ? (
+                                    <>
+                                        <Skeleton animation="wave" variant="text" width={230} height={42} sx={{ mb: 2 }} />
+                                        <Skeleton animation="wave" variant="text" width={180} height={24} />
+                                    </>
+                                ) : (
+                                    <>
+                                        <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                                            Recent Activity
+                                        </Typography>
+                                        <Typography variant="body1" color={"grey.200"}>
+                                            Last {data2.members.length > 3 ? 3 : data2.members.length} verified members.
+                                        </Typography>
+                                    </>
+                                )}
+                                {/* <Grid container spacing={3}> */}
+                                {isLoading2 ? (
+                                    <>
+                                        {Array.from({ length: 3 }, (_, i) => {
+                                            return (
+                                                <List key={i} sx={{ width: "100%", maxWidth: 360 }}>
+                                                    <ListItem>
+                                                        <ListItemAvatar>
+                                                            <Skeleton animation="wave" variant="circular" width={40} height={40} />
+                                                        </ListItemAvatar>
+                                                        <ListItemText primary={<Skeleton animation="wave" variant="text" width={145} height={24} />} secondary={
+                                                            <>
+                                                                <Skeleton animation="wave" variant="text" width={175} height={20} />
+                                                                <Skeleton animation="wave" variant="text" width={80} height={20} />
+                                                            </>
+                                                        } />
+                                                    </ListItem>
+                                                </List>
                                             )
+                                        })}
+                                    </>
+                                ) : (
+                                    <>
+                                        {data2.members.slice(0, 3).map((member: any) => {
+                                            if (data2.members.indexOf(member) > 2) {
+                                                return null
                                             }
-                                            <h5 className="break-all ml-2 text-2xl font-bold tracking-tight text-white flex justify-center items-center">{item.username}</h5>
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
 
-                        {Array.isArray(data2.members) && data2.members.length > 3 && (
-                            <Link href="/dashboard/members">
-                                <button className=" bg-indigo-600 border-indigo-600 border block w-full rounded-lg p-3 hover:bg-indigo-700 text-white transition-all">
-                                    Show More
-                                </button>
-                            </Link>
+                                            return (
+                                                <List key={member.id} sx={{ width: '100%', maxWidth: 360 }}>
+                                                    <ListItem>
+                                                        <ListItemAvatar>
+                                                            {member.avatar.length > 1 ? (
+                                                                <Avatar src={`https://cdn.discordapp.com/avatars/${member.userId}/${member.avatar}?size=128`} />
+                                                            ) : (
+                                                                <Avatar src={`https://cdn.discordapp.com/embed/avatars/${member.avatar}.png`} />
+                                                            )}
+                                                        </ListItemAvatar>
+                                                        <ListItemText primary={`${member.username}`} secondary={
+                                                            <>
+                                                                Id: {`${member.userId}`}
+                                                                <br/>Server: {`${member.guildName}`}
+                                                            </>
+                                                        } />
+                                                    </ListItem>
+                                                </List>
+                                            )
+                                        })}
+                                    </>
+                                )}
+
+                                {isLoading2 ? (
+                                    <>
+                                        <Skeleton animation="wave" variant="rectangular" width={"100%"} height={36} sx={{ borderRadius: "4px" }} />
+                                    </>
+                                ) : (
+                                    <>
+                                        {Array.isArray(data2.members) && data2.members.length > 3 && (
+                                            <Link href="/dashboard/members">
+                                                <Button variant="contained" color="primary" sx={{ width: '100%' }}>
+                                                    View All
+                                                </Button>
+                                            </Link>
+                                        )}
+                                    </>
+                                )}
+
+                            </CardContent>
+                        </Paper>
+                    </Grid>
+                </Grid>
+                
+                {/* news */}
+                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                    <CardContent>
+                        {isLoading ? (
+                            <>
+                                <Skeleton animation="wave" variant="text" width={85} height={42} sx={{ mb: 2 }} />
+                                <Card variant="outlined" sx={{ width: "100%", padding: "1rem", borderRadius: "1rem" }}>
+                                    <Skeleton animation="wave" variant="text" width={195} height={32} sx={{ mb: 2 }} />
+                                    <Skeleton animation="wave" variant="rectangular" width={"100%"} height={300} />
+                                </Card>
+                            </>
+                        ) : (
+                            <>
+                                <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                                    News
+                                </Typography>
+
+                                {Array.isArray(data.news) && data.news.map((item: any) => {
+                                    // replace the links with a tags
+                                    let content = item.content.replace(/\[(.*?)\]\((.*?)\)/g, (match: any, p1: any, p2: any) => {
+                                        return `<a href="${p2}">${p1}</a>`
+                                    }).replace(/\*\*(.*?)\*\*/g, (match: any, p1: any) => {
+                                        return `<b>${p1}</b>`
+                                    });
+
+                                    return (
+                                        <Card variant="outlined" key={item.id} sx={{ width: '100%', padding: "1rem", borderRadius: "1rem" }}>
+                                            <Typography variant="h5" sx={{ mb: 2, fontWeight: "500" }}>
+                                                {item.title}
+                                            </Typography>
+                                            <Typography variant="body1" color={"grey.200"} sx={{ whiteSpace: "pre-line" }} dangerouslySetInnerHTML={{ __html: content }} />
+                                        </Card>
+                                    )
+                                })}
+                            </>
                         )}
-                    </div>
-                </div>
-
-                <div className="max-w-screen p-4 w-full rounded-lg border shadow-md bg-gray-900 border-gray-800">
-                    <h2 className="text-white sm:text-3xl text-xl font-bold leading-tight mb-4">
-                        Updates
-                    </h2>
-                    {Array.isArray(data.news) && data.news.map((item: any) => {
-                        return (
-                            <div className="mb-6 p-6 rounded-lg border shadow-md bg-gray-800 border-gray-700" key={item.id}>
-                                <h5 className="mb-2 text-2xl font-bold tracking-tight text-white">{item.title}</h5>
-                                <p className="break-words mb-3 font-normal text-gray-400 whitespace-pre-line">{item.content}</p>
-                                <hr className="border-b border-gray-700" />
-                                <div className="flex justify-between items-center mt-4">
-                                    <div className="flex items-center">
-                                        <svg className="h-6 w-6 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                        <span className="ml-2 text-sm text-gray-500">{new Date(item.createdAt).toUTCString()}</span>
-                                        <span style={{borderRight: "2px solid #374151", color: "transparent", marginLeft: "0.5rem"}}>​</span>
-                                        <span className="ml-2 text-sm text-gray-500">{item.author}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        )
-                    })}
-                </div>
-
-
-
-                {/* <div className="max-w-screen p-4 mt-4 w-full rounded-lg border shadow-md bg-gray-900 border-gray-800">
-                    <h2 className="text-white sm:text-3xl text-xl font-bold leading-tight mb-4">
-                        Recent Activities
-                    </h2>
-                </div> */}
-            </div>
+                    </CardContent>
+                </Paper>
+            </Container>
         </>
     )
 }

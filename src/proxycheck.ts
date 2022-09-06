@@ -1,5 +1,5 @@
-import fetch from 'node-fetch';
-import { URLSearchParams } from 'url';
+import fetch from "node-fetch";
+import { URLSearchParams } from "url";
 
 class proxycheck {
     api_key: string;
@@ -72,8 +72,7 @@ class proxycheck {
             const params = new URLSearchParams();
             params.append('ips', ip.join(','));
 
-            return fetch(url, { method: 'POST', body: params })
-                .then(res => res.json());
+            return fetch(url, { method: 'POST', body: params }).then(res => res.json());
         }
         else {
             return fetch(url).then(res => res.json());

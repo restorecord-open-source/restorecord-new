@@ -1,8 +1,8 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import type { Readable } from 'node:stream';
+import type { NextApiRequest, NextApiResponse } from "next";
+import type { Readable } from "node:stream";
 import { createHmac } from "crypto";
-import { prisma } from '../../../../src/db';
-import { Email } from '../../../../src/email';
+import { prisma } from "../../../../src/db";
+import { Email } from "../../../../src/email";
 
 export const config = {
     api: {
@@ -68,7 +68,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                                 </h1>
                                                 <div style="padding: 1rem; max-width: 30rem; margin-left: auto;margin-right: auto; width: 100%; border-radius: 0.75rem; border-width: 1px; background: rgb(250, 250, 250);">
                                                     <h2 style="color: rgb(0, 0, 0); font-size: 1.75rem; line-height: 2rem; font-weight: 600; line-height: 1.25; margin-bottom: 1rem">
-                                                        New Login Detected
+                                                        Thanks for purchasing ${body.variant.product.title}!
                                                     </h2>
                                                     <div>
                                                         <p style="white-space: pre-line; color: rgb(0, 0, 0); font-weight: 400; margin-bottom: 0.75rem; overflow-wrap: break-word; font-size: 1rem;">
@@ -95,7 +95,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         }).then(() => {
                             console.log(`[Email] Successfully upgraded ${body.additional_information[0].value} (${body.invoice.customer_information.email}) to ${body.variant.product.title}!`);
                         }).catch((err: any) => {
-                            console.log(err);
+                            console.error(err);
                         })
 
 
@@ -117,7 +117,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 }
             }
             catch (err: any) {
-                console.log(err);
+                console.error(err);
                 return res.status(400).json({ success: false, message: "Something went wrong" });
             }
             break;

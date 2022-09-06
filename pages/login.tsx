@@ -1,17 +1,31 @@
 import { useState, useEffect } from "react";
-import NavBar from "../components/landing/NavBar";
-import { Toaster } from "react-hot-toast";
-import styles from "../public/styles/login.module.css";
-import Link from "next/link";
-import functions from "../src/functions";
 import { useRouter } from "next/router";
-import Head from "next/head";
+
+import Link from "next/link";
+import MuiLink from "@mui/material/Link";
+import NavBar from "../components/landing/NavBar";
+import Footer from "../components/landing/Footer";
+
+import Container from "@mui/material/Container";
+import Grid from "@mui/material/Grid";
+import TextField from "@mui/material/TextField";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 
 export default function Login() {
     const router = useRouter();
 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+
+    const [openS, setOpenS] = useState(false);
+    const [openE, setOpenE] = useState(false);
+    const [notiTextS, setNotiTextS] = useState("X");
+    const [notiTextE, setNotiTextE] = useState("X");
+
 
     const redirect_to: any = router.query.redirect_to;
     const username_query: any = router.query.username;
@@ -32,19 +46,21 @@ export default function Login() {
             .then(res => res.json())
             .then(res => {
                 if (!res.success) {
-                    functions.ToastAlert(res.message, "error");
+                    setNotiTextE(res.message);
+                    setOpenE(true);
                 }
                 else {
-                    functions.ToastAlert(res.message, "success");
+                    setNotiTextS(res.message);
+                    setOpenS(true);
                     localStorage.setItem("token", res.token);
                     setTimeout(() => router.push(redirect_to ? redirect_to : "/dashboard"), 500);
                 }
             })
             .catch(err => {
-                functions.ToastAlert(err, "error");
+                setNotiTextE(err.message);
+                setOpenE(true);
             });
     }
-
     
     const handleChange = (e: any) => {
         const { name, value } = e.target;
@@ -72,40 +88,116 @@ export default function Login() {
                     .then(res => res.json())
                     .then(res => {
                         if (res.success) {
-                            functions.ToastAlert("You are already logged in, redirecting", "success");
-                            setTimeout(() => router.push("/dashboard"), 1000);
+                            // setNotiTextS("You are already logged in");
+                            // setOpenS(true);
+                            setTimeout(() => router.push("/dashboard"), 100);
                         }
                         else {
                             localStorage.removeItem("token");
                         }
                     })
                     .catch(err => {
-                        functions.ToastAlert("Error please check console", "error");
-                        console.log(err);
+                        setNotiTextE(err);
+                        setOpenE(true);
+                        console.error(err);
                     });
             }
         }
-        catch (error) {
-            console.log(error);
+        catch (err) {
+            console.error(err);
         }
     }, [router]);
 
     return (
         <>
-            <Head>
-                <title>RestoreCord | Login</title>
-                <meta name="description" content="Login to RestoreCord, the best option if you need to backup and restore your Discord Server Members, Settings, Channels, Roles, etc." />
-            </Head>
+            <Box sx={{ minHeight: "100vh", flexDirection: "column", display: "flex" }}>
+                <Container maxWidth="lg" sx={{ mx: "auto", justifyContent: "center", alignItems: "center" }}>
 
-            <NavBar />
-            <Toaster />
-            <div className={styles.mainWrapper}>
-                <div className={styles.loginWrapper}>
-                    <div className={styles.header}>
+                    <NavBar />
+
+                    <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+                        <Alert elevation={6} variant="filled" severity="error">
+                            {notiTextE}
+                        </Alert>
+                    </Snackbar>
+
+                    <Snackbar open={openS} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenS(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+                        <Alert elevation={6} variant="filled" severity="success">
+                            {notiTextS}
+                        </Alert>
+                    </Snackbar>
+
+                    <Box sx={{ width: "100%", maxWidth: "500px", mx: "auto", mt: "3rem" }}>
+                        <Typography variant="h4" component="h1" align="center" sx={{ fontWeight: "bold" }} gutterBottom>
+                            Log into your Account
+                        </Typography>
+
+                        <form onSubmit={onSubmit}>
+                            <Box sx={{ width: "100%", maxWidth: "500px", mx: "auto", mt: "3rem" }}>
+                                <TextField
+                                    variant="outlined"
+                                    margin="normal"
+                                    required
+                                    fullWidth
+                                    id="username"
+                                    label="Username"
+                                    name="username"
+                                    autoComplete="username"
+                                    InputProps={{ inputProps: { minLength: 3, maxLength: 20 } }}
+                                    autoFocus
+                                    value={username}
+                                    defaultValue={username_query}
+                                    onChange={handleChange}
+                                />
+                                <TextField
+                                    variant="outlined"
+                                    margin="normal"
+                                    required
+                                    fullWidth
+                                    name="password"
+                                    label="Password"
+                                    type="password"
+                                    id="password"
+                                    autoComplete="password"
+                                    InputProps={{ inputProps: { minLength: 6, maxLength: 45 } }}
+                                    value={password}
+                                    onChange={handleChange}
+                                />
+                                <Button
+                                    type="submit"
+                                    fullWidth
+                                    variant="contained"
+                                    color="primary"
+                                    sx={{ mt: "2rem", mb: "0.5rem" }}
+                                >
+                                    Login
+                                </Button>
+                                <Grid container>
+                                    <Grid item xs>
+                                        <Link href="/forgot">
+                                            <MuiLink variant="body2" component="a" href="/forgot">
+                                            Forgot password?
+                                            </MuiLink>
+                                        </Link>
+                                    </Grid>
+                                    <Grid item>
+                                        <Link href="/register">
+                                            <MuiLink variant="body2" component="a" href="/register">
+                                                {"Don't have an account? Sign Up"}
+                                            </MuiLink>
+                                        </Link>
+                                    </Grid>
+                                </Grid>
+                            </Box>
+                        </form>
+                    </Box>
+
+                    {/* <div>
+                    <div>
                         <h1>Log into your Account</h1>
                     </div>
-                    <form className={styles.formWrapper} onSubmit={onSubmit}>
-                        <div className={styles.form}>
+                    <form onSubmit={onSubmit}>
+                        <div>
                             <div>
                                 <label htmlFor="username" className="block mb-2 text-sm font-medium text-gray-300">Username</label>
                                 <div className="relative mb-6">
@@ -120,8 +212,8 @@ export default function Login() {
                                 </div>
                             </div>
                             
-                            <div className={styles.formTextWrapper}>
-                                <a className={styles.formText}>
+                            <div>
+                                <a>
                                     Don&#39;t have an account? Register <Link href="/register"><span>here</span></Link>.
                                 </a>
                             </div>
@@ -129,13 +221,15 @@ export default function Login() {
 
                         
                         <div>
-                            <button type="submit" className={styles.formButton}>
+                            <button type="button"  onClick={() => setOpen(true) }>
                                 Login
                             </button>
                         </div>
                     </form>
-                </div>
-            </div>
+                </div> */}
+                </Container>
+                <Footer />
+            </Box>
         </>
     )
 }

@@ -40,16 +40,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     },
                 });
 
+                const members = await prisma.members.findMany({
+                    where: {
+                        guildId: server?.guildId,
+                    },
+                });
+
                 if (server) {
                     return res.status(200).json({ success: true, server: {
                         name: server.name,
                         guildId: server.guildId.toString(),
-                        picture: server.picture,
-                        bgImage: server.bgImage ? server.bgImage : null,
+                        icon: server.picture,
+                        bg: server.bgImage ? server.bgImage : null,
                         description: server.description,
                         createdAt: server.createdAt,
                         clientId: customBot?.clientId.toString(),
                         owner: ownerAccount?.username,
+                        verified: members.length >= 50,
                     } });
                 }
                 else {
@@ -58,7 +65,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 
             }
             catch (err: any) {
-                console.log(err);
+                console.error(err);
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 return res.status(400).json({ success: false, message: "Something went wrong" });
             }

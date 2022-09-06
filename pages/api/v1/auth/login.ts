@@ -21,6 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     try {
         await limiter.check(res, 5, "CACHE_TOKEN");
+        if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
 
         const data = { ...req.body };
 
@@ -133,7 +134,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }).then(() => {
                         // console.log("Email sent");
                     }).catch((err: any) => {
-                        console.log(err);
+                        console.error(err);
                     })
                 });
         }
@@ -147,7 +148,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
     }
     catch (err: any) {
-        console.log(err);
+        console.error(err);
         if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
         if (err?.name === "ValidationError") return res.status(400).json({ success: false, message: err.errors[0] });
         return res.status(500);

@@ -1,8 +1,14 @@
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { Toaster } from "react-hot-toast";
-import functions from "../../src/functions";
 import { useToken } from "../../src/token";
+import { useEffect, useState } from "react";
+import Container from "@mui/material/Container";
+import Paper from "@mui/material/Paper";
+import CardContent from "@mui/material/CardContent";
+import Typography from "@mui/material/Typography";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
+import Grid from "@mui/material/Grid";
+import { Button, TextField } from "@mui/material";
 
 export default function DashBotSettings({ user, id }: any) {
     const [token]: any = useToken();
@@ -11,6 +17,12 @@ export default function DashBotSettings({ user, id }: any) {
     const [botSecret, setBotSecret] = useState("");
     const [botToken, setBotToken] = useState("");
     const [botName, setBotName] = useState("");
+
+    
+    const [openS, setOpenS] = useState(false);
+    const [openE, setOpenE] = useState(false);
+    const [notiTextS, setNotiTextS] = useState("X");
+    const [notiTextE, setNotiTextE] = useState("X");
 
     const bot = user.bots.find((bot: any) => bot.clientId === id);
 
@@ -21,14 +33,6 @@ export default function DashBotSettings({ user, id }: any) {
             setBotName(bot.name);
         }
     }, [bot]);
-
-    if (!user.username) {
-        return (
-            <>
-                <span className="text-white">Loading...</span>
-            </>
-        )
-    }
 
     function handleSubmit(e: any) {
         e.preventDefault();
@@ -52,15 +56,21 @@ export default function DashBotSettings({ user, id }: any) {
             .then(res => res.json())
             .then(res => {
                 if (!res.success) {
-                    functions.ToastAlert(res.message, "error");
+                    setNotiTextE(res.message);
+                    setOpenE(true);
                 }
                 else {
-                    functions.ToastAlert(res.message, "success");
-                    router.push("/dashboard/custombots");
+                    setNotiTextS(res.message);
+                    setOpenS(true);
+                    setTimeout(() => {
+                        router.push("/dashboard/custombots");
+                    }, 1500);
                 }
             })
             .catch(err => {
-                functions.ToastAlert(err, "error");
+                console.error(err);
+                setNotiTextE(err.message);
+                setOpenE(true);
             });
 
     }
@@ -85,7 +95,86 @@ export default function DashBotSettings({ user, id }: any) {
 
     return (
         <>
-            <Toaster />
+            <Container maxWidth="xl">
+                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                    <CardContent>
+                        <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                            Change Bot Settings
+                        </Typography>
+
+                        <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+                            <Alert elevation={6} variant="filled" severity="error">
+                                {notiTextE}
+                            </Alert>
+                        </Snackbar>
+
+                        <Snackbar open={openS} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenS(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+                            <Alert elevation={6} variant="filled" severity="success">
+                                {notiTextS}
+                            </Alert>
+                        </Snackbar>
+
+                        {(user.bots.find((bot: any) => bot.clientId === id)) ? (
+                            <>
+                     
+                                <Button variant="contained" sx={{ mb: 2 }} onClick={() => { router.push(`/dashboard/custombots/`)} }>
+                                    Go Back
+                                </Button>
+
+                                <form onSubmit={handleSubmit}>
+                                    <Grid container spacing={3} direction="column">
+                                        <Grid item>
+                                            <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                                Bot Name
+                                            </Typography>
+                                            <TextField fullWidth variant="outlined" name="botName" value={botName} onChange={handleChange} />
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                                Bot Secret
+                                            </Typography>
+                                            <TextField fullWidth variant="outlined" name="botSecret" value={botSecret} onChange={handleChange} />
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                                Bot Token
+                                            </Typography>
+                                            <Typography variant="body2" sx={{ mb: 2, fontWeight: "500", color: "red" }}>
+                                                Warning: Changing the Bot token to another Bot will make the Bot <u>unusable</u>, until changed back to the original token.
+                                            </Typography>
+                                            <TextField fullWidth variant="outlined" name="botToken" value={botToken} onChange={handleChange} />
+                                        </Grid>
+                                        <Grid item>
+                                            <Button variant="contained" type="submit" sx={{ mb: 2 }}>
+                                                Save
+                                            </Button>
+                                        </Grid>
+                                    </Grid>
+                                </form>
+                            </>
+                        ) : (
+                            <>
+                                <Grid container spacing={3} direction="row" justifyContent={"space-between"}>
+                                    <Grid item>
+                                        <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                            You do not have access to this bot
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item>
+                                        <Button variant="contained" sx={{ mb: 2 }} onClick={() => { router.push(`/dashboard/settings/`)} }>
+                                            Go Back
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+                            </>
+                        )}
+
+
+                    </CardContent>
+                </Paper>
+            </Container>
+            
+            {/* 
             <div className="xl:mr-28 sm:ml-32 sm:mt-12 ml-6 mr-8 mt-10 w-full transition-all">
                 <div className="col-span-12 md:col-span-8 mb-4">
                     <h1 className="text-white sm:text-4xl text-2xl font-bold leading-tight">
@@ -137,7 +226,7 @@ export default function DashBotSettings({ user, id }: any) {
                             
                                           
                 </div>
-            </div>
+            </div> */}
         </>
     )
 }

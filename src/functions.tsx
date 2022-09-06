@@ -1,70 +1,31 @@
-import toast from "react-hot-toast";
+import { SxProps } from "@mui/material";
 
-class functions {
-    constructor() {
-        functions.toUptime = functions.toUptime.bind(this);
-        functions.ToastAlert = functions.ToastAlert.bind(this);
+export function stringToColor(string: string) {
+    let hash = 0;
+    let i;
+  
+    /* eslint-disable no-bitwise */
+    for (i = 0; i < string.length; i += 1) {
+        hash = string.charCodeAt(i) + ((hash << 5) - hash);
     }
-
-    static async toUptime(uptime: number) {
-        const days = Math.floor(uptime / (60 * 60 * 24));
-        const hours = Math.floor((uptime % (60 * 60 * 24)) / (60 * 60));
-        const minutes = Math.floor((uptime % (60 * 60)) / 60);
-        const seconds = Math.floor(uptime % 60);
-        const milliseconds = Math.floor((uptime % 1) * 1000);
-
-        return { 
-            full: `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`,
-            short: `${hours}h ${minutes}m`,
-
-            days: days, 
-            hours: hours, 
-            minutes: minutes,
-            seconds: seconds,
-            milliseconds: milliseconds
-        };
+  
+    let color = '#';
+  
+    for (i = 0; i < 3; i += 1) {
+        const value = (hash >> (i * 8)) & 0xff;
+        color += `00${value.toString(16)}`.slice(-2);
     }
-
-    static async ToastAlert(message: string, type: "success" | "error" | "info" = "info") {
-        switch (type) {
-        case "success":
-            toast.success(message, {
-                position: "bottom-right",
-                style: {
-                    background: "#333",
-                    color: "#fff",
-                },
-            });
-            break;
-        case "error":
-            toast.error(message, {
-                position: "bottom-right",
-                style: {
-                    background: "#333",
-                    color: "#fff",
-                },
-            });
-            break;
-        case "info":
-            toast(message, {
-                position: "bottom-right",
-                style: {
-                    background: "#333",
-                    color: "#fff",
-                },
-            });
-            break;
-        default:
-            toast(message, {
-                position: "bottom-right",
-                style: {
-                    background: "#333",
-                    color: "#fff",
-                },
-            });
-            break;
-        }
-    }
+    /* eslint-enable no-bitwise */
+  
+    return color;
 }
-
-export default functions;
+  
+export function stringAvatar(name: string, props: { sx: SxProps }) {
+    return {
+        sx: {
+            bgcolor: stringToColor(name),
+            ...props.sx
+        },
+        children: `${name.split(' ')[0][0]}`,
+    };
+}

@@ -150,7 +150,7 @@ export async function resolveUser(token: string): Promise<User> {
 interface User {
 	id: number;
 	username: string;
-	discriminator: string;
+	discriminator: any;
 	avatar: string;
 	bot?: boolean;
 	system?: boolean;

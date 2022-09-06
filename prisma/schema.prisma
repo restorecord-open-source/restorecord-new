@@ -31,12 +31,12 @@ model accounts {
     servers        servers[]
     customBots     customBots[]
     sessions       sessions[]
+    emails         emails[]
 }
 
 model servers {
     id          Int         @id @default(autoincrement())
     name        String      @unique
-    owner       accounts    @relation(fields: [ownerId], references: [id])
     ownerId     Int
     guildId     BigInt      @unique @db.UnsignedBigInt
     roleId      BigInt      @unique @db.UnsignedBigInt
@@ -47,10 +47,11 @@ model servers {
     bgImage     String?
     description String      @default("Just a Discord Server.")
     createdAt   DateTime    @default(now())
-    customBot   customBots  @relation(fields: [customBotId], references: [id])
     customBotId Int
     pulling     Boolean     @default(false)
     pullTimeout DateTime?   @default(now())
+    customBot   customBots  @relation(fields: [customBotId], references: [id])
+    owner       accounts    @relation(fields: [ownerId], references: [id])
     members     members[]
     blacklist   blacklist[]
 }
@@ -80,7 +81,6 @@ model sessions {
 model members {
     id           Int      @id @default(autoincrement())
     userId       BigInt   @db.UnsignedBigInt
-    guild        servers  @relation(fields: [guildId], references: [guildId])
     guildId      BigInt   @db.UnsignedBigInt
     accessToken  String
     refreshToken String
@@ -88,6 +88,7 @@ model members {
     username     String
     avatar       String
     createdAt    DateTime @default(now())
+    guild        servers  @relation(fields: [guildId], references: [guildId])
     // @@index([userId, guildId])
 
     @@unique([userId, guildId])
@@ -97,8 +98,8 @@ model blacklist {
     id      Int     @id @default(autoincrement())
     ip      String? @unique
     userId  BigInt? @db.UnsignedBigInt
-    guild   servers @relation(fields: [guildId], references: [guildId])
     guildId BigInt  @db.UnsignedBigInt
+    guild   servers @relation(fields: [guildId], references: [guildId])
 }
 
 model customBots {
@@ -107,6 +108,7 @@ model customBots {
     clientId  BigInt    @unique @db.UnsignedBigInt
     botToken  String
     botSecret String
+    publicKey String?
     ownerId   Int
     owner     accounts  @relation(fields: [ownerId], references: [id])
     servers   servers[]
@@ -118,4 +120,15 @@ model news {
     content   String   @db.LongText
     author    String
     createdAt DateTime @default(now())
+}
+
+model emails {
+    id        Int      @id @default(autoincrement())
+    accountId Int
+    title     String   @db.LongText
+    code      String   @db.VarChar(999)
+    expires   DateTime
+    used      Boolean  @default(false)
+    createdAt DateTime @default(now())
+    account   accounts @relation(fields: [accountId], references: [id])
 }

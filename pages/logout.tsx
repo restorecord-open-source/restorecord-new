@@ -1,10 +1,20 @@
-import { useEffect } from "react";
-import { Toaster } from "react-hot-toast";
-import functions from "../src/functions";
+import { useEffect, useState } from "react";
 import { useToken } from "../src/token";
+
+import Container from "@mui/material/Container";
+import Paper from "@mui/material/Paper";
+import CardContent from "@mui/material/CardContent";
+import Typography from "@mui/material/Typography";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 
 export default function Logout() {
     const [token]: any = useToken();
+
+    const [openS, setOpenS] = useState(false);
+    const [openE, setOpenE] = useState(false);
+    const [notiTextS, setNotiTextS] = useState("X");
+    const [notiTextE, setNotiTextE] = useState("X");
 
     useEffect(() => {
         try {
@@ -16,10 +26,12 @@ export default function Logout() {
                 .then(res => res.json())
                 .then(res => {
                     if (!res.success) {
-                        functions.ToastAlert(res.message, "error");
+                        setNotiTextE(res.message);
+                        setOpenE(true);
                     }
                     else {
-                        functions.ToastAlert(res.message, "success");
+                        setNotiTextS(res.message);
+                        setOpenS(true);
                         window.localStorage.removeItem("token");
                         window.location.href = "/";
                     }
@@ -31,8 +43,29 @@ export default function Logout() {
 
     return (
         <>
-            <Toaster />
-            <span className="text-white">Logging out...</span>
+            <Container maxWidth="xl">
+                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                    <CardContent>
+                        <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                            Logging out...
+                        </Typography>
+
+                        <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+                            <Alert elevation={6} variant="filled" severity="error">
+                                {notiTextE}
+                            </Alert>
+                        </Snackbar>
+
+                        <Snackbar open={openS} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenS(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+                            <Alert elevation={6} variant="filled" severity="success">
+                                {notiTextS}
+                            </Alert>
+                        </Snackbar>
+
+
+                    </CardContent>
+                </Paper>
+            </Container>
         </>
     )
 }

@@ -1,87 +1,118 @@
-import { faBars } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import Link from "next/link"
 import { useEffect, useState } from "react"
-import styles from "../../public/styles/dashboard/sidebar.module.css"
+import { useRouter } from "next/router";
+import { useTheme } from "@mui/material/styles";
+
+import Link from "next/link"
 import navItemWrappers from "../../src/dashboard/navBarItems"
 
-export default function NavBar({ user }: any) {
+import Toolbar from "@mui/material/Toolbar";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import ListItemButton from "@mui/material/ListItemButton";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import CssBaseline from "@mui/material/CssBaseline";
+import Drawer from "@mui/material/Drawer";
+import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+import useMediaQuery from "@mui/material/useMediaQuery";
+
+import MenuIcon from "@mui/icons-material/Menu";
+import styled from "@emotion/styled";
+
+
+const drawerWidth = 240;
+
+const Main = styled("main", { shouldForwardProp: (prop: any) => prop !== "open" })<{
+    open?: boolean;
+    sx?: any;
+}>(({ theme, open }: any) => ({
+    flexGrow: 1,
+    padding: theme.spacing(3),
+    transition: theme.transitions.create("margin", {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen,
+    }),
+    marginLeft: `-${drawerWidth}px`,
+    ...(open && {
+        transition: theme.transitions.create("margin", {
+            easing: theme.transitions.easing.easeOut,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+        marginLeft: 0,
+    }),
+}));
+  
+
+export default function NavBar({ ...props }: any) {
     const [pathName, setPathName] = useState("/")
-    const number = [0,1,2,3,4,5,6,7,8,9]
+    const [openDrawer, setOpenDrawer] = useState(true);
+        
+    const router = useRouter();
+    const isMobile = useMediaQuery(useTheme().breakpoints.down("md"));
 
     useEffect(() => {
-        setPathName(window.location.pathname);
-    }, [])
+        setPathName(router.pathname);
 
-    if (!user.username) {
-        return (
-            <>
-                <aside className={styles.sideBarMainWrapper} aria-label="Sidebar">
-                    <div className={styles.sideBarWrapper}>
-                        <span className={styles.sideBarTitleWrapper}>
-                            <span className={styles.sideBarTitle}>Restore<span>Cord</span></span>
-                        </span>
-
-                        <div className="animate-pulse space-y-5">
-                            {number.map(num => (
-                                <div className="flex flex-row" key={num}>
-                                    <div className="h-6 w-6 rounded-lg bg-gray-500 ml-2"></div>
-                                    <div className="flex flex-col space-y-3 pl-2">
-                                        <div className="h-7 w-32 rounded-md bg-gray-500"></div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </aside>
-            </>
-        )
-    }
+        if (isMobile) setOpenDrawer(false);
+        else setOpenDrawer(true);
+    }, [router.pathname, isMobile]);
 
     return (
         <>
-            <FontAwesomeIcon id="menu" className={styles.sideBurgerMenu} icon={faBars} onClick={() => {
-                document.querySelector("#sidebar")?.classList.toggle(styles.sideBarOpen);
-                document.querySelector("#menu")?.classList.toggle(styles.sideBurgerClose);
-            } } />
-
-            <aside className={styles.sideBarMainWrapper} aria-label="Sidebar" id="sidebar">
-                <div className={styles.sideBarWrapper}>
-                    <div className="inline-flex">
-                        <FontAwesomeIcon id="close" className={styles.sideBurgerMenuClose} icon={faBars} onClick={() => {
-                            document.querySelector("#sidebar")?.classList.toggle(styles.sideBarOpen);
-                            document.querySelector("#menu")?.classList.toggle(styles.sideBurgerClose);
-                        } } />
-
-                        <span className={styles.sideBarTitleWrapper}>
-                            <span className={styles.sideBarTitle}>Restore<span>Cord</span></span>
-                        </span>
-                    </div>
-                    
-                    {navItemWrappers.map((item, index) => {
-                        return (
-                            <ul className={item.seperator ? `${styles.itemWrapperSeperator}` : `${styles.itemWrapperNormal}`} key={index}>
-                                {item.items.map((item, index) => {
-                                    if (item.admin && !user.admin) {
-                                        return null
+            <Box sx={{ display: "flex" }}>
+                <CssBaseline />
+                <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+                    <Toolbar>
+                        {isMobile && (
+                            <>
+                                <IconButton onClick={() => setOpenDrawer(!openDrawer)} edge="start" sx={{ marginRight: (theme) => theme.spacing(2) }} color="inherit" aria-label="menu">
+                                    <MenuIcon />
+                                </IconButton>
+                            </>
+                        )}
+                        <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, cursor: "pointer"}} onClick={() => { router.push("/dashboard") }}>
+                            RestoreCord
+                        </Typography>
+                    </Toolbar>
+                </AppBar>
+                <Drawer open={openDrawer} onClose={() => setOpenDrawer(false)} variant="persistent" sx={{ width: drawerWidth, flexShrink: 0, [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: "border-box" }, }}>
+                    <Toolbar />
+                    <Box sx={{ overflow: "auto" }}>
+                        {navItemWrappers.map((item, index) => {
+                            return (
+                                <List key={index}>
+                                    {item.items.map((item, index) => {
+                                        if (item.admin) {
+                                            return null
+                                        }
+                                        return (
+                                            <ListItem key={index} disablePadding selected={pathName === item.href}>
+                                                <Link href={item.href}>
+                                                    <ListItemButton>
+                                                        {/* <ListItem button selected={pathName === item.href} disablePadding> */}
+                                                        <ListItemIcon>
+                                                            {item.icon}
+                                                        </ListItemIcon>
+                                                        <ListItemText primary={item.name} />
+                                                        {/* </ListItem> */}
+                                                    </ListItemButton>
+                                                </Link>
+                                            </ListItem>
+                                        )
                                     }
-                                    return (
-                                        <li key={index}>
-                                            <Link href={item.href}>
-                                                <a className={pathName === item.href ? `${styles.itemWrapper} ${styles.itemWrapperActive}` : `${styles.itemWrapper}`}>
-                                                    {item.icon}
-                                                    <span>{item.name}</span>
-                                                </a>
-                                            </Link>
-                                        </li>
-                                    )
-                                })}
-                            </ul>
-                        )
-                    })}
-
-                </div>
-            </aside>
+                                    )}
+                                </List>
+                            )
+                        })}
+                    </Box>
+                </Drawer>
+            </Box>
+            <Main open={openDrawer} sx={{ flexGrow: 1, p: 3 }}>
+                {props.children}
+            </Main>
         </>
     )
 }

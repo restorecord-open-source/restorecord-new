@@ -1,43 +1,207 @@
 import { useRouter } from "next/router";
-import { Toaster } from "react-hot-toast";
 import { useToken } from "../../src/token";
-import Image from "next/future/image";
+import { useState } from "react";
 import { useQuery } from "react-query";
+
 import getMembers from "../../src/dashboard/getMembers";
-import { useEffect, useState } from "react";
+import Container from "@mui/material/Container";
+import Paper from "@mui/material/Paper";
+import CardContent from "@mui/material/CardContent";
+import Typography from "@mui/material/Typography";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
+import Grid from "@mui/material/Grid";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import Button from "@mui/material/Button";
+import Avatar from "@mui/material/Avatar";
+import Skeleton from "@mui/material/Skeleton";
+import Stack from "@mui/material/Stack";
+import axios from "axios";
+import LoadingButton from "@mui/lab/LoadingButton";
 
 export default function VerifiedMembers({ user }: any) {
     const [token]: any = useToken();
     const router = useRouter();
     const [serverId, setServerId] = useState("");
 
+    const [openS, setOpenS] = useState(false);
+    const [openE, setOpenE] = useState(false);
+    const [notiTextS, setNotiTextS] = useState("X");
+    const [notiTextE, setNotiTextE] = useState("X");
+
+    const [loading, setLoading] = useState(false);
+
     const { data, isError, isLoading, refetch } = useQuery('members', async () => await getMembers({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
-    }, serverId), { retry: false });
+    }, serverId), { retry: true });
 
-    if (!user.username || isLoading) {
-        return (
-            <>
-                <span className="text-white">Loading...</span>
-            </>
-        );
-    }
-
-    function handleSelect(e: any) {
-        if (e.target.value !== "") {
-            // if target value is all then set serverId to null
-            setServerId(e.target.value === "all" ? null : e.target.value);
+    function handleSelect(event: SelectChangeEvent) {
+        setServerId(event.target.value as string);
+        setTimeout(() => {
             refetch();
-        }
+        }, 10);
     }
-
-
 
     return (
         <>
-            <Toaster />
 
-            <div className="xl:mr-28 sm:ml-32 sm:mt-12 ml-6 mr-8 mt-10 w-full transition-all">
+            <Container maxWidth="xl">
+                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                    <CardContent>
+                        <Typography variant="h4" sx={{ mb: 2, fontWeight: "500", sm: { fontSize: "0.5rem" } }}>
+                            Verified Members
+                        </Typography>
+
+                        <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+                            <Alert elevation={6} variant="filled" severity="error">
+                                {notiTextE}
+                            </Alert>
+                        </Snackbar>
+
+                        <Snackbar open={openS} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenS(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+                            <Alert elevation={6} variant="filled" severity="success">
+                                {notiTextS}
+                            </Alert>
+                        </Snackbar>
+                        
+                        <Grid justifyContent={"space-between"}>
+                            <Grid item>
+                                <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                    {isLoading ? (
+                                        <Skeleton animation="wave" variant="text" width={250} height={30} />
+                                    ) : (
+                                        <>
+                                            {data.members.length === 0 ? "No verified members" : `Showing ${data.members.length} verified members.`}
+                                        </>
+                                    )}
+                                </Typography>
+                            </Grid>
+                            <Grid item>
+                                {isLoading ? (
+                                    <Skeleton animation="wave" variant="rectangular" width={"100%"} height={55} sx={{ borderRadius: "4px" }} />
+                                ) : (
+                                    <>
+                                        <FormControl fullWidth>
+                                            <InputLabel id="server-select-label">Server</InputLabel>
+                                            <Select labelId="server-select-label" id="server-select" label="Server" value={serverId} onChange={handleSelect}>
+                                                <MenuItem value="all">All</MenuItem>
+                                                {user.servers.map((server: any) => (
+                                                    <MenuItem key={server.id} value={server.guildId}>{server.name}</MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                    </>
+                                )}
+                            </Grid>
+                        </Grid>
+
+                        {isLoading ? (
+                            <Stack spacing={2}>
+                                {[...Array(15)].map((_, i) => (
+                                    <Paper key={i} variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                                        <CardContent>
+                                            <Grid container spacing={3} direction="row" justifyContent={"space-between"}>
+                                                <Grid item>
+                                                    <div style={{ display: "inline-flex", alignItems: "center" }}>
+                                                        <Skeleton animation="wave" variant="circular" width={40} height={40} sx={{ mr: "0.5rem" }} />
+                                                        <Skeleton animation="wave" variant="text" width={200} height={32} />
+                                                    </div>
+                                                    <Skeleton animation="wave" variant="text" width={200} height={20} />
+                                                </Grid>
+                                                <Grid item>
+                                                    <Stack spacing={1} direction="column" justifyContent={"space-between"}>
+                                                        <Skeleton animation="wave" variant="rectangular" width={100} height={35} sx={{ borderRadius: "4px" }} />
+                                                        <Skeleton animation="wave" variant="rectangular" width={100} height={35} sx={{ borderRadius: "4px" }} />
+                                                    </Stack>
+                                                </Grid>
+                                            </Grid>
+                                        </CardContent>
+                                    </Paper>
+                                ))}
+                            </Stack>
+                        ) : (
+                            <>
+                                {data.members.map((item: any) => {
+                                    return (
+                                        <Paper key={item.id} variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                                            <CardContent>
+                                                <Grid container spacing={3} direction="row" justifyContent={"space-between"}>
+                                                    <Grid item>
+                                                        <div style={{ display: "inline-flex", alignItems: "center" }}>
+                                                            {item.avatar.length > 1 ? (
+                                                                <Avatar alt={item.username} src={`https://cdn.discordapp.com/avatars/${item.userId}/${item.avatar}.png?size=32`} srcSet={`https://cdn.discordapp.com/avatars/${item.userId}/${item.avatar}.png?size=64 2x, https://cdn.discordapp.com/avatars/${item.userId}/${item.avatar}.png?size=128 3x`} sx={{ mr: "0.5rem" }} />
+                                                            ) : (
+                                                                <Avatar alt={item.username} src={`https://cdn.discordapp.com/embed/avatars/${item.username.charCodeAt(0) % 5}.png?size=32`} srcSet={`https://cdn.discordapp.com/embed/avatars/${item.username.charCodeAt(0) % 5}.png?size=64 2x, https://cdn.discordapp.com/embed/avatars/${item.username.charCodeAt(0) % 5}.png?size=128 3x`} sx={{ mr: "0.5rem" }} />
+                                                            )}
+                                                            {item.username ? (
+                                                                <Typography variant="h6" sx={{ fontWeight: "500", wordBreak: "break-word" }}>
+                                                                    {item.username}
+                                                                </Typography>
+                                                            ) : (
+                                                                <Skeleton variant="text" width={150} />
+                                                            )}
+                                                        </div>
+                                                        <Typography variant="body2" color="textSecondary" sx={{ wordBreak: "break-word" }}>
+                                                            ID: {item.userId}
+                                                        </Typography>
+                                                        <Typography variant="body2" color="textSecondary" sx={{ wordBreak: "break-word" }}>
+                                                            Verified: {new Date(item.createdAt).toLocaleString()}
+                                                        </Typography>
+                                                    </Grid>
+                                                    <Grid item xs={12} sm={12} md={3} lg={2} xl={1}>
+                                                        <Stack spacing={2} direction="column" justifyContent={"space-between"}>
+                                                            <LoadingButton id={`user_${item.userId}`} loading={loading} variant="contained" sx={{ background: "#43a047", "&:hover": { background: "#388e3c" } }} onClick={() => {
+                                                                setLoading(true);
+                                                                
+                                                                axios.put(`/api/v1/member/${item.userId}`, {}, { 
+                                                                    headers: {
+                                                                        "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                                    },
+                                                                    validateStatus: () => true
+                                                                })
+                                                                    .then((res: any) => {
+                                                                        if (!res.data.success) {
+                                                                            setNotiTextE(res.data.message);
+                                                                            setOpenE(true);
+                                                                        }
+                                                                        else {
+                                                                            setNotiTextS(res.data.message);
+                                                                            setOpenS(true);
+                                                                        }
+                                                                        
+                                                                        setTimeout(() => {
+                                                                            setLoading(false);
+                                                                        }, 200);
+                                                                    })
+                                                                    .catch((err): any => {
+                                                                        setNotiTextE(err.message);
+                                                                        setOpenE(true);
+                                                                        console.error(err);
+                                                                    });
+                                                            }}>Pull</LoadingButton>
+                                                            {/* <Button variant="contained" color="error" onClick={() => { }}>
+                                                                Delete    
+                                                            </Button> */}
+                                                        </Stack>
+                                                    </Grid>
+                                                </Grid>
+                                            </CardContent>
+                                        </Paper>
+                                    );
+                                })}
+                            </>
+                        )}
+
+                        
+
+                    </CardContent>
+                </Paper>
+            </Container>
+
+            {/* <div className="xl:mr-28 sm:ml-32 sm:mt-12 ml-6 mr-8 mt-10 w-full transition-all">
                 <div className="col-span-12 md:col-span-8 mb-4">
                     <h1 className="text-white sm:text-4xl text-2xl font-bold leading-tight">
 						Verified Members
@@ -63,16 +227,6 @@ export default function VerifiedMembers({ user }: any) {
                                         Showing {data.members.length} verified members.
                                     </h2>
                                 </div>
-                                
-                                {/* <label htmlFor="server" className="font-medium leading-tight flex items-center justify-center h-11">Select a Server</label>
-                                <select id="server" onChange={(e) => handleSelect(e)} className="mb-4 sm:ml-2 ml-0 sm:w-52 w-full border text-sm rounded-lg p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-indigo-500 focus:border-indigo-500">
-                                    <option value="all">All Servers</option>
-                                    {Array.isArray(user.servers) && user.servers.map((server: any) => {
-                                        return (
-                                            <option key={server.id} value={server.guildId}>{server.name}</option>
-                                        )
-                                    })}
-                                </select> */}
                             </>
                         )}
                     </div>
@@ -82,18 +236,11 @@ export default function VerifiedMembers({ user }: any) {
                             <div key={item.id}>
                                 <div className="mb-6 p-6 rounded-lg border shadow-md bg-gray-800 border-gray-700">
                                     <div className="inline-flex">
-                                        {item.avatar.length > 1 ? (
-                                            <Image onError={(e) => {
-                                            }} placeholder="blur" blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAACQElEQVR4nO3c25nqIBSGYdxTCOmEdBI7wU5iC1ZArAQswQqci8w8T3bG48Twk8n3XnrDcq1wUCDGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFiajTqA11hrq6qqqmr4YUoppXQ6nVRR/XHWWu99COHySAjBe2+tVYf8V3jvY4wP8/5TjNF7rw5/yX6desowlXNueupHZXDOqb/WQrRt+8bUD9EVHrDWPjPNThFCYH6+zlr73mHnlhgjNRjLln1qcEXm7FODsbnH/VtCCOqvXgDvvST7vbWvi5xzwuz3Vv37QDX4DK13IGqaRp38L03TqJOhkH/lc0uMUZ2M7EoY/Ye0M8G//E1ut9v8jd6hjUewI3a5XPI3et9mI9sZzN0Dylz5CaPKXYC6rjO3+AxhVBTAmFUVYHSgoRDCqHJPPgXOwD3VPJy1B5T8J7AqNsHvAAxRADEKIEYBxFgFfVnFKsgYk1LK3OIzhFHlLkDXdZlbfIYwKgpgzKoKUOYQVOZjMZdy9iN72l1JwTJ0v9/nb/SO0uKZnbVW/dD/p+R/qOYy3z2AV7Vtq06GQjmdQP74f0haPZ/PpoDdsd1udzgctDEoaZdDazySNaI9oVXm+YzcVIdEV3ok9Kr8twTWfjPgp5yrUrJ/XZ5+QPbvmXs+YNx/bKZLk1yLfM17hyOGnd/o3xE0PfU8+FM1TfPqdb4QwoKG+8W8ssw5V9d19c0YU1VVv7+WvnVddzwe1ZECAAAAAAAAAAAAAAAAAAAAAAAAANbiE4Z1TdUWDVTEAAAAAElFTkSuQmCC" loading="lazy" src={`https://cdn.discordapp.com/avatars/${item.userId}/${item.avatar}?size=128`} className="w-10 h-10 rounded-full border-2 border-indigo-600" alt="Profile Picture" width={64} height={64} />
-                                        ) : (
-                                            <Image placeholder="blur" blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAACQElEQVR4nO3c25nqIBSGYdxTCOmEdBI7wU5iC1ZArAQswQqci8w8T3bG48Twk8n3XnrDcq1wUCDGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFiajTqA11hrq6qqqmr4YUoppXQ6nVRR/XHWWu99COHySAjBe2+tVYf8V3jvY4wP8/5TjNF7rw5/yX6desowlXNueupHZXDOqb/WQrRt+8bUD9EVHrDWPjPNThFCYH6+zlr73mHnlhgjNRjLln1qcEXm7FODsbnH/VtCCOqvXgDvvST7vbWvi5xzwuz3Vv37QDX4DK13IGqaRp38L03TqJOhkH/lc0uMUZ2M7EoY/Ye0M8G//E1ut9v8jd6hjUewI3a5XPI3et9mI9sZzN0Dylz5CaPKXYC6rjO3+AxhVBTAmFUVYHSgoRDCqHJPPgXOwD3VPJy1B5T8J7AqNsHvAAxRADEKIEYBxFgFfVnFKsgYk1LK3OIzhFHlLkDXdZlbfIYwKgpgzKoKUOYQVOZjMZdy9iN72l1JwTJ0v9/nb/SO0uKZnbVW/dD/p+R/qOYy3z2AV7Vtq06GQjmdQP74f0haPZ/PpoDdsd1udzgctDEoaZdDazySNaI9oVXm+YzcVIdEV3ok9Kr8twTWfjPgp5yrUrJ/XZ5+QPbvmXs+YNx/bKZLk1yLfM17hyOGnd/o3xE0PfU8+FM1TfPqdb4QwoKG+8W8ssw5V9d19c0YU1VVv7+WvnVddzwe1ZECAAAAAAAAAAAAAAAAAAAAAAAAANbiE4Z1TdUWDVTEAAAAAElFTkSuQmCC" loading="lazy" src={`https://cdn.discordapp.com/embed/avatars/${item.avatar}.png`} className="w-10 h-10 rounded-full border-2 border-indigo-600" alt="Profile Picture" width={64} height={64} />
-                                        )}
                                         <h5 className="ml-2 text-2xl break-all font-bold tracking-tight text-white flex justify-center items-center">{item.username}</h5>
                                     </div>
                                     <hr className="border-b border-gray-700" />
                                     <div className="flex justify-between items-center mt-4">
                                         <div className="flex items-center">
-                                            <svg className="h-6 w-6 text-gray-400 sm:flex hidden" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                             <span className="ml-2 text-sm text-gray-500 sm:flex hidden">{new Date(item.createdAt).toLocaleString()}</span>
                                             <span className="sm:flex hidden" style={{borderRight: "2px solid #374151", color: "transparent", marginLeft: "0.5rem"}}>​</span>
                                             <span className="ml-2 text-sm text-gray-500">{item.guildName} ({item.guildId}) {(item.ip && !(item.ip.includes("127.0.0.1") || item.ip.includes("::1"))) && ( <p className="font-normal text-gray-500">IP Address <span className="blur-[0.2rem] hover:blur-0 transition-all">{item.ip}</span></p>)}</span>
@@ -104,7 +251,7 @@ export default function VerifiedMembers({ user }: any) {
                         );
                     })}
                 </div>
-            </div>
+            </div> */}
         </>
     );
 }
