@@ -49,12 +49,12 @@ export default function Verify({ status, err }: any) {
 
             <Container maxWidth="lg">
                 <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", flexDirection: "column" }}>
-                    <Paper sx={{ borderRadius: "1rem", padding: "2rem", marginTop: "1rem", width: { xs: "100%", md: "50%" }, marginBottom: "2rem", boxShadow: "5px 5px 10px 5px rgba(0, 0, 0, 0.5)" }}>
+                    <Paper sx={{ borderRadius: "1rem", padding: "2rem", marginTop: "1rem", width: { xs: "100%", md: "50%" }, marginBottom: "2rem", boxShadow: "0px 10px 10px 5px rgba(0, 0, 0, 0.25)", backgroundColor: "#00000026", backdropFilter: "blur(1.5rem)" }}>
 
                         {isLoading ? ( <></> ) : (
                             <>
                                 {status === "finished" ? (
-                                    <Alert severity="success" variant="filled" sx={{ mb: 2 }}>
+                                    <Alert severity="success" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(28, 205, 30, 0.25)", backdropFilter: "blur(0.5rem)" }}>
                                         <AlertTitle>Success</AlertTitle>
                                         You have successfully verified in <b>{data.server.name}</b>!
                                     </Alert>
@@ -65,14 +65,14 @@ export default function Verify({ status, err }: any) {
                         {isLoading ? ( <></> ) : (
                             <>
                                 {err === "403" ? (
-                                    <Alert severity="error" variant="filled" sx={{ mb: 2 }}>
+                                    <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
                                         <AlertTitle>Error</AlertTitle>
                                         Seems like this bot hasn&#39;t been setup correctly, please contact the owner telling him the bot is <b><code>Missing Permission</code></b>.
                                     </Alert>
                                 ) : ( <></> )}
 
                                 {err === "306" ? (
-                                    <Alert severity="error" variant="filled" sx={{ mb: 2 }}>
+                                    <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
                                         <AlertTitle>Error</AlertTitle>
                                         VPN or Proxy detected, please disable it and try again.
                                     </Alert>
@@ -91,16 +91,16 @@ export default function Verify({ status, err }: any) {
                                 {data.success ? (
                                     <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                                         <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={data.server.name} placement="top" disableInteractive>
-                                            <Typography variant="h1" component="h1" sx={{ fontWeight: "700", fontSize: { xs: "1.5rem", md: "3rem" }, pl: "1rem", mr: "1rem" }}>
+                                            <Typography variant="h1" component="h1" sx={{ fontWeight: "700", fontSize: { xs: "1.5rem", md: "3rem" }, pl: "1rem", mr: "1rem", textShadow: "0px 0px 15px rgba(0, 0, 0, 0.25)" }}>
                                                 {data.server.name}
                                             </Typography>
                                         </Tooltip>
 
-                                        {/* {data.server.verified && (
+                                        {data.server.verified && (
                                             <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={`Verified`} placement="top" disableInteractive>
                                                 <CheckCircle sx={{ color: theme.palette.grey[500], width: "2rem", height: "2rem" }} />
                                             </Tooltip>
-                                        )} */}
+                                        )}
                                     </Box>
                                 ) : ( 
                                     <>
@@ -134,7 +134,7 @@ export default function Verify({ status, err }: any) {
                             ) : (
                                 <>
                                     {data.success && (
-                                        <Avatar src={data.server.icon} sx={{ border: `0.175rem solid ${theme.palette.primary.main}`, width: { xs: "6rem", md: "8rem" }, height: { xs: "6rem", md: "8rem" } }} />
+                                        <Avatar src={data.server.icon} sx={{ width: { xs: "6rem", md: "8rem" }, height: { xs: "6rem", md: "8rem" } }} />
                                     )}
                                 </>
                             )}
@@ -162,7 +162,7 @@ export default function Verify({ status, err }: any) {
                     ) : (
                         <>
                             {data.success && (
-                                <Typography variant="body1" component="p" sx={{ textAlign: "center", mt: 1 }}>
+                                <Typography variant="body1" component="p" sx={{ textAlign: "center", mt: 1, color: "rgba(255, 255, 255, 0.15)", bottom: 0, position: "absolute", marginBottom: { xs: "0.25rem", md: "2rem" }, display: { xs: "none", md: "block" } }}>
                                     Created on {new Date(data.server.createdAt).toLocaleDateString()} by {data.server.owner}
                                 </Typography>
                             )}

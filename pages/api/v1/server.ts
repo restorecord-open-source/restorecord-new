@@ -56,7 +56,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         createdAt: server.createdAt,
                         clientId: customBot?.clientId.toString(),
                         owner: ownerAccount?.username,
-                        verified: members.length >= 50,
+                        verified: members.length >= 1000,
                     } });
                 }
                 else {

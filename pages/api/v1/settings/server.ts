@@ -157,6 +157,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             roleId: BigInt(data.newRoleId as any),
                             webhook: data.newWebhookCheck ? data.newWebhook : null,
                             picture: data.newPicture,
+                            bgImage: data.newBackground,
+                            description: data.newDescription,
                             vpncheck: data.newWebhookCheck ? (data.newVpnCheck ? true : false) : false,
                         }
                     });

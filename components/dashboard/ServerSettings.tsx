@@ -23,6 +23,8 @@ export default function DashServerSettings({ user, id }: any) {
     const [roleId, setRoleId] = useState("");
     const [picture, setPicture] = useState("");
     const [webhook, setWebhook] = useState("");
+    const [background, setBackground] = useState("");
+    const [description, setDescription] = useState("");
     const [webhookcheck, setWebhookCheck] = useState(false);
     const [vpncheck, setVpnCheck] = useState(false);
 
@@ -42,6 +44,8 @@ export default function DashServerSettings({ user, id }: any) {
             setWebhookCheck(server.webhook ? true : false);
             setWebhook(server.webhook ? server.webhook : "");
             setPicture(server.picture ? server.picture : "");
+            setDescription(server.description ? server.description : "");
+            setBackground(server.bgImage ? server.bgImage : "");
             setVpnCheck(server.vpncheck);
         }
     }, [server]);
@@ -65,6 +69,8 @@ export default function DashServerSettings({ user, id }: any) {
                 newWebhookCheck: webhookcheck,
                 newVpnCheck: vpncheck,
                 newPicture: picture,
+                newBackground: background,
+                newDescription: description,
                 
                 serverName: server.name,
                 guildId: server.guildId,
@@ -118,6 +124,12 @@ export default function DashServerSettings({ user, id }: any) {
             break;
         case "picture":
             setPicture(e.target.value);
+            break;
+        case "background":
+            setBackground(e.target.value);
+            break;
+        case "description":
+            setDescription(e.target.value);
             break;
         default:
             break;
@@ -186,13 +198,19 @@ export default function DashServerSettings({ user, id }: any) {
                                             <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                                 Server Description
                                             </Typography>
-                                            <TextField fullWidth variant="outlined" name="description" value={server.description} onChange={handleChange} />
+                                            <TextField fullWidth variant="outlined" name="description" value={description} onChange={handleChange} inputProps={{ maxLength: 50 }} />
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                                 Server Icon
                                             </Typography>
                                             <TextField fullWidth variant="outlined" name="picture" value={picture} onChange={handleChange} />
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                                Server Background
+                                            </Typography>
+                                            <TextField fullWidth variant="outlined" name="background" value={background} onChange={handleChange} />
                                         </Grid>
                                         <Grid item>
                                             <Stack direction="row" spacing={1}>
