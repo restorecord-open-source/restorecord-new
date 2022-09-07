@@ -35,6 +35,8 @@ const withDiscordInteraction = (next: any) => async (
 
         if (!cBot) return res.status(400).end("invalid application id")
 
+        if (cBot.publicKey === null) return res.status(400).end("invalid public key")
+
         const isVerified = verifyHeaders(timestamp, rawBody, signature, cBot.publicKey)
         if (!isVerified) {
             return res.status(401).end("invalid request signature")
