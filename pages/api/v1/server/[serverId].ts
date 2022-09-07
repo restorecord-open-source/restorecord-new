@@ -166,14 +166,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 if (members.length === 0) return res.status(400).json({ success: false, message: "No members found" });
 
-                if (server.pulling === true) return res.status(400).json({ success: false, message: "Bot is already pulling" });
+                if (server.pulling === true) return res.status(400).json({ success: false, message: "You are already pulling" });
+
+                if (server.pullTimeout !== null)
+                    if (server.pullTimeout > new Date()) return res.status(400).json({ success: false, message: "You're on cooldown, you can pull again on the " + server.pullTimeout.toLocaleString() });
 
                 await prisma.servers.update({
                     where: {
                         id: server.id 
                     },
                     data: {
-                        pulling: true
+                        pulling: true,
+                        pullTimeout: new Date(Date.now() + 1000 * 60 * 60)
                     }
                 });
 
@@ -269,28 +273,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                 break;
                             }
                         }).catch(async (err: Error) => {
-                            await prisma.servers.update({
-                                where: {
-                                    id: server.id
-                                },
-                                data: {
-                                    pulling: false
-                                }
-                            });
-
                             return res.status(400).json({ success: false, message: err?.message ? err?.message : "Something went wrong" });
                         });
 
                         await sleep(delay);
                     }
-                    await prisma.servers.update({
-                        where: {
-                            id: server.id
-                        },
-                        data: {
-                            pulling: false
-                        }
-                    });
                 }).catch(async (err: Error) => {
                     console.log(`3 ${err}`);
                 });
@@ -310,10 +297,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     esimatedTime = Math.round(esimatedTime);
                     esimatedTime = esimatedTime + " seconds";
                 }
+
+                // when pulling is done update the db
+                pullingProcess.then(async () => {
+                    await prisma.servers.update({
+                        where: {
+                            id: server.id
+                        },
+                        data: {
+                            pulling: false,
+                        }
+                    });
+                }).catch(async (err: Error) => {
+                    console.log(`4 ${err}`);
+                });
             
                 return res.status(200).json({ success: true, message: `Started Pull Process, this will take around ${esimatedTime}` });
             }
             catch (err: any) {
+                console.error(err);
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 if (err?.name === "" || err?.name === "JsonWebTokenError") return res.status(400).json({ success: false, message: "User not logged in" }); 
                 return res.status(400).json({ success: false, message: "Something went wrong" });

@@ -17,7 +17,7 @@ export default function DashBotSettings({ user, id }: any) {
     const [botSecret, setBotSecret] = useState("");
     const [botToken, setBotToken] = useState("");
     const [botName, setBotName] = useState("");
-
+    const [publicKey, setPublicKey] = useState("");
     
     const [openS, setOpenS] = useState(false);
     const [openE, setOpenE] = useState(false);
@@ -31,6 +31,7 @@ export default function DashBotSettings({ user, id }: any) {
             setBotSecret(bot.botSecret);
             setBotToken(bot.botToken);
             setBotName(bot.name);
+            setPublicKey(bot.publicKey);
         }
     }, [bot]);
 
@@ -47,6 +48,7 @@ export default function DashBotSettings({ user, id }: any) {
                 newBotSecret: botSecret,
                 newBotToken: botToken,
                 newBotName: botName,
+                newPublicKey: publicKey,
 
                 botSecret: bot.botSecret,
                 botToken: bot.botToken,
@@ -85,6 +87,9 @@ export default function DashBotSettings({ user, id }: any) {
             break;
         case "botName":
             setBotName(e.target.value);
+            break;
+        case "publicKey":
+            setPublicKey(e.target.value);
             break;
         default:
             break;
@@ -134,6 +139,12 @@ export default function DashBotSettings({ user, id }: any) {
                                                 Bot Secret
                                             </Typography>
                                             <TextField fullWidth variant="outlined" name="botSecret" value={botSecret} onChange={handleChange} />
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                                Public Key
+                                            </Typography>
+                                            <TextField fullWidth variant="outlined" name="publicKey" value={publicKey} onChange={handleChange} />
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>

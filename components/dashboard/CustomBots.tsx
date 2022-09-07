@@ -18,6 +18,7 @@ import TextField from "@mui/material/TextField";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import { Link } from "@mui/material";
+import Image from "next/image";
 
 export default function DashCustomBot({ user }: any) {
     const [token]: any = useToken();
@@ -228,6 +229,16 @@ export default function DashCustomBot({ user }: any) {
                                             <Button variant="contained" onClick={(e: any) => handleSubmit(e)}>
                                                 Create Bot
                                             </Button>
+                                        </Stack>
+
+                                        <Typography variant="h6" sx={{ fontWeight: "500", marginBottom: "1rem", marginTop: "1rem" }}>
+                                            How to add Redirect{user.role === "business" ? <> and Interaction URL</> : <></>}?
+                                        </Typography>
+                                        <Stack spacing={1} direction="row" justifyContent={"justify-between"} sx={{ marginTop: "1rem" }}>
+                                            <Image src="https://docs.restorecord.com/static/botsetup/redirect_url.png" alt="Redirect URL" width={1920} height={1080} />
+                                            {user.role === "business" && (
+                                                <Image src="https://docs.restorecord.com/static/botsetup/interaction_url.png" alt="Interaction URL" width={1920} height={1080} />
+                                            )}
                                         </Stack>
                                     </CardContent>
                                 </Paper>

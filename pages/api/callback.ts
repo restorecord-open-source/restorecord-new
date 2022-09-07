@@ -52,8 +52,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                         const createdAt: number = account.id / 4194304 + 1420070400000;
                         const pCheck = await ProxyCheck.check(IPAddr, { vpn: true, asn: true });
 
-                        console.log(pCheck);
-                        
                         if (serverInfo.vpncheck && pCheck[IPAddr].proxy === "yes") {
                             let operator = pCheck[IPAddr].operator.url ? `[\`${pCheck[IPAddr].operator.name}\`](${pCheck[IPAddr].operator.url})` : pCheck[IPAddr].operator.name;
 

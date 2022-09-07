@@ -44,7 +44,7 @@ export default function DashServerSettings({ user, id }: any) {
             setPicture(server.picture ? server.picture : "");
             setVpnCheck(server.vpncheck);
         }
-    }, []);
+    }, [server]);
 
     function handleSubmit(e: any) {
         e.preventDefault();

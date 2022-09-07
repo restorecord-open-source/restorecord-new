@@ -75,6 +75,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                         name: bot.name,
                                         clientId: bot.clientId.toString(),
                                         botToken: bot.botToken,
+                                        publicKey: bot.publicKey,
                                         botSecret: bot.botSecret,
                                     }
                                 })
