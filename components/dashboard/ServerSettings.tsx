@@ -21,6 +21,7 @@ export default function DashServerSettings({ user, id }: any) {
     const [serverName, setServerName] = useState("");
     const [guildId, setGuildId] = useState("");
     const [roleId, setRoleId] = useState("");
+    const [picture, setPicture] = useState("");
     const [webhook, setWebhook] = useState("");
     const [webhookcheck, setWebhookCheck] = useState(false);
     const [vpncheck, setVpnCheck] = useState(false);
@@ -38,13 +39,17 @@ export default function DashServerSettings({ user, id }: any) {
             setGuildId(server.guildId);
             setRoleId(server.roleId);
 
-            setWebhookCheck(server.webhook);
+            setWebhookCheck(server.webhook ? true : false);
+            setWebhook(server.webhook ? server.webhook : "");
+            setPicture(server.picture ? server.picture : "");
             setVpnCheck(server.vpncheck);
         }
-    }, [server]);
+    }, []);
 
     function handleSubmit(e: any) {
         e.preventDefault();
+
+        console.log(serverName, guildId, roleId, webhookcheck, vpncheck, webhook, picture);
 
         fetch(`/api/v1/settings/server`, {
             method: "PATCH",
@@ -58,7 +63,8 @@ export default function DashServerSettings({ user, id }: any) {
                 newRoleId: roleId,
                 newWebhook: webhook,
                 newWebhookCheck: webhookcheck,
-                newVpn: vpncheck,
+                newVpnCheck: vpncheck,
+                newPicture: picture,
                 
                 serverName: server.name,
                 guildId: server.guildId,
@@ -77,7 +83,7 @@ export default function DashServerSettings({ user, id }: any) {
                     setOpenS(true);
                     setTimeout(() => {
                         router.push("/dashboard/settings");
-                    }, 1500);
+                    }, 1250);
                     // functions.ToastAlert(res.message, "success");
                     // router.push("/dashboard/settings");
                 }
@@ -109,6 +115,9 @@ export default function DashServerSettings({ user, id }: any) {
             break;
         case "vpncheck":
             setVpnCheck(e.target.checked);
+            break;
+        case "picture":
+            setPicture(e.target.value);
             break;
         default:
             break;
@@ -183,29 +192,29 @@ export default function DashServerSettings({ user, id }: any) {
                                             <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                                 Server Icon
                                             </Typography>
-                                            <TextField fullWidth variant="outlined" name="picture" value={server.picture} onChange={handleChange} />
+                                            <TextField fullWidth variant="outlined" name="picture" value={picture} onChange={handleChange} />
                                         </Grid>
                                         <Grid item>
                                             <Stack direction="row" spacing={1}>
                                                 <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                                     Webhook Logs
                                                 </Typography>
-                                                <Switch onChange={handleChange} name="webhookcheck" inputProps={{ "aria-label": "controlled" }} defaultChecked={server.webhook} />
+                                                <Switch onChange={handleChange} name="webhookcheck" defaultChecked={server.webhook ? true : false} />
                                             </Stack>
-                                            {webhookcheck ? (
-                                                <TextField fullWidth variant="outlined" name="webhook" value={server.webhook} onChange={handleChange} />
-                                            ) : ( <></>)}
+                                            {webhookcheck && (
+                                                <TextField fullWidth variant="outlined" name="webhook" value={webhook} onChange={handleChange} />
+                                            )}
                                         </Grid>
-                                        {webhookcheck ? (
+                                        {webhookcheck && (
                                             <Grid item>
                                                 <Stack direction="row" spacing={1}>
                                                     <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
-                                                    VPN Check
+                                                        VPN Check
                                                     </Typography>
-                                                    <Switch onChange={handleChange} name="vpncheck" inputProps={{ "aria-label": "controlled" }} defaultChecked={server.vpn} />
+                                                    <Switch onChange={handleChange} name="vpncheck" defaultChecked={server.vpncheck} />
                                                 </Stack>
                                             </Grid>
-                                        ) : ( <></>)}
+                                        )}
                                         <Grid item>
                                             <Button variant="contained" type="submit" sx={{ mb: 2 }} fullWidth>
                                                 Save Changes

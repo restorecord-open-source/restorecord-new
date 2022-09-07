@@ -21,7 +21,7 @@ export default function SubscriptionPlansSection() {
             <Grid container spacing={2} alignItems="flex-end">
                 {SubscriptionList.map((tier) => (
                     <Grid item key={tier.name} xs={12} md={4}>
-                        <Card>
+                        <Card sx={{ borderRadius: "8px", px: 0.5, py: 2 }}>
                             <CardHeader title={tier.name} titleTypographyProps={{ align: "center" }} subheaderTypographyProps={{ align: "center", }} sx={{ bgColor: "grey.700" }} />
                             <CardContent>
                                 <Box sx={{ display: "flex", justifyContent: "center", alignItems: "baseline", mb: 2 }}>

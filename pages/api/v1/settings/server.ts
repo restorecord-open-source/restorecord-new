@@ -2,6 +2,7 @@ import { verify } from "jsonwebtoken";
 import { NextApiRequest, NextApiResponse } from "next";
 import rateLimit from "../../../../src/rate-limit";
 import { prisma } from "../../../../src/db";
+import { Prisma } from "@prisma/client";
 
 const limiter = rateLimit({
     interval: 300 * 1000,
@@ -144,6 +145,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                     if (!server) return res.status(400).json({ success: false, message: "Server not found" });
 
+                    if (data.newPicture === "") return res.status(400).json({ success: false, message: "Picture can't be empty" });
+
                     const newServer = await prisma.servers.update({
                         where: {
                             id: server.id,
@@ -153,7 +156,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             guildId: BigInt(data.newGuildId as any),
                             roleId: BigInt(data.newRoleId as any),
                             webhook: data.newWebhookCheck ? data.newWebhook : null,
-                            vpncheck: data.newVpn ? data.newVpn : server.vpncheck,
+                            picture: data.newPicture,
+                            vpncheck: data.newWebhookCheck ? (data.newVpnCheck ? true : false) : false,
                         }
                     });
 
@@ -165,56 +169,56 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         customBotId: newServer.customBotId.toString(),
                     } });
 
-                } else if (data.picture && data.webhook && data.guildId) {                   
-                    const server = await prisma.servers.findFirst({
-                        where: {
-                            AND: [
-                                { ownerId: valid.id },
-                                { guildId: BigInt(data.guildId as any) },
-                            ],
-                        },
-                    });
-
-                    if (!server) return res.status(400).json({ success: false, message: "Server not found" });
-
-                    if ((data.description === "" || data.bgimage === "") || account?.role !== "business") {
-                        data.description = server.description;
-                        data.bgimage = server.bgImage;
-                    }
-
-                    if (/^https?:\/\/i.imgur.com(?:\/[^/#?]+)+\.(?:jpg|gif|png|jpeg)$/.test(data.picture) === false || /^https?:\/\/i.imgur.com(?:\/[^/#?]+)+\.(?:jpg|gif|png|jpeg)$/.test(data.bgimage) === false) {
-                        return res.status(400).json({ success: false, message: "Invalid Picture or Background Image" });
-                    }
-
-                    // discord webhook
-                    if (/^.*(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-zA-Z0-9_-]+)$/.test(data.webhook) === false) {
-                        return res.status(400).json({ success: false, message: "Invalid Webhook" });
-                    }
-
-                    const newServer = await prisma.servers.update({
-                        where: {
-                            id: server.id,
-                        },
-                        data: {
-                            picture: data.picture,
-                            webhook: data.webhook,
-                            description: data.description,
-                            bgImage: data.bgimage,
-                        }
-                    });
-
-                    return res.status(200).json({ success: true, message: "Successfully Updated your server!", server: {
-                        id: newServer.id,
-                        guildId: newServer.guildId.toString(),
-                        roleId: newServer.roleId.toString(),
-                        picture: newServer.picture,
-                        webhook: newServer.webhook,
-                        description: newServer.description,
-                        bgImage: newServer.bgImage,
-                    } });
-                } else {
-                    return res.status(400).json({ success: false, message: "Invalid Data", x: data });
                 }
+                //  else if (data.picture && data.webhook && data.guildId) {                   
+                //     const server = await prisma.servers.findFirst({
+                //         where: {
+                //             AND: [
+                //                 { ownerId: valid.id },
+                //                 { guildId: BigInt(data.guildId as any) },
+                //             ],
+                //         },
+                //     });
+
+                //     if (!server) return res.status(400).json({ success: false, message: "Server not found" });
+
+                //     if ((data.description === "" || data.bgimage === "") || account?.role !== "business") {
+                //         data.description = server.description;
+                //         data.bgimage = server.bgImage;
+                //     }
+
+                //     // if (/^https?:\/\/i.imgur.com(?:\/[^/#?]+)+\.(?:jpg|gif|png|jpeg)$/.test(data.picture) === false || /^https?:\/\/i.imgur.com(?:\/[^/#?]+)+\.(?:jpg|gif|png|jpeg)$/.test(data.bgimage) === false) {
+                //     //     return res.status(400).json({ success: false, message: "Invalid Picture or Background Image" });
+                //     // }
+
+                //     if (/^.*(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-zA-Z0-9_-]+)$/.test(data.webhook) === false) {
+                //         return res.status(400).json({ success: false, message: "Invalid Webhook" });
+                //     }
+
+                //     const newServer = await prisma.servers.update({
+                //         where: {
+                //             id: server.id,
+                //         },
+                //         data: {
+                //             picture: data.picture,
+                //             webhook: data.webhook,
+                //             description: data.description,
+                //             bgImage: data.bgimage,
+                //         }
+                //     });
+
+                //     return res.status(200).json({ success: true, message: "Successfully Updated your server!", server: {
+                //         id: newServer.id,
+                //         guildId: newServer.guildId.toString(),
+                //         roleId: newServer.roleId.toString(),
+                //         picture: newServer.picture,
+                //         webhook: newServer.webhook,
+                //         description: newServer.description,
+                //         bgImage: newServer.bgImage,
+                //     } });
+                // } else {
+                //     return res.status(400).json({ success: false, message: "Invalid Data", x: data });
+                // }
             }
             catch (err: any) {
                 console.error(err);
