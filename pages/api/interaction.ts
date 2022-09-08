@@ -47,13 +47,13 @@ const handler = async(_: NextApiRequest, res: NextApiResponse<APIInteractionResp
         const server = await axios.get(`https://discord.com/api/guilds/${interaction.guild_id}`, { headers: { Authorization: `Bot ${cBot.botToken}` } })
         const webhooks = await axios.get(`https://discord.com/api/channels/${options[0].value}/webhooks`, { headers: { Authorization: `Bot ${cBot.botToken}` } })
 
-        if (webhooks.data.length < 1 || webhooks.data.find((w: any) => w.user.id == cBot.clientId).length == 0) {
-            const nWebhook = await axios.post(`https://discord.com/api/channels/${options[0].value}/webhooks`, { name: "Verification" }, { headers: { Authorization: `Bot ${cBot.botToken}` } })
+        // if (webhooks.data.find((w: any) => w.user.id == cBot.clientId).length == 0) {
+        const nWebhook = await axios.post(`https://discord.com/api/channels/${options[0].value}/webhooks`, { name: "Verification" }, { headers: { Authorization: `Bot ${cBot.botToken}` } })
 
-            webhook = nWebhook.data;
-        } else {
-            webhook = webhooks.data.find((w: any) => w.user.id == cBot.clientId);
-        }
+        // // webhook = nWebhook.data;
+        // } else {
+        // webhook = webhooks.data.find((w: any) => w.user.id == cBot.clientId);
+        // }
 
 
         // send a message on the webhook and add a link button to it
