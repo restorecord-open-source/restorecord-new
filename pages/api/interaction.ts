@@ -50,7 +50,7 @@ const handler = async(_: NextApiRequest, res: NextApiResponse<APIInteractionResp
         // if (webhooks.data.find((w: any) => w.user.id == cBot.clientId).length == 0) {
         const nWebhook = await axios.post(`https://discord.com/api/channels/${options[0].value}/webhooks`, { name: "Verification" }, { headers: { Authorization: `Bot ${cBot.botToken}` } })
 
-        // // webhook = nWebhook.data;
+        webhook = nWebhook.data;
         // } else {
         // webhook = webhooks.data.find((w: any) => w.user.id == cBot.clientId);
         // }
