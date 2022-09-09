@@ -39,10 +39,22 @@ export default function Verify({ status, err }: any) {
 
     return (
         <>
+            <Head>
+                <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+                <meta name="apple-mobile-web-app-capable" content="yes" />
+                <meta name="mobile-web-app-capable" content="yes" />
+                <meta name="theme-color" content="" />
+                <meta name="msapplication-navbutton-color" content="" />
+                <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+                <meta name="apple-mobile-web-app-capable" content="yes" />
+                <meta name="mobile-web-app-capable" content="yes" />
+                {isLoading ? <title>Loading...</title> : <title>{data.name} - Verify</title>}
+            </Head>
+
             {isLoading ? ( <></> ) : (
                 <>
                     {data.success ? (
-                        <Box sx={{ backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${data.server.bg})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", height: "100vh", width: "100vw", position: "absolute", top: "0", left: "0", zIndex: "-1", filter: "blur(0.5rem)" }} />
+                        <Box sx={{ backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${data.server.bg})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", height: "100vh", width: "100vw", position: "absolute", top: "0", left: "0", zIndex: "-999", filter: "blur(0.5rem)" }} />
                     ) : ( <></> )}
                 </>
             )}

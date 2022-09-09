@@ -182,6 +182,7 @@ export default function VerifiedMembers({ user }: any) {
                                                                         console.error(err);
                                                                     });
                                                             }}>Pull</LoadingButton>
+                                                            {/* <Button variant="contained" color="secondary">More Info</Button> */}
                                                             {/* <Button variant="contained" color="error" onClick={() => { }}>
                                                                 Delete    
                                                             </Button> */}

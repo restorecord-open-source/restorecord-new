@@ -10,7 +10,7 @@ const SubscriptionList: Subscription[] = [
         features: [
             {
                 name: "memberCapacity",
-                value: "250 Restorable Members",
+                value: "Unlimited Restorable Members",
                 description: "Maximum number of Restorable Members",
                 icon: <Check sx={{ color: "#22c55e" }} />,
             },
@@ -84,7 +84,7 @@ const SubscriptionList: Subscription[] = [
         features: [
             {
                 name: "memberCapacity",
-                value: "5000 Restorable Members",
+                value: "Unlimited Restorable Members",
                 description: "Maximum number of Restorable Members",
                 icon: <Check sx={{ color: "#22c55e" }} />,
             },
@@ -158,7 +158,7 @@ const SubscriptionList: Subscription[] = [
         features: [
             {
                 name: "memberCapacity",
-                value: "500k Restorable Members",
+                value: "Unlimited Restorable Members",
                 description: "Maximum number of Restorable Members",
                 icon: <Check sx={{ color: "#22c55e" }} />,
             },

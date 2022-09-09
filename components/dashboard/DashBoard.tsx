@@ -168,9 +168,9 @@ export default function DashBoard({ user }: any) {
     return (
         <>
             <Container maxWidth="xl">
-                {/* make a grid with 2 sides and on smaller screens put them in a row */}
+
                 <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
+                    <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "block" } }}>
                         <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%" }}>
                             <CardContent>
                                 {isLoading2 ? (
@@ -188,10 +188,12 @@ export default function DashBoard({ user }: any) {
                                         </Typography>
                                     </>
                                 )}
+
                                 <Chart options={apexChart.options} series={apexChart.series} type="area" height={350} />
                             </CardContent>
                         </Paper>
                     </Grid>
+
                     <Grid item xs={12} md={6}>
                         <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%" }}>
                             <CardContent>

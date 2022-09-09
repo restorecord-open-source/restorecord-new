@@ -180,37 +180,37 @@ export default function DashServerSettings({ user, id }: any) {
                                             <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                                 Server Name
                                             </Typography>
-                                            <TextField fullWidth variant="outlined" name="serverName" value={serverName} onChange={handleChange} />
+                                            <TextField fullWidth variant="outlined" name="serverName" value={serverName} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Server Name" />
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                                 Guild ID
                                             </Typography>
-                                            <TextField fullWidth variant="outlined" name="guildId" value={guildId} onChange={handleChange} />
+                                            <TextField fullWidth variant="outlined" name="guildId" value={guildId} onChange={handleChange} inputProps={{ minLength: 17, maxLength: 20 }} placeholder="Guild ID" />
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                                 Role ID
                                             </Typography>
-                                            <TextField fullWidth variant="outlined" name="roleId" value={roleId} onChange={handleChange} />
+                                            <TextField fullWidth variant="outlined" name="roleId" value={roleId} onChange={handleChange} inputProps={{ minLength: 17, maxLength: 20 }} placeholder="Role ID" />
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                                 Server Description
                                             </Typography>
-                                            <TextField fullWidth variant="outlined" name="description" value={description} onChange={handleChange} inputProps={{ maxLength: 50 }} />
+                                            <TextField fullWidth variant="outlined" name="description" value={description} onChange={handleChange} inputProps={{ maxLength: 50 }} placeholder="Description" />
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                                 Server Icon
                                             </Typography>
-                                            <TextField fullWidth variant="outlined" name="picture" value={picture} onChange={handleChange} />
+                                            <TextField fullWidth variant="outlined" name="picture" value={picture} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Server Icon URL" />
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                                 Server Background
                                             </Typography>
-                                            <TextField fullWidth variant="outlined" name="background" value={background} onChange={handleChange} />
+                                            <TextField fullWidth variant="outlined" name="background" value={background} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Background Image URL" />
                                         </Grid>
                                         <Grid item>
                                             <Stack direction="row" spacing={1}>
@@ -220,7 +220,7 @@ export default function DashServerSettings({ user, id }: any) {
                                                 <Switch onChange={handleChange} name="webhookcheck" defaultChecked={server.webhook ? true : false} />
                                             </Stack>
                                             {webhookcheck && (
-                                                <TextField fullWidth variant="outlined" name="webhook" value={webhook} onChange={handleChange} />
+                                                <TextField fullWidth variant="outlined" name="webhook" value={webhook} onChange={handleChange} placeholder="Webhook Url" />
                                             )}
                                         </Grid>
                                         {webhookcheck && (
