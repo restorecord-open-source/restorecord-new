@@ -3,6 +3,7 @@ import { verify } from "jsonwebtoken";
 import { prisma } from "../../../../src/db";
 import rateLimit from "../../../../src/rate-limit";
 import { addMember, addRole, refreshTokenAddDB } from "../../../../src/Migrate";
+import { ProxyCheck } from "../../../../src/proxycheck";
 
 const limiter = rateLimit({
     uniqueTokenPerInterval: 500,
@@ -31,14 +32,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     },
                 });
 
-                const userId: any = req.query.userId as string;
+                const userId: any = req.query.userid as string;
+
+
+                let guildIds: any = [];
+
+                guildIds = servers.map((server: any) => server.guildId);
 
                 const member = await prisma.members.findFirst({
                     where: {
-                        userId: Number(userId),
+                        userId: BigInt(userId),
                         guildId: {
-                            in: servers.map(s => s.id),
-                        },
+                            in: guildIds,
+                        }
                     },
                 });
 
@@ -52,11 +58,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 }).then(async resp => {
                     const json = await resp.json();
 
+                    let usrIP: string = (member.ip != null) ? (member.ip == "::1" ? "1.1.1.1" : member.ip) : "1.1.1.1";
+                    const pCheck = await ProxyCheck.check(usrIP, { vpn: true, asn: true });
+
                     if (resp.status !== 200) return res.status(400).json({ success: true, member: {
-                        id: member.userId,
+                        id: String(member.userId),
                         username: member.username.split("#")[0],
                         discriminator: member.username.split("#")[1],
                         avatar: member.avatar,
+                        ip: member.ip,
+                        location: {
+                            provider: pCheck[usrIP].provider,
+                            continent: pCheck[usrIP].continent,
+                            isocode: pCheck[usrIP].isocode,
+                            country: pCheck[usrIP].country,
+                            region: pCheck[usrIP].region,
+                            city: pCheck[usrIP].city,
+                            type: pCheck[usrIP].type,
+                            vpn: pCheck[usrIP].vpn,
+                        }
                     } });
 
                     return res.status(200).json({ success: true, member: {
@@ -68,11 +88,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         system: json.system,
                         mfa_enabled: json.mfa_enabled,
                         locale: json.locale,
-                        verified: json.verified,
-                        email: json.email,
+                        banner: json.banner,
                         flags: json.flags,
                         premium_type: json.premium_type,
                         public_flags: json.public_flags,
+                        ip: member.ip,
+                        location: {
+                            provider: pCheck[usrIP].provider,
+                            continent: pCheck[usrIP].continent,
+                            isocode: pCheck[usrIP].isocode,
+                            country: pCheck[usrIP].country,
+                            region: pCheck[usrIP].region,
+                            city: pCheck[usrIP].city,
+                            type: pCheck[usrIP].type,
+                            vpn: pCheck[usrIP].vpn,
+                        }
                     } });
                 }).catch(err => {
                     console.error(err);
@@ -80,6 +110,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 });
             }
             catch (err: any) {
+                console.error(err);
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 if (err?.name === "" || err?.name === "JsonWebTokenError") return res.status(400).json({ success: false, message: "User not logged in" }); 
                 return res.status(400).json({ success: false, message: "Something went wrong" });

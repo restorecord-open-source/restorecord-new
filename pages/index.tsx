@@ -15,6 +15,8 @@ import SupportAgentRoundedIcon from "@mui/icons-material/SupportAgentRounded";
 import ShowChartRoundedIcon from "@mui/icons-material/ShowChartRounded";
 import VpnKeyOffRoundedIcon from '@mui/icons-material/VpnKeyOffRounded';
 import TuneRoundedIcon from '@mui/icons-material/TuneRounded';
+import Badge from "@mui/material/Badge";
+import theme from "../src/theme";
 
 export default function Home() {
     return (
@@ -31,9 +33,11 @@ export default function Home() {
                             RestoreCord helps you Backup your Discord Server, you can save your Server Channels, Roles, Settings and Members.
                         </Typography>
 
-                        <Button variant="contained" color="primary" href="/login">
-                            Get Started
-                        </Button>
+                        <Badge badgeContent={<>FOR FREE</>} color="success"  sx={{ mb: 4, boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)" }}>
+                            <Button variant="contained" color="primary" href="/login" size="large">
+                                Get Started
+                            </Button>
+                        </Badge>
 
                         <Typography variant="h3" component="h2" sx={{ textAlign: "center", marginTop: 32, fontWeight: "semibold" }} id="features">
                             Our Features

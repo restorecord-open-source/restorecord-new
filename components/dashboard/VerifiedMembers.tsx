@@ -3,7 +3,7 @@ import { useToken } from "../../src/token";
 import { useState } from "react";
 import { useQuery } from "react-query";
 
-import getMembers from "../../src/dashboard/getMembers";
+import getMembers, { BOT_HTTP_INTERACTIONS, BUG_HUNTER_LEVEL_1, BUG_HUNTER_LEVEL_2, CERTIFIED_MODERATOR, DELETED, DISABLED, DISABLED_SUSPICIOUS_ACTIVITY, DISABLE_PREMIUM, DISCORD_EMPLOYEE, DISCORD_PARTNER, EARLY_SUPPORTER, HAS_UNREAD_URGENT_MESSAGES, HIGH_GLOBAL_RATE_LIMIT, HOUSE_BALANCE, HOUSE_BRAVERY, HOUSE_BRILLIANCE, HYPESQUAD_EVENTS, INTERNAL_APPLICATION, MFA_SMS, PREMIUM_DISCRIMINATOR, PREMIUM_PROMO_DISMISSED, QUARANTINED, SELF_DELETED, SPAMMER, SYSTEM, TEAM_PSEUDO_USER, UNDERAGE_DELETED, USED_DESKTOP_CLIENT, USED_MOBILE_CLIENT, USED_WEB_CLIENT, VERIFIED_BOT, VERIFIED_BOT_DEVELOPER, VERIFIED_EMAIL } from "../../src/dashboard/getMembers";
 import Container from "@mui/material/Container";
 import Paper from "@mui/material/Paper";
 import CardContent from "@mui/material/CardContent";
@@ -21,6 +21,16 @@ import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 import axios from "axios";
 import LoadingButton from "@mui/lab/LoadingButton";
+import theme from "../../src/theme";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogActions from "@mui/material/DialogActions";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
+import Tooltip from "@mui/material/Tooltip";
+import Fade from "@mui/material/Fade";
 
 export default function VerifiedMembers({ user }: any) {
     const [token]: any = useToken();
@@ -31,6 +41,10 @@ export default function VerifiedMembers({ user }: any) {
     const [openE, setOpenE] = useState(false);
     const [notiTextS, setNotiTextS] = useState("X");
     const [notiTextE, setNotiTextE] = useState("X");
+
+    const [open, setOpen] = useState(false);
+    const [userId, setUserId] = useState("");
+    const [userInfo, setUserInfo]: any = useState({});
 
     const [loading, setLoading] = useState(false);
 
@@ -43,6 +57,28 @@ export default function VerifiedMembers({ user }: any) {
         setTimeout(() => {
             refetch();
         }, 10);
+    }
+
+    function requestInfo(userId: string) {
+        fetch(`/api/v1/member/${userId}`, {
+            headers: {
+                "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+            },
+        })
+            .then(res => res.json())
+            .then(res => {
+                if (!res.success) {
+                    setNotiTextE(res.message);
+                    setOpenE(true);
+                } else {
+                    // get json `member` from response
+                    console.log(res.member);
+                    setUserInfo(res.member)
+                }
+            }).catch(err => {
+                setNotiTextE(err.message);
+                setOpenE(true);
+            });
     }
 
     return (
@@ -66,6 +102,67 @@ export default function VerifiedMembers({ user }: any) {
                                 {notiTextS}
                             </Alert>
                         </Snackbar>
+
+                        <Dialog open={open} onClose={() => { setOpen(false); } } maxWidth="sm" fullWidth sx={{ border: "1" }}>
+                            <DialogTitle>
+                                <Stack spacing={1} direction="row" alignItems="center" justifyContent="space-between">
+                                    <Typography variant="h5" sx={{ fontWeight: "500" }}>
+                                        More Info
+                                    </Typography>
+                                    <IconButton onClick={() => { setOpen(false); } }>
+                                        <CloseIcon />
+                                    </IconButton>
+                                </Stack>
+                            </DialogTitle>
+                            <DialogContent>
+                                {userInfo.username && 
+                                    <>
+                                        <Stack spacing={1} direction="row" alignItems="center" sx={{ py: userInfo.banner ? 4 : 0, px: userInfo.banner ? 2 : 0, background: userInfo.banner ? `url(https://cdn.discordapp.com/banners/${userInfo.id}/${userInfo.banner}?size=512) center / cover no-repeat` : ``, borderRadius: "1rem" }}>
+                                            <Avatar alt={userInfo.username} src={userInfo.avatar.length < 2 ? `https://cdn.discordapp.com/embed/avatars/${userInfo.discriminator % 5}.png` : `https://cdn.discordapp.com/avatars/${userInfo.id}/${userInfo.avatar}?size=2048`} />
+                                            <Tooltip title={`${userInfo.username}#${userInfo.discriminator}`} placement="top">
+                                                <Typography variant="h5" sx={{ fontWeight: "800" }}>
+                                                    {userInfo.username}#{userInfo.discriminator}
+                                                </Typography>
+                                            </Tooltip>
+
+                                            {(userInfo.premium_type > 0) &&                                                 <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Nitro"} placement="top"><Avatar alt="Nitro" src="https://cdn.discordapp.com/attachments/953322413393846393/1018637667900080218/24d05f3b46a110e538674edbac0db4cd.pnh.png" sx={{ width: 28, height: 28 }} /></Tooltip>}
+                                            {(userInfo.public_flags & DISCORD_EMPLOYEE) == DISCORD_EMPLOYEE &&              <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Discord Employee"} placement="top"><Avatar alt="Discord Employee" src="https://discord.id/img/flags/0.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                            {(userInfo.public_flags & DISCORD_PARTNER) == DISCORD_PARTNER &&                <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Discord Partner"} placement="top"><Avatar alt="Discord Partner" src="https://discord.id/img/flags/1.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                            {(userInfo.public_flags & HYPESQUAD_EVENTS) == HYPESQUAD_EVENTS &&              <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Discord Hypesquad Boss"} placement="top"><Avatar alt="Discord Hypesquad Boss" src="https://discord.id/img/flags/2.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                            {(userInfo.public_flags & BUG_HUNTER_LEVEL_1) == BUG_HUNTER_LEVEL_1 &&          <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Discord Hypesquad"} placement="top"><Avatar alt="Discord Hypesquad" src="https://discord.id/img/flags/3.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                            {(userInfo.public_flags & HOUSE_BRAVERY) == HOUSE_BRAVERY &&                    <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"House of Bravery"} placement="top"><Avatar alt="House of Bravery" src="https://discord.id/img/flags/6.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                            {(userInfo.public_flags & HOUSE_BRILLIANCE) == HOUSE_BRILLIANCE &&              <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"House of Brilliance"} placement="top"><Avatar alt="House of Brilliance" src="https://discord.id/img/flags/7.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                            {(userInfo.public_flags & HOUSE_BALANCE) == HOUSE_BALANCE &&                    <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"House of Balance"} placement="top"><Avatar alt="House of Balance" src="https://discord.png/img/flags/8.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                            {(userInfo.public_flags & EARLY_SUPPORTER) == EARLY_SUPPORTER &&                <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Early Supporter"} placement="top"><Avatar alt="Early Supporter" src="https://discord.id/img/flags/9.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                            {(userInfo.public_flags & SYSTEM) == SYSTEM &&                                  <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"System"} placement="top"><Avatar alt="System" src="https://discord.id/img/flags/12.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                            {(userInfo.public_flags & VERIFIED_BOT) == VERIFIED_BOT &&                      <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Verified Bot"} placement="top"><Avatar alt="Verified Bot" src="https://discord.id/img/flags/16.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                            {(userInfo.public_flags & VERIFIED_BOT_DEVELOPER) == VERIFIED_BOT_DEVELOPER &&  <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Verified Bot Developer"} placement="top"><Avatar alt="Verified Bot Developer" src="https://discord.id/img/flags/17.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                            {(userInfo.public_flags & CERTIFIED_MODERATOR) == CERTIFIED_MODERATOR &&        <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Certified Moderator"} placement="top"><Avatar alt="Certified Moderator" src="https://discord.id/img/flags/18.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                            {(userInfo.public_flags & DELETED) == DELETED && <span>Deleted</span>}
+                                            {(userInfo.public_flags & SELF_DELETED) == SELF_DELETED && <span>Self Deleted</span>}
+                                            {(userInfo.public_flags & DISABLED) == DISABLED && <span>Disabled</span>}
+                                        </Stack>
+
+                                        <Stack spacing={1} direction="row" alignItems="center" sx={{ mt: 2 }}>
+                                            {userInfo.location.isocode && <Avatar alt="Bot" src={`https://cdn.ipregistry.co/flags/twemoji/${userInfo.location.isocode.toLowerCase()}.svg`} sx={{ width: 20, height: 20, borderRadius: 0 }} />}
+                                            <Typography color="textSecondary" variant="body2">IP: <b>{userInfo.ip}</b></Typography>
+                                        </Stack>
+                                        {userInfo.location.country && <Typography color="textSecondary" variant="body2">Country: <b>{userInfo.location.country}</b></Typography>}
+                                        {userInfo.location.region && <Typography color="textSecondary" variant="body2">Region: <b>{userInfo.location.region}</b></Typography>}
+                                        {userInfo.location.city && <Typography color="textSecondary" variant="body2">City: <b>{userInfo.location.city}</b></Typography>}
+                                        {userInfo.location.provider && <Typography color="textSecondary" variant="body2">Provider: <b>{userInfo.location.provider}</b></Typography>}
+                                        {userInfo.location.type && <Typography color="textSecondary" variant="body2">Type: <b>{userInfo.location.type}</b></Typography>}
+                                        {userInfo.locale && <Typography color="textSecondary" variant="body2" sx={{ mt: 2 }}>Language: <b>{userInfo.locale.split("-")[1] ? userInfo.locale.split("-")[1] : userInfo.locale.toUpperCase()}</b></Typography>}
+                                        {userInfo.mfa_enabled && <Typography color="textSecondary" variant="body2">2FA: <b>{userInfo.mfa_enabled ? "Enabled" : "Disabled"}</b></Typography>}
+                                    </>
+                                }
+                            </DialogContent>
+                            <DialogActions sx={{ justifyContent: "flex-end" }}>
+                                <Button onClick={() => { setOpen(false); } } color="primary">
+                                    Close
+                                </Button>
+                            </DialogActions>
+                        </Dialog>
                         
                         <Grid justifyContent={"space-between"}>
                             <Grid item>
@@ -182,7 +279,11 @@ export default function VerifiedMembers({ user }: any) {
                                                                         console.error(err);
                                                                     });
                                                             }}>Pull</LoadingButton>
-                                                            {/* <Button variant="contained" color="secondary">More Info</Button> */}
+                                                            <Button variant="contained" color="info" onClick={() => {
+                                                                setUserId(item.userId);
+                                                                requestInfo(item.userId);
+                                                                setOpen(true);
+                                                            }}>Info</Button>
                                                             {/* <Button variant="contained" color="error" onClick={() => { }}>
                                                                 Delete    
                                                             </Button> */}

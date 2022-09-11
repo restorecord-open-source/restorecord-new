@@ -7,8 +7,11 @@ const theme = createTheme({
             main: '#4f46e5',
         },
         secondary: {
-            main: '#1d4ed8',
+            main: '#433add',
         },
+        info: {
+            main: '#3f84f6',
+        }
     },
     typography: {
         fontFamily: [
