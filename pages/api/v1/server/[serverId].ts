@@ -224,7 +224,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         }
                     });
 
-                    for (const member of membersNew) {  
+                    for (const member of membersNew) { 
+                        const newServer = await prisma.servers.findFirst({
+                            where: {
+                                id: server.id
+                            }
+                        });
+
+                        if (!newServer) return reject();
+                        if (!newServer.pulling) return reject();
+
                         console.log(`Adding ${member.username} to ${server.name}`);
                         await addMember(server.guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, [BigInt(server.roleId).toString()]).then(async (resp: any) => {
                             console.log(resp?.response?.status ?? "");
