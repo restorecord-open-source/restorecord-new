@@ -31,6 +31,7 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import Tooltip from "@mui/material/Tooltip";
 import Fade from "@mui/material/Fade";
+import Box from "@mui/material/Box";
 
 export default function VerifiedMembers({ user }: any) {
     const [token]: any = useToken();
@@ -47,6 +48,7 @@ export default function VerifiedMembers({ user }: any) {
     const [userInfo, setUserInfo]: any = useState({});
 
     const [loading, setLoading] = useState(false);
+    const [loadingInfo, setLoadingInfo] = useState(true);
 
     const { data, isError, isLoading, refetch } = useQuery('members', async () => await getMembers({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
@@ -60,6 +62,7 @@ export default function VerifiedMembers({ user }: any) {
     }
 
     function requestInfo(userId: string) {
+        setLoadingInfo(true);
         fetch(`/api/v1/member/${userId}`, {
             headers: {
                 "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
@@ -67,12 +70,11 @@ export default function VerifiedMembers({ user }: any) {
         })
             .then(res => res.json())
             .then(res => {
+                setLoadingInfo(false);
                 if (!res.success) {
                     setNotiTextE(res.message);
                     setOpenE(true);
                 } else {
-                    // get json `member` from response
-                    console.log(res.member);
                     setUserInfo(res.member)
                 }
             }).catch(err => {
@@ -103,50 +105,73 @@ export default function VerifiedMembers({ user }: any) {
                             </Alert>
                         </Snackbar>
 
-                        <Dialog open={open} onClose={() => { setOpen(false); } } maxWidth="sm" fullWidth sx={{ border: "1" }}>
-                            <DialogTitle>
+                        <Dialog open={open} onClose={() => { setOpen(false); setLoadingInfo(true); setUserInfo({}); } } maxWidth="sm" fullWidth sx={{ borderRadius: "50%" }}>
+                            <DialogTitle sx={{ backgroundColor: "grey.900" }}>
                                 <Stack spacing={1} direction="row" alignItems="center" justifyContent="space-between">
                                     <Typography variant="h5" sx={{ fontWeight: "500" }}>
                                         More Info
                                     </Typography>
-                                    <IconButton onClick={() => { setOpen(false); } }>
+                                    <IconButton onClick={() => { setOpen(false); setLoadingInfo(true); setUserInfo({}); } }>
                                         <CloseIcon />
                                     </IconButton>
                                 </Stack>
                             </DialogTitle>
-                            <DialogContent>
-                                {userInfo.username && 
-                                    <>
-                                        <Stack spacing={1} direction="row" alignItems="center" sx={{ py: userInfo.banner ? 4 : 0, px: userInfo.banner ? 2 : 0, background: userInfo.banner ? `url(https://cdn.discordapp.com/banners/${userInfo.id}/${userInfo.banner}?size=512) center / cover no-repeat` : ``, borderRadius: "1rem" }}>
-                                            <Avatar alt={userInfo.username} src={userInfo.avatar.length < 2 ? `https://cdn.discordapp.com/embed/avatars/${userInfo.discriminator % 5}.png` : `https://cdn.discordapp.com/avatars/${userInfo.id}/${userInfo.avatar}?size=2048`} />
+                            <DialogContent sx={{ marginTop: 2 }}>
+                                <Stack spacing={1} direction="row" alignItems="center" sx={{ borderRadius: "1rem", flexDirection: { xs: "column", md: "row" } }}>
+                                    {loadingInfo ? <Skeleton animation="wave" variant="circular" width={40} height={40}  /> : <Avatar alt={userInfo.username} src={userInfo.avatar.length < 2 ? `https://cdn.discordapp.com/embed/avatars/${userInfo.discriminator % 5}.png` : `https://cdn.discordapp.com/avatars/${userInfo.id}/${userInfo.avatar}?size=2048`} />}
+                                    {loadingInfo ? 
+                                        <>
+                                            <Skeleton animation="wave" variant="rectangular" width={135} height={28} sx={{ borderRadius: "4px" }} />
+                                        </> : <>
                                             <Tooltip title={`${userInfo.username}#${userInfo.discriminator}`} placement="top">
-                                                <Typography variant="h5" sx={{ fontWeight: "800" }}>
+                                                <Typography variant="h5" sx={{ fontWeight: "600", zIndex: 9999  }}>
                                                     {userInfo.username}#{userInfo.discriminator}
                                                 </Typography>
                                             </Tooltip>
-
-                                            {(userInfo.premium_type > 0) &&                                                 <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Nitro"} placement="top"><Avatar alt="Nitro" src="https://cdn.discordapp.com/attachments/953322413393846393/1018637667900080218/24d05f3b46a110e538674edbac0db4cd.pnh.png" sx={{ width: 28, height: 28 }} /></Tooltip>}
-                                            {(userInfo.public_flags & DISCORD_EMPLOYEE) == DISCORD_EMPLOYEE &&              <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Discord Employee"} placement="top"><Avatar alt="Discord Employee" src="https://discord.id/img/flags/0.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
-                                            {(userInfo.public_flags & DISCORD_PARTNER) == DISCORD_PARTNER &&                <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Discord Partner"} placement="top"><Avatar alt="Discord Partner" src="https://discord.id/img/flags/1.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
-                                            {(userInfo.public_flags & HYPESQUAD_EVENTS) == HYPESQUAD_EVENTS &&              <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Discord Hypesquad Boss"} placement="top"><Avatar alt="Discord Hypesquad Boss" src="https://discord.id/img/flags/2.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
-                                            {(userInfo.public_flags & BUG_HUNTER_LEVEL_1) == BUG_HUNTER_LEVEL_1 &&          <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Discord Hypesquad"} placement="top"><Avatar alt="Discord Hypesquad" src="https://discord.id/img/flags/3.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
-                                            {(userInfo.public_flags & HOUSE_BRAVERY) == HOUSE_BRAVERY &&                    <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"House of Bravery"} placement="top"><Avatar alt="House of Bravery" src="https://discord.id/img/flags/6.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
-                                            {(userInfo.public_flags & HOUSE_BRILLIANCE) == HOUSE_BRILLIANCE &&              <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"House of Brilliance"} placement="top"><Avatar alt="House of Brilliance" src="https://discord.id/img/flags/7.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
-                                            {(userInfo.public_flags & HOUSE_BALANCE) == HOUSE_BALANCE &&                    <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"House of Balance"} placement="top"><Avatar alt="House of Balance" src="https://discord.png/img/flags/8.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
-                                            {(userInfo.public_flags & EARLY_SUPPORTER) == EARLY_SUPPORTER &&                <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Early Supporter"} placement="top"><Avatar alt="Early Supporter" src="https://discord.id/img/flags/9.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
-                                            {(userInfo.public_flags & SYSTEM) == SYSTEM &&                                  <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"System"} placement="top"><Avatar alt="System" src="https://discord.id/img/flags/12.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
-                                            {(userInfo.public_flags & VERIFIED_BOT) == VERIFIED_BOT &&                      <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Verified Bot"} placement="top"><Avatar alt="Verified Bot" src="https://discord.id/img/flags/16.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
-                                            {(userInfo.public_flags & VERIFIED_BOT_DEVELOPER) == VERIFIED_BOT_DEVELOPER &&  <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Verified Bot Developer"} placement="top"><Avatar alt="Verified Bot Developer" src="https://discord.id/img/flags/17.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
-                                            {(userInfo.public_flags & CERTIFIED_MODERATOR) == CERTIFIED_MODERATOR &&        <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Certified Moderator"} placement="top"><Avatar alt="Certified Moderator" src="https://discord.id/img/flags/18.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                        </>
+                                    }
+                                    
+                                    {(userInfo.public_flags || userInfo.premium_type) ? 
+                                        <Stack spacing={1} direction="row" alignItems="center" flexWrap="wrap" width="100%" sx={{ justifyContent: {xs: "center", md: "flex-start" } }}>
+                                            {(userInfo.premium_type > 0) &&                                                 <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Nitro"}                    placement="top"><Avatar alt="Nitro" src="https://cdn.discordapp.com/attachments/953322413393846393/1018637667900080218/24d05f3b46a110e538674edbac0db4cd.pnh.png" sx={{ width: 28, height: 28 }} /></Tooltip>}
+                                            {(userInfo.public_flags & DISCORD_EMPLOYEE) == DISCORD_EMPLOYEE &&              <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Discord Employee"}         placement="top"><Avatar alt="Discord Employee" src="https://discord.id/img/flags/0.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                            {(userInfo.public_flags & DISCORD_PARTNER) == DISCORD_PARTNER &&                <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Discord Partner"}          placement="top"><Avatar alt="Discord Partner" src="https://discord.id/img/flags/1.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                            {(userInfo.public_flags & HYPESQUAD_EVENTS) == HYPESQUAD_EVENTS &&              <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Discord Hypesquad"}        placement="top"><Avatar alt="Discord Hypesquad Boss" src="https://discord.id/img/flags/2.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                            {(userInfo.public_flags & BUG_HUNTER_LEVEL_1) == BUG_HUNTER_LEVEL_1 &&          <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Discord Bug Hunter"}       placement="top"><Avatar alt="Discord Hypesquad" src="https://discord.id/img/flags/3.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                            {(userInfo.public_flags & HOUSE_BRAVERY) == HOUSE_BRAVERY &&                    <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"House of Bravery"}         placement="top"><Avatar alt="House of Bravery" src="https://discord.id/img/flags/6.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                            {(userInfo.public_flags & HOUSE_BRILLIANCE) == HOUSE_BRILLIANCE &&              <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"House of Brilliance"}      placement="top"><Avatar alt="House of Brilliance" src="https://discord.id/img/flags/7.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                            {(userInfo.public_flags & HOUSE_BALANCE) == HOUSE_BALANCE &&                    <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"House of Balance"}         placement="top"><Avatar alt="House of Balance" src="https://discord.id/img/flags/8.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                            {(userInfo.public_flags & EARLY_SUPPORTER) == EARLY_SUPPORTER &&                <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Early Supporter"}          placement="top"><Avatar alt="Early Supporter" src="https://discord.id/img/flags/9.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                            {(userInfo.public_flags & SYSTEM) == SYSTEM &&                                  <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"System"}                   placement="top"><Avatar alt="System" src="https://discord.id/img/flags/12.png" sx={{ width: 28, height: 28, borderRadius: 0 }} /></Tooltip>}
+                                            {(userInfo.public_flags & VERIFIED_BOT) == VERIFIED_BOT &&                      <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Verified Bot"}             placement="top"><Avatar alt="Verified Bot" src="https://discord.id/img/flags/16.png" sx={{ width: 28, height: 28, borderRadius: 0 }}/></Tooltip>}
+                                            {(userInfo.public_flags & VERIFIED_BOT_DEVELOPER) == VERIFIED_BOT_DEVELOPER &&  <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Verified Bot Developer"}   placement="top"><Avatar alt="Verified Bot Developer" src="https://discord.id/img/flags/17.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                            {(userInfo.public_flags & CERTIFIED_MODERATOR) == CERTIFIED_MODERATOR &&        <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Certified Moderator"}      placement="top"><Avatar alt="Certified Moderator" src="https://discord.id/img/flags/18.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
                                             {(userInfo.public_flags & DELETED) == DELETED && <span>Deleted</span>}
                                             {(userInfo.public_flags & SELF_DELETED) == SELF_DELETED && <span>Self Deleted</span>}
                                             {(userInfo.public_flags & DISABLED) == DISABLED && <span>Disabled</span>}
-                                        </Stack>
+                                        </Stack> : <></>}
+                                </Stack>
 
-                                        <Stack spacing={1} direction="row" alignItems="center" sx={{ mt: 2 }}>
-                                            {userInfo.location.isocode && <Avatar alt="Bot" src={`https://cdn.ipregistry.co/flags/twemoji/${userInfo.location.isocode.toLowerCase()}.svg`} sx={{ width: 20, height: 20, borderRadius: 0 }} />}
-                                            <Typography color="textSecondary" variant="body2">IP: <b>{userInfo.ip}</b></Typography>
-                                        </Stack>
+                                <Stack spacing={1} direction="row" alignItems="center" sx={{ mt: 2 }}>
+                                    {loadingInfo ? 
+                                        <>
+                                            <Skeleton animation="wave" variant="rectangular" width={30} height={16} sx={{ borderRadius: "4px" }} /> 
+                                            <Skeleton animation="wave" variant="rectangular" width={120} height={16} sx={{ borderRadius: "4px" }} /> 
+                                        </> : <>
+                                            {userInfo.location.isocode && <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200}} title={userInfo.location.country} placement="top"><Avatar alt="Bot" src={`https://cdn.ipregistry.co/flags/twemoji/${userInfo.location.isocode.toLowerCase()}.svg`} sx={{ width: 20, height: 20, borderRadius: 0 }} /></Tooltip>}
+                                            {userInfo.ip && <Typography color="textSecondary" variant="body2">IP: <b>{userInfo.ip}</b></Typography>}
+                                        </>
+                                    }
+
+                                </Stack>
+                                {loadingInfo ? 
+                                    <>
+                                        <Skeleton animation="wave" variant="rectangular" width={225} height={16} sx={{ borderRadius: "4px", mt: 0.5 }} />
+                                        <Skeleton animation="wave" variant="rectangular" width={230} height={16} sx={{ borderRadius: "4px", mt: 0.5 }} />
+                                        <Skeleton animation="wave" variant="rectangular" width={200} height={16} sx={{ borderRadius: "4px", mt: 0.5 }} />
+                                        <Skeleton animation="wave" variant="rectangular" width={190} height={16} sx={{ borderRadius: "4px", mt: 0.5 }} />
+                                        <Skeleton animation="wave" variant="rectangular" width={170} height={16} sx={{ borderRadius: "4px", mt: 0.5 }} />
+                                    </> : <>
                                         {userInfo.location.country && <Typography color="textSecondary" variant="body2">Country: <b>{userInfo.location.country}</b></Typography>}
                                         {userInfo.location.region && <Typography color="textSecondary" variant="body2">Region: <b>{userInfo.location.region}</b></Typography>}
                                         {userInfo.location.city && <Typography color="textSecondary" variant="body2">City: <b>{userInfo.location.city}</b></Typography>}
@@ -157,11 +182,14 @@ export default function VerifiedMembers({ user }: any) {
                                     </>
                                 }
                             </DialogContent>
-                            <DialogActions sx={{ justifyContent: "flex-end" }}>
-                                <Button onClick={() => { setOpen(false); } } color="primary">
-                                    Close
+                            {/* <DialogActions sx={{ justifyContent: "flex-start", padding: "20px 24px", backgroundColor: "grey.900" }}>
+                                <Button onClick={() => { setOpen(false); setLoadingInfo(true); setUserInfo({}); } } color="error" variant="contained">
+                                    Delete
                                 </Button>
-                            </DialogActions>
+                                <Button onClick={() => { setOpen(false); setLoadingInfo(true); setUserInfo({}); } } color="warning" variant="contained">
+                                    Ban
+                                </Button>
+                            </DialogActions> */}
                         </Dialog>
                         
                         <Grid justifyContent={"space-between"}>
@@ -282,6 +310,7 @@ export default function VerifiedMembers({ user }: any) {
                                                             <Button variant="contained" color="info" onClick={() => {
                                                                 setUserId(item.userId);
                                                                 requestInfo(item.userId);
+                                                                setLoadingInfo(true);
                                                                 setOpen(true);
                                                             }}>Info</Button>
                                                             {/* <Button variant="contained" color="error" onClick={() => { }}>
