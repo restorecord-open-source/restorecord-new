@@ -32,11 +32,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     },
                 });
 
-                const userId: any = req.query.userid as string;
+                const account = await prisma.accounts.findFirst({ where: { id: valid.id } });
+                if (!account) return res.status(400).json({ success: false, message: "Account not found." });
 
+                const userId: any = req.query.userid as string;
+                if (!userId) return res.status(400).json({ success: false, message: "No userid provided." });
 
                 let guildIds: any = [];
-
                 guildIds = servers.map((server: any) => server.guildId);
 
                 const member = await prisma.members.findFirst({
@@ -61,49 +63,54 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     let usrIP: string = (member.ip != null) ? (member.ip == "::1" ? "1.1.1.1" : member.ip) : "1.1.1.1";
                     const pCheck = await ProxyCheck.check(usrIP, { vpn: true, asn: true });
 
-                    if (resp.status !== 200) return res.status(400).json({ success: true, member: {
-                        id: String(member.userId),
-                        username: member.username.split("#")[0],
-                        discriminator: member.username.split("#")[1],
-                        avatar: member.avatar,
-                        ip: member.ip,
-                        location: {
-                            provider: pCheck[usrIP].provider,
-                            continent: pCheck[usrIP].continent,
-                            isocode: pCheck[usrIP].isocode,
-                            country: pCheck[usrIP].country,
-                            region: pCheck[usrIP].region,
-                            city: pCheck[usrIP].city,
-                            type: pCheck[usrIP].type,
-                            vpn: pCheck[usrIP].vpn,
-                        }
-                    } });
+                    if (resp.status !== 200) {
+                        return res.status(200).json({ success: true, member: {
+                            id: String(member.userId),
+                            username: member.username.split("#")[0],
+                            discriminator: member.username.split("#")[1],
+                            avatar: member.avatar,
+                            ip: member.ip,
+                            location: {
+                                provider: pCheck[usrIP].provider,
+                                continent: pCheck[usrIP].continent,
+                                isocode: pCheck[usrIP].isocode,
+                                country: pCheck[usrIP].country,
+                                region: pCheck[usrIP].region,
+                                city: pCheck[usrIP].city,
+                                type: pCheck[usrIP].type,
+                                vpn: pCheck[usrIP].vpn,
+                            }
+                        } });
+                    }
 
-                    return res.status(200).json({ success: true, member: {
-                        id: json.id,
-                        username: json.username,
-                        discriminator: json.discriminator,
-                        avatar: json.avatar,
-                        bot: json.bot,
-                        system: json.system,
-                        mfa_enabled: json.mfa_enabled,
-                        locale: json.locale,
-                        banner: json.banner,
-                        flags: json.flags,
-                        premium_type: json.premium_type,
-                        public_flags: json.public_flags,
-                        ip: member.ip,
-                        location: {
-                            provider: pCheck[usrIP].provider,
-                            continent: pCheck[usrIP].continent,
-                            isocode: pCheck[usrIP].isocode,
-                            country: pCheck[usrIP].country,
-                            region: pCheck[usrIP].region,
-                            city: pCheck[usrIP].city,
-                            type: pCheck[usrIP].type,
-                            vpn: pCheck[usrIP].vpn,
-                        }
-                    } });
+
+                    if (resp.status === 200) {
+                        return res.status(200).json({ success: true, member: {
+                            id: json.id,
+                            username: json.username,
+                            discriminator: json.discriminator,
+                            avatar: json.avatar,
+                            bot: json.bot,
+                            system: json.system,
+                            mfa_enabled: account.role === "business" ? json.mfa_enabled : null,
+                            locale: account.role === "business" ? json.locale : null,
+                            banner: json.banner,
+                            flags: json.flags,
+                            premium_type: json.premium_type,
+                            public_flags: json.public_flags,
+                            ip: account.role !== "free" ? member.ip : null,
+                            location: {
+                                provider: account.role === "business" ? pCheck[usrIP].provider : null,
+                                continent: account.role !== "free" ? pCheck[usrIP].continent : null,
+                                isocode: account.role !== "free" ? pCheck[usrIP].isocode : null,
+                                country: account.role !== "free" ? pCheck[usrIP].country : null,
+                                region: account.role !== "free" ? pCheck[usrIP].region : null,
+                                city: account.role === "business" ? pCheck[usrIP].city : null,
+                                type: account.role !== "free" ? pCheck[usrIP].type : null,
+                                vpn: account.role !== "free" ? pCheck[usrIP].vpn : null,
+                            }
+                        } });
+                    }
                 }).catch(err => {
                     console.error(err);
                     return res.status(400).json({ success: false, message: "Couldn't get user information." });
