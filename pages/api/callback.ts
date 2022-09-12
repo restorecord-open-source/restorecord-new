@@ -211,8 +211,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 },
                             },
                             data: {
-                                accessToken: resp.access_token,
-                                refreshToken: resp.refresh_token,
+                                accessToken: resp.data.access_token,
+                                refreshToken: resp.data.refresh_token,
                                 ip: IPAddr ?? "127.0.0.1",
                                 username: account.username + "#" + account.discriminator,
                                 avatar: account.avatar ? account.avatar : (account.discriminator as any % 5).toString(),
