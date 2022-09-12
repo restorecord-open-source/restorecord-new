@@ -63,6 +63,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     let usrIP: string = (member.ip != null) ? (member.ip == "::1" ? "1.1.1.1" : member.ip) : "1.1.1.1";
                     const pCheck = await ProxyCheck.check(usrIP, { vpn: true, asn: true });
 
+                    console.log(`${member.username} ${resp.status}`);
+
                     if (resp.status !== 200) {
                         return res.status(200).json({ success: true, member: {
                             id: String(member.userId),
