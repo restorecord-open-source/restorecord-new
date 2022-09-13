@@ -113,8 +113,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     const roleIdCheck = await prisma.servers.findFirst({ where: { roleId: BigInt(data.newRoleId), } });
 
                     if (serverNameCheck && (data.newServerName !== data.serverName)) return res.status(400).json({ success: false, message: "Server name is already in use" });
-                    if (guildIdCheck && (data.newGuildId !== BigInt(data.guildId))) return res.status(400).json({ success: false, message: "Guild ID is already in use" });
-                    if (roleIdCheck && (data.newRoleId !== BigInt(data.roleId))) return res.status(400).json({ success: false, message: "Role ID is already in use" });
+                    if (guildIdCheck && (data.newGuildId !== data.guildId)) return res.status(400).json({ success: false, message: "Guild ID is already in use" });
+                    if (roleIdCheck && (data.newRoleId !== data.roleId)) return res.status(400).json({ success: false, message: "Role ID is already in use" });
 
                     const server = await prisma.servers.findFirst({
                         where: {
