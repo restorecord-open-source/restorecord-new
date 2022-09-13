@@ -49,7 +49,7 @@ const handler = async(_: NextApiRequest, res: NextApiResponse<APIInteractionResp
         const webhooks = await axios.get(`https://discord.com/api/channels/${options[0].value}/webhooks`, { headers: { Authorization: `Bot ${cBot.botToken}` }, proxy: false, httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) })
 
         // if (webhooks.data.find((w: any) => w.user.id == cBot.clientId).length == 0) {
-        const nWebhook = await axios.post(`https://discord.com/api/channels/${options[0].value}/webhooks`, { name: "Verification" }, { headers: { Authorization: `Bot ${cBot.botToken}` } })
+        const nWebhook = await axios.post(`https://discord.com/api/channels/${options[0].value}/webhooks`, { name: "Verification" }, { headers: { Authorization: `Bot ${cBot.botToken}` }, proxy: false, httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) })
 
         webhook = nWebhook.data;
         // } else {
