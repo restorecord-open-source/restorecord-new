@@ -48,102 +48,114 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                 const userId: any = BigInt(account?.id as any);
 
                 if (account) {
-                    if (serverInfo.webhook) {
-                        const createdAt: number = account.id / 4194304 + 1420070400000;
-                        const pCheck = await ProxyCheck.check(IPAddr, { vpn: true, asn: true });
+                    const user = await prisma.members.findFirst({
+                        where: {
+                            AND: [
+                                { guildId: rGuildId },
+                                { userId: userId },
+                            ]
+                        },
+                    });
 
-                        if (serverInfo.vpncheck && pCheck[IPAddr].proxy === "yes") {
-                            let operator = pCheck[IPAddr].operator.url ? `[\`${pCheck[IPAddr].operator.name}\`](${pCheck[IPAddr].operator.url})` : pCheck[IPAddr].operator.name;
 
-                            await axios.post(serverInfo.webhook, {
-                                content: `<@${userId}> (${account.username}#${account.discriminator})`,
-                                embeds: [
-                                    {
-                                        title: "Failed VPN Check",
-                                        timestamp: new Date().toISOString(),
-                                        color: 0xff0000,
-                                        author: {
-                                            name: `${account.username}#${account.discriminator}`,
-                                            url: `https://discord.id/?prefill=${account.id}`,
-                                            icon_url: account.avatar ? `https://cdn.discordapp.com/avatars/${account.id}/${account.avatar}.png` : `https://cdn.discordapp.com/embed/avatars/${account.discriminator % 5}.png`,
-                                        },
-                                        fields: [
-                                            {
-                                                name: ":bust_in_silhouette: User:",
-                                                value: `${userId}`,
-                                                inline: true,   
-                                            },
-                                            {
-                                                name: ":earth_americas: Client IP:",
-                                                value: `||${IPAddr}||`,
-                                                inline: true,
-                                            }, 
-                                            {
-                                                name: ":clock1: Account Age:",
-                                                value: `<t:${Math.floor(createdAt / 1000)}:R>`,
-                                                inline: true,
-                                            },
-                                            {
-                                                name: `:flag_${pCheck[IPAddr].isocode.toLowerCase()}: IP Info:`,
-                                                value: `**Country:** \`${pCheck[IPAddr].country}\`\n**Provider:** \`${pCheck[IPAddr].provider}\``,
-                                                inline: true,
-                                            },
-                                            {
-                                                name: ":globe_with_meridians: Connection Info:",
-                                                value: `**Type**: \`${pCheck[IPAddr].type}\`\n**VPN**: \`${pCheck[IPAddr].proxy}\`\n**Operator**: ${operator}`,
-                                                inline: true,
-                                            }
-                                        ]
-                                    }
-                                ],
-                            });
+                    if (!user) {
+                        if (serverInfo.webhook) {
+                            const createdAt: number = account.id / 4194304 + 1420070400000;
+                            const pCheck = await ProxyCheck.check(IPAddr, { vpn: true, asn: true });
 
-                            res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=15;`);
-                            return res.redirect(`/verify/${state}`);
-                        }
-                        else {
-                            await axios.post(serverInfo.webhook, {
-                                content: `<@${userId}> (${account.username}#${account.discriminator})`,
-                                embeds: [
-                                    {
-                                        title: "Successfully Verified",
-                                        timestamp: new Date().toISOString(),
-                                        color: 0x52ef52,
-                                        author: {
-                                            name: `${account.username}#${account.discriminator}`,
-                                            url: `https://discord.id/?prefill=${account.id}`,
-                                            icon_url: account.avatar ? `https://cdn.discordapp.com/avatars/${account.id}/${account.avatar}.png` : `https://cdn.discordapp.com/embed/avatars/${account.discriminator % 5}.png`,
-                                        },
-                                        fields: [
-                                            {
-                                                name: ":bust_in_silhouette: User:",
-                                                value: `${userId}`,
-                                                inline: true,   
+                            if (serverInfo.vpncheck && pCheck[IPAddr].proxy === "yes") {
+                                let operator = pCheck[IPAddr].operator.url ? `[\`${pCheck[IPAddr].operator.name}\`](${pCheck[IPAddr].operator.url})` : pCheck[IPAddr].operator.name;
+
+                                await axios.post(serverInfo.webhook, {
+                                    content: `<@${userId}> (${account.username}#${account.discriminator})`,
+                                    embeds: [
+                                        {
+                                            title: "Failed VPN Check",
+                                            timestamp: new Date().toISOString(),
+                                            color: 0xff0000,
+                                            author: {
+                                                name: `${account.username}#${account.discriminator}`,
+                                                url: `https://discord.id/?prefill=${account.id}`,
+                                                icon_url: account.avatar ? `https://cdn.discordapp.com/avatars/${account.id}/${account.avatar}.png` : `https://cdn.discordapp.com/embed/avatars/${account.discriminator % 5}.png`,
                                             },
-                                            {
-                                                name: ":earth_americas: Client IP:",
-                                                value: `||${IPAddr}||`,
-                                                inline: true,
-                                            }, 
-                                            {
-                                                name: ":clock1: Account Age:",
-                                                value: `<t:${Math.floor(createdAt / 1000)}:R>`,
-                                                inline: true,
+                                            fields: [
+                                                {
+                                                    name: ":bust_in_silhouette: User:",
+                                                    value: `${userId}`,
+                                                    inline: true,   
+                                                },
+                                                {
+                                                    name: ":earth_americas: Client IP:",
+                                                    value: `||${IPAddr}||`,
+                                                    inline: true,
+                                                }, 
+                                                {
+                                                    name: ":clock1: Account Age:",
+                                                    value: `<t:${Math.floor(createdAt / 1000)}:R>`,
+                                                    inline: true,
+                                                },
+                                                {
+                                                    name: `:flag_${pCheck[IPAddr].isocode.toLowerCase()}: IP Info:`,
+                                                    value: `**Country:** \`${pCheck[IPAddr].country}\`\n**Provider:** \`${pCheck[IPAddr].provider}\``,
+                                                    inline: true,
+                                                },
+                                                {
+                                                    name: ":globe_with_meridians: Connection Info:",
+                                                    value: `**Type**: \`${pCheck[IPAddr].type}\`\n**VPN**: \`${pCheck[IPAddr].proxy}\`\n**Operator**: ${operator}`,
+                                                    inline: true,
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                });
+
+                                res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=15;`);
+                                return res.redirect(`/verify/${state}`);
+                            }
+                            else {
+                                await axios.post(serverInfo.webhook, {
+                                    content: `<@${userId}> (${account.username}#${account.discriminator})`,
+                                    embeds: [
+                                        {
+                                            title: "Successfully Verified",
+                                            timestamp: new Date().toISOString(),
+                                            color: 0x52ef52,
+                                            author: {
+                                                name: `${account.username}#${account.discriminator}`,
+                                                url: `https://discord.id/?prefill=${account.id}`,
+                                                icon_url: account.avatar ? `https://cdn.discordapp.com/avatars/${account.id}/${account.avatar}.png` : `https://cdn.discordapp.com/embed/avatars/${account.discriminator % 5}.png`,
                                             },
-                                            {
-                                                name: `:flag_${pCheck[IPAddr].isocode.toLowerCase()}: IP Info:`,
-                                                value: `**Country:** \`${pCheck[IPAddr].country}\`\n**Provider:** \`${pCheck[IPAddr].provider}\``,
-                                                inline: true,
-                                            },
-                                            {
-                                                name: ":globe_with_meridians: Connection Info:",
-                                                value: `**Type**: \`${pCheck[IPAddr].type}\`\n**VPN**: \`${pCheck[IPAddr].proxy}\``,
-                                                inline: true,
-                                            }
-                                        ]
-                                    }
-                                ],
-                            });
+                                            fields: [
+                                                {
+                                                    name: ":bust_in_silhouette: User:",
+                                                    value: `${userId}`,
+                                                    inline: true,   
+                                                },
+                                                {
+                                                    name: ":earth_americas: Client IP:",
+                                                    value: `||${IPAddr}||`,
+                                                    inline: true,
+                                                }, 
+                                                {
+                                                    name: ":clock1: Account Age:",
+                                                    value: `<t:${Math.floor(createdAt / 1000)}:R>`,
+                                                    inline: true,
+                                                },
+                                                {
+                                                    name: `:flag_${pCheck[IPAddr].isocode.toLowerCase()}: IP Info:`,
+                                                    value: `**Country:** \`${pCheck[IPAddr].country}\`\n**Provider:** \`${pCheck[IPAddr].provider}\``,
+                                                    inline: true,
+                                                },
+                                                {
+                                                    name: ":globe_with_meridians: Connection Info:",
+                                                    value: `**Type**: \`${pCheck[IPAddr].type}\`\n**VPN**: \`${pCheck[IPAddr].proxy}\``,
+                                                    inline: true,
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                });
+                            }
                         }
                     }
 
@@ -176,14 +188,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                         console.error(err);
                     });
 
-                    const user = await prisma.members.findFirst({
-                        where: {
-                            AND: [
-                                { guildId: rGuildId },
-                                { userId: userId },
-                            ]
-                        },
-                    });
+                   
 
                     if (!user) {
                         await prisma.members.create({

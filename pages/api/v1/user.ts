@@ -8,7 +8,7 @@ import { Email } from "../../../src/email";
 
 const limiter = rateLimit({
     interval: 60 * 1000,
-    uniqueTokenPerInterval: 500,
+    uniqueTokenPerInterval: 5000,
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

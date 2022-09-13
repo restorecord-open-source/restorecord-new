@@ -6,7 +6,7 @@ import { addMember, addRole, refreshTokenAddDB, shuffle, sleep } from "../../../
 import rateLimit from "../../../../src/rate-limit";
 
 const limiter = rateLimit({
-    uniqueTokenPerInterval: 500,
+    uniqueTokenPerInterval: 5000,
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -168,18 +168,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 if (server.pulling === true) return res.status(400).json({ success: false, message: "You are already pulling" });
 
-                if (server.pullTimeout !== null)
-                    if (server.pullTimeout > new Date()) return res.status(400).json({ success: false, message: "You're on cooldown, you can pull again on the " + server.pullTimeout.toLocaleString() });
+                if (server.pullTimeout !== null) if (server.pullTimeout > new Date()) return res.status(400).json({ success: false, message: "You're on cooldown, you can pull again on the " + server.pullTimeout.toLocaleString() });
 
-                await prisma.servers.update({
-                    where: {
-                        id: server.id 
-                    },
-                    data: {
-                        pulling: true,
-                        pullTimeout: new Date(Date.now() + 1000 * 60 * 60)
-                    }
-                });
+                if (account.role !== "free") {
+                    await prisma.servers.update({
+                        where: {
+                            id: server.id 
+                        },
+                        data: {
+                            pulling: true,
+                            pullTimeout: new Date(Date.now() + 1000 * 60 * 60)
+                        }
+                    });
+                } else {
+                    await prisma.servers.update({
+                        where: {
+                            id: server.id 
+                        },
+                        data: {
+                            pulling: true,
+                            pullTimeout: new Date(Date.now() + 1000 * 60 * 60 * 12)
+                        }
+                    });
+                }
 
                 fetch(`https://discord.com/api/v9/users/@me`, {
                     headers: {

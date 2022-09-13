@@ -6,7 +6,7 @@ import { addMember, addRole, refreshTokenAddDB } from "../../../../src/Migrate";
 import { ProxyCheck } from "../../../../src/proxycheck";
 
 const limiter = rateLimit({
-    uniqueTokenPerInterval: 500,
+    uniqueTokenPerInterval: 5000,
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

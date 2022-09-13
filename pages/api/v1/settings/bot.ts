@@ -5,11 +5,12 @@ import dotenv from "dotenv";
 import rateLimit from "../../../../src/rate-limit";
 import { prisma } from "../../../../src/db";
 import axios from "axios";
+import { HttpsProxyAgent } from "https-proxy-agent";
 dotenv.config({ path: "../../" });
 
 const limiter = rateLimit({
     interval: 60 * 1000,
-    uniqueTokenPerInterval: 500,
+    uniqueTokenPerInterval: 5000,
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) { 
@@ -57,6 +58,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         Authorization: `Bot ${data.botToken}`,
                     },
                     validateStatus: () => true,
+                    proxy: false, 
+                    httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
                 });
 
                 if (botData.status != 200) return res.status(400).json({ success: false, message: "Invalid Bot Token" });
@@ -175,6 +178,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         Authorization: `Bot ${data.newBotToken}`,
                     },
                     validateStatus: () => true,
+                    proxy: false, 
+                    httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
                 });
 
                 if (botData.status != 200) return res.status(400).json({ success: false, message: "Invalid Bot Token" });

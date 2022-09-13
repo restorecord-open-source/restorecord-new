@@ -6,7 +6,7 @@ import { Prisma } from "@prisma/client";
 
 const limiter = rateLimit({
     interval: 300 * 1000,
-    uniqueTokenPerInterval: 500,
+    uniqueTokenPerInterval: 5000,
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -108,29 +108,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 const account = await prisma.accounts.findFirst({ where: { id: valid.id, } });
 
                 if (data.newServerName && data.newGuildId && data.newRoleId && data.serverName && data.guildId && data.roleId) {
+                    const serverNameCheck = await prisma.servers.findFirst({ where: { name: data.newServerName, } });
+                    const guildIdCheck = await prisma.servers.findFirst({ where: { guildId: BigInt(data.newGuildId), } });
+                    const roleIdCheck = await prisma.servers.findFirst({ where: { roleId: BigInt(data.newRoleId), } });
 
-                    const multipleCheck = await prisma.servers.findFirst({
-                        where: {
-                            OR: [
-                                { name: data.newServerName },
-                                { guildId: BigInt(data.newGuildId) },
-                                { roleId: BigInt(data.newRoleId) },
-                            ],
-                        }
-                    });
-
-                    if (multipleCheck) {
-                        if (data.newServerName !== data.serverName) { 
-                            if (multipleCheck.name.toLowerCase() === data.newServerName.toLowerCase()) return res.status(400).json({ success: false, message: "Server name is already in use" }); 
-                        }
-                        if (data.newGuildId !== data.guildId) {
-                            if (multipleCheck.guildId === BigInt(data.newGuildId)) return res.status(400).json({ success: false, message: "Guild ID is already in use" });
-                        }
-                        if (data.newRoleId !== data.roleId) {
-                            if (multipleCheck.roleId === BigInt(data.newRoleId)) return res.status(400).json({ success: false, message: "Role ID is already in use" });
-                        }
-                    }
-
+                    if (serverNameCheck && (data.newServerName !== data.serverName)) return res.status(400).json({ success: false, message: "Server name is already in use" });
+                    if (guildIdCheck && (data.newGuildId !== BigInt(data.guildId))) return res.status(400).json({ success: false, message: "Guild ID is already in use" });
+                    if (roleIdCheck && (data.newRoleId !== BigInt(data.roleId))) return res.status(400).json({ success: false, message: "Role ID is already in use" });
 
                     const server = await prisma.servers.findFirst({
                         where: {
@@ -231,7 +215,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
             break;
         default:
-            res.setHeader("Allow", "POST");
+            res.setHeader("Allow", "POST, PATCH");
             res.status(405).end(`Method ${req.method} Not Allowed`);
             break;
         }
