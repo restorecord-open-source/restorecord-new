@@ -81,7 +81,9 @@ const handler = async(_: NextApiRequest, res: NextApiResponse<APIInteractionResp
                     url: `https://discord.com/oauth2/authorize?client_id=${application_id}&redirect_uri=https://restorecord.com/api/callback&response_type=code&scope=identify+guilds.join&state=${server.data.id}`
                 }]
             }]
-        })
+        }, {
+            proxy: false, httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) 
+        });
 
         return res.status(200).json(VERIFY_EMBED_COMMAND);
         break;
