@@ -16,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         switch (req.method) {
         case "GET":
             try {
-                limiter.check(res, 30, "CACHE_TOKEN");
+                limiter.check(res, 60, "CACHE_TOKEN");
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 
                 const token = req.headers.authorization as string;

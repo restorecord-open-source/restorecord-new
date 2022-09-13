@@ -58,7 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             break;
         case "DELETE":
             try {
-                limiter.check(res, 5, "CACHE_TOKEN");
+                limiter.check(res, 15, "CACHE_TOKEN");
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
 
                 const token = req.headers.authorization as string;
@@ -114,7 +114,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             break;
         case "PUT":
             try {
-                limiter.check(res, 5, "CACHE_TOKEN");
+                limiter.check(res, 15, "CACHE_TOKEN");
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 
                 const token = req.headers.authorization as string;

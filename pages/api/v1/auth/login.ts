@@ -20,7 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(405).json({ message: "Method not allowed" });
 
     try {
-        await limiter.check(res, 5, "CACHE_TOKEN");
+        await limiter.check(res, 15, "CACHE_TOKEN");
         if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
 
         const data = { ...req.body };
