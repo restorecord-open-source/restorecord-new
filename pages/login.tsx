@@ -143,7 +143,7 @@ export default function Login() {
                                     label="Username"
                                     name="username"
                                     autoComplete="username"
-                                    InputProps={{ inputProps: { minLength: 3, maxLength: 20 } }}
+                                    InputProps={{ inputProps: { minLength: 2, maxLength: 20 } }}
                                     autoFocus
                                     value={username}
                                     defaultValue={username_query}
