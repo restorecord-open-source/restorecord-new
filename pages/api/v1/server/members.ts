@@ -4,7 +4,7 @@ import rateLimit from "../../../../src/rate-limit";
 import { prisma } from "../../../../src/db";
 
 const limiter = rateLimit({
-    uniqueTokenPerInterval: 5000,
+    uniqueTokenPerInterval: 500,
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

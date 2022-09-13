@@ -6,7 +6,7 @@ import { addMember, addRole, refreshTokenAddDB, shuffle, sleep } from "../../../
 import rateLimit from "../../../../src/rate-limit";
 
 const limiter = rateLimit({
-    uniqueTokenPerInterval: 5000,
+    uniqueTokenPerInterval: 500,
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

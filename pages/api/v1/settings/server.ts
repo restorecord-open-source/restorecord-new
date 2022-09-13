@@ -6,7 +6,7 @@ import { Prisma } from "@prisma/client";
 
 const limiter = rateLimit({
     interval: 300 * 1000,
-    uniqueTokenPerInterval: 5000,
+    uniqueTokenPerInterval: 500,
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

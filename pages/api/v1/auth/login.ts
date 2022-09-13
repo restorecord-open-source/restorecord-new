@@ -12,7 +12,7 @@ dotenv.config({ path: "../../" });
 
 const limiter = rateLimit({
     interval: 60 * 1000,
-    uniqueTokenPerInterval: 5000,
+    uniqueTokenPerInterval: 500,
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) { 
