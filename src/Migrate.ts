@@ -10,6 +10,8 @@ export async function sendWebhook(webhookUrl: string, content: string, username:
         headers: {
             "Content-Type": "application/json",
         },
+        proxy: false,
+        httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
     });
 }
 
@@ -123,27 +125,39 @@ export async function exchange(excode: string, redirectUri: string, clientId: an
             "Content-Type": "application/x-www-form-urlencoded",
             "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
         },
+        proxy: false,
+        httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
     })
         .then(async (res: any) => { return res; })
         .catch(async (err: any) => { return err; });
 }
 
 export async function resolveUser(token: string): Promise<User> {
-    const request = await fetch("https://discord.com/api/users/@me", {
+    // const request = await fetch("https://discord.com/api/users/@me", {
+    //     headers: {
+    //         Authorization: `Bearer ${token}`,
+    //         "X-RateLimit-Precision": "millisecond",
+    //         "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
+    //     },
+    // });
+
+    // const response: User = await request.json();
+
+    // if (!response.id) {
+    //     return null as any;
+    // }
+
+    // return response;
+
+    return await axios.get("https://discord.com/api/users/@me", {
         headers: {
             Authorization: `Bearer ${token}`,
             "X-RateLimit-Precision": "millisecond",
             "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
         },
-    });
-
-    const response: User = await request.json();
-
-    if (!response.id) {
-        return null as any;
-    }
-
-    return response;
+        proxy: false,
+        httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
+    }).then(async (res: any) => { return res.data; } );
 }
 
 
