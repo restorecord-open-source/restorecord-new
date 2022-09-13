@@ -232,7 +232,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         });
 
                         if (!newServer) return reject();
-                        if (!newServer.pulling) return reject();
+                        // if (!newServer.pulling) return reject();
 
                         console.log(`Adding ${member.username} to ${server.name}`);
                         await addMember(server.guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, [BigInt(server.roleId).toString()]).then(async (resp: any) => {
