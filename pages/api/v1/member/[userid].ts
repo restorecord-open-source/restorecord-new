@@ -60,7 +60,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 }).then(async resp => {
                     const json = await resp.json();
 
-                    let usrIP: string = (member.ip != null) ? (member.ip == "::1" ? "1.1.1.1" : member.ip) : "1.1.1.1";
+                    let usrIP: string = (member.ip != null) ? ((member.ip == "::1" || member.ip == "127.0.0.1") ? "1.1.1.1" : member.ip) : "1.1.1.1";
                     const pCheck = await ProxyCheck.check(usrIP, { vpn: true, asn: true });
 
                     console.log(`${member.username} ${resp.status}`);
@@ -71,16 +71,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             username: member.username.split("#")[0],
                             discriminator: member.username.split("#")[1],
                             avatar: member.avatar,
-                            ip: member.ip,
+                            ip: account.role !== "free" ? member.ip : null,
                             location: {
-                                provider: pCheck[usrIP].provider,
-                                continent: pCheck[usrIP].continent,
-                                isocode: pCheck[usrIP].isocode,
-                                country: pCheck[usrIP].country,
-                                region: pCheck[usrIP].region,
-                                city: pCheck[usrIP].city,
-                                type: pCheck[usrIP].type,
-                                vpn: pCheck[usrIP].vpn,
+                                provider: account.role === "business" ? pCheck[usrIP].provider : null,
+                                continent: account.role !== "free" ? pCheck[usrIP].continent : null,
+                                isocode: account.role !== "free" ? pCheck[usrIP].isocode : null,
+                                country: account.role !== "free" ? pCheck[usrIP].country : null,
+                                region: account.role !== "free" ? pCheck[usrIP].region : null,
+                                city: account.role === "business" ? pCheck[usrIP].city : null,
+                                type: account.role !== "free" ? pCheck[usrIP].type : null,
+                                vpn: account.role !== "free" ? pCheck[usrIP].vpn : null,
                             }
                         } });
                     }
@@ -113,6 +113,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             }
                         } });
                     }
+
                 }).catch(err => {
                     console.error(err);
                     return res.status(400).json({ success: false, message: "Couldn't get user information." });
