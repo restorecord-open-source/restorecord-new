@@ -284,8 +284,7 @@ export default function DashBoard({ user }: any) {
                     </Grid>
                 </Grid>
                 
-                {/* news */}
-                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                {/* <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
                     <CardContent>
                         {isLoading ? (
                             <>
@@ -302,11 +301,8 @@ export default function DashBoard({ user }: any) {
                                 </Typography>
 
                                 {Array.isArray(data.news) && data.news.map((item: any) => {
-                                    // replace the links with a tags
                                     let content = item.content.replace(/\[(.*?)\]\((.*?)\)/g, (match: any, p1: any, p2: any) => {
                                         return `<a href="${p2}">${p1}</a>`
-                                    }).replace(/\*\*(.*?)\*\*/g, (match: any, p1: any) => {
-                                        return `<b>${p1}</b>`
                                     });
 
                                     return (
@@ -321,7 +317,7 @@ export default function DashBoard({ user }: any) {
                             </>
                         )}
                     </CardContent>
-                </Paper>
+                </Paper> */}
             </Container>
         </>
     )
