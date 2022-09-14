@@ -238,6 +238,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                 // return res.redirect(`/verify/${state}`);
             } else {
                 let error_detail;
+                console.log("verify = " + resp.status);
                 const err = resp?.response?.data?.error_description;
                 
 
