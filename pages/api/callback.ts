@@ -166,8 +166,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                             return res.redirect(`/verify/${state}`);
                         }
                         else if (resp?.status === 204 || resp?.response?.status === 204) {
-                            await addRole(rGuildId.toString(), userId, customBotInfo?.botToken, serverInfo?.roleId.toString()).then(async (resp) => {
-                                console.log(`${account?.username} adding role: ${resp?.status}`);
+                            await addRole(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, serverInfo?.roleId.toString()).then(async (resp) => {
+                                console.log(`${account?.username} adding role: ${resp?.status} (${rGuildId.toString()}, ${userId.toString()}, ${serverInfo?.roleId.toString()})`);
                                 if (resp.status !== 204) {
                                     res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=15;`);
                                     return res.redirect(`/verify/${state}`);
