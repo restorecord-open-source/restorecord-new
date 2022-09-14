@@ -4,7 +4,7 @@ import { prisma } from "../../../src/db";
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     let accounts: any = await prisma.accounts.count();
     let servers: any = await prisma.servers.count();
-    let members: any = await prisma.members.count();
+    let members: any = await prisma.members.count({ where: { accessToken: { not: "unauthorized" } } });
 
     res.status(200).json({
         accounts: accounts,

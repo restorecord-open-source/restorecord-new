@@ -160,14 +160,14 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                     }
 
                     addMember(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, resp.data.access_token, [BigInt(serverInfo?.roleId).toString()]).then(async (resp) => {
-                        console.log(resp?.status);
+                        console.log(`${account?.username} adding member ${resp?.status}`);
                         if (resp?.status === 403 || resp?.response?.status === 403 || resp?.response?.data?.code === "50013") {
                             res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=15;`);
                             return res.redirect(`/verify/${state}`);
                         }
                         else if (resp?.status === 204 || resp?.response?.status === 204) {
                             await addRole(rGuildId.toString(), userId, customBotInfo?.botToken, serverInfo?.roleId.toString()).then(async (resp) => {
-                                console.log(resp?.status);
+                                console.log(`${account?.username} adding role: ${resp?.status}`);
                                 if (resp.status !== 204) {
                                     res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=15;`);
                                     return res.redirect(`/verify/${state}`);
@@ -178,14 +178,14 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                     return res.redirect(`/verify/${state}`);
                                 }
                             }).catch((err) => {
-                                console.error(err);
+                                console.error(`addRole: ${err}`);
                             })
                         } else {
                             res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
                             return res.redirect(`/verify/${state}`);
                         }
                     }).catch((err) => {
-                        console.error(err);
+                        console.error(`addMember ${err}`);
                     });
 
                    
