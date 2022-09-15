@@ -15,6 +15,7 @@ import axios from "axios";
 import { useQuery } from "react-query";
 import Stack from "@mui/material/Stack";
 import dynamic from "next/dynamic";
+import { useEffect } from "react";
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
@@ -26,16 +27,14 @@ async function getStats() {
         .catch((err: any) => { return err; });    
 }
 
-async function getInfo() {
-    return await axios.get(`/api/v1/info`, {
-        validateStatus: () => true
-    })
-        .then((res: any) => { return res.data; })
-        .catch((err: any) => { return err; });    
-}
-
 export default function Info() {
     const { data, isError, isLoading, refetch } = useQuery('stats', async () => await getStats(), { retry: false,  refetchOnWindowFocus: true });
+
+    useEffect(() => {
+        setTimeout(() => {
+            refetch();
+        }, 5000);
+    }, [data]);
 
     return (
         <>
