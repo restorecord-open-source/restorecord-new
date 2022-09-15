@@ -58,9 +58,15 @@ export default function DashCustomBot({ user }: any) {
                             bot.username = `${res.username}#${res.discriminator}`;
                             bot.clientId = res.id;
                             return bot;
+                        } else if (res.message === "401: Unauthorized") {
+                            bot.avatar = `https://cdn.discordapp.com/embed/avatars/0.png`;
+                            bot.username = `Unknown Bot`;
+                            bot.clientId = atob(bot.botToken.split(".")[0]);
+                            return bot;
                         }
-                    }).catch(err => {
-                        console.error(err);
+                    })
+                    .catch(err => {
+                        console.error(`Error: ${err}`);
                     })
             }
         }

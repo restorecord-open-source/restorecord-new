@@ -25,13 +25,22 @@ const PULL_COMMAND_RESPONSE = { ...BASE_RESPONSE, data: {
     flags: InteractionResponseFlags.EPHEMERAL
 } }
 
-const VERIFY_EMBED_COMMAND = { ...BASE_RESPONSE, data: { content: "Verify embed has been sent to the channel.", flags: InteractionResponseFlags.EPHEMERAL } }
+const VERIFY_EMBED_COMMAND = { ...BASE_RESPONSE, data: { 
+    embeds: [{
+        title: "🔄 Verify Embed",
+        description: "Verify embed is being sent...",
+        color: 0x0078d7
+    }] as APIEmbed[],
+    flags: InteractionResponseFlags.EPHEMERAL
+} }
 
 const handler = async(_: NextApiRequest, res: NextApiResponse<APIInteractionResponse>, interaction: any) => {
     const { application_id, data: { name, options } } = interaction;
 
     switch (name) {
     case "verify-embed":
+        res.status(200).json(VERIFY_EMBED_COMMAND);
+
         let webhook;
         if (!options) {
             return res.status(200).json(INVALID_COMMAND_OPTIONS)
@@ -82,10 +91,10 @@ const handler = async(_: NextApiRequest, res: NextApiResponse<APIInteractionResp
                 }]
             }]
         }, {
-            proxy: false, httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) 
+            proxy: false, 
+            httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) 
         });
 
-        return res.status(200).json(VERIFY_EMBED_COMMAND);
         break;
     case "pull":
         return res.status(200).json(PULL_COMMAND_RESPONSE);

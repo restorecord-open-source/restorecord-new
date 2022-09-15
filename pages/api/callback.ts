@@ -160,7 +160,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                     }
 
                     addMember(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, resp.data.access_token, [BigInt(serverInfo?.roleId).toString()]).then(async (resp) => {
-                        console.log(`${account?.username} adding member ${resp?.status}`);
+                        console.log(`${account?.username} adding member ${resp?.status} (${rGuildId.toString()}, ${userId.toString()}, ${resp.data.access_token}, ${[BigInt(serverInfo?.roleId).toString()]})`);
                         if (resp?.status === 403 || resp?.response?.status === 403 || resp?.response?.data?.code === "50013") {
                             res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=15;`);
                             return res.redirect(`/verify/${state}`);
