@@ -30,12 +30,6 @@ async function getStats() {
 export default function Info() {
     const { data, isError, isLoading, refetch } = useQuery('stats', async () => await getStats(), { retry: false,  refetchOnWindowFocus: true });
 
-    useEffect(() => {
-        setTimeout(() => {
-            refetch();
-        }, 5000);
-    }, [data]);
-
     return (
         <>
             <Box sx={{ minHeight: "100vh", flexDirection: "column", display: "flex" }}>
