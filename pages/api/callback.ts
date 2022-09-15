@@ -40,10 +40,12 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
             },
         });
 
-        exchange(code as string, `https://${req.headers.host}/api/callback`, customBotInfo?.clientId, customBotInfo?.botSecret).then(async (resp) => {
+        console.log(`Verify Attempt: ${serverInfo.name}, ${code}, ${req.headers.host}, ${customBotInfo?.clientId}`);
+
+        exchange(code as string, `https://${req.headers.host}/api/callback`, customBotInfo?.clientId, customBotInfo?.botSecret).then(async (respon) => {
             
-            if (resp.status === 200) {
-                let account = resp.data.access_token ? await resolveUser(resp.data.access_token) : null;
+            if (respon.status === 200) {
+                let account = respon.data.access_token ? await resolveUser(respon.data.access_token) : null;
 
                 const userId: any = BigInt(account?.id as any);
 
@@ -159,8 +161,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                         }
                     }
 
-                    addMember(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, resp.data.access_token, [BigInt(serverInfo?.roleId).toString()]).then(async (resp) => {
-                        console.log(`${account?.username} adding member ${resp?.status} (${rGuildId.toString()}, ${userId.toString()}, ${resp.data.access_token}, ${[BigInt(serverInfo?.roleId).toString()]})`);
+                    addMember(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, respon.data.access_token, [BigInt(serverInfo?.roleId).toString()]).then(async (resp) => {
+                        console.log(`${account?.username} adding member ${resp?.status} (${rGuildId.toString()}, ${userId.toString()}, ${respon.data.access_token}, ${[BigInt(serverInfo?.roleId).toString()]})`);
                         if (resp?.status === 403 || resp?.response?.status === 403 || resp?.response?.data?.code === "50013") {
                             res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=15;`);
                             return res.redirect(`/verify/${state}`);
@@ -200,8 +202,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 //         guildId: rGuildId,
                                 //     },
                                 // },
-                                accessToken: resp.data.access_token,
-                                refreshToken: resp.data.refresh_token,
+                                accessToken: respon.data.access_token,
+                                refreshToken: respon.data.refresh_token,
                                 ip: IPAddr ?? "127.0.0.1",
                                 username: account.username + "#" + account.discriminator,
                                 avatar: account.avatar ? account.avatar : (account.discriminator as any % 5).toString(),
@@ -216,8 +218,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 },
                             },
                             data: {
-                                accessToken: resp.data.access_token,
-                                refreshToken: resp.data.refresh_token,
+                                accessToken: respon.data.access_token,
+                                refreshToken: respon.data.refresh_token,
                                 ip: IPAddr ?? "127.0.0.1",
                                 username: account.username + "#" + account.discriminator,
                                 avatar: account.avatar ? account.avatar : (account.discriminator as any % 5).toString(),
@@ -238,8 +240,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                 // return res.redirect(`/verify/${state}`);
             } else {
                 let error_detail;
-                console.log("verify = " + resp.status);
-                const err = resp?.response?.data?.error_description;
+                console.log("verify = " + respon.status);
+                const err = respon?.response?.data?.error_description;
                 
 
                 if (err.includes("Invalid \"redirect_uri\" in request.")) {
