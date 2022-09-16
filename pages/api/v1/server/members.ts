@@ -32,8 +32,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 const servers = await prisma.servers.findMany({ where: { ownerId: account.id } });
                 if (!servers) return res.status(400).json({ success: false, message: "No servers found." });
 
-                const next: any = req.query.after ? req.query.after : 0;
-
                 const limit: any = req.query.max ? req.query.max : 30;
                 const page = req.query.page ?? ''
 
@@ -48,39 +46,43 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 const count = await prisma.members.count({ where: { guildId: { in: guildIds } } });
 
-                const members = await prisma.members.findMany({
+                const memberList = await prisma.members.findMany({
+                    where: {
+                        guildId: { in: guildIds },
+                    },
+                    take: Number(page) * Number(limit),
+                });
+
+                const highestId = memberList.find((member: any) => member.id === Math.max(...memberList.map((member: any) => member.id)))?.id;
+
+                await prisma.members.findMany({
                     where: {
                         AND: [
                             { guildId: { in: guildIds } },
+                            { id: { gt: highestId } },
                         ],
                     },
                     take: Number(limit),
-                    skip: page ? Number(page) * Number(limit) : 0,
-                    orderBy: {
-                        createdAt: "desc"
-                    },
-                });
-
-                return res.status(200).json({
-                    success: true,
-                    max: count,
-                    nextId: members.length === limit ? members[limit - 1].id : undefined,
-                    maxPages: Math.ceil(count / limit) - 1,
-                    members: members.map((member: any) => {
-                        return {
-                            id: member.id,
-                            userId: member.userId.toString(),
-                            username: member.username,
-                            avatar: member.avatar,
-                            ip: account.role !== "free" ? member.ip : null,
-                            createdAt: member.createdAt,
-                            guildId: member.guildId.toString(),
-                            guildName: (servers.find((server: any) => server.guildId === member.guildId) as any).name,
-                        }
+                }).then((members: any) => {
+                    return res.status(200).json({
+                        success: true,
+                        max: count,
+                        nextId: highestId,
+                        maxPages: Math.ceil(count / limit) - 1,
+                        members: members.map((member: any) => {
+                            return {
+                                id: member.id,
+                                userId: String(member.userId),
+                                username: member.username,
+                                avatar: member.avatar,
+                                ip: account.role !== "free" ? member.ip : null,
+                                createdAt: member.createdAt,
+                                guildId: String(member.guildId),
+                                guildName: servers.find((server: any) => server.guildId === member.guildId)?.name,
+                            };
+                        })
                     })
-                });
-
-
+                })
             }
             catch (err: any) {
                 console.log(err);

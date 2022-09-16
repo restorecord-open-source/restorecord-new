@@ -347,14 +347,19 @@ export default function VerifiedMembers({ user }: any) {
                             </>
                         )}
 
-                        {hasNextPage && (
-                            // center box
-                            <Box sx={{ display: "flex", justifyContent: "center", mt: "1rem" }}>
+                        <Box sx={{ display: "flex", justifyContent: "center", mt: "1rem", alignItems: "center" }}>
+                            {hasNextPage && (
                                 <Button variant="contained" color="primary" onClick={() => {
                                     fetchNextPage();
                                 }}>Load More</Button>
-                            </Box>
-                        )}
+                            )}
+                            {isFetchingNextPage && (
+                                <Typography variant="body2" color="textSecondary" sx={{ ml: "0.5rem" }}>
+                                    Loading...
+                                </Typography>
+                            )}
+                        </Box>
+
 
                         
 

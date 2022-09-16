@@ -316,7 +316,7 @@ export default function DashSettings({ user }: any) {
                                             )}
                                             <TextField label="Server Name" variant="outlined" value={serverName} onChange={(e) => setServerName(e.target.value)} required />
                                             <TextField label="Server Id" variant="outlined" value={guildId} onChange={(e) => setGuildId(e.target.value)} required />
-                                            <TextField label="Role Id" variant="outlined" value={roleId} onChange={(e) => setRoleId(e.target.value)} required />
+                                            <TextField label="Member Role Id" variant="outlined" value={roleId} onChange={(e) => setRoleId(e.target.value)} required />
                                             <FormControl fullWidth variant="outlined" required>
                                                 <InputLabel id="bot-select-label">Custom Bot</InputLabel>
                                                 <Select labelId="bot-select-label" label="Custom Bot" value={customBot} onChange={(e) => setCustomBot(e.target.value as string)} required>
