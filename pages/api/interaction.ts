@@ -39,7 +39,6 @@ const handler = async(_: NextApiRequest, res: NextApiResponse<APIInteractionResp
 
     switch (name) {
     case "verify-embed":
-        res.status(200).json(VERIFY_EMBED_COMMAND);
 
         let webhook;
         if (!options) {
@@ -71,11 +70,11 @@ const handler = async(_: NextApiRequest, res: NextApiResponse<APIInteractionResp
             content: null,
             embeds: [
                 {
-                    title: `**Verify in ${server.data.name}**`,
-                    description: "To get **access** to the rest of the server, click on the **verify** button.",
+                    title: options[1].value ?? `**Verify in ${server.data.name}**`,
+                    description: options[2].value ?? "To get **access** to the rest of the server, click on the **verify** button.",
                     color: 3092790,
                     image: {
-                        url: `${options[1]?.value ? options[1]?.value : ""}`
+                        url: `${options[3]?.value ? options[3]?.value : ""}`
                     }
                 }
             ],
@@ -94,7 +93,8 @@ const handler = async(_: NextApiRequest, res: NextApiResponse<APIInteractionResp
             proxy: false, 
             httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) 
         });
-
+      
+        return  res.status(200).json(VERIFY_EMBED_COMMAND);
         break;
     case "pull":
         return res.status(200).json(PULL_COMMAND_RESPONSE);

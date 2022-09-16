@@ -63,6 +63,18 @@ const withDiscordInteraction = (next: any) => async (
                     required: true
                 },
                 {
+                    name: "title",
+                    description: "Embed title",
+                    type: ApplicationCommandOptionType.String,
+                    required: false
+                },
+                {
+                    name: "descriptioon",
+                    description: "Embed Description",
+                    type: ApplicationCommandOptionType.String,
+                    required: false
+                },
+                {
                     name: "image",
                     description: "The image to use for the embed. (Please use direct link ending in .png, .jpg, .jpeg, .gif)",
                     type: ApplicationCommandOptionType.String,

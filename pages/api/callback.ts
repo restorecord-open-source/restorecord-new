@@ -30,9 +30,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
             },
         });
 
-        if (!serverInfo) {
-            return res.status(400).json({ success: false, message: "No server info" });
-        }
+        if (!serverInfo) return res.status(400).json({ success: false, message: "No server info" });
 
         const customBotInfo = await prisma.customBots.findUnique({
             where: {
@@ -40,7 +38,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
             },
         });
 
-        console.log(`Verify Attempt: ${serverInfo.name}, ${code}, ${req.headers.host}, ${customBotInfo?.clientId}`);
+        if (!customBotInfo) return res.status(400).json({ success: false, message: "No custom bot info" });
+        
+
+        console.log(`Verify Attempt: ${serverInfo.name}, ${code}, ${req.headers.host}, ${customBotInfo?.clientId}, ${customBotInfo?.botSecret}`);
 
         exchange(code as string, `https://${req.headers.host}/api/callback`, customBotInfo?.clientId, customBotInfo?.botSecret).then(async (respon) => {
             
