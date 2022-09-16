@@ -69,7 +69,7 @@ const withDiscordInteraction = (next: any) => async (
                     required: false
                 },
                 {
-                    name: "descriptioon",
+                    name: "description",
                     description: "Embed Description",
                     type: ApplicationCommandOptionType.String,
                     required: false

@@ -39,6 +39,7 @@ const handler = async(_: NextApiRequest, res: NextApiResponse<APIInteractionResp
 
     switch (name) {
     case "verify-embed":
+        res.status(200).json(VERIFY_EMBED_COMMAND);
 
         let webhook;
         if (!options) {
@@ -64,17 +65,21 @@ const handler = async(_: NextApiRequest, res: NextApiResponse<APIInteractionResp
         // webhook = webhooks.data.find((w: any) => w.user.id == cBot.clientId);
         // }
 
+        const title = options.find((o: any) => o.name == "title")?.value;
+        const description = options.find((o: any) => o.name == "description")?.value;
+        const image = options.find((o: any) => o.name == "image")?.value;
+
 
         // send a message on the webhook and add a link button to it
         const message = await axios.post(`https://discord.com/api/webhooks/${webhook.id}/${webhook.token}`, {
             content: null,
             embeds: [
                 {
-                    title: options[1].value ?? `**Verify in ${server.data.name}**`,
-                    description: options[2].value ?? "To get **access** to the rest of the server, click on the **verify** button.",
+                    title: title ?? `**Verify in ${server.data.name}**`,
+                    description: description ?? "To get **access** to the rest of the server, click on the **verify** button.",
                     color: 3092790,
                     image: {
-                        url: `${options[3]?.value ? options[3]?.value : ""}`
+                        url: `${image ?? ""}`
                     }
                 }
             ],
@@ -94,7 +99,6 @@ const handler = async(_: NextApiRequest, res: NextApiResponse<APIInteractionResp
             httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) 
         });
       
-        return  res.status(200).json(VERIFY_EMBED_COMMAND);
         break;
     case "pull":
         return res.status(200).json(PULL_COMMAND_RESPONSE);
