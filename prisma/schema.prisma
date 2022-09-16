@@ -35,25 +35,26 @@ model accounts {
 }
 
 model servers {
-    id          Int         @id @default(autoincrement())
-    name        String      @unique
-    ownerId     Int
-    guildId     BigInt      @unique @db.UnsignedBigInt
-    roleId      BigInt      @unique @db.UnsignedBigInt
-    redirectUrl String?
-    picture     String?     @default("https://cdn.restorecord.com/logo512.png")
-    vpncheck    Boolean     @default(false)
-    webhook     String?
-    bgImage     String?
-    description String      @default("Just a Discord Server.")
-    createdAt   DateTime    @default(now())
-    customBotId Int
-    pulling     Boolean     @default(false)
-    pullTimeout DateTime?   @default(now())
-    customBot   customBots  @relation(fields: [customBotId], references: [id])
-    owner       accounts    @relation(fields: [ownerId], references: [id])
-    members     members[]
-    blacklist   blacklist[]
+    id           Int         @id @default(autoincrement())
+    name         String      @unique
+    ownerId      Int
+    guildId      BigInt      @unique @db.UnsignedBigInt
+    roleId       BigInt      @unique @db.UnsignedBigInt
+    redirectUrl  String?
+    picture      String?     @default("https://cdn.restorecord.com/logo512.png")
+    vpncheck     Boolean     @default(false)
+    webhook      String?
+    bgImage      String?
+    description  String      @default("Just a Discord Server.")
+    customDomain String?
+    createdAt    DateTime    @default(now())
+    customBotId  Int
+    pulling      Boolean     @default(false)
+    pullTimeout  DateTime?   @default(now())
+    customBot    customBots  @relation(fields: [customBotId], references: [id])
+    owner        accounts    @relation(fields: [ownerId], references: [id])
+    members      members[]
+    blacklist    blacklist[]
 }
 
 model logs {

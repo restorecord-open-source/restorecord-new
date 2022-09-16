@@ -26,56 +26,64 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 const serverId: any = req.query.guild;
 
-                prisma.accounts.findUnique({
+                const account = await prisma.accounts.findUnique({ where: { id: valid.id } });
+                if (!account) return res.status(400).json({ success: false, message: "Account not found." });
+
+                const servers = await prisma.servers.findMany({ where: { ownerId: account.id } });
+                if (!servers) return res.status(400).json({ success: false, message: "No servers found." });
+
+                const next: any = req.query.after ? req.query.after : 0;
+
+                const limit: any = req.query.max ? req.query.max : 30;
+                const page = req.query.page ?? ''
+
+
+                let guildIds: any = [];
+
+                if (serverId !== undefined && serverId.toLowerCase() === "all") {
+                    guildIds = servers.map((server: any) => server.guildId);
+                } else {
+                    guildIds = serverId ? [BigInt(serverId)] : servers.map((server: any) => server.guildId);
+                }
+
+                const count = await prisma.members.count({ where: { guildId: { in: guildIds } } });
+
+                const members = await prisma.members.findMany({
                     where: {
-                        id: valid.id
-                    }
-                }).then((account: any) => {
-                    prisma.servers.findMany({
-                        where: {
-                            ownerId: account.id
-                        },
-                    }).then((servers: any) => {
-                        // check if serverId is valid bigint
-                        let guildIds: any = [];
-
-                        if (serverId !== undefined && serverId.toLowerCase() === "all") {
-                            guildIds = servers.map((server: any) => server.guildId);
-                        } else {
-                            guildIds = serverId ? [BigInt(serverId)] : servers.map((server: any) => server.guildId);
-                        }
-
-                        prisma.members.findMany({
-                            where: {
-                                guildId: {
-                                    in: guildIds
-                                },
-                            },
-                            orderBy: {
-                                createdAt: "desc"
-                            },
-                        }).then((members: any) => {
-                            res.status(200).json({
-                                success: true,
-                                members: members.map((member: any) => {
-                                    return {
-                                        id: member.id,
-                                        userId: member.userId.toString(),
-                                        username: member.username,
-                                        avatar: member.avatar,
-                                        ip: account.role !== "free" ? member.ip : null,
-                                        createdAt: member.createdAt,
-                                        guildId: member.guildId.toString(),
-                                        guildName: servers.find((server: any) => server.guildId === member.guildId).name,
-                                    }
-                                })
-                            });
-                        });
-
-                    });
+                        AND: [
+                            { guildId: { in: guildIds } },
+                        ],
+                    },
+                    take: Number(limit),
+                    skip: page ? Number(page) * Number(limit) : 0,
+                    orderBy: {
+                        createdAt: "desc"
+                    },
                 });
+
+                return res.status(200).json({
+                    success: true,
+                    max: count,
+                    nextId: members.length === limit ? members[limit - 1].id : undefined,
+                    maxPages: Math.ceil(count / limit) - 1,
+                    members: members.map((member: any) => {
+                        return {
+                            id: member.id,
+                            userId: member.userId.toString(),
+                            username: member.username,
+                            avatar: member.avatar,
+                            ip: account.role !== "free" ? member.ip : null,
+                            createdAt: member.createdAt,
+                            guildId: member.guildId.toString(),
+                            guildName: (servers.find((server: any) => server.guildId === member.guildId) as any).name,
+                        }
+                    })
+                });
+
+
             }
             catch (err: any) {
+                console.log(err);
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 if (err?.name === "" || err?.name === "JsonWebTokenError") return res.status(400).json({ success: false, message: "User not logged in" }); 
                 return res.status(400).json({ success: false, message: "Something went wrong" });

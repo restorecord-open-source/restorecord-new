@@ -1,7 +1,7 @@
 import axios from "axios";
 
-export default async function getMembers(options: any, serverId?: any) {
-    return await axios.get(`/api/v1/server/members${serverId ? `?guild=${serverId}` : ``}`, {
+export default async function getMembers(options: any, serverId?: any, page: any = null) {
+    return await axios.get(`/api/v1/server/members${serverId ? `?guild=${serverId}` : ""}${(page && serverId) ? `&page=${page}` : ""}${(page && !serverId) ? `?page=${page}` : ""}`, {
         headers: options,
         validateStatus: () => true
     })
