@@ -57,13 +57,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     take: search ? undefined : (Number(page) * Number(limit)),
                 });
 
-                const highestId = memberList.find((member: any) => member.id === Math.max(...memberList.map((member: any) => member.id)))?.id;
+                // const highestId = memberList.find((member: any) => member.id === Math.max(...memberList.map((member: any) => member.id)))?.id;
+                const lowestId = memberList.find((member: any) => member.id === Math.min(...memberList.map((member: any) => member.id)))?.id;
 
                 await prisma.members.findMany({
                     where: {
                         AND: [
                             { guildId: { in: guildIds } },
-                            { id: { gt: search ? 0 : highestId } },
+                            { id: { gt: search ? 0 : lowestId } },
                             { username: { contains: search ? search : '' } }
                         ],
                     },
@@ -72,7 +73,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     return res.status(200).json({
                         success: true,
                         max: count,
-                        nextId: search ? 0 : highestId,
                         maxPages: Math.ceil(count / limit) === 0 ? 1 : Math.ceil(count / limit),
                         members: members.map((member: any) => {
                             return {
