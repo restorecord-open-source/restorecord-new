@@ -28,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 
                 if (!valid) return res.status(400).json({ success: false, message: "Invalid Token" });
 
-                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, } }); 
+                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
                 const account = await prisma.accounts.findFirst({ where: { id: valid.id, } });
 
                 if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
@@ -133,7 +133,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 
                 if (!valid) return res.status(400).json({ success: false, message: "Invalid Token" });
 
-                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, } }); 
+                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
 
                 if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
 

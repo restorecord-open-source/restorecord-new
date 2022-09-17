@@ -21,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 if (!valid) return res.status(400).json({ success: false });
 
-                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, } }); 
+                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
 
                 if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
 
