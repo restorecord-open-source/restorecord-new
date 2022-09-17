@@ -51,13 +51,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     where: {
                         AND: [
                             { guildId: { in: guildIds } },
-                            { username: { contains: search } },
+                            { username: { contains: search ? search : '' } }
                         ]
                     },
                     take: search ? undefined : (Number(page) * Number(limit)),
                 });
-
-                console.log(search ? undefined : (Number(page) * Number(limit)))
 
                 const highestId = memberList.find((member: any) => member.id === Math.max(...memberList.map((member: any) => member.id)))?.id;
 
@@ -66,7 +64,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         AND: [
                             { guildId: { in: guildIds } },
                             { id: { gt: search ? 0 : highestId } },
-                            { username: { contains: search } },
+                            { username: { contains: search ? search : '' } }
                         ],
                     },
                     take: search ? undefined : (Number(page) * Number(limit)),
