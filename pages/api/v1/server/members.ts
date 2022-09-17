@@ -33,7 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 if (!servers) return res.status(400).json({ success: false, message: "No servers found." });
 
                 const limit: any = req.query.max ? req.query.max : 30;
-                const page = req.query.page ?? ''
+                const page = req.query.page ?? '';
 
 
                 let guildIds: any = [];
@@ -45,12 +45,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 }
 
                 const count = await prisma.members.count({ where: { guildId: { in: guildIds } } });
+                const search: any = req.query.search ?? '';
 
                 const memberList = await prisma.members.findMany({
                     where: {
-                        guildId: { in: guildIds },
+                        AND: [
+                            { guildId: { in: guildIds } },
+                            { username: { contains: search } },
+                        ]
                     },
-                    take: Number(page) * Number(limit),
+                    take: search ? undefined : (Number(page) * Number(limit)),
                 });
 
                 const highestId = memberList.find((member: any) => member.id === Math.max(...memberList.map((member: any) => member.id)))?.id;
@@ -59,15 +63,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     where: {
                         AND: [
                             { guildId: { in: guildIds } },
-                            { id: { gt: highestId } },
+                            { id: { gt: search ? 0 : highestId } },
+                            { username: { contains: search } },
                         ],
                     },
-                    take: Number(limit),
+                    take: search ? undefined : (Number(page) * Number(limit)),
                 }).then((members: any) => {
                     return res.status(200).json({
                         success: true,
                         max: count,
-                        nextId: highestId,
+                        nextId: search ? 0 : highestId,
                         maxPages: Math.ceil(count / limit) - 1,
                         members: members.map((member: any) => {
                             return {
@@ -79,6 +84,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                 createdAt: member.createdAt,
                                 guildId: String(member.guildId),
                                 guildName: servers.find((server: any) => server.guildId === member.guildId)?.name,
+                                unauthorized: (member.accessToken === "unauthorized"),
                             };
                         })
                     })

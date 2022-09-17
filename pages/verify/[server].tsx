@@ -102,14 +102,14 @@ export default function Verify({ status, err }: any) {
                             <>
                                 {data.success ? (
                                     <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                        <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={data.server.name} placement="top" disableInteractive>
+                                        <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} placement="top" disableInteractive title={data.server.name}>
                                             <Typography variant="h1" component="h1" sx={{ fontWeight: "700", fontSize: { xs: "1.5rem", md: "3rem" }, pl: "1rem", mr: "1rem", textShadow: "0px 0px 15px rgba(0, 0, 0, 0.25)" }}>
                                                 {data.server.name}
                                             </Typography>
                                         </Tooltip>
 
                                         {data.server.verified && (
-                                            <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={`Verified`} placement="top" disableInteractive>
+                                            <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} placement="top" disableInteractive title={`Verified`}>
                                                 <CheckCircle sx={{ color: theme.palette.grey[500], width: "2rem", height: "2rem" }} />
                                             </Tooltip>
                                         )}

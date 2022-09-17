@@ -34,12 +34,16 @@ import Fade from "@mui/material/Fade";
 import Box from "@mui/material/Box";
 import { useInView } from "react-intersection-observer";
 import React from "react";
+import TextField from "@mui/material/TextField";
+import { Badge } from "@mui/icons-material";
 
 export default function VerifiedMembers({ user }: any) {
     const { ref, inView } = useInView()
     const [token]: any = useToken();
     const router = useRouter();
+
     const [serverId, setServerId] = useState("");
+    const [search, setSearch] = useState("");
 
     const [openS, setOpenS] = useState(false);
     const [openE, setOpenE] = useState(false);
@@ -55,7 +59,7 @@ export default function VerifiedMembers({ user }: any) {
 
     const { data, isSuccess, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, refetch } = useInfiniteQuery('members', async ({ pageParam = 1 }: any) => await getMembers({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
-    }, serverId, pageParam), {
+    }, serverId, search, pageParam), {
         getNextPageParam: (lastPage, allPages: any) => {
             const maxPages = lastPage.maxPages;
             const nextPage = allPages.length + 1;
@@ -69,6 +73,22 @@ export default function VerifiedMembers({ user }: any) {
         setTimeout(() => {
             refetch();
         }, 10);
+    }
+
+    function handleSearch(event: any) {
+        let timeout: any;
+        setSearch(event.target.value);
+
+        clearTimeout(timeout);
+        
+        timeout = setTimeout(() => {
+            refetch();
+        }, 100);
+
+
+        // setTimeout(() => {
+        //     refetch();
+        // }, 250);
     }
 
     function requestInfo(userId: string) {
@@ -232,15 +252,18 @@ export default function VerifiedMembers({ user }: any) {
                                     <Skeleton animation="wave" variant="rectangular" width={"100%"} height={55} sx={{ borderRadius: "4px" }} />
                                 ) : (
                                     <>
-                                        <FormControl fullWidth>
-                                            <InputLabel id="server-select-label">Server</InputLabel>
-                                            <Select labelId="server-select-label" id="server-select" label="Server" value={serverId} onChange={handleSelect}>
-                                                <MenuItem value="all">All</MenuItem>
-                                                {user.servers.map((server: any) => (
-                                                    <MenuItem key={server.id} value={server.guildId}>{server.name}</MenuItem>
-                                                ))}
-                                            </Select>
-                                        </FormControl>
+                                        <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
+                                            <TextField id="search" label="Search" variant="outlined" sx={{ width: 250 }} onChange={handleSearch} />
+                                            <FormControl fullWidth>
+                                                <InputLabel id="server-select-label">Server</InputLabel>
+                                                <Select labelId="server-select-label" id="server-select" label="Server" value={serverId} onChange={handleSelect}>
+                                                    <MenuItem value="all">All</MenuItem>
+                                                    {user.servers.map((server: any) => (
+                                                        <MenuItem key={server.id} value={server.guildId}>{server.name}</MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </FormControl>
+                                        </Stack>
                                     </>
                                 )}
                             </Grid>
@@ -292,6 +315,13 @@ export default function VerifiedMembers({ user }: any) {
                                                                 ) : (
                                                                     <Skeleton variant="text" width={150} />
                                                                 )}
+                                                                {item.unauthorized && (
+                                                                    <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} placement="top" disableInteractive title="Unauthorized">
+                                                                        <Badge color="error" sx={{ ml: "0.5rem" }}>
+                                                                            Unauthorized
+                                                                        </Badge>
+                                                                    </Tooltip>
+                                                                )}
                                                             </div>
                                                             <Typography variant="body2" color="textSecondary" sx={{ wordBreak: "break-word" }}>
                                                                 ID: {item.userId}
@@ -302,35 +332,37 @@ export default function VerifiedMembers({ user }: any) {
                                                         </Grid>
                                                         <Grid item xs={12} sm={12} md={3} lg={2} xl={1}>
                                                             <Stack spacing={2} direction="column" justifyContent={"space-between"}>
-                                                                <LoadingButton id={`user_${item.userId}`} loading={loading} variant="contained" sx={{ background: "#43a047", "&:hover": { background: "#388e3c" } }} onClick={() => {
-                                                                    setLoading(true);
+                                                                {item.unauthorized ? (<></>) : (
+                                                                    <LoadingButton id={`user_${item.userId}`} loading={loading} variant="contained" sx={{ background: "#43a047", "&:hover": { background: "#388e3c" } }} onClick={() => {
+                                                                        setLoading(true);
                                                                 
-                                                                    axios.put(`/api/v1/member/${item.userId}`, {}, { 
-                                                                        headers: {
-                                                                            "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
-                                                                        },
-                                                                        validateStatus: () => true
-                                                                    })
-                                                                        .then((res: any) => {
-                                                                            if (!res.data.success) {
-                                                                                setNotiTextE(res.data.message);
-                                                                                setOpenE(true);
-                                                                            }
-                                                                            else {
-                                                                                setNotiTextS(res.data.message);
-                                                                                setOpenS(true);
-                                                                            }
-                                                                        
-                                                                            setTimeout(() => {
-                                                                                setLoading(false);
-                                                                            }, 200);
+                                                                        axios.put(`/api/v1/member/${item.userId}`, {}, { 
+                                                                            headers: {
+                                                                                "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                                            },
+                                                                            validateStatus: () => true
                                                                         })
-                                                                        .catch((err): any => {
-                                                                            setNotiTextE(err.message);
-                                                                            setOpenE(true);
-                                                                            console.error(err);
-                                                                        });
-                                                                }}>Pull</LoadingButton>
+                                                                            .then((res: any) => {
+                                                                                if (!res.data.success) {
+                                                                                    setNotiTextE(res.data.message);
+                                                                                    setOpenE(true);
+                                                                                }
+                                                                                else {
+                                                                                    setNotiTextS(res.data.message);
+                                                                                    setOpenS(true);
+                                                                                }
+                                                                        
+                                                                                setTimeout(() => {
+                                                                                    setLoading(false);
+                                                                                }, 200);
+                                                                            })
+                                                                            .catch((err): any => {
+                                                                                setNotiTextE(err.message);
+                                                                                setOpenE(true);
+                                                                                console.error(err);
+                                                                            });
+                                                                    }}>Pull</LoadingButton>
+                                                                )}
                                                                 <Button variant="contained" color="info" onClick={() => {
                                                                     setUserId(item.userId);
                                                                     requestInfo(item.userId);
