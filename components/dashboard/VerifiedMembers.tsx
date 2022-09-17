@@ -238,7 +238,7 @@ export default function VerifiedMembers({ user }: any) {
                                         <Skeleton animation="wave" variant="text" width={250} height={30} />
                                     ) : (
                                         <>
-                                            {data?.pages.map((page) => {
+                                            {data?.pages?.map((page) => {
                                                 return (
                                                     page.max === 0 ? "No verified members" : `Showing ${page.max} verified members.`
                                                 )
@@ -295,7 +295,7 @@ export default function VerifiedMembers({ user }: any) {
                             </Stack>
                         ) : (
                             <>
-                                {data?.pages.map((page) =>
+                                {data?.pages?.map((page) =>
                                     page.members.map((item: any) => {
                                         return (
                                             <Paper key={item.id} variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>

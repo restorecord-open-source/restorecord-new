@@ -1,15 +1,24 @@
 import axios from "axios";
 
 export default async function getMembers(options: any, serverId?: any, search?: any, page: any = null) {
-    // return await axios.get(`/api/v1/server/members${serverId ? `?guild=${serverId}` : ""}${(page && serverId) ? `&page=${page}` : ""}${(page && !serverId) ? `?page=${page}` : ""}`, {
     return await axios.get(`/api/v1/server/members${page ? `?page=${page}` : ""}${search ? `&search=${search}` : ""}${serverId ? `&guild=${serverId}` : ""}`, {
         headers: options,
         validateStatus: () => true
     })
         .then(res => { return res.data; })
         .catch(err => { return err; });
-        
 }
+
+export async function getMemberList(options: any, serverId?: any, search?: any, page: any = null) {
+    return await axios.get(`/api/v1/server/memberList`, {
+        headers: options,
+        validateStatus: () => true
+    })
+        .then(res => { return res.data; })
+        .catch(err => { return err; });
+}
+
+
 
 export const DISCORD_EMPLOYEE = 1;
 export const DISCORD_PARTNER = 2;

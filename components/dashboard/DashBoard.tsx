@@ -1,14 +1,13 @@
 import { useQuery } from "react-query";
 import { useToken } from "../../src/token"
 
-import getMembers from "../../src/dashboard/getMembers";
+import { getMemberList } from "../../src/dashboard/getMembers";
 import getNews from "../../src/dashboard/getNews";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
-import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
@@ -31,7 +30,7 @@ export default function DashBoard({ user }: any) {
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
     }), { retry: false });
 
-    const { data: data2, isError: isError2, isLoading: isLoading2 } = useQuery('members', async () => await getMembers({
+    const { data: data2, isError: isError2, isLoading: isLoading2 } = useQuery('members', async () => await getMemberList({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
     }), { retry: false });
 
