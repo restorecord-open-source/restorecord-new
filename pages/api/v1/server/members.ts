@@ -58,13 +58,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 });
 
                 // const highestId = memberList.find((member: any) => member.id === Math.max(...memberList.map((member: any) => member.id)))?.id;
-                const lowestId = memberList.find((member: any) => member.id === Math.min(...memberList.map((member: any) => member.id)))?.id;
+                const lowestId = memberList.find((member: any) => member.id === Math.min(...memberList.map((member: any) => member.id)))?.id - 1;
 
                 await prisma.members.findMany({
                     where: {
                         AND: [
                             { guildId: { in: guildIds } },
-                            { id: { gt: search ? 0 : lowestId } },
+                            { id: { gt: search ? 0 : lowestId } }
                             { username: { contains: search ? search : '' } }
                         ],
                     },
