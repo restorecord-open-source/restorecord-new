@@ -73,7 +73,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         success: true,
                         max: count,
                         nextId: search ? 0 : highestId,
-                        maxPages: Math.ceil(count / limit) - 1,
+                        maxPages: Math.ceil(count / limit) === 0 ? 1 : Math.ceil(count / limit),
                         members: members.map((member: any) => {
                             return {
                                 id: member.id,
