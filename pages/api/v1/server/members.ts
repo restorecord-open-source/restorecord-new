@@ -54,8 +54,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             { username: { contains: search } },
                         ]
                     },
-                    take: search ? undefined : (Number(page) ? (Number(page) * Number(limit)) : Number(limit)),
+                    take: search ? undefined : (Number(page) * Number(limit)),
                 });
+
+                console.log(search ? undefined : (Number(page) * Number(limit)))
 
                 const highestId = memberList.find((member: any) => member.id === Math.max(...memberList.map((member: any) => member.id)))?.id;
 
@@ -67,7 +69,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             { username: { contains: search } },
                         ],
                     },
-                    take: search ? undefined : (Number(page) ? (Number(page) * Number(limit)) : Number(limit)),
+                    take: search ? undefined : (Number(page) * Number(limit)),
                 }).then((members: any) => {
                     return res.status(200).json({
                         success: true,
