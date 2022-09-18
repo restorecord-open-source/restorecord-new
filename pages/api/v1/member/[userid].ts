@@ -91,7 +91,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             id: json.id,
                             username: json.username,
                             discriminator: json.discriminator,
-                            avatar: json.avatar ? json.avatar : json.discriminator % 5,
+                            avatar: json.avatar ? json.avatar : String(json.discriminator % 5),
                             bot: json.bot,
                             system: json.system,
                             mfa_enabled: account.role === "business" ? json.mfa_enabled : null,
