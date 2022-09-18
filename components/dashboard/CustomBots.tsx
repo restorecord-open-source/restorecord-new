@@ -19,6 +19,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import { Link } from "@mui/material";
 import Image from "next/image";
+import { faBullseye } from "@fortawesome/free-solid-svg-icons";
 
 export default function DashCustomBot({ user }: any) {
     const [token]: any = useToken();
@@ -37,10 +38,10 @@ export default function DashCustomBot({ user }: any) {
     const [notiTextS, setNotiTextS] = useState("X");
     const [notiTextE, setNotiTextE] = useState("X");
 
-    const { data, isError, isLoading, refetch } = useQuery("getCustomBotInfo", async() => {
+    const { data, isError, isLoading  } = useQuery("getCustomBotInfo", async() => {
         if (user.bots && user.bots.length > 0) {
             for (const bot of user.bots) {
-                await fetch(`https://discord.com/api/users/@me`, {
+                await fetch(`/api/v1/users/@me`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -70,6 +71,10 @@ export default function DashCustomBot({ user }: any) {
                     })
             }
         }
+    }, {
+        retry: false,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
     });
 
     if (isError) {

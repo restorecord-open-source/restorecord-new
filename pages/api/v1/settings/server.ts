@@ -101,7 +101,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 
                 if (!valid) return res.status(400).json({ success: false, message: "Invalid Token" });
 
-                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
+                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, } }); 
 
                 if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
 
@@ -130,6 +130,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     if (!server) return res.status(400).json({ success: false, message: "Server not found" });
 
                     if (data.newPicture === "") return res.status(400).json({ success: false, message: "Picture can't be empty" });
+
+                    if (data.newWebhook) {
+                        if (/^.*(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-zA-Z0-9_-]+)$/.test(data.newWebhook) === false) {
+                            return res.status(400).json({ success: false, message: "Invalid Webhook" });
+                        }
+                    }
 
                     const newServer = await prisma.servers.update({
                         where: {

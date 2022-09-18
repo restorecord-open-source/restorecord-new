@@ -1,4 +1,5 @@
 import axios from "axios";
+import { HttpsProxyAgent } from "https-proxy-agent";
 import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "../../src/db";
 import { getIPAddress } from "../../src/getIPAddress";
@@ -109,7 +110,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                                 }
                                             ]
                                         }
-                                    ],
+                                    ]
+                                }, {
+                                    proxy: false,
+                                    httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
                                 });
 
                                 res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=15;`);
@@ -157,6 +161,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                             ]
                                         }
                                     ],
+                                }, {
+                                    proxy: false,
+                                    httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
                                 });
                             }
                         }
