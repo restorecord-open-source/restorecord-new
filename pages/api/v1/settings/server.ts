@@ -2,7 +2,6 @@ import { verify } from "jsonwebtoken";
 import { NextApiRequest, NextApiResponse } from "next";
 import rateLimit from "../../../../src/rate-limit";
 import { prisma } from "../../../../src/db";
-import { Prisma } from "@prisma/client";
 
 const limiter = rateLimit({
     interval: 300 * 1000,

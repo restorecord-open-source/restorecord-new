@@ -70,7 +70,6 @@ const handler = async(_: NextApiRequest, res: NextApiResponse<APIInteractionResp
         const image = options.find((o: any) => o.name == "image")?.value;
 
 
-        // send a message on the webhook and add a link button to it
         const message = await axios.post(`https://discord.com/api/webhooks/${webhook.id}/${webhook.token}`, {
             content: null,
             embeds: [
@@ -98,7 +97,7 @@ const handler = async(_: NextApiRequest, res: NextApiResponse<APIInteractionResp
             proxy: false, 
             httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) 
         });
-      
+        
         break;
     case "pull":
         return res.status(200).json(PULL_COMMAND_RESPONSE);

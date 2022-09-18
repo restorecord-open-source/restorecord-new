@@ -165,7 +165,7 @@ export default function VerifiedMembers({ user }: any) {
                             </DialogTitle>
                             <DialogContent sx={{ marginTop: 2 }}>
                                 <Stack spacing={1} direction="row" alignItems="center" sx={{ borderRadius: "1rem", flexDirection: { xs: "column", md: "row" } }}>
-                                    {loadingInfo ? <Skeleton animation="wave" variant="circular" width={40} height={40}  /> : <Avatar alt={userInfo.username} src={userInfo.avatar.length < 2 ? `https://cdn.discordapp.com/embed/avatars/${userInfo.discriminator % 5}.png` : `https://cdn.discordapp.com/avatars/${userInfo.id}/${userInfo.avatar}?size=2048`} />}
+                                    {loadingInfo ? <Skeleton animation="wave" variant="circular" width={40} height={40}  /> : <Avatar alt={userInfo.username} src={userInfo.avatar.length < 5 ? `https://cdn.discordapp.com/embed/avatars/${userInfo.discriminator % 5}.png` : `https://cdn.discordapp.com/avatars/${userInfo.id}/${userInfo.avatar}?size=2048`} />}
                                     {loadingInfo ? 
                                         <>
                                             <Skeleton animation="wave" variant="rectangular" width={135} height={28} sx={{ borderRadius: "4px" }} />

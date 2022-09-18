@@ -302,7 +302,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     console.log(`3 ${err}`);
                 });
 
-                let esimatedTime: any = members.length * 300 * 3;
+                let esimatedTime: any = members.length * 300 * 5;
 
                 if (esimatedTime > 60000) {
                     esimatedTime = esimatedTime / (60 * 1000);

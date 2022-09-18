@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { verify, sign } from "jsonwebtoken";
-import * as bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import rateLimit from "../../../../src/rate-limit";
 import { prisma } from "../../../../src/db";
