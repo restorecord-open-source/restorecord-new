@@ -30,7 +30,7 @@ export default function DashBoard({ user }: any) {
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
     }), { retry: false });
 
-    const { data: data2, isError: isError2, isLoading: isLoading2 } = useQuery('members', async () => await getMemberList({
+    const { data: data2, isError: isError2, isLoading: isLoading2 } = useQuery('memberList', async () => await getMemberList({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
     }), { retry: false });
 
