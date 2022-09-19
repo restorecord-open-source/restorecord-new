@@ -50,12 +50,12 @@ const SubscriptionList: Subscription[] = [
                 description: "Log all verifications in your server",
                 icon: <Clear sx={{ color: "#ef4444" }} />,
             },
-            {
-                name: "serverBackups",
-                value: "Server Backups",
-                description: "Backup all your Server Settings, Channels, Roles and more",
-                icon: <Clear sx={{ color: "#ef4444" }} />,
-            },
+            // {
+            //     name: "serverBackups",
+            //     value: "Server Backups",
+            //     description: "Backup all your Server Settings, Channels, Roles and more",
+            //     icon: <Clear sx={{ color: "#ef4444" }} />,
+            // },
             {
                 name: "customization",
                 value: "Customization",
@@ -124,12 +124,12 @@ const SubscriptionList: Subscription[] = [
                 description: "Log all verifications in your server",
                 icon: <Check sx={{ color: "#22c55e" }} />,
             },
-            {
-                name: "serverBackups",
-                value: "Server Backup",
-                description: "Backup all your Server Settings, Channels, Roles and more",
-                icon: <Check sx={{ color: "#22c55e" }} />,
-            },
+            // {
+            //     name: "serverBackups",
+            //     value: "Server Backup",
+            //     description: "Backup all your Server Settings, Channels, Roles and more",
+            //     icon: <Check sx={{ color: "#22c55e" }} />,
+            // },
             {
                 name: "customization",
                 value: "Customization",
@@ -198,12 +198,12 @@ const SubscriptionList: Subscription[] = [
                 description: "Log all verifications in your server",
                 icon: <Check sx={{ color: "#22c55e" }} />,
             },
-            {
-                name: "serverBackups",
-                value: "Full Server Backup",
-                description: "Backup all your Server Settings, Channels, Roles and more",
-                icon: <Check sx={{ color: "#22c55e" }} />,
-            },
+            // {
+            //     name: "serverBackups",
+            //     value: "Full Server Backup",
+            //     description: "Backup all your Server Settings, Channels, Roles and more",
+            //     icon: <Check sx={{ color: "#22c55e" }} />,
+            // },
             {
                 name: "customization",
                 value: "Customization",
