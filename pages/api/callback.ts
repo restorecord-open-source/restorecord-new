@@ -61,65 +61,74 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                         },
                     });
 
+                    const serverOwner = await prisma.accounts.findFirst({
+                        where: {
+                            id: serverInfo.ownerId,
+                        },
+                    });
 
-                    if (!user) {
-                        if (serverInfo.webhook) {
-                            const createdAt: number = account.id / 4194304 + 1420070400000;
-                            const pCheck = await ProxyCheck.check(IPAddr, { vpn: true, asn: true });
+                    if (!serverOwner) return res.status(400).json({ success: false, message: "No server owner found" });
 
-                            if (serverInfo.vpncheck && pCheck[IPAddr].proxy === "yes") {
-                                let operator = pCheck[IPAddr].operator.url ? `[\`${pCheck[IPAddr].operator.name}\`](${pCheck[IPAddr].operator.url})` : pCheck[IPAddr].operator.name;
 
-                                await axios.post(serverInfo.webhook, {
-                                    content: `<@${userId}> (${account.username}#${account.discriminator})`,
-                                    embeds: [
-                                        {
-                                            title: "Failed VPN Check",
-                                            timestamp: new Date().toISOString(),
-                                            color: 0xff0000,
-                                            author: {
-                                                name: `${account.username}#${account.discriminator}`,
-                                                url: `https://discord.id/?prefill=${account.id}`,
-                                                icon_url: account.avatar ? `https://cdn.discordapp.com/avatars/${account.id}/${account.avatar}.png` : `https://cdn.discordapp.com/embed/avatars/${account.discriminator % 5}.png`,
+                    // if (!user) {
+                    if (serverInfo.webhook) {
+                        const createdAt: number = account.id / 4194304 + 1420070400000;
+                        const pCheck = await ProxyCheck.check(IPAddr, { vpn: true, asn: true });
+
+                        if (serverInfo.vpncheck && pCheck[IPAddr].proxy === "yes") {
+                            let operator = pCheck[IPAddr].operator.url ? `[\`${pCheck[IPAddr].operator.name}\`](${pCheck[IPAddr].operator.url})` : pCheck[IPAddr].operator.name;
+
+                            await axios.post(serverInfo.webhook, {
+                                content: `<@${userId}> (${account.username}#${account.discriminator})`,
+                                embeds: [
+                                    {
+                                        title: "Failed VPN Check",
+                                        timestamp: new Date().toISOString(),
+                                        color: 0xff0000,
+                                        author: {
+                                            name: `${account.username}#${account.discriminator}`,
+                                            url: `https://discord.id/?prefill=${account.id}`,
+                                            icon_url: account.avatar ? `https://cdn.discordapp.com/avatars/${account.id}/${account.avatar}.png` : `https://cdn.discordapp.com/embed/avatars/${account.discriminator % 5}.png`,
+                                        },
+                                        fields: [
+                                            {
+                                                name: ":bust_in_silhouette: User:",
+                                                value: `${userId}`,
+                                                inline: true,   
                                             },
-                                            fields: [
-                                                {
-                                                    name: ":bust_in_silhouette: User:",
-                                                    value: `${userId}`,
-                                                    inline: true,   
-                                                },
-                                                {
-                                                    name: ":earth_americas: Client IP:",
-                                                    value: `||${IPAddr}||`,
-                                                    inline: true,
-                                                }, 
-                                                {
-                                                    name: ":clock1: Account Age:",
-                                                    value: `<t:${Math.floor(createdAt / 1000)}:R>`,
-                                                    inline: true,
-                                                },
-                                                {
-                                                    name: `:flag_${pCheck[IPAddr].isocode.toLowerCase()}: IP Info:`,
-                                                    value: `**Country:** \`${pCheck[IPAddr].country}\`\n**Provider:** \`${pCheck[IPAddr].provider}\``,
-                                                    inline: true,
-                                                },
-                                                {
-                                                    name: ":globe_with_meridians: Connection Info:",
-                                                    value: `**Type**: \`${pCheck[IPAddr].type}\`\n**VPN**: \`${pCheck[IPAddr].proxy}\`\n**Operator**: ${operator}`,
-                                                    inline: true,
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }, {
-                                    proxy: false,
-                                    httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
-                                });
+                                            {
+                                                name: ":earth_americas: Client IP:",
+                                                value: `||${IPAddr}||`,
+                                                inline: true,
+                                            }, 
+                                            {
+                                                name: ":clock1: Account Age:",
+                                                value: `<t:${Math.floor(createdAt / 1000)}:R>`,
+                                                inline: true,
+                                            },
+                                            {
+                                                name: `:flag_${pCheck[IPAddr].isocode.toLowerCase()}: IP Info:`,
+                                                value: `**Country:** \`${pCheck[IPAddr].country}\`\n**Provider:** \`${pCheck[IPAddr].provider}\``,
+                                                inline: true,
+                                            },
+                                            {
+                                                name: serverOwner.role === "business" ? ":globe_with_meridians: Connection Info:" : "",
+                                                value: serverOwner.role === "business" ? `**Type**: \`${pCheck[IPAddr].type}\`\n**VPN**: \`${pCheck[IPAddr].proxy}\`\n**Operator**: ${operator}` : "",
+                                                inline: serverOwner.role === "business" ? true : false,
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }, {
+                                proxy: false,
+                                httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
+                            });
 
-                                res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=15;`);
-                                return res.redirect(`https://${serverInfo.customDomain ? serverInfo.customDomain : req.headers.host}/verify/${state}`);
-                            }
-                            else {
+                            res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=15;`);
+                            return res.redirect(`https://${serverInfo.customDomain ? serverInfo.customDomain : req.headers.host}/verify/${state}`);
+                        }
+                        else {
+                            if (!user) {
                                 await axios.post(serverInfo.webhook, {
                                     content: `<@${userId}> (${account.username}#${account.discriminator})`,
                                     embeds: [
@@ -168,6 +177,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                             }
                         }
                     }
+                    // }
 
                     addMember(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, respon.data.access_token, [BigInt(serverInfo?.roleId).toString()]).then(async (resp) => {
                         console.log(`${account?.username} adding member ${resp?.status} (${rGuildId.toString()}, ${userId.toString()}, ${respon.data.access_token}, ${[BigInt(serverInfo?.roleId).toString()]})`);
@@ -248,16 +258,19 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                 // return res.redirect(`https://${serverInfo.customDomain ? serverInfo.customDomain : req.headers.host}/verify/${state}`);
             } else {
                 let error_detail;
-                console.log("verify = " + respon.status);
-                const err = respon?.response?.data?.error_description;
+                const err = respon?.response?.data?.error;
 
                 console.log(respon?.response?.data);
                 
 
-                if (err.includes("Invalid \"redirect_uri\" in request.")) {
+                if (err.includes("redirect_uri")) {
                     error_detail = "Redirect is missing, follow this: https://docs.restorecord.com/guides/create-a-custom-bot/#setup-oauth2-redirect"
+                } else if (err.includes("invalid_client")) {
+                    error_detail = "Bot secret is missing and/or invalid, please reset it on Discord and update the bot on Restorecord."
+                } else if (err.includes("invalid_request")) {
+                    error_detail = "Verification took too long, please try again."
                 } else {
-                    error_detail = err;
+                    error_detail = "Unknown error, please contact Restorecord support."
                 }
 
                 return res.status(400).json({

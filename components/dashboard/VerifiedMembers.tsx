@@ -75,22 +75,6 @@ export default function VerifiedMembers({ user }: any) {
         }, 10);
     }
 
-    function handleSearch(event: any) {
-        let timeout: any;
-        setSearch(event.target.value);
-
-        clearTimeout(timeout);
-        
-        timeout = setTimeout(() => {
-            refetch();
-        }, 100);
-
-
-        // setTimeout(() => {
-        //     refetch();
-        // }, 250);
-    }
-
     function requestInfo(userId: string) {
         setLoadingInfo(true);
         fetch(`/api/v1/member/${userId}`, {
@@ -125,11 +109,18 @@ export default function VerifiedMembers({ user }: any) {
             }
         };
 
+        const delayDebounceFn = setTimeout(() => {
+            refetch();
+        }, 1000)
+
         document.addEventListener('scroll', onScroll);
         return () => {
             document.addEventListener('scroll', onScroll);
+            clearTimeout(delayDebounceFn);
         }
-    }, [hasNextPage, fetchNextPage]);
+        
+       
+    }, [hasNextPage, fetchNextPage, refetch, search]);
 
     return (
         <>
@@ -253,7 +244,7 @@ export default function VerifiedMembers({ user }: any) {
                                 ) : (
                                     <>
                                         <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
-                                            <TextField id="search" label="Search" variant="outlined" sx={{ width: 250 }} onChange={handleSearch} />
+                                            <TextField id="search" label="Search" variant="outlined" sx={{ width: 250 }} onChange={(e) => setSearch(e.target.value)} />
                                             <FormControl fullWidth>
                                                 <InputLabel id="server-select-label">Server</InputLabel>
                                                 <Select labelId="server-select-label" id="server-select" label="Server" value={serverId} onChange={handleSelect}>

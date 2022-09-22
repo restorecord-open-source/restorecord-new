@@ -44,8 +44,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     guildIds = serverId ? [BigInt(serverId)] : servers.map((server: any) => server.guildId);
                 }
 
-                const count = await prisma.members.count({ where: { guildId: { in: guildIds } } });
                 const search: any = req.query.search ?? '';
+                const count = await prisma.members.count({ where: { AND: [{ guildId: { in: guildIds } }, { username: { contains: search ? search : '' } }] } });
 
                 const memberList = await prisma.members.findMany({
                     where: {
