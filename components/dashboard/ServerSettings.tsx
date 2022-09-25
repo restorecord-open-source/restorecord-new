@@ -206,12 +206,14 @@ export default function DashServerSettings({ user, id }: any) {
                                             </Typography>
                                             <TextField fullWidth variant="outlined" name="picture" value={picture} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Server Icon URL" />
                                         </Grid>
-                                        <Grid item>
-                                            <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
-                                                Server Background
-                                            </Typography>
-                                            <TextField fullWidth variant="outlined" name="background" value={background} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Background Image URL" />
-                                        </Grid>
+                                        {user.role === "business" && (
+                                            <Grid item>
+                                                <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                                    Server Background
+                                                </Typography>
+                                                <TextField fullWidth variant="outlined" name="background" value={background} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Background Image URL" />
+                                            </Grid>
+                                        )}
                                         <Grid item>
                                             <Stack direction="row" spacing={1}>
                                                 <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
