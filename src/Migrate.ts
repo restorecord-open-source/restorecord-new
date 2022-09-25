@@ -35,7 +35,7 @@ export async function addMember(guildId: string, userId: string, botToken: any, 
 }
 
 export async function addRole(guildId: string, userId: string, botToken: any, roleId: string) {
-    return await axios.put(`https://discord.com/api/guilds/${guildId}/members/${userId}/roles/${roleId}`, {
+    return await axios.put(`https://discord.com/api/v10/guilds/${guildId}/members/${userId}/roles/${roleId}`, {
         ValidateStatus: () => true
     }, {
         headers: {

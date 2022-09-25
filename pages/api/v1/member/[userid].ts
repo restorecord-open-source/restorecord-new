@@ -178,7 +178,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     return res.status(400).json({ success: false, message: "Bot token is invalid." });
                 });
 
-                await fetch(`https://discord.com/api/guilds/${server.guildId}/members?limit=1000`, {
+                await fetch(`https://discord.com/api/v10/guilds/${server.guildId}/members?limit=1000`, {
                     method: "GET",
                     headers: {
                         "Authorization": `Bot ${customBot.botToken}`,

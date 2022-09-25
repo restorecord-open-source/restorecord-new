@@ -54,11 +54,11 @@ const handler = async(_: NextApiRequest, res: NextApiResponse<APIInteractionResp
 
         if (!cBot) return res.status(400).end("invalid application id");
 
-        const server = await axios.get(`https://discord.com/api/guilds/${interaction.guild_id}`, { headers: { Authorization: `Bot ${cBot.botToken}` }, proxy: false, httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) })
-        const webhooks = await axios.get(`https://discord.com/api/channels/${options[0].value}/webhooks`, { headers: { Authorization: `Bot ${cBot.botToken}` }, proxy: false, httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) })
+        const server = await axios.get(`https://discord.com/api/v10/guilds/${interaction.guild_id}`, { headers: { Authorization: `Bot ${cBot.botToken}` }, proxy: false, httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) })
+        const webhooks = await axios.get(`https://discord.com/api/v10/channels/${options[0].value}/webhooks`, { headers: { Authorization: `Bot ${cBot.botToken}` }, proxy: false, httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) })
 
         // if (webhooks.data.find((w: any) => w.user.id == cBot.clientId).length == 0) {
-        const nWebhook = await axios.post(`https://discord.com/api/channels/${options[0].value}/webhooks`, { name: "Verification" }, { headers: { Authorization: `Bot ${cBot.botToken}` }, proxy: false, httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) })
+        const nWebhook = await axios.post(`https://discord.com/api/v10/channels/${options[0].value}/webhooks`, { name: "Verification" }, { headers: { Authorization: `Bot ${cBot.botToken}` }, proxy: false, httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) })
 
         webhook = nWebhook.data;
         // } else {

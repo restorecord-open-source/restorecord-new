@@ -51,8 +51,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                 username: account.username,
                                 email: account.email,
                                 role: account.role,
-                                admin: account.admin,
-                                pfp: account.pfp,
+                                ...(account.admin === true && { admin: true }),
+                                // pfp: account.pfp,
                                 createdAt: account.createdAt,
                                 expiry: account.expiry,
                                 servers: servers.map((server: any) => {
