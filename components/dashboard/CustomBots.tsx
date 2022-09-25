@@ -19,7 +19,6 @@ import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import { Link } from "@mui/material";
 import Image from "next/image";
-import { faBullseye } from "@fortawesome/free-solid-svg-icons";
 
 export default function DashCustomBot({ user }: any) {
     const [token]: any = useToken();
