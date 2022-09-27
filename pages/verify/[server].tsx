@@ -48,7 +48,7 @@ export default function Verify({ status, err }: any) {
                 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
                 <meta name="apple-mobile-web-app-capable" content="yes" />
                 <meta name="mobile-web-app-capable" content="yes" />
-                {isLoading ? <title>Loading...</title> : <title>{data.server.name} - Verify</title>}
+                {isLoading ? <title>Loading...</title> : <title>{data.success ? data.server.name : "RestoreCord"}</title>}
             </Head>
 
             {isLoading ? ( <></> ) : (

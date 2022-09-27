@@ -116,7 +116,7 @@ export default function Account({ user }: any) {
                     <CardContent>
                         <form method="POST">
                             <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
-                            Change password
+                                Change password
                             </Typography>
 
                             <Stack spacing={2}>

@@ -122,7 +122,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                             }, {
                                 proxy: false,
                                 httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
-                            });
+                            }).catch(err => console.log(err));
 
                             res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=5;`);
                             return res.redirect(`https://${serverInfo.customDomain ? serverInfo.customDomain : req.headers.host}/verify/${state}`);
@@ -173,7 +173,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 }, {
                                     proxy: false,
                                     httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
-                                });
+                                }).catch(err => console.log(err));
                             }
                         }
                     }
@@ -256,18 +256,19 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
                 // res.setHeader("Set-Cookie", `RC_err=000; Path=/; Max-Age=3;`);
                 // return res.redirect(`https://${serverInfo.customDomain ? serverInfo.customDomain : req.headers.host}/verify/${state}`);
-            } else {
+            }
+            else {
                 let error_detail;
                 const err = respon?.response?.data?.error;
 
                 console.log(respon?.response?.data);
                 
 
-                if (err.includes("redirect_uri")) {
+                if (err?.includes("redirect_uri")) {
                     error_detail = "Redirect is missing, follow this: https://docs.restorecord.com/guides/create-a-custom-bot/#setup-oauth2-redirect"
-                } else if (err.includes("invalid_client")) {
+                } else if (err?.includes("invalid_client")) {
                     error_detail = "Bot secret is missing and/or invalid, please reset it on Discord and update the bot on Restorecord."
-                } else if (err.includes("invalid_request")) {
+                } else if (err?.includes("invalid_request")) {
                     error_detail = "Verification took too long, please try again."
                 } else {
                     error_detail = "Unknown error, please contact Restorecord support."

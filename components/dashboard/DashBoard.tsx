@@ -241,7 +241,7 @@ export default function DashBoard({ user }: any) {
 
                                             return (
                                                 <List key={member.id} sx={{ width: '100%', maxWidth: 360 }}>
-                                                    <ListItem>
+                                                    <ListItem sx={{ wordBreak: "break-all" }}>
                                                         <ListItemAvatar>
                                                             {member.avatar.length > 1 ? (
                                                                 <Avatar src={`https://cdn.discordapp.com/avatars/${member.userId}/${member.avatar}?size=128`} />

@@ -21,6 +21,7 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 
 import MenuIcon from "@mui/icons-material/Menu";
 import styled from "@emotion/styled";
+import { Button } from "@mui/material";
 
 
 const drawerWidth = 240;
@@ -73,7 +74,7 @@ export default function NavBar({ ...props }: any) {
                                 </IconButton>
                             </>
                         )}
-                        <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, cursor: "pointer"}} onClick={() => { router.push("/dashboard") }}>
+                        <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 0, cursor: "pointer"}} onClick={() => { router.push("/dashboard") }}>
                             RestoreCord
                         </Typography>
                     </Toolbar>
