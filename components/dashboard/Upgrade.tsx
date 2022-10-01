@@ -26,7 +26,7 @@ export default function DashUpgrade({ user }: any) {
                             Upgrade
                         </Typography>
 
-                        <Typography variant="body1" sx={{ mb: 2 }}>
+                        <Typography component="h6" variant="h6" sx={{ mb: 2, fontWeight: "400" }}>
                             Your current plan is <b>{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</b>.
                         </Typography>
                         
@@ -62,7 +62,7 @@ export default function DashUpgrade({ user }: any) {
                                                             Purchase
                                                         </Button>
                                                     ) : (
-                                                        <Button fullWidth variant="contained" color="primary" href={`https://shop.restorecord.com/product/${tier.name.toLowerCase()}`}>
+                                                        <Button fullWidth variant="contained" color="primary" href={`https://shop.restorecord.com/product/${tier.name.toLowerCase()}${tier.name.toLowerCase() === "premium" ? `?additional-4085c60735770cdb133e54cded7d1960=${user.username}` : `?additional-4085c60735770cdb133e54cded7d1960=${user.username}`}`}>
                                                             Purchase
                                                         </Button>
                                                     )}
@@ -73,8 +73,6 @@ export default function DashUpgrade({ user }: any) {
                                 </Grid>
                             ))}
                         </Grid>
-                        
-
                     </CardContent>
                 </Paper>
             </Container>
