@@ -141,7 +141,7 @@ export default function DashServerSettings({ user, id }: any) {
     return (
         <>
             <Container maxWidth="xl">
-                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #2f2f2f" }}>
                     <CardContent>
                         <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
                             Change Server Settings

@@ -242,7 +242,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             }
                         });
 
-                        if (!newServer) return reject();
+                        if (!newServer) return reject("Server not found");
                         // if (!newServer.pulling) return reject();
 
                         console.log(`Adding ${member.username} to ${server.name}`);
@@ -289,7 +289,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                 resolve();
                                 break;
                             default:
-                                reject();
+                                reject("Unknown error");
                                 break;
                             }
                         }).catch(async (err: Error) => {

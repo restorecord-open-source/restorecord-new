@@ -23,7 +23,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         switch (req.method) {
         case "POST":
             try {
-
                 const buf = await buffer(req);
                 const rawBody = buf.toString('utf8');
                 const signature = req.headers['signature'];

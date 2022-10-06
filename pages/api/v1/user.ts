@@ -49,7 +49,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                 success: true,
                                 id: account.id,
                                 username: account.username,
-                                email: account.email,
+                                // email: account.email,
                                 role: account.role,
                                 ...(account.admin === true && { admin: true }),
                                 // pfp: account.pfp,

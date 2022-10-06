@@ -90,7 +90,7 @@ export default function NavBar({ ...props }: any) {
                                             return null
                                         }
                                         return (
-                                            <ListItem key={index} disablePadding selected={pathName === item.href}>
+                                            <ListItem key={index} disablePadding selected={pathName === item.href} sx={{ "&.Mui-selected": { backgroundColor: "#1e1e1e" } }}>
                                                 <Link href={item.href}>
                                                     <ListItemButton>
                                                         {/* <ListItem button selected={pathName === item.href} disablePadding> */}
