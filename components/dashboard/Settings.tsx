@@ -247,7 +247,12 @@ export default function DashSettings({ user }: any) {
                                                                 })
                                                                     .then(res => {
                                                                         if (!res.data.success) {
-                                                                            setNotiTextE(res.data.message);
+                                                                            if (res.data.pullTimeout) {
+                                                                                setNotiTextE(`${res.data.message} ${new Intl.DateTimeFormat(navigator.language, { dateStyle: "medium", timeStyle: "short" }).format(new Date(res.data.pullTimeout))}`);
+                                                                            }
+                                                                            else {
+                                                                                setNotiTextE(res.data.message);
+                                                                            }
                                                                             setOpenE(true);
                                                                         }
                                                                         else {

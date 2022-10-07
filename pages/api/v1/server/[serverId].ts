@@ -168,7 +168,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 if (server.pulling === true) return res.status(400).json({ success: false, message: "You are already pulling" });
 
-                if (server.pullTimeout !== null) if (server.pullTimeout > new Date()) return res.status(400).json({ success: false, message: "You're on cooldown, you can pull again on the " + server.pullTimeout.toLocaleString() });
+                if (server.pullTimeout !== null) if (server.pullTimeout > new Date()) return res.status(400).json({ success: false, message: "You're on cooldown, you can pull again on", pullTimeout: server.pullTimeout });
 
                 if (account.role !== "free") {
                     await prisma.servers.update({

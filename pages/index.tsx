@@ -26,6 +26,8 @@ export default function Home() {
                     <NavBar />
 
                     <Box sx={{ my: 4, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+                        <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: -1, backgroundImage: "linear-gradient(180deg, rgb(30,30,30) 0%, rgba(18,18,18) 100%)" }} />
+                        
                         <Typography color="primary" variant="h1" component="h1" sx={{ textAlign: "center", fontWeight: "bold", fontSize: { xs: "2.5rem", md: "3rem", lg: "4rem" } }}>
                             RestoreCord
                         </Typography>
@@ -39,6 +41,7 @@ export default function Home() {
                             </Button>
                         </Badge>
 
+
                         <Typography variant="h3" component="h2" sx={{ textAlign: "center", marginTop: 32, fontWeight: "semibold" }} id="features">
                             Our Features
                         </Typography>
@@ -50,7 +53,7 @@ export default function Home() {
                             <Grid item xs={12} sm={6} md={4}>
                                 <Paper elevation={1} sx={{ borderColor: "grey.800", borderRadius: "8px" }}>
                                     <CardContent sx={{ alignItems: "center", display: "flex", flexDirection: "column" }}>
-                                        <Paper elevation={0} sx={{ width: "56px", height: "56px", marginBottom: 2, borderRadius: "50%", alignItems: "center", justifyContent: "center", display: "flex", backgroundColor: "primary.main", boxShadow: "0px 0px 15px rgba(0, 0, 0, 0.5)" }}>
+                                        <Paper elevation={0} sx={{ width: "56px", height: "56px", marginBottom: 2, borderRadius: "50%", alignItems: "center", justifyContent: "center", display: "flex", backgroundColor: "rgba(79, 70, 229, 0.85)", boxShadow: "0px 0px 15px rgba(0, 0, 0, 0.5)" }}>
                                             <SpeedRoundedIcon sx={{ fontSize: 32 }} />
                                         </Paper>
                                         <Typography variant="h5" component="h2" sx={{ textAlign: "center", fontWeight: "700", fontSize: "1.5rem" }}>
@@ -65,7 +68,7 @@ export default function Home() {
                             <Grid item xs={12} sm={6} md={4}>
                                 <Paper elevation={1} sx={{ borderColor: "grey.800", borderRadius: "8px", fontSize: "1.25rem" }}>
                                     <CardContent sx={{ alignItems: "center", display: "flex", flexDirection: "column" }}>
-                                        <Paper elevation={0} sx={{ width: "56px", height: "56px", marginBottom: 2, borderRadius: "50%", alignItems: "center", justifyContent: "center", display: "flex", backgroundColor: "primary.main", boxShadow: "0px 0px 15px rgba(0, 0, 0, 0.5)" }}>
+                                        <Paper elevation={0} sx={{ width: "56px", height: "56px", marginBottom: 2, borderRadius: "50%", alignItems: "center", justifyContent: "center", display: "flex", backgroundColor: "rgba(79, 70, 229, 0.85)", boxShadow: "0px 0px 15px rgba(0, 0, 0, 0.5)" }}>
                                             <SellRoundedIcon sx={{ fontSize: 32 }} />
                                         </Paper>
                                         <Typography variant="h5" component="h2" sx={{ textAlign: "center", fontWeight: "700", fontSize: "1.5rem" }}>
@@ -80,7 +83,7 @@ export default function Home() {
                             <Grid item xs={12} sm={6} md={4}>
                                 <Paper elevation={1} sx={{ borderColor: "grey.800", borderRadius: "8px", fontSize: "1.25rem" }}>
                                     <CardContent sx={{ alignItems: "center", display: "flex", flexDirection: "column" }}>
-                                        <Paper elevation={0} sx={{ width: "56px", height: "56px", marginBottom: 2, borderRadius: "50%", alignItems: "center", justifyContent: "center", display: "flex", backgroundColor: "primary.main", boxShadow: "0px 0px 15px rgba(0, 0, 0, 0.5)" }}>
+                                        <Paper elevation={0} sx={{ width: "56px", height: "56px", marginBottom: 2, borderRadius: "50%", alignItems: "center", justifyContent: "center", display: "flex", backgroundColor: "rgba(79, 70, 229, 0.85)", boxShadow: "0px 0px 15px rgba(0, 0, 0, 0.5)" }}>
                                             <SupportAgentRoundedIcon sx={{ fontSize: 32 }} />
                                         </Paper>
                                         <Typography variant="h5" component="h2" sx={{ textAlign: "center", fontWeight: "700", fontSize: "1.5rem" }}>
@@ -95,7 +98,7 @@ export default function Home() {
                             <Grid item xs={12} sm={6} md={4}>
                                 <Paper elevation={1} sx={{ borderColor: "grey.800", borderRadius: "8px", fontSize: "1.25rem" }}>
                                     <CardContent sx={{ alignItems: "center", display: "flex", flexDirection: "column" }}>
-                                        <Paper elevation={0} sx={{ width: "56px", height: "56px", marginBottom: 2, borderRadius: "50%", alignItems: "center", justifyContent: "center", display: "flex", backgroundColor: "primary.main", boxShadow: "0px 0px 15px rgba(0, 0, 0, 0.5)" }}>
+                                        <Paper elevation={0} sx={{ width: "56px", height: "56px", marginBottom: 2, borderRadius: "50%", alignItems: "center", justifyContent: "center", display: "flex", backgroundColor: "rgba(79, 70, 229, 0.85)", boxShadow: "0px 0px 15px rgba(0, 0, 0, 0.5)" }}>
                                             <ShowChartRoundedIcon sx={{ fontSize: 32 }} />
                                         </Paper>
                                         <Typography variant="h5" component="h2" sx={{ textAlign: "center", fontWeight: "700", fontSize: "1.5rem" }}>
@@ -110,7 +113,7 @@ export default function Home() {
                             <Grid item xs={12} sm={6} md={4}>
                                 <Paper elevation={1} sx={{ borderColor: "grey.800", borderRadius: "8px", fontSize: "1.25rem" }}>
                                     <CardContent sx={{ alignItems: "center", display: "flex", flexDirection: "column" }}>
-                                        <Paper elevation={0} sx={{ width: "56px", height: "56px", marginBottom: 2, borderRadius: "50%", alignItems: "center", justifyContent: "center", display: "flex", backgroundColor: "primary.main", boxShadow: "0px 0px 15px rgba(0, 0, 0, 0.5)" }}>
+                                        <Paper elevation={0} sx={{ width: "56px", height: "56px", marginBottom: 2, borderRadius: "50%", alignItems: "center", justifyContent: "center", display: "flex", backgroundColor: "rgba(79, 70, 229, 0.85)", boxShadow: "0px 0px 15px rgba(0, 0, 0, 0.5)" }}>
                                             <VpnKeyOffRoundedIcon sx={{ fontSize: 32 }} />
                                         </Paper>
                                         <Typography variant="h5" component="h2" sx={{ textAlign: "center", fontWeight: "700", fontSize: "1.5rem" }}>
@@ -125,7 +128,7 @@ export default function Home() {
                             <Grid item xs={12} sm={6} md={4}>
                                 <Paper elevation={1} sx={{ borderColor: "grey.800", borderRadius: "8px", fontSize: "1.25rem" }}>
                                     <CardContent sx={{ alignItems: "center", display: "flex", flexDirection: "column" }}>
-                                        <Paper elevation={0} sx={{ width: "56px", height: "56px", marginBottom: 2, borderRadius: "50%", alignItems: "center", justifyContent: "center", display: "flex", backgroundColor: "primary.main", boxShadow: "0px 0px 15px rgba(0, 0, 0, 0.5)" }}>
+                                        <Paper elevation={0} sx={{ width: "56px", height: "56px", marginBottom: 2, borderRadius: "50%", alignItems: "center", justifyContent: "center", display: "flex", backgroundColor: "rgba(79, 70, 229, 0.85)", boxShadow: "0px 0px 15px rgba(0, 0, 0, 0.5)" }}>
                                             <TuneRoundedIcon sx={{ fontSize: 32 }} />
                                         </Paper>
                                         <Typography variant="h5" component="h2" sx={{ textAlign: "center", fontWeight: "700", fontSize: "1.5rem" }}>
