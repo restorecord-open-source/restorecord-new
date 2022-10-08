@@ -32,7 +32,7 @@ export default function Info() {
 
     return (
         <>
-            <Box sx={{ minHeight: "100vh", flexDirection: "column", display: "flex" }}>
+            <Box sx={{ minHeight: "100vh", flexDirection: "column", display: "flex", pt: "2.5rem" }}>
                 <Container maxWidth="xl" sx={{ mx: "auto", justifyContent: "center", alignItems: "center"}}>
                     <NavBar />
 
