@@ -13,6 +13,15 @@ import Switch from "@mui/material/Switch";
 import Stack from "@mui/material/Stack";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import IconButton from "@mui/material/IconButton";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogActions from "@mui/material/DialogActions";
+import CloseIcon from "@mui/icons-material/Close";
+import theme from "../../src/theme";
+import axios from "axios";
 
 export default function DashServerSettings({ user, id }: any) {
     const [token]: any = useToken();
@@ -34,6 +43,8 @@ export default function DashServerSettings({ user, id }: any) {
     const [openE, setOpenE] = useState(false);
     const [notiTextS, setNotiTextS] = useState("X");
     const [notiTextE, setNotiTextE] = useState("X");
+    
+    const [confirmDelete, setConfirmDelete] = useState(false);
 
     useEffect(() => {
         if (server) {
@@ -158,6 +169,62 @@ export default function DashServerSettings({ user, id }: any) {
                                 {notiTextS}
                             </Alert>
                         </Snackbar>
+
+                        <Dialog open={confirmDelete} onClose={() => setConfirmDelete(false)} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" fullWidth maxWidth="sm">
+                            <DialogTitle id="alert-dialog-title">{"Are you sure you?"}
+                                <IconButton aria-label="close" onClick={() => setConfirmDelete(false)} sx={{ position: 'absolute', right: 8, top: 8, color: theme.palette.grey[500] }}>
+                                    <CloseIcon />
+                                </IconButton>
+                            </DialogTitle>
+                            <DialogContent>
+                                <DialogContentText id="alert-dialog-description">
+                                    <Typography variant="body1" sx={{ fontWeight: "500", color: theme.palette.error.main }}>
+                                        This action cannot be undone.
+                                    </Typography>
+
+                                    Deleting this server will remove:
+                                    <ul>
+                                        <li>All Backups</li>
+                                        <li>All Verified Members</li>
+                                        <li>All Customized Settings</li>
+                                    </ul>
+                                </DialogContentText>
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={() => {
+                                    setConfirmDelete(false);
+
+                                    axios.delete(`/api/v1/server/${guildId}`, { headers: {
+                                        "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                    },
+                                    validateStatus: () => true
+                                    })
+                                        .then((res: any) => {
+                                            if (!res.data.success) {
+                                                setNotiTextE(res.data.message);
+                                                setOpenE(true);
+                                            }
+                                            else {
+                                                setNotiTextS(res.data.message);
+                                                setOpenS(true);
+                                                setTimeout(() => {
+                                                    router.push("/dashboard/settings");
+                                                }, 1250);
+                                            }
+                                        })
+                                        .catch((err: any) => {
+                                            setNotiTextE(err.message);
+                                            setOpenE(true);
+                                            console.error(err);
+                                        });
+                                } } color="error">
+                                    Delete
+                                </Button>
+                                <Button onClick={() => setConfirmDelete(false)} color="primary" autoFocus>
+                                    Cancel
+                                </Button>
+                            </DialogActions>
+                        </Dialog>
                         
                         {(user.servers.find((server: any) => server.guildId === id)) ? (
                             <>
@@ -168,6 +235,9 @@ export default function DashServerSettings({ user, id }: any) {
                                         </Typography>
                                     </Grid>
                                     <Grid item>
+                                        <Button variant="contained" color="error" sx={{ mb: 2, mr: 2 }} onClick={() => { setConfirmDelete(true) }}>
+                                            Delete Server
+                                        </Button>
                                         <Button variant="contained" sx={{ mb: 2 }} onClick={() => { router.push(`/dashboard/settings/`)} }>
                                             Go Back
                                         </Button>
