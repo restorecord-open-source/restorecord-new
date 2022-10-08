@@ -147,16 +147,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     },
                 });
                 
-                if (!member) return res.status(400).json({ success: false, message: "No member found." });
+                if (!member) return res.status(400).json({ success: false, message: "Member not found." });
+
+                const servers = await prisma.servers.findMany({
+                    where: {
+                        ownerId: valid.id,
+                    },
+                });
+
+                if (!servers) return res.status(400).json({ success: false, message: "No servers found on account." });
 
                 const server = await prisma.servers.findFirst({
                     where: {
                         ownerId: valid.id,
-                        guildId: member.guildId,
+                        guildId: {
+                            in: servers.map(s => s.guildId),
+                        },
                     },
                 });
 
-                if (!server) return res.status(400).json({ success: false, message: "No server found." });
+                if (!server) return res.status(400).json({ success: false, message: "Server of member not found." });
 
                 const customBot = await prisma.customBots.findFirst({
                     where: {
