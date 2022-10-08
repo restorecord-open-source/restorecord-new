@@ -44,14 +44,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     guildIds = serverId ? [BigInt(serverId)] : servers.map((server: any) => server.guildId);
                 }
 
-                const search: any = req.query.search ?? '';
-                const count = await prisma.members.count({ where: { AND: [{ guildId: { in: guildIds } }, { username: { contains: search ? search : '' } }] } });
+                let search: any = req.query.search ?? '';
+                let userIdSearch: any = search ? (isNaN(search) ? search : BigInt(search)) : '';
+                const count = await prisma.members.count({ where: { AND: [{ guildId: { in: guildIds } }, { username: { contains: search ? (userIdSearch ? '' : search) : '' } }, { userId: { equals: userIdSearch ? BigInt(userIdSearch) as bigint : undefined } }] } });
 
                 const memberList = await prisma.members.findMany({
                     where: {
                         AND: [
                             { guildId: { in: guildIds } },
-                            { username: { contains: search ? search : '' } }
+                            { username: { contains: search ? (userIdSearch ? '' : search) : '' } },
+                            { userId: { equals: userIdSearch ? BigInt(userIdSearch) as bigint : undefined } }
                         ]
                     },
                     take: search ? undefined : (Number(page) * Number(limit)),
@@ -65,7 +67,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         AND: [
                             { guildId: { in: guildIds } },
                             { id: { gt: search ? 0 : (lowestId - 1) } },
-                            { username: { contains: search ? search : '' } }
+                            { username: { contains: search ? (userIdSearch ? '' : search) : '' } },
+                            { userId: { equals: userIdSearch ? BigInt(userIdSearch) as bigint : undefined } }
                         ],
                     },
                     take: search ? undefined : (Number(page) * Number(limit)),
