@@ -226,7 +226,13 @@ export default function VerifiedMembers({ user }: any) {
                                         <Skeleton animation="wave" variant="text" width={250} height={30} />
                                     ) : (
                                         <>
-                                            {data?.pages?.[0]?.max === 0 ? "No verified members" : `Showing ${data?.pages?.[0]?.max} verified members.`}
+                                            {data?.pages ? (
+                                                <>
+                                                    {data?.pages?.[0]?.max === 0 ? "No verified members" : `Showing ${data?.pages?.[0]?.max} verified members.`}
+                                                </>
+                                            ) : (
+                                                "Loading..."
+                                            )}
                                         </>
                                     )}
                                 </Typography>

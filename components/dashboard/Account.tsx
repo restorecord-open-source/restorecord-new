@@ -99,33 +99,6 @@ export default function Account({ user }: any) {
 
                 {/* <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #2f2f2f" }}>
                     <CardContent>
-                        <Grid container justifyContent={"space-between"}>
-                            <Grid item>
-                                <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
-                                    Subscription
-                                </Typography>
-                            </Grid>
-
-                            <Grid item>
-                                <Button variant="outlined" color="primary" onClick={() => {
-                                    router.push(`/dashboard/upgrade`);
-                                }}>
-                                    Extend
-                                </Button>
-                            </Grid>
-                        </Grid>
-
-                        <Typography variant="body1">
-                            <b>Subscription</b>: {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                        </Typography>
-                        <Typography variant="body1">
-                            <b>Subscription expires</b>: {new Date(user.expiry).toLocaleString()}
-                        </Typography>
-                    </CardContent>
-                </Paper> */}
-
-                {/* <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #2f2f2f" }}>
-                    <CardContent>
                         <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
                             2-Factor Authentication
                         </Typography>
@@ -221,7 +194,6 @@ export default function Account({ user }: any) {
 
 
 
-                {/* delete account  */}
                 {/* <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #ff0000" }}>
                     <CardContent>
                         <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
@@ -237,6 +209,8 @@ export default function Account({ user }: any) {
                         </Button>
                     </CardContent>
                 </Paper> */}
+
+
             </Container>
         </>
     )
