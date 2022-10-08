@@ -13,6 +13,8 @@ import { useRef, useState } from "react";
 import { useToken } from "../../src/token";
 import Slide from "@mui/material/Slide";
 import axios from "axios";
+import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
 
 export default function Account({ user }: any) {
     const [token]: any = useToken();
@@ -69,6 +71,16 @@ export default function Account({ user }: any) {
                             <TextField label="Username" variant="outlined" fullWidth value={user.username} disabled />
                             {/* <TextField label="Email" variant="outlined" fullWidth value={user.email} disabled /> */}
                         </Stack>
+                        
+                        <Box sx={{ mt: 2 }}>
+                            <b>Subscription:</b>
+                            <Typography variant="body1">
+                                <li><b>Type</b>: {user.role.charAt(0).toUpperCase() + user.role.slice(1)}</li>
+                            </Typography>
+                            <Typography variant="body1">
+                                <li><b>Expires</b>: {new Intl.DateTimeFormat(navigator.language, { year: "numeric", month: "long", day: "2-digit" }).format(new Date(user.expiry))}</li>
+                            </Typography>
+                        </Box>
 
                         {/* <LoadingButton variant="contained" color="primary" loading={loading1} sx={{ mt: 2}} fullWidth onClick={() => { 
                             setLoading1(true);
