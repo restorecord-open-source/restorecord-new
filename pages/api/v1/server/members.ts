@@ -45,7 +45,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 }
 
                 let search: any = req.query.search ?? '';
-                let userIdSearch: any = search ? (isNaN(search) ? search : BigInt(search)) : '';
+                let userIdSearch: any = search ? (isNaN(search) ? undefined : BigInt(search)) : undefined;
                 const count = await prisma.members.count({ where: { AND: [{ guildId: { in: guildIds } }, { username: { contains: search ? (userIdSearch ? '' : search) : '' } }, { userId: { equals: userIdSearch ? BigInt(userIdSearch) as bigint : undefined } }] } });
 
                 const memberList = await prisma.members.findMany({

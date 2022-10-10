@@ -28,7 +28,7 @@ async function getStats() {
 }
 
 export default function Info() {
-    const { data, isError, isLoading, refetch } = useQuery('stats', async () => await getStats(), { retry: false,  refetchOnWindowFocus: true });
+    const { data, isError, isLoading, refetch } = useQuery('stats', async () => await getStats(), { retry: true, refetchOnWindowFocus: true, staleTime: 500, cacheTime: 500 });
 
     return (
         <>
