@@ -88,9 +88,9 @@ export default function Home() {
                         </Badge>
 
 
-                        <div id="features" />
+                        <Box id="features" sx={{ marginTop: 8 }} />
 
-                        <Typography variant="h3" component="h2" sx={{ textAlign: "center", marginTop: 32, fontWeight: "semibold" }}>
+                        <Typography variant="h3" component="h2" sx={{ textAlign: "center", marginTop: 24, fontWeight: "semibold" }}>
                             Our Features
                         </Typography>
                         <Typography color="grey.600" variant="h6" component="h2" sx={{ textAlign: "center", fontWeight: "normal", marginBottom: "2.5rem" }}>
@@ -100,7 +100,7 @@ export default function Home() {
                         <Grid container spacing={4}>
                             {FeatureList.map((feature, id) => (
                                 <Grid item xs={12} sm={6} md={4} key={id}>
-                                    <Paper elevation={1} sx={{ borderColor: "grey.800", borderRadius: "8px", background: "rgba(0, 0, 0, 0.5)", backdropFilter: "blur(1rem)", transition: "all 0.2s ease-in-out", "&:hover": { transform: "scale(1.05)", boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)" }, border: "1px solid rgba(255, 255, 255, 0.125)" }}>
+                                    <Paper elevation={1} sx={{ borderRadius: "8px", background: "rgba(0, 0, 0, 0.5)", backdropFilter: "blur(1rem)", transition: "all 0.2s ease-in-out", "&:hover": { transform: "scale(1.05)", boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)" }, border: "1px solid rgba(255, 255, 255, 0.125)" }}>
                                         <CardContent sx={{ alignItems: "center", display: "flex", flexDirection: "column" }}>
                                             <Paper elevation={0} sx={{ width: "56px", height: "56px", marginBottom: 2, borderRadius: "50%", alignItems: "center", justifyContent: "center", display: "flex", backgroundColor: "rgba(79, 70, 229, 0.85)", boxShadow: "0px 0px 15px rgba(0, 0, 0, 0.5)" }}>
                                                 {feature.icon}

@@ -45,7 +45,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         console.log(`Verify Attempt: ${serverInfo.name}, ${code}, ${req.headers.host}, ${customBotInfo?.clientId}, ${customBotInfo?.botSecret}`);
 
         exchange(code as string, `https://${serverInfo.customDomain ? serverInfo.customDomain : req.headers.host}/api/callback`, customBotInfo?.clientId, customBotInfo?.botSecret).then(async (respon) => {
-            
             if (respon.status === 200) {
                 let account = respon.data.access_token ? await resolveUser(respon.data.access_token) : null;
 

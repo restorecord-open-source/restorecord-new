@@ -6,7 +6,7 @@ import Box from "@mui/material/Box";
 
 export default function Footer() {
     return (
-        <Container component="footer" maxWidth={false} sx={{ padding: "16px 0", px: { xs: 3, sm: 24, md: 32 }, paddingTop: 2, paddingBottom: 5, marginTop: "auto", backgroundColor: "rgba(0, 0, 0, 0.35)" }}>
+        <Container component="footer" maxWidth={false} sx={{ padding: "16px 0", px: { xs: 3, sm: 24, md: 32 }, paddingTop: 2, paddingBottom: 5, marginTop: "auto", backgroundColor: "rgba(0, 0, 0, 0.35)", borderTop: "1px solid rgba(255, 255, 255, 0.125)" }}>
             <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, justifyContent: "space-between", alignItems: { sm: "center" } , flexWrap: "wrap" }}>
                 
                 <Box sx={{ display: { xs: "none", sm: "flex" }, flexDirection: "column", justifyContent: "center", flexWrap: "wrap", marginBottom: "auto", maxWidth: "30%" }}>
