@@ -24,7 +24,7 @@ export default function SubscriptionPlansSection() {
             <Grid container spacing={2} alignItems="flex-end">
                 {SubscriptionList.map((tier) => (
                     <Grid item key={tier.name} xs={12} md={4}>
-                        <Card sx={{ borderRadius: "8px", px: 0.5, py: 2, transitionProperty: "all", transitionTimingFunction: "cubic-bezier(0.4, 0, 0.2, 1)", transitionDuration: "150ms", background: "rgba(0, 0, 0, 0.5)", borderColor: "grey.800", border: "0.125rem solid rgba(255, 255, 255, 0.125)", backdropFilter: "blur(1rem)", [`&:hover`]: { border: `0.125rem solid ${tier.name === "Premium" ? "rgb(251, 140, 0)" : "rgb(79, 70, 229)"}` } }}>
+                        <Card sx={{ borderRadius: "8px", px: 0.5, py: 2, transitionProperty: "all", transitionTimingFunction: "cubic-bezier(0.4, 0, 0.2, 1)", transitionDuration: "150ms", background: "rgba(0, 0, 0, 0.5)", borderColor: "grey.800", border: "0.125rem solid rgba(255, 255, 255, 0.125)", backdropFilter: "blur(0.25rem)", [`&:hover`]: { border: `0.125rem solid ${tier.name === "Premium" ? "rgb(251, 140, 0)" : "rgb(79, 70, 229)"}` } }}>
                             <CardHeader title={tier.name} titleTypographyProps={{ align: "center" }} subheaderTypographyProps={{ align: "center", }} sx={{ bgColor: "grey.700" }} />
                             <CardContent>
                                 <Box sx={{ display: "flex", justifyContent: "center", alignItems: "baseline", mb: 2 }}>

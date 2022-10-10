@@ -108,7 +108,7 @@ export default function DashSettings({ user }: any) {
                         </Snackbar>
                         
 
-                        {!createNewServer && (Array.isArray(user.servers) && user.servers.length > 0) && (
+                        {!createNewServer && (Array.isArray(user.servers) && user.servers.length >= 1) && (
                             <>
                                 <Button variant="contained" sx={{ mb: 2 }} onClick={() => setCreateNewServer(true)}>
                                     Create New Server

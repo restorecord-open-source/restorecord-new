@@ -80,7 +80,7 @@ export default function NavBar({ ...props }: any) {
                         </Typography>
                     </Toolbar>
                 </AppBar>
-                <Drawer open={openDrawer} onClose={() => setOpenDrawer(false)} variant="persistent" sx={{ width: drawerWidth, flexShrink: 0, [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: "border-box" }, }}>
+                <Drawer open={openDrawer} onClose={() => setOpenDrawer(false)} variant="persistent" sx={{ width: drawerWidth, flexShrink: 0, [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: "border-box" } }}>
                     <Toolbar />
                     <Box sx={{ overflow: "auto" }}>
                         {navItemWrappers.map((item, index) => {
