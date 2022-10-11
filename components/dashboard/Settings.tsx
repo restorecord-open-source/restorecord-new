@@ -23,6 +23,7 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
+import Badge from "@mui/material/Badge";
 
 export default function DashSettings({ user }: any) {
     const [token]: any = useToken();
@@ -33,16 +34,12 @@ export default function DashSettings({ user }: any) {
     const [roleId, setRoleId] = useState("");
     const [customBot, setCustomBot] = useState("");
 
-    const [picture, setPicture] = useState("");
-    const [webhook, setWebhook] = useState("");
-    const [description, setDescription] = useState("");
-    const [bgimage, setBgimage] = useState("");
-
-
     const [openS, setOpenS] = useState(false);
     const [openE, setOpenE] = useState(false);
+    const [openI, setOpenI] = useState(false);
     const [notiTextS, setNotiTextS] = useState("X");
     const [notiTextE, setNotiTextE] = useState("X");
+    const [notiTextI, setNotiTextI] = useState("X");
 
     const [createNewServer, setCreateNewServer] = useState(false);
 
@@ -104,6 +101,12 @@ export default function DashSettings({ user }: any) {
                         <Snackbar open={openS} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenS(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
                             <Alert elevation={6} variant="filled" severity="success">
                                 {notiTextS}
+                            </Alert>
+                        </Snackbar>
+                        
+                        <Snackbar open={openI} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenS(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+                            <Alert elevation={6} variant="filled" severity="info">
+                                {notiTextI}
                             </Alert>
                         </Snackbar>
                         
@@ -173,6 +176,35 @@ export default function DashSettings({ user }: any) {
                                                                         console.error(err);
                                                                     });
                                                             }}>Migrate</Button>
+                                                            {user.role === "business" && (
+                                                                <Button variant="contained" sx={{ background: "#fbc02d", "&:hover": { background: "#f9a825" } }} onClick={() => {
+                                                                    setNotiTextI("Creating a backup...");
+                                                                    setOpenI(true);
+
+                                                                    axios.post(`/api/v1/server/backup/${item.guildId}`, {}, {
+                                                                        headers: {
+                                                                            "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                                        },
+                                                                        validateStatus: () => true
+                                                                    })
+                                                                        .then(res => {
+                                                                            setOpenI(false);
+                                                                            if (!res.data.success) {
+                                                                                setNotiTextE(res.data.message);
+                                                                                setOpenE(true);
+                                                                            }
+                                                                            else {
+                                                                                setNotiTextS(res.data.message);
+                                                                                setOpenS(true);
+                                                                            }
+                                                                        })
+                                                                        .catch((err): any => {
+                                                                            setNotiTextE(err.message);
+                                                                            setOpenE(true);
+                                                                            console.error(err);
+                                                                        });
+                                                                }}>Backup</Button>
+                                                            )}
                                                         </Stack>
                                                     </Grid>
                                                 </Grid>

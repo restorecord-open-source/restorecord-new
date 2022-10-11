@@ -121,7 +121,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                             }, {
                                 proxy: false,
                                 httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
-                            }).catch(err => console.log(err));
+                            }).catch(err => console.error(err));
 
                             res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=5;`);
                             return res.redirect(`https://${serverInfo.customDomain ? serverInfo.customDomain : req.headers.host}/verify/${state}`);
@@ -172,7 +172,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 }, {
                                     proxy: false,
                                     httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
-                                }).catch(err => console.log(err));
+                                }).catch(err => console.error(err));
                             }
                         }
                     }

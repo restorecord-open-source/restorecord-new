@@ -8,7 +8,7 @@ import Typography from "@mui/material/Typography";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import Grid from "@mui/material/Grid";
-import { Button, TextField } from "@mui/material";
+import { Button, Stack, Switch, TextField } from "@mui/material";
 
 export default function DashBotSettings({ user, id }: any) {
     const [token]: any = useToken();
@@ -154,6 +154,15 @@ export default function DashBotSettings({ user, id }: any) {
                                                 Warning: Changing the Bot token to another Bot will make the Bot <u>unusable</u>, until changed back to the original token.
                                             </Typography>
                                             <TextField fullWidth variant="outlined" name="botToken" value={botToken} onChange={handleChange} />
+                                        </Grid>
+                                        <Grid item>
+                                            <Stack direction="row" spacing={1}>
+                                                <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                                    Custom Domain
+                                                </Typography>
+                                                <Switch onChange={handleChange} name="customcheck"  />
+                                            </Stack>
+                                            <TextField fullWidth variant="outlined" name="custom domain" onChange={handleChange} placeholder="example.com" />
                                         </Grid>
                                         <Grid item>
                                             <Button variant="contained" type="submit" sx={{ mb: 2 }}>

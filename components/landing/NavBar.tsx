@@ -85,7 +85,7 @@ export default function NavBar() {
                 checkSession();
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }, []);
 

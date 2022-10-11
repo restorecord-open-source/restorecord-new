@@ -64,8 +64,6 @@ export default function DashServerSettings({ user, id }: any) {
     function handleSubmit(e: any) {
         e.preventDefault();
 
-        console.log(serverName, guildId, roleId, webhookcheck, vpncheck, webhook, picture);
-
         fetch(`/api/v1/settings/server`, {
             method: "PATCH",
             headers: {
