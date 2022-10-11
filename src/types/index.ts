@@ -4,7 +4,6 @@ export * from "./BackupData";
 export * from "./BaseChannelData";
 export * from "./EmojiData";
 export * from "./MessageData";
-export * from "./RestoreServer";
 export * from "./RoleData";
 export * from "./VoiceChannelData";
 export * from "./WidgetData";

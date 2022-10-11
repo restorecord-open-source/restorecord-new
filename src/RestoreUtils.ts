@@ -1,14 +1,3 @@
-import type { BackupData, RestoreServerOptions } from "./types";
-import {
-    Collection,
-    Emoji,
-    Guild,
-    GuildChannel,
-    Role,
-    RoleResolvable,
-    Snowflake,
-    VoiceChannel,
-} from "discord.js";
 import { loadCategory, loadChannel } from "./BackupUtils";
 import { backups, channels, customBots, roles, servers } from "@prisma/client";
 import axios from "axios";
