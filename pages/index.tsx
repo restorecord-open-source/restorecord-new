@@ -68,7 +68,7 @@ export default function Home() {
                         <Typography color="primary" variant="h1" component="h1" sx={{ textAlign: "center", fontWeight: "bold", fontSize: { xs: "2.5rem", md: "3rem", lg: "4rem" } }}>
                             RestoreCord
                         </Typography>
-                        <Typography color="grey.200" variant="h5" component="h2" sx={{ textAlign: "center", padding: 4, paddingLeft: { xs: 2, sm: 16 }, paddingRight: { xs: 2, sm: 16 } }}>
+                        <Typography color={theme.palette.grey[200]} variant="h5" component="h2" sx={{ textAlign: "center", padding: 4, paddingLeft: { xs: 2, sm: 16 }, paddingRight: { xs: 2, sm: 16 } }}>
                             We provide a free and easy to use Discord server backup service.
                         </Typography>
 
@@ -84,7 +84,7 @@ export default function Home() {
                         <Typography variant="h3" component="h2" sx={{ textAlign: "center", marginTop: 24, fontWeight: "semibold" }}>
                             Our Features
                         </Typography>
-                        <Typography color="grey.600" variant="h6" component="h2" sx={{ textAlign: "center", fontWeight: "normal", marginBottom: "2.5rem" }}>
+                        <Typography color={theme.palette.grey[600]} variant="h6" component="h2" sx={{ textAlign: "center", fontWeight: "normal", marginBottom: "2.5rem" }}>
                             Not sure what you need? Check out our features below.
                         </Typography>
 
@@ -99,7 +99,7 @@ export default function Home() {
                                             <Typography variant="h5" component="h2" sx={{ textAlign: "center", fontWeight: "700", fontSize: "1.5rem" }}>
                                                 {feature.name}
                                             </Typography>
-                                            <Typography color="grey.600" variant="h6" component="h2" sx={{ textAlign: "center", fontWeight: "500", fontSize: "1rem" }}>
+                                            <Typography color={theme.palette.grey[600]} variant="h6" component="h2" sx={{ textAlign: "center", fontWeight: "500", fontSize: "1rem" }}>
                                                 {feature.description}
                                             </Typography>
                                         </CardContent>
