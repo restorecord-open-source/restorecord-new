@@ -18,23 +18,10 @@ export function generateKey(size = 32) {
 }
 
 export async function getMembers(guild: servers, bot: customBots) {
-    const memberRoles: MemberData[] = [];
+    try {
+        const memberRoles: MemberData[] = [];
 
-    const members = await axios.get(`https://discord.com/api/v10/guilds/${guild.guildId}/members?limit=1000`, {
-        headers: {
-            "Authorization": `Bot ${bot.botToken}`,
-            "Content-Type": "application/json",
-            "X-RateLimit-Precision": "millisecond",
-            "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
-        },
-        proxy: false,
-        httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
-        validateStatus: () => true,
-    });
-
-    while (members.data.length === 1000) {
-        const lastMember = members.data[members.data.length - 1];
-        const moreMembers = await axios.get(`https://discord.com/api/v10/guilds/${guild.guildId}/members?limit=1000&after=${lastMember.user.id}`, {
+        const members = await axios.get(`https://discord.com/api/v10/guilds/${guild.guildId}/members?limit=1000`, {
             headers: {
                 "Authorization": `Bot ${bot.botToken}`,
                 "Content-Type": "application/json",
@@ -45,19 +32,37 @@ export async function getMembers(guild: servers, bot: customBots) {
             httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
             validateStatus: () => true,
         });
-        members.data.push(...moreMembers.data);
-    }
 
-    for (const member of members.data) {
-        memberRoles.push({
-            guildId: BigInt(guild.guildId) as bigint,
-            userId: BigInt(member.user.id) as bigint,
-            roles: member.roles.join(","),
-            nickname: member.nick,
-        });
-    }
+        while (members.data.length === 1000) {
+            const lastMember = members.data[members.data.length - 1];
+            const moreMembers = await axios.get(`https://discord.com/api/v10/guilds/${guild.guildId}/members?limit=1000&after=${lastMember.user.id}`, {
+                headers: {
+                    "Authorization": `Bot ${bot.botToken}`,
+                    "Content-Type": "application/json",
+                    "X-RateLimit-Precision": "millisecond",
+                    "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
+                },
+                proxy: false,
+                httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
+                validateStatus: () => true,
+            });
+            members.data.push(...moreMembers.data);
+        }
 
-    return memberRoles;
+        for (const member of members.data) {
+            memberRoles.push({
+                guildId: BigInt(guild.guildId) as bigint,
+                userId: BigInt(member.user.id) as bigint,
+                roles: member.roles.join(","),
+                nickname: member.nick,
+            });
+        }
+
+        return memberRoles;
+    } catch (e) {
+        console.error(e);
+        return [];
+    }
 }
 
 export async function getChannels(guild: servers, bot: customBots) {
