@@ -199,7 +199,7 @@ const makeBackup = async(backupData: any) => {
             serverName: backupData.serverName as string,
             guildId: BigInt(backupData.guildId),
             backupId: backupData.backupId as string,
-            serverId: backupData.serverId as number,
+            // serverId: backupData.serverId as number,
             iconURL: backupData.iconURL as string,
             channels: {
                 createMany: {
