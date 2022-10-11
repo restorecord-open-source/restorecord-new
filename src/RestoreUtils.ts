@@ -11,12 +11,14 @@ import { HttpsProxyAgent } from "https-proxy-agent";
 export const loadConfig = async(server: servers, bot: customBots, backup: backups) => {
     // send a request to PATCH https://discord.com/api/v10/guilds/ and update name and icon
 
-    // get base64 image
-    const image = await axios.get(backup.iconURL, { responseType: "arraybuffer", validateStatus: () => true });
+    let image;
+    if (backup.iconURL !== null || backup.iconURL !== "") {
+        image = await axios.get(backup.iconURL, { responseType: "arraybuffer", validateStatus: () => true });
+    }
     
     const modify = await axios.patch(`https://discord.com/api/v10/guilds/${server.guildId}`, {
         name: backup.serverName,
-        icon: backup.iconURL ? `data:image/png;base64,${image.data.toString("base64")}` : null,
+        icon: backup.iconURL ? `data:image/png;base64,${image ? image.data.toString("base64") : ""}` : null,
     }, {
         headers: {
             "Authorization": `Bot ${bot.botToken}`,
