@@ -170,7 +170,7 @@ export default function DashBoard({ user }: any) {
 
                 <Grid container spacing={3}>
                     <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "block" } }}>
-                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%" }}>
+                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%", border: "1px solid #2f2f2f" }}>
                             <CardContent>
                                 {isLoading2 ? (
                                     <>
@@ -194,7 +194,7 @@ export default function DashBoard({ user }: any) {
                     </Grid>
 
                     <Grid item xs={12} md={6}>
-                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%" }}>
+                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%", border: "1px solid #2f2f2f" }}>
                             <CardContent>
                                 {isLoading2 ? (
                                     <>

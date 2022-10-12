@@ -26,7 +26,7 @@ interface Props {
     children: React.ReactElement;
 }
   
-function ElevationScroll(props: Props = { children: <div /> }) {
+function ElevationScroll(props: Props = { children: <div style={{ backgroundColor: "transparent" }} /> }) {
     const { children, window } = props;
     const trigger = useScrollTrigger({
         disableHysteresis: true,
@@ -85,15 +85,15 @@ export default function NavBar() {
                 checkSession();
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }, []);
 
     return (
         <Box sx={{ marginBottom: "6rem" }}>
             <ElevationScroll>
-                <AppBar component="nav">
-                    <Container maxWidth="lg">
+                <AppBar component="nav" sx={{ backgroundColor: "transparent", width: { xs: "90%", sm: "85%", md: "65%", lg: "50%", }, left: "50%", transform: "translate(-50%, 0)", boxShadow: "none", top: "1rem", borderRadius: "1.25rem", backgroundImage: "none", background: `rgba(15,15,15,0.5)`, border: "1px solid rgba(255,255,255,0.1)" }}>
+                    <Container maxWidth="lg" sx={{ backdropFilter: "blur(1rem)", borderRadius: "1.25rem" }}>
                         <Toolbar>
                             <Link href="/">
                                 <Typography variant="h6" component="div" sx={{ display: { xs: "none", md: "block" }, cursor: "pointer", flexGrow: 1 }}>

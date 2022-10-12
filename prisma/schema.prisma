@@ -35,26 +35,101 @@ model accounts {
 }
 
 model servers {
-    id           Int         @id @default(autoincrement())
-    name         String      @unique
+    id           Int            @id @default(autoincrement())
+    name         String         @unique
     ownerId      Int
-    guildId      BigInt      @unique @db.UnsignedBigInt
-    roleId       BigInt      @unique @db.UnsignedBigInt
+    guildId      BigInt         @unique @db.UnsignedBigInt
+    roleId       BigInt         @unique @db.UnsignedBigInt
     redirectUrl  String?
-    picture      String?     @default("https://cdn.restorecord.com/logo512.png")
-    vpncheck     Boolean     @default(false)
+    picture      String?        @default("https://cdn.restorecord.com/logo512.png")
+    vpncheck     Boolean        @default(false)
     webhook      String?
     bgImage      String?
-    description  String      @default("Just a Discord Server.")
+    description  String         @default("Just a Discord Server.")
     customDomain String?
-    createdAt    DateTime    @default(now())
+    createdAt    DateTime       @default(now())
     customBotId  Int
-    pulling      Boolean     @default(false)
-    pullTimeout  DateTime?   @default(now())
-    customBot    customBots  @relation(fields: [customBotId], references: [id])
-    owner        accounts    @relation(fields: [ownerId], references: [id])
+    pulling      Boolean        @default(false)
+    pullTimeout  DateTime?      @default(now())
+    customBot    customBots     @relation(fields: [customBotId], references: [id])
+    owner        accounts       @relation(fields: [ownerId], references: [id])
     members      members[]
     blacklist    blacklist[]
+    backups      backups[]
+    guildMembers guildMembers[]
+}
+
+model backups {
+    id          Int            @id @default(autoincrement())
+    serverName  String
+    guildId     BigInt         @unique @db.UnsignedBigInt
+    iconURL     String
+    backupId    String         @unique @default(uuid())
+    createdAt   DateTime       @default(now())
+    server      servers        @relation(fields: [guildId], references: [guildId])
+    channels    channels[]
+    roles       roles[]
+    guildMembes guildMembers[]
+}
+
+model channels {
+    id               Int                  @id @default(autoincrement())
+    channelId        BigInt               @unique @db.UnsignedBigInt
+    backupId         String
+    type             Int
+    name             String
+    position         Int
+    bitrate          Int?
+    userLimit        Int?
+    parentId         BigInt?              @db.UnsignedBigInt
+    topic            String?
+    rateLimitPerUser Int?
+    nsfw             Boolean
+    createdAt        DateTime             @default(now())
+    permissions      channelPermissions[] @relation("channel_permissions")
+    backup           backups              @relation(fields: [backupId], references: [backupId])
+}
+
+model channelPermissions {
+    id        Int      @id @default(autoincrement())
+    channelId BigInt   @db.UnsignedBigInt
+    roleId    BigInt   @db.UnsignedBigInt
+    type      String
+    allow     BigInt
+    deny      BigInt
+    createdAt DateTime @default(now())
+    channel   channels @relation("channel_permissions", fields: [channelId], references: [channelId])
+}
+
+model roles {
+    id          Int      @id @default(autoincrement())
+    backupId    String
+    name        String
+    roleId      BigInt   @unique @db.UnsignedBigInt
+    botId       BigInt?
+    color       String
+    hoist       Boolean
+    permissions BigInt
+    mentionable Boolean
+    position    Int
+    isEveryone  Boolean
+    createdAt   DateTime @default(now())
+    backup      backups  @relation(fields: [backupId], references: [backupId])
+}
+
+model guildMembers {
+    id        Int      @id @default(autoincrement())
+    backupId  String
+    userId    BigInt   @db.UnsignedBigInt
+    guildId   BigInt   @db.UnsignedBigInt
+    nickname  String?
+    roles     String
+    createdAt DateTime @default(now())
+    backup    backups  @relation(fields: [backupId], references: [backupId])
+    server    servers  @relation(fields: [guildId], references: [guildId])
+    // @@index([userId, guildId])
+
+    @@unique([userId, guildId])
 }
 
 model logs {

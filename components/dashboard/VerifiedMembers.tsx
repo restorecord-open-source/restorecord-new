@@ -21,12 +21,9 @@ import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 import axios from "axios";
 import LoadingButton from "@mui/lab/LoadingButton";
-import theme from "../../src/theme";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogActions from "@mui/material/DialogActions";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import Tooltip from "@mui/material/Tooltip";
@@ -125,7 +122,7 @@ export default function VerifiedMembers({ user }: any) {
     return (
         <>
             <Container maxWidth="xl">
-                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #2f2f2f" }}>
                     <CardContent>
                         <Typography variant="h4" sx={{ mb: 2, fontWeight: "500", sm: { fontSize: "0.5rem" } }}>
                             Verified Members
@@ -229,11 +226,13 @@ export default function VerifiedMembers({ user }: any) {
                                         <Skeleton animation="wave" variant="text" width={250} height={30} />
                                     ) : (
                                         <>
-                                            {data?.pages?.map((page) => {
-                                                return (
-                                                    page.max === 0 ? "No verified members" : `Showing ${page.max} verified members.`
-                                                )
-                                            })}
+                                            {data?.pages ? (
+                                                <>
+                                                    {data?.pages?.[0]?.max === 0 ? "No verified members" : `Showing ${data?.pages?.[0]?.max} verified members.`}
+                                                </>
+                                            ) : (
+                                                "Loading..."
+                                            )}
                                         </>
                                     )}
                                 </Typography>

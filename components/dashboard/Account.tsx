@@ -13,6 +13,8 @@ import { useRef, useState } from "react";
 import { useToken } from "../../src/token";
 import Slide from "@mui/material/Slide";
 import axios from "axios";
+import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
 
 export default function Account({ user }: any) {
     const [token]: any = useToken();
@@ -58,7 +60,7 @@ export default function Account({ user }: any) {
                     </Alert>
                 </Snackbar>
 
-                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #2f2f2f" }}>
                     <CardContent>
                         <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
                             Settings
@@ -67,8 +69,18 @@ export default function Account({ user }: any) {
                         <Stack spacing={2}>
                             <TextField label="User ID" variant="outlined" fullWidth value={user.id} disabled />
                             <TextField label="Username" variant="outlined" fullWidth value={user.username} disabled />
-                            <TextField label="Email" variant="outlined" fullWidth value={user.email} disabled />
+                            {/* <TextField label="Email" variant="outlined" fullWidth value={user.email} disabled /> */}
                         </Stack>
+                        
+                        <Box sx={{ mt: 2 }}>
+                            <b>Subscription:</b>
+                            <Typography variant="body1">
+                                <li><b>Type</b>: {user.role.charAt(0).toUpperCase() + user.role.slice(1)}</li>
+                            </Typography>
+                            <Typography variant="body1">
+                                <li><b>Expires</b>: {new Intl.DateTimeFormat(navigator.language, { year: "numeric", month: "long", day: "2-digit" }).format(new Date(user.expiry))}</li>
+                            </Typography>
+                        </Box>
 
                         {/* <LoadingButton variant="contained" color="primary" loading={loading1} sx={{ mt: 2}} fullWidth onClick={() => { 
                             setLoading1(true);
@@ -85,34 +97,37 @@ export default function Account({ user }: any) {
                     </CardContent>
                 </Paper>
 
-                {/* <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                {/* <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #2f2f2f" }}>
                     <CardContent>
-                        <Grid container justifyContent={"space-between"}>
-                            <Grid item>
-                                <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
-                                    Subscription
-                                </Typography>
-                            </Grid>
-
-                            <Grid item>
-                                <Button variant="outlined" color="primary" onClick={() => {
-                                    router.push(`/dashboard/upgrade`);
-                                }}>
-                                    Extend
-                                </Button>
-                            </Grid>
-                        </Grid>
-
-                        <Typography variant="body1">
-                            <b>Subscription</b>: {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                        <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                            2-Factor Authentication
                         </Typography>
-                        <Typography variant="body1">
-                            <b>Subscription expires</b>: {new Date(user.expiry).toLocaleString()}
+
+                        <Typography variant="body1" sx={{ mb: 2 }}>
+                            <b>2-Factor Authentication</b>: {user.auth ? "Enabled" : "Disabled"}
                         </Typography>
+                        
+                        <Stack spacing={2}>
+                            {user.auth ? (
+                                <>
+                                    <TextField label="2-Factor Authentication code" variant="outlined" type="password" fullWidth />
+                                    <Button variant="contained" color="error" fullWidth onClick={(e: any) => { setOpenE(true); setNotiTextE("2-Factor Authentication disabled"); }}>
+                                        Disable 2-Factor Authentication
+                                    </Button>
+                                </>
+                            ) : (
+                                <>
+                                    <TextField label="2-Factor Authentication code" variant="outlined" type="password" fullWidth />
+                                    <Button variant="contained" color="primary" fullWidth onClick={(e: any) => { setOpenS(true); setNotiTextS("2-Factor Authentication enabled"); }}>
+                                        Enable 2-Factor Authentication
+                                    </Button>
+                                </>
+                            )}
+                        </Stack>
                     </CardContent>
                 </Paper> */}
 
-                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #2f2f2f" }}>
                     <CardContent>
                         <form method="POST">
                             <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
@@ -177,37 +192,8 @@ export default function Account({ user }: any) {
                     </CardContent>
                 </Paper>
 
-                {/* <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
-                    <CardContent>
-                        <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
-                            2-Factor Authentication
-                        </Typography>
 
-                        <Typography variant="body1" sx={{ mb: 2 }}>
-                            <b>2-Factor Authentication</b>: {user.auth ? "Enabled" : "Disabled"}
-                        </Typography>
-                        
-                        <Stack spacing={2}>
-                            {user.auth ? (
-                                <>
-                                    <TextField label="2-Factor Authentication code" variant="outlined" type="password" fullWidth />
-                                    <Button variant="contained" color="error" fullWidth onClick={(e: any) => { setOpenE(true); setNotiTextE("2-Factor Authentication disabled"); }}>
-                                        Disable 2-Factor Authentication
-                                    </Button>
-                                </>
-                            ) : (
-                                <>
-                                    <TextField label="2-Factor Authentication code" variant="outlined" type="password" fullWidth />
-                                    <Button variant="contained" color="primary" fullWidth onClick={(e: any) => { setOpenS(true); setNotiTextS("2-Factor Authentication enabled"); }}>
-                                        Enable 2-Factor Authentication
-                                    </Button>
-                                </>
-                            )}
-                        </Stack>
-                    </CardContent>
-                </Paper> */}
 
-                {/* delete account  */}
                 {/* <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #ff0000" }}>
                     <CardContent>
                         <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
@@ -223,6 +209,8 @@ export default function Account({ user }: any) {
                         </Button>
                     </CardContent>
                 </Paper> */}
+
+
             </Container>
         </>
     )

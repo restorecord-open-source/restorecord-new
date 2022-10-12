@@ -6,7 +6,7 @@ import Box from "@mui/material/Box";
 
 export default function Footer() {
     return (
-        <Container component="footer" maxWidth={false} sx={{ padding: "16px 0", px: { xs: 3, sm: 24, md: 32 }, backgroundColor: "#212121", paddingTop: 2, paddingBottom: 5, marginTop: "auto" }}>
+        <Container component="footer" maxWidth={false} sx={{ padding: "16px 0", px: { xs: 3, sm: 24, md: 32 }, paddingTop: 2, paddingBottom: 5, marginTop: "auto", backgroundColor: "rgba(0, 0, 0, 0.35)", borderTop: "1px solid rgba(255, 255, 255, 0.125)" }}>
             <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, justifyContent: "space-between", alignItems: { sm: "center" } , flexWrap: "wrap" }}>
                 
                 <Box sx={{ display: { xs: "none", sm: "flex" }, flexDirection: "column", justifyContent: "center", flexWrap: "wrap", marginBottom: "auto", maxWidth: "30%" }}>
@@ -17,29 +17,29 @@ export default function Footer() {
                 <Box style={{ display: "flex", flexDirection: "column", justifyContent: "center", flexWrap: "wrap", marginBottom: "auto" }}>
                     <Typography variant="h6" color="text.secondary" sx={{ fontWeight: "bold" }}>Social</Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ wordWrap: "break-all" }}>
-                        <Link href="https://twitter.com/restorecord"><MuiLink variant="body2" href="https://twitter.com/restorecord">Twitter</MuiLink></Link>
+                        <Link href="https://twitter.com/restorecord"><MuiLink variant="body2" color="#a7a2ff" href="https://twitter.com/restorecord">Twitter</MuiLink></Link>
                         <br />
-                        <Link href="https://youtube.com/channel/UCdO4LjbTjSJWxP9VQg7ZNXw"><MuiLink variant="body2" href="https://youtube.com/channel/UCdO4LjbTjSJWxP9VQg7ZNXw">YouTube</MuiLink></Link>
+                        <Link href="https://youtube.com/channel/UCdO4LjbTjSJWxP9VQg7ZNXw"><MuiLink variant="body2" color="#a7a2ff" href="https://youtube.com/channel/UCdO4LjbTjSJWxP9VQg7ZNXw">YouTube</MuiLink></Link>
                         <br />
-                        <Link href="https://github.com/restorecord"><MuiLink variant="body2" href="https://github.com/restorecord">GitHub</MuiLink></Link>
+                        <Link href="https://github.com/restorecord"><MuiLink variant="body2" color="#a7a2ff" href="https://github.com/restorecord">GitHub</MuiLink></Link>
                     </Typography>
                 </Box>
 
                 <Box style={{ display: "flex", flexDirection: "column", justifyContent: "center", flexWrap: "wrap", marginBottom: "auto" }}>
                     <Typography variant="h6" color="text.secondary" sx={{ fontWeight: "bold" }}>Resources</Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ wordWrap: "break-all" }}>
-                        <Link href="https://community.restorecord.com"><MuiLink variant="body2" href="https://community.restorecord.com">Support</MuiLink></Link>
+                        <Link href="https://community.restorecord.com"><MuiLink variant="body2" color="#a7a2ff" href="https://community.restorecord.com">Support</MuiLink></Link>
                         <br />
-                        <Link href="https://docs.restorecord.com"><MuiLink variant="body2" href="https://docs.restorecord.com">Documentation</MuiLink></Link>
+                        <Link href="https://docs.restorecord.com"><MuiLink variant="body2" color="#a7a2ff" href="https://docs.restorecord.com">Documentation</MuiLink></Link>
                     </Typography>
                 </Box>
 
                 <Box style={{ display: "flex", flexDirection: "column", justifyContent: "center", flexWrap: "wrap", marginBottom: "auto" }}>
                     <Typography variant="h6" color="text.secondary" sx={{ fontWeight: "bold" }}>Legal</Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ wordWrap: "break-all" }}>
-                        <Link href="/privacy"><MuiLink variant="body2" href="/privacy">Privacy Policy</MuiLink></Link>
+                        <Link href="/privacy"><MuiLink variant="body2" color="#a7a2ff" href="/privacy">Privacy Policy</MuiLink></Link>
                         <br />
-                        <Link href="/terms"><MuiLink variant="body2" href="/terms">Terms of Service</MuiLink></Link>
+                        <Link href="/terms"><MuiLink variant="body2" color="#a7a2ff" href="/terms">Terms of Service</MuiLink></Link>
                     </Typography>
                 </Box>
 

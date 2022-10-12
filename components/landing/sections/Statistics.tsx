@@ -37,7 +37,7 @@ export default function StatisticsSection() {
             </Typography>
             <Grid container spacing={2} alignItems="flex-end">
                 <Grid item xs={12} md={4}>
-                    <Card sx={{ borderColor: "grey.800", borderRadius: "8px" }}>
+                    <Card sx={{ border: "1px solid rgba(255, 255, 255, 0.125)", borderRadius: "8px", background: "rgba(0, 0, 0, 0.5)", backdropFilter: "blur(0.25rem)" }}>
                         <CardHeader title="Accounts" titleTypographyProps={{ align: "center" }} subheaderTypographyProps={{ align: "center", }} sx={{ bgColor: "grey.700" }} />
                         <CardContent>
                             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "baseline", mb: 2 }}>
@@ -48,7 +48,7 @@ export default function StatisticsSection() {
                     </Card>
                 </Grid>
                 <Grid item xs={12} md={4}>
-                    <Card sx={{ borderColor: "grey.800", borderRadius: "8px" }}>
+                    <Card sx={{ border: "1px solid rgba(255, 255, 255, 0.125)", borderRadius: "8px", background: "rgba(0, 0, 0, 0.5)", backdropFilter: "blur(0.25rem)" }}>
                         <CardHeader title="Servers" titleTypographyProps={{ align: "center" }} subheaderTypographyProps={{ align: "center", }} sx={{ bgColor: "grey.700" }} />
                         <CardContent>
                             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "baseline", mb: 2 }}>
@@ -59,7 +59,7 @@ export default function StatisticsSection() {
                     </Card>
                 </Grid>
                 <Grid item xs={12} md={4}>
-                    <Card sx={{ borderColor: "grey.800", borderRadius: "8px" }}>
+                    <Card sx={{ border: "1px solid rgba(255, 255, 255, 0.125)", borderRadius: "8px", background: "rgba(0, 0, 0, 0.5)", backdropFilter: "blur(0.25rem)" }}>
                         <CardHeader title="Members" titleTypographyProps={{ align: "center" }} subheaderTypographyProps={{ align: "center", }} sx={{ bgColor: "grey.700" }} />
                         <CardContent>
                             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "baseline", mb: 2 }}>

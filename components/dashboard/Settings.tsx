@@ -18,18 +18,12 @@ import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import MuiLink from "@mui/material/Link";
 import theme from "../../src/theme";
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogActions from "@mui/material/DialogActions";
-import CloseIcon from "@mui/icons-material/Close";
-import IconButton from "@mui/material/IconButton";
 import TextField from "@mui/material/TextField";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
+import Badge from "@mui/material/Badge";
 
 export default function DashSettings({ user }: any) {
     const [token]: any = useToken();
@@ -40,20 +34,14 @@ export default function DashSettings({ user }: any) {
     const [roleId, setRoleId] = useState("");
     const [customBot, setCustomBot] = useState("");
 
-    const [picture, setPicture] = useState("");
-    const [webhook, setWebhook] = useState("");
-    const [description, setDescription] = useState("");
-    const [bgimage, setBgimage] = useState("");
-
-    const [modalGuildId, setModalGuildId] = useState("1");
-
     const [openS, setOpenS] = useState(false);
     const [openE, setOpenE] = useState(false);
+    const [openI, setOpenI] = useState(false);
     const [notiTextS, setNotiTextS] = useState("X");
     const [notiTextE, setNotiTextE] = useState("X");
+    const [notiTextI, setNotiTextI] = useState("X");
 
     const [createNewServer, setCreateNewServer] = useState(false);
-    const [confirmDelete, setConfirmDelete] = useState(false);
 
     function handleSubmit(e: any, body: any, method: string = "POST") {
         e.preventDefault();
@@ -95,41 +83,10 @@ export default function DashSettings({ user }: any) {
 
     }
 
-    function handleChange(e: any) {
-        switch (e.target.name) {
-        case "serverName":
-            setServerName(e.target.value);
-            break;
-        case "guildId":
-            setGuildId(e.target.value);
-            break;
-        case "roleId":
-            setRoleId(e.target.value);
-            break;
-        case "customBot":
-            setCustomBot(e.target.value);
-            break;
-        case "picture":
-            setPicture(e.target.value);
-            break;
-        case "webhook":
-            setWebhook(e.target.value);
-            break;
-        case "description":
-            setDescription(e.target.value);
-            break;
-        case "bgimage":
-            setBgimage(e.target.value);
-            break;
-        default:
-            break;
-        }
-    }
-
     return (
         <>
             <Container maxWidth="xl">
-                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #2f2f2f" }}>
                     <CardContent>
                         <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
                             Settings
@@ -147,61 +104,14 @@ export default function DashSettings({ user }: any) {
                             </Alert>
                         </Snackbar>
                         
-                        <Dialog open={confirmDelete} onClose={() => setConfirmDelete(false)} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" fullWidth maxWidth="sm">
-                            <DialogTitle id="alert-dialog-title">{"Are you sure you?"}
-                                <IconButton aria-label="close" onClick={() => setConfirmDelete(false)} sx={{ position: 'absolute', right: 8, top: 8, color: theme.palette.grey[500] }}>
-                                    <CloseIcon />
-                                </IconButton>
-                            </DialogTitle>
-                            <DialogContent>
-                                <DialogContentText id="alert-dialog-description">
-                                    <Typography variant="body1" sx={{ fontWeight: "500", color: theme.palette.error.main }}>
-                                        This action cannot be undone.
-                                    </Typography>
+                        <Snackbar open={openI} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenS(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+                            <Alert elevation={6} variant="filled" severity="info">
+                                {notiTextI}
+                            </Alert>
+                        </Snackbar>
+                        
 
-                                    Deleting this server will remove:
-                                    <ul>
-                                        <li>All Backups</li>
-                                        <li>All Verified Members</li>
-                                        <li>All Customized Settings</li>
-                                    </ul>
-                                </DialogContentText>
-                            </DialogContent>
-                            <DialogActions>
-                                <Button onClick={() => {
-                                    setConfirmDelete(false);
-
-                                    axios.delete(`/api/v1/server/${modalGuildId}`, { headers: {
-                                        "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
-                                    },
-                                    validateStatus: () => true
-                                    })
-                                        .then(res => {
-                                            if (!res.data.success) {
-                                                setNotiTextE(res.data.message);
-                                                setOpenE(true);
-                                            }
-                                            else {
-                                                setNotiTextS(res.data.message);
-                                                setOpenS(true);
-                                                document.querySelector(`div#server_${modalGuildId}`)?.remove();
-                                            }
-                                        })
-                                        .catch(err => {
-                                            setNotiTextE(err.message);
-                                            setOpenE(true);
-                                            console.error(err);
-                                        });
-                                } } color="error">
-                                    Delete
-                                </Button>
-                                <Button onClick={() => setConfirmDelete(false)} color="primary" autoFocus>
-                                    Cancel
-                                </Button>
-                            </DialogActions>
-                        </Dialog>
-
-                        {!createNewServer && (Array.isArray(user.servers) && user.servers.length > 0) && (
+                        {!createNewServer && (Array.isArray(user.servers) && user.servers.length >= 1) && (
                             <>
                                 <Button variant="contained" sx={{ mb: 2 }} onClick={() => setCreateNewServer(true)}>
                                     Create New Server
@@ -247,7 +157,12 @@ export default function DashSettings({ user }: any) {
                                                                 })
                                                                     .then(res => {
                                                                         if (!res.data.success) {
-                                                                            setNotiTextE(res.data.message);
+                                                                            if (res.data.pullTimeout) {
+                                                                                setNotiTextE(`${res.data.message} ${new Intl.DateTimeFormat(navigator.language, { dateStyle: "medium", timeStyle: "short" }).format(new Date(res.data.pullTimeout))}`);
+                                                                            }
+                                                                            else {
+                                                                                setNotiTextE(res.data.message);
+                                                                            }
                                                                             setOpenE(true);
                                                                         }
                                                                         else {
@@ -261,33 +176,35 @@ export default function DashSettings({ user }: any) {
                                                                         console.error(err);
                                                                     });
                                                             }}>Migrate</Button>
-                                                            <Button variant="contained" color="error" onClick={() => {
-                                                                // axios.delete(`/api/v1/server/${item.id}`, { headers: {
-                                                                //     "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
-                                                                // },
-                                                                // validateStatus: () => true
-                                                                // })
-                                                                //     .then(res => {
-                                                                //         if (!res.data.success) {
-                                                                //             setNotiTextE(res.data.message);
-                                                                //             setOpenE(true);
-                                                                //         }
-                                                                //         else {
-                                                                //             setNotiTextS(res.data.message);
-                                                                //             setOpenS(true);
-                                                                //         }
-                                                                //     })
-                                                                //     .catch(err => {
-                                                                //         setNotiTextE(err.message);
-                                                                //         setOpenE(true);
-                                                                //         console.error(err);
-                                                                //     });
+                                                            {user.role === "business" && (
+                                                                <Button variant="contained" sx={{ background: "#fbc02d", "&:hover": { background: "#f9a825" } }} onClick={() => {
+                                                                    setNotiTextI("Creating a backup...");
+                                                                    setOpenI(true);
 
-                                                                setModalGuildId(item.guildId);
-
-                                                                setConfirmDelete(true);
-                                                            }
-                                                            }>Delete</Button>
+                                                                    axios.post(`/api/v1/server/backup/${item.guildId}`, {}, {
+                                                                        headers: {
+                                                                            "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                                        },
+                                                                        validateStatus: () => true
+                                                                    })
+                                                                        .then(res => {
+                                                                            setOpenI(false);
+                                                                            if (!res.data.success) {
+                                                                                setNotiTextE(res.data.message);
+                                                                                setOpenE(true);
+                                                                            }
+                                                                            else {
+                                                                                setNotiTextS(res.data.message);
+                                                                                setOpenS(true);
+                                                                            }
+                                                                        })
+                                                                        .catch((err): any => {
+                                                                            setNotiTextE(err.message);
+                                                                            setOpenE(true);
+                                                                            console.error(err);
+                                                                        });
+                                                                }}>Backup</Button>
+                                                            )}
                                                         </Stack>
                                                     </Grid>
                                                 </Grid>

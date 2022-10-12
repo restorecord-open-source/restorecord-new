@@ -2,6 +2,8 @@ import { ReactElement } from "react";
 
 import Dashboard from "@mui/icons-material/Dashboard";
 import Storage from "@mui/icons-material/Storage";
+import CloudSync from '@mui/icons-material/CloudSync';
+import Save from '@mui/icons-material/Save';
 import Code from "@mui/icons-material/Code";
 import VerifiedUser from "@mui/icons-material/VerifiedUser";
 import AdminPanelSettings from "@mui/icons-material/AdminPanelSettings";
@@ -30,6 +32,12 @@ const navItemWrappers: navItemWrapper[] = [
                 name: "Servers",
                 icon: <Storage />,
                 href: "/dashboard/settings",
+                admin: false,
+            },
+            {
+                name: "Backups",
+                icon: <Save />,
+                href: "/dashboard/backups",
                 admin: false,
             },
             {

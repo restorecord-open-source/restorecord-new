@@ -5,6 +5,7 @@ import { prisma } from "../../../src/db";
 import { compare, hash } from "bcrypt";
 import { getBrowser, getIPAddress, getPlatform } from "../../../src/getIPAddress";
 import { Email } from "../../../src/email";
+import { backups, customBots, servers } from "@prisma/client";
 
 const limiter = rateLimit({
     interval: 60 * 1000,
@@ -27,64 +28,66 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
 
                 if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
-                
-                prisma.accounts.findFirst({
-                    where: {
-                        id: valid.id
-                    }
-                }).then((account: any) => {
-                    if (!account) return res.status(400).json({ success: false });
 
-                    prisma.servers.findMany({
-                        where: {
-                            ownerId: account.id
-                        }
-                    }).then((servers: any) => {
-                        prisma.customBots.findMany({
-                            where: {
-                                ownerId: account.id
-                            }
-                        }).then((bots: any) => {
-                            return res.status(200).json({
-                                success: true,
-                                id: account.id,
-                                username: account.username,
-                                email: account.email,
-                                role: account.role,
-                                ...(account.admin === true && { admin: true }),
-                                // pfp: account.pfp,
-                                createdAt: account.createdAt,
-                                expiry: account.expiry,
-                                servers: servers.map((server: any) => {
-                                    return {
-                                        id: server.id,
-                                        name: server.name,
-                                        guildId: server.guildId.toString(),
-                                        roleId: server.roleId.toString(),
-                                        picture: server.picture,
-                                        description: server.description,
-                                        webhook: server.webhook,
-                                        bgImage: server.bgImage,
-                                        vpncheck: server.vpncheck,
-                                        createdAt: server.createdAt
-                                    }
-                                }),
-                                bots: bots.map((bot: any) => {
-                                    return {
-                                        id: bot.id,
-                                        name: bot.name,
-                                        clientId: bot.clientId.toString(),
-                                        botToken: bot.botToken,
-                                        publicKey: bot.publicKey,
-                                        botSecret: bot.botSecret,
-                                    }
-                                })
-                            });
-                        });
-                    });
-                });   
+                const account = await prisma.accounts.findFirst({ where: { id: valid.id } });
+                const servers = await prisma.servers.findMany({ where: { ownerId: valid.id } });
+                const backups = await prisma.backups.findMany({ where: { guildId: { in: servers.map(s => s.guildId) } } });
+                const customBots = await prisma.customBots.findMany({ where: { ownerId: valid.id } });
+
+                if (!account) return res.status(400).json({ success: false, message: "No account found." });
+
+                const allBackups = backups.map(async(backup) => {
+                    const channelCount = await prisma.channels.count({ where: { backupId: backup.backupId } });
+                    const roleCount = await prisma.roles.count({ where: { backupId: backup.backupId } });
+                    const guildMemberCount = await prisma.guildMembers.count({ where: { backupId: backup.backupId } });
+
+                    return {
+                        id: backup.id,
+                        name: backup.serverName,
+                        backupId: backup.backupId,
+                        guildId: backup.guildId.toString(),
+                        channels: channelCount,
+                        roles: roleCount,
+                        guildMembers: guildMemberCount,
+                        createdAt: backup.createdAt
+                    }
+                })
+
+
+                return res.status(200).json({ 
+                    success: true,
+                    id: account.id,
+                    username: account.username,
+                    role: account.role,
+                    ...(account.admin === true && { admin: true }),
+                    createdAt: account.createdAt,
+                    expiry: account.expiry,
+                    servers: servers.map(server => ({
+                        id: server.id,
+                        name: server.name,
+                        guildId: server.guildId.toString(),
+                        roleId: server.roleId.toString(),
+                        picture: server.picture,
+                        description: server.description,
+                        webhook: server.webhook,
+                        bgImage: server.bgImage,
+                        vpncheck: server.vpncheck,
+                        createdAt: server.createdAt
+                    })),
+                    backups: await Promise.all(allBackups),
+                    bots: customBots.map((bot: customBots) => ({
+                        id: bot.id,
+                        name: bot.name,
+                        clientId: bot.clientId.toString(),
+                        botToken: bot.botToken,
+                        publicKey: bot.publicKey,
+                        botSecret: bot.botSecret,
+                    })),
+                });
+
             }
             catch (err: any) {
+                console.error(err);
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 if (err?.name === "" || err?.name === "JsonWebTokenError") return res.status(400).json({ success: false, message: "User not logged in" }); 
                 return res.status(400).json({ success: false, message: "Something went wrong" });

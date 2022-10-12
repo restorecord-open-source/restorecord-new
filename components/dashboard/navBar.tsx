@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useTheme } from "@mui/material/styles";
 
 import Link from "next/link"
+import MuiLink from "@mui/material/Link";
 import navItemWrappers from "../../src/dashboard/navBarItems"
 
 import Toolbar from "@mui/material/Toolbar";
@@ -79,7 +80,7 @@ export default function NavBar({ ...props }: any) {
                         </Typography>
                     </Toolbar>
                 </AppBar>
-                <Drawer open={openDrawer} onClose={() => setOpenDrawer(false)} variant="persistent" sx={{ width: drawerWidth, flexShrink: 0, [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: "border-box" }, }}>
+                <Drawer open={openDrawer} onClose={() => setOpenDrawer(false)} variant="persistent" sx={{ width: drawerWidth, flexShrink: 0, [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: "border-box" } }}>
                     <Toolbar />
                     <Box sx={{ overflow: "auto" }}>
                         {navItemWrappers.map((item, index) => {
@@ -90,18 +91,21 @@ export default function NavBar({ ...props }: any) {
                                             return null
                                         }
                                         return (
-                                            <ListItem key={index} disablePadding selected={pathName === item.href}>
-                                                <Link href={item.href}>
-                                                    <ListItemButton>
-                                                        {/* <ListItem button selected={pathName === item.href} disablePadding> */}
-                                                        <ListItemIcon>
-                                                            {item.icon}
-                                                        </ListItemIcon>
-                                                        <ListItemText primary={item.name} />
-                                                        {/* </ListItem> */}
-                                                    </ListItemButton>
-                                                </Link>
-                                            </ListItem>
+                                            <MuiLink key={index} href={item.href} underline="none" color="inherit">
+                                                <ListItem disablePadding selected={pathName === item.href} sx={{ "&.Mui-selected": { backgroundColor: "#1e1e1e" } }}>
+                                                    <Link href={item.href}>
+                                                        <ListItemButton>
+                                                            {/* <ListItem button selected={pathName === item.href} disablePadding> */}
+                                                            <ListItemIcon>
+                                                                {item.icon}
+                                                            </ListItemIcon>
+                                                            <ListItemText primary={item.name} />
+                                                            {/* </ListItem> */}
+                                                        </ListItemButton>
+                                                    </Link>
+                                                </ListItem>
+                                            </MuiLink>
+
                                         )
                                     }
                                     )}
