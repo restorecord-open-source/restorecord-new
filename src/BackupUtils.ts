@@ -149,7 +149,7 @@ export async function getRoles(guild: servers, bot: customBots) {
             mentionable: role.mentionable,
             position: role.position,
             isEveryone: (role.name === "@everyone" && role.position === 0) ? true : false,
-            botId: role.tags.bot_id ? BigInt(role.tags.bot_id) as bigint : null,
+            botId: role.tags ? (role.tags.bot_id ? BigInt(role.tags.bot_id) as bigint : null) : null,
         };
         roles.push(roleData);
         // }
