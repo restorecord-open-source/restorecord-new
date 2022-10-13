@@ -1,2 +1,2 @@
 -- AlterTable
-ALTER TABLE `guildmembers` MODIFY `roles` LONGTEXT NOT NULL;
+ALTER TABLE `guildMembers` MODIFY `roles` LONGTEXT NOT NULL;
