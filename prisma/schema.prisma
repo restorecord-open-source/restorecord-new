@@ -123,7 +123,7 @@ model guildMembers {
     userId    BigInt   @db.UnsignedBigInt
     guildId   BigInt   @db.UnsignedBigInt
     nickname  String?
-    roles     String
+    roles     String   @db.LongText()
     createdAt DateTime @default(now())
     backup    backups  @relation(fields: [backupId], references: [backupId])
     server    servers  @relation(fields: [guildId], references: [guildId])
