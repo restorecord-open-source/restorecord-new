@@ -168,9 +168,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 const server = await prisma.servers.findFirst({
                     where: {
                         ownerId: valid.id,
-                        guildId: {
-                            in: servers.map(s => s.guildId),
-                        },
+                        guildId: req.query.guild ? BigInt(req.query.guild as string) : BigInt(servers[0].guildId),
                     },
                 });
 
@@ -201,7 +199,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 addMember(server.guildId.toString(), member.userId.toString(), customBot.botToken, member.accessToken, [BigInt(server.roleId).toString()]).then(async (resp: any) => {
                     console.log(resp?.response?.status ?? "");
                     console.log(resp?.status ?? "");
-                     
+
                     if (resp?.response?.status) {
                         switch (resp.response.status) {
                         case 429:   

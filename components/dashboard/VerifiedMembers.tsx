@@ -221,7 +221,7 @@ export default function VerifiedMembers({ user }: any) {
                                 <LoadingButton loading={loading} variant="contained" sx={{ background: "#43a047", "&:hover": { background: "#388e3c" } }} onClick={() => {
                                     setLoading(true);
                                                                 
-                                    axios.put(`/api/v1/member/${userInfo.id}`, {}, { 
+                                    axios.put(`/api/v1/member/${userInfo.id}?guild=${userInfoGuild}`, {}, { 
                                         headers: {
                                             "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
                                         },
@@ -264,9 +264,8 @@ export default function VerifiedMembers({ user }: any) {
                                                 setOpenS(true);
                                                 setOpen(false);
                                                 setLoadingInfo(true);
-                                                // document.getElementById(`user_${userInfo.id}_${userInfoGuild}`)?.remove();
+                                                setTimeout(() => { refetch(); }, 100);
                                                 setUserInfo({});
-                                                refetch();
                                             }
                                         })
                                         .catch((err): any => {
