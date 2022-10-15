@@ -4,6 +4,8 @@ import { prisma } from "../../../../src/db";
 import rateLimit from "../../../../src/rate-limit";
 import { addMember, addRole, refreshTokenAddDB } from "../../../../src/Migrate";
 import { ProxyCheck } from "../../../../src/proxycheck";
+import axios from "axios";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 const limiter = rateLimit({
     uniqueTokenPerInterval: 500,
@@ -14,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         switch (req.method) {
         case "GET":
             try {
-                limiter.check(res, 15, "CACHE_TOKEN");
+                limiter.check(res, 30, "CACHE_TOKEN");
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 
                 const token = req.headers.authorization as string;
@@ -52,13 +54,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 if (!member) return res.status(400).json({ success: false, message: "No member found." });
 
-                await fetch(`https://discord.com/api/users/@me`, {
+                await axios.get(`https://discord.com/api/users/@me`, {
                     method: "GET",
                     headers: {
-                        Authorization: `Bearer ${member.accessToken}`,
+                        "Authorization": `Bearer ${member.accessToken}`,
+                        "Content-Type": "application/json",
+                        "X-RateLimit-Precision": "millisecond",
+                        "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
                     },
-                }).then(async resp => {
-                    const json = await resp.json();
+                    proxy: false,
+                    httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
+                    validateStatus: () => true,
+                }).then(async (resp) => {
+                    let json = resp.data;
 
                     let usrIP: string = (member.ip != null) ? ((member.ip == "::1" || member.ip == "127.0.0.1") ? "1.1.1.1" : member.ip) : "1.1.1.1";
                     const pCheck = await ProxyCheck.check(usrIP, { vpn: true, asn: true });
@@ -263,6 +271,57 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 });
 
                 
+            }
+            catch (err: any) {
+                if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
+                if (err?.name === "" || err?.name === "JsonWebTokenError") return res.status(400).json({ success: false, message: "User not logged in" }); 
+                return res.status(400).json({ success: false, message: "Something went wrong" });
+            }
+        case "DELETE":
+            try {
+                limiter.check(res, 15, "CACHE_TOKEN");
+                if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
+                
+                const token = req.headers.authorization as string;
+                const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
+
+                if (!valid) return res.status(400).json({ success: false });
+
+                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
+
+                if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
+
+                const servers = await prisma.servers.findMany({
+                    where: {
+                        ownerId: valid.id,
+                    },
+                });
+
+                const account = await prisma.accounts.findFirst({ where: { id: valid.id } });
+                if (!account) return res.status(400).json({ success: false, message: "Account not found." });
+
+                const userId: any = req.query.userid as string;
+                if (!userId) return res.status(400).json({ success: false, message: "No userid provided." });
+
+                const member = await prisma.members.findFirst({
+                    where: {
+                        userId: BigInt(userId),
+                        guildId: req.query.guild ? BigInt(req.query.guild as string) : 0,
+                    },
+                });
+
+                if (!member) return res.status(400).json({ success: false, message: "No member found." });
+                
+                await prisma.members.delete({
+                    where: {
+                        id: member.id
+                    }
+                }).then(async () => {
+                    return res.status(200).json({ success: true, message: "Member removed from server." });
+                }).catch(async (err: Error) => {
+                    console.error(err);
+                    return res.status(400).json({ success: false, message: "Something went wrong" });
+                });
             }
             catch (err: any) {
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
