@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useCountUp } from 'react-countup';
 
 import Box from "@mui/material/Box";
 import CardContent from "@mui/material/CardContent";
@@ -28,12 +29,37 @@ async function getStats() {
 }
 
 export default function Info() {
+    const accountsRef = useRef(null);
+    const serversRef = useRef(null);
+    const membersRef = useRef(null);
+    const botsRef = useRef(null);
+    const subscribersRef = useRef(null);
+    const backupsRef = useRef(null);
+    const totalMembersRef = useRef(null);
+
     useEffect(() => {
+        accountsStart();
+        serversStart();
+        membersStart();
+        botsStart();
+        subscribersStart();
+        backupsStart();
+        totalMembersStart();
+
         const interval = setInterval(() => {
-            getStats().then((res: any) => {
-                setStats(res);
+            getStats().then((stats: any) => {
+                setStats(stats);
+
+                accountsUpdate(stats.accounts);
+                serversUpdate(stats.servers);
+                membersUpdate(stats.members);
+                botsUpdate(stats.bots);
+                subscribersUpdate(stats.subscribers);
+                backupsUpdate(stats.backups);
+                totalMembersUpdate(stats.totalMembers);
             });
-        }, 3000);
+        }, 5000);
+
         return () => clearInterval(interval);
     }, []);
 
@@ -47,6 +73,55 @@ export default function Info() {
     });
 
 
+    const { start: accountsStart, update: accountsUpdate } = useCountUp({
+        ref: accountsRef,
+        start: 0,
+        end: stats.accounts,
+        duration: 1,
+    });
+
+    const { start: serversStart, update: serversUpdate } = useCountUp({
+        ref: serversRef,
+        start: 0,
+        end: stats.accounts,
+        duration: 1,
+    });
+
+    const { start: membersStart, update: membersUpdate } = useCountUp({
+        ref: membersRef,
+        start: 0,
+        end: stats.members,
+        duration: 1,
+    });
+
+    const { start: botsStart, update: botsUpdate } = useCountUp({
+        ref: botsRef,
+        start: 0,
+        end: stats.bots,
+        duration: 1,
+    });
+
+    const { start: subscribersStart, update: subscribersUpdate } = useCountUp({
+        ref: subscribersRef,
+        start: 0,
+        end: stats.subscribers,
+        duration: 1,
+    });
+
+    const { start: backupsStart, update: backupsUpdate } = useCountUp({
+        ref: backupsRef,
+        start: 0,
+        end: stats.backups,
+        duration: 1,
+    });
+
+    const { start: totalMembersStart, update: totalMembersUpdate } = useCountUp({
+        ref: totalMembersRef,
+        start: 0,
+        end: stats.totalMembers,
+        duration: 1,
+    });
+
     return (
         <>
             <Box sx={{ minHeight: "100vh", flexDirection: "column", display: "flex", pt: "2.5rem" }}>
@@ -58,11 +133,7 @@ export default function Info() {
                             <Paper elevation={3}>
                                 <CardContent sx={{ alignItems: "center", justifyContent: "center", display: "flex", flexDirection: "column" }}>
                                     <ContactPageIcon sx={{ fontSize: 64, color: theme.palette.primary.main }} />
-                                    <CountUp start={stats.accounts} end={stats.accounts} duration={1} separator="," >
-                                        {({ countUpRef }) => (
-                                            <Typography variant="h5" ref={countUpRef} />
-                                        )}
-                                    </CountUp>
+                                    <Typography variant="h5" ref={accountsRef} />
                                     <Typography variant="body2" component="p" color="textSecondary">
                                         Accounts
                                     </Typography>
@@ -73,11 +144,7 @@ export default function Info() {
                             <Paper elevation={3}>
                                 <CardContent sx={{ alignItems: "center", justifyContent: "center", display: "flex", flexDirection: "column" }}>
                                     <StorageIcon sx={{ fontSize: 64, color: theme.palette.primary.main }} />
-                                    <CountUp start={stats.servers} end={stats.servers} duration={1} separator="," >
-                                        {({ countUpRef }) => (
-                                            <Typography variant="h5" ref={countUpRef} />
-                                        )}
-                                    </CountUp>
+                                    <Typography variant="h5" ref={serversRef} />
                                     <Typography variant="body2" component="p" color="textSecondary">
                                         Servers
                                     </Typography>
@@ -88,11 +155,7 @@ export default function Info() {
                             <Paper elevation={3}>
                                 <CardContent sx={{ alignItems: "center", justifyContent: "center", display: "flex", flexDirection: "column" }}>
                                     <PersonIcon sx={{ fontSize: 64, color: theme.palette.primary.main }} />
-                                    <CountUp start={stats.members} end={stats.members} duration={1} separator="," >
-                                        {({ countUpRef }) => (
-                                            <Typography variant="h5" ref={countUpRef} />
-                                        )}
-                                    </CountUp>
+                                    <Typography variant="h5" ref={membersRef} />
                                     <Typography variant="body2" component="p" color="textSecondary">
                                         Members
                                     </Typography>
@@ -103,11 +166,7 @@ export default function Info() {
                             <Paper elevation={3}>
                                 <CardContent sx={{ alignItems: "center", justifyContent: "center", display: "flex", flexDirection: "column" }}>
                                     <CodeIcon sx={{ fontSize: 64, color: theme.palette.primary.main }} />
-                                    <CountUp start={stats.bots} end={stats.bots} duration={1} separator="," >
-                                        {({ countUpRef }) => (
-                                            <Typography variant="h5" ref={countUpRef} />
-                                        )}
-                                    </CountUp>
+                                    <Typography variant="h5" ref={botsRef} />
                                     <Typography variant="body2" component="p" color="textSecondary">
                                         Custom Bots
                                     </Typography>
@@ -118,11 +177,7 @@ export default function Info() {
                             <Paper elevation={3}>
                                 <CardContent sx={{ alignItems: "center", justifyContent: "center", display: "flex", flexDirection: "column" }}>
                                     <AccountBalanceWalletIcon sx={{ fontSize: 64, color: theme.palette.primary.main }} />
-                                    <CountUp start={stats.subscribers} end={stats.subscribers} duration={1} separator="," >
-                                        {({ countUpRef }) => (
-                                            <Typography variant="h5" ref={countUpRef} />
-                                        )}
-                                    </CountUp>
+                                    <Typography variant="h5" ref={subscribersRef} />
                                     <Typography variant="body2" component="p" color="textSecondary">
                                         Subscribers
                                     </Typography>
@@ -133,11 +188,7 @@ export default function Info() {
                             <Paper elevation={3}>
                                 <CardContent sx={{ alignItems: "center", justifyContent: "center", display: "flex", flexDirection: "column" }}>
                                     <SaveIcon sx={{ fontSize: 64, color: theme.palette.primary.main }} />
-                                    <CountUp start={stats.backups} end={stats.backups} duration={1} separator="," >
-                                        {({ countUpRef }) => (
-                                            <Typography variant="h5" ref={countUpRef} />
-                                        )}
-                                    </CountUp>
+                                    <Typography variant="h5" ref={backupsRef} />
                                     <Typography variant="body2" component="p" color="textSecondary">
                                         Backups
                                     </Typography>
@@ -148,11 +199,7 @@ export default function Info() {
                             <Paper elevation={3}>
                                 <CardContent sx={{ alignItems: "center", justifyContent: "center", display: "flex", flexDirection: "column" }}>
                                     <PeopleIcon sx={{ fontSize: 64, color: theme.palette.primary.main }} />
-                                    <CountUp start={stats.totalMembers} end={stats.totalMembers} duration={1} separator="," >
-                                        {({ countUpRef }) => (
-                                            <Typography variant="h5" ref={countUpRef} />
-                                        )}
-                                    </CountUp>
+                                    <Typography variant="h5" ref={totalMembersRef} />
                                     <Typography variant="body2" component="p" color="textSecondary">
                                         Total Members
                                     </Typography>
