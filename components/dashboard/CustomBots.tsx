@@ -15,8 +15,6 @@ import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
 import Skeleton from "@mui/material/Skeleton";
 import TextField from "@mui/material/TextField";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
 import { Link } from "@mui/material";
 import Image from "next/image";
 
