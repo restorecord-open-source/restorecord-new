@@ -58,7 +58,7 @@ export default function Info() {
                 backupsUpdate(stats.backups);
                 totalMembersUpdate(stats.totalMembers);
             });
-        }, 5000);
+        }, 1000);
 
         return () => clearInterval(interval);
     }, []);
@@ -78,6 +78,7 @@ export default function Info() {
         start: 0,
         end: stats.accounts,
         duration: 1,
+        separator: ","
     });
 
     const { start: serversStart, update: serversUpdate } = useCountUp({
@@ -85,6 +86,7 @@ export default function Info() {
         start: 0,
         end: stats.accounts,
         duration: 1,
+        separator: ","
     });
 
     const { start: membersStart, update: membersUpdate } = useCountUp({
@@ -92,6 +94,7 @@ export default function Info() {
         start: 0,
         end: stats.members,
         duration: 1,
+        separator: ","
     });
 
     const { start: botsStart, update: botsUpdate } = useCountUp({
@@ -99,6 +102,7 @@ export default function Info() {
         start: 0,
         end: stats.bots,
         duration: 1,
+        separator: ","
     });
 
     const { start: subscribersStart, update: subscribersUpdate } = useCountUp({
@@ -106,6 +110,7 @@ export default function Info() {
         start: 0,
         end: stats.subscribers,
         duration: 1,
+        separator: ","
     });
 
     const { start: backupsStart, update: backupsUpdate } = useCountUp({
@@ -113,6 +118,7 @@ export default function Info() {
         start: 0,
         end: stats.backups,
         duration: 1,
+        separator: ","
     });
 
     const { start: totalMembersStart, update: totalMembersUpdate } = useCountUp({
@@ -120,6 +126,7 @@ export default function Info() {
         start: 0,
         end: stats.totalMembers,
         duration: 1,
+        separator: ","
     });
 
     return (
