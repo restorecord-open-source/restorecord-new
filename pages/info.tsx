@@ -33,7 +33,7 @@ export default function Info() {
             getStats().then((res: any) => {
                 setStats(res);
             });
-        }, 500);
+        }, 3000);
         return () => clearInterval(interval);
     }, []);
 
