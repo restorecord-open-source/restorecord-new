@@ -189,7 +189,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     if (response.status !== 200) return res.status(400).json({ success: false, message: "Invalid bot token" });
                 });
 
-                let done;
+                // let done;
                 const serverMemberList = await axios.get(`https://discord.com/api/v10/guilds/${server.guildId}/members?limit=1000`, {
                     headers: {
                         "Authorization": `Bot ${bot.botToken}`,
@@ -204,28 +204,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 
                 if (serverMemberList.status === 403) {
                     serverMemberList.data = [];
-                    done = true;
+                    // done = true;
                 }
 
-                if (serverMemberList.data.length < 1000) done = true;
+                // if (serverMemberList.data.length < 1000) done = true;
 
-                while (!done) {
-                    const lastId = serverMemberList.data[serverMemberList.data.length - 1].user.id;
-                    const nextMemberList = await axios.get(`https://discord.com/api/v10/guilds/${server.guildId}/members?limit=1000&after=${lastId}`, {
-                        headers: {
-                            "Authorization": `Bot ${bot.botToken}`,
-                            "Content-Type": "application/json",
-                            "X-RateLimit-Precision": "millisecond",
-                            "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
-                        },
-                        proxy: false,
-                        httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
-                        validateStatus: () => true,
-                    });
+                // while (!done) {
+                //     const lastId = serverMemberList.data[serverMemberList.data.length - 1].user.id;
+                //     const nextMemberList = await axios.get(`https://discord.com/api/v10/guilds/${server.guildId}/members?limit=1000&after=${lastId}`, {
+                //         headers: {
+                //             "Authorization": `Bot ${bot.botToken}`,
+                //             "Content-Type": "application/json",
+                //             "X-RateLimit-Precision": "millisecond",
+                //             "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
+                //         },
+                //         proxy: false,
+                //         httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
+                //         validateStatus: () => true,
+                //     });
 
-                    serverMemberList.data.push(...nextMemberList.data);
-                    if (nextMemberList.data.length < 1000) done = true;
-                }
+                //     serverMemberList.data.push(...nextMemberList.data);
+                //     if (nextMemberList.data.length < 1000) done = true;
+                // }
 
                 for (const serverMemberData of serverMemberList.data) {
                     const member = members.find((m) => m.userId == serverMemberData.user.id);
