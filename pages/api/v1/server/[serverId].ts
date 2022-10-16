@@ -202,10 +202,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     validateStatus: () => true,
                 });
                 
-                if (serverMemberList.status === 403) { 
+                if (serverMemberList.status === 403) {
                     serverMemberList.data = [];
                     done = true;
                 }
+
+                if (serverMemberList.data.length < 1000) done = true;
 
                 while (!done) {
                     const lastId = serverMemberList.data[serverMemberList.data.length - 1].user.id;
