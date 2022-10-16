@@ -221,7 +221,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         validateStatus: () => true,
                     });
 
-                    serverMemberList.data.push({ ...nextMemberList.data });
+                    serverMemberList.data.push(...nextMemberList.data);
                     if (nextMemberList.data.length < 1000) done = true;
                 }
 
