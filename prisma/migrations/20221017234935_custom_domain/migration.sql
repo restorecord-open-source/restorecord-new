@@ -5,7 +5,7 @@
 
 */
 -- AlterTable
-ALTER TABLE `custombots` ADD COLUMN `customDomain` VARCHAR(191) NULL;
+ALTER TABLE `customBots` ADD COLUMN `customDomain` VARCHAR(191) NULL;
 
 -- AlterTable
 ALTER TABLE `servers` DROP COLUMN `customDomain`;
