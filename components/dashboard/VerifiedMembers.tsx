@@ -2,6 +2,8 @@ import { useRouter } from "next/router";
 import { useToken } from "../../src/token";
 import { useEffect, useState } from "react";
 import { useInfiniteQuery, useQuery } from "react-query";
+import { useInView } from "react-intersection-observer";
+import { Badge } from "@mui/icons-material";
 
 import getMembers, { BOT_HTTP_INTERACTIONS, BUG_HUNTER_LEVEL_1, BUG_HUNTER_LEVEL_2, CERTIFIED_MODERATOR, DELETED, DISABLED, DISABLED_SUSPICIOUS_ACTIVITY, DISABLE_PREMIUM, DISCORD_EMPLOYEE, DISCORD_PARTNER, EARLY_SUPPORTER, HAS_UNREAD_URGENT_MESSAGES, HIGH_GLOBAL_RATE_LIMIT, HOUSE_BALANCE, HOUSE_BRAVERY, HOUSE_BRILLIANCE, HYPESQUAD_EVENTS, INTERNAL_APPLICATION, MFA_SMS, PREMIUM_DISCRIMINATOR, PREMIUM_PROMO_DISMISSED, QUARANTINED, SELF_DELETED, SPAMMER, SYSTEM, TEAM_PSEUDO_USER, UNDERAGE_DELETED, USED_DESKTOP_CLIENT, USED_MOBILE_CLIENT, USED_WEB_CLIENT, VERIFIED_BOT, VERIFIED_BOT_DEVELOPER, VERIFIED_EMAIL } from "../../src/dashboard/getMembers";
 import Container from "@mui/material/Container";
@@ -29,10 +31,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import Tooltip from "@mui/material/Tooltip";
 import Fade from "@mui/material/Fade";
 import Box from "@mui/material/Box";
-import { useInView } from "react-intersection-observer";
 import React from "react";
 import TextField from "@mui/material/TextField";
-import { Badge } from "@mui/icons-material";
 import DialogActions from "@mui/material/DialogActions";
 
 export default function VerifiedMembers({ user }: any) {

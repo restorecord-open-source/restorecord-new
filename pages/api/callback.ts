@@ -44,7 +44,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
         console.log(`Verify Attempt: ${serverInfo.name}, ${code}, ${req.headers.host}, ${customBotInfo?.clientId}, ${customBotInfo?.botSecret}`);
 
-        exchange(code as string, `https://${serverInfo.customDomain ? serverInfo.customDomain : req.headers.host}/api/callback`, customBotInfo?.clientId, customBotInfo?.botSecret).then(async (respon) => {
+        exchange(code as string, `https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/api/callback`, customBotInfo?.clientId, customBotInfo?.botSecret).then(async (respon) => {
             if (respon.status === 200) {
                 let account = respon.data.access_token ? await resolveUser(respon.data.access_token) : null;
 
@@ -128,7 +128,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                             });
 
                             res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=5;`);
-                            return res.redirect(`https://${serverInfo.customDomain ? serverInfo.customDomain : req.headers.host}/verify/${state}`);
+                            return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
                         }
                         else {
                             if (!user) {
@@ -190,33 +190,31 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                         console.log(`${account?.username} adding member ${resp?.status} (${rGuildId.toString()}, ${userId.toString()}, ${respon.data.access_token}, ${[BigInt(serverInfo?.roleId).toString()]})`);
                         if (resp?.status === 403 || resp?.response?.status === 403 || resp?.response?.data?.code === "50013") {
                             res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=5;`);
-                            return res.redirect(`https://${serverInfo.customDomain ? serverInfo.customDomain : req.headers.host}/verify/${state}`);
+                            return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
                         }
                         else if (resp?.status === 204 || resp?.response?.status === 204) {
                             await addRole(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, serverInfo?.roleId.toString()).then(async (response) => {
                                 console.log(`${account?.username} adding role: ${response?.status} (${rGuildId.toString()}, ${userId.toString()}, ${serverInfo?.roleId.toString()})`);
                                 if (response.status !== 204) {
                                     res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=5;`);
-                                    return res.redirect(`https://${serverInfo.customDomain ? serverInfo.customDomain : req.headers.host}/verify/${state}`);
+                                    return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
                                 } else if (response.status === 204) {
                                     res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
-                                    return res.redirect(`https://${serverInfo.customDomain ? serverInfo.customDomain : req.headers.host}/verify/${state}`);
+                                    return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
                                 } else {
-                                    return res.redirect(`https://${serverInfo.customDomain ? serverInfo.customDomain : req.headers.host}/verify/${state}`);
+                                    return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
                                 }
                             }).catch((err) => {
                                 console.error(`addRole: ${err}`);
                             })
                         } else {
                             res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
-                            return res.redirect(`https://${serverInfo.customDomain ? serverInfo.customDomain : req.headers.host}/verify/${state}`);
+                            return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
                         }
                     }).catch((err) => {
                         console.error(`addMember ${err}`);
                     });
-
-                   
-
+                    
                     if (!user) {
                         await prisma.members.create({
                             data: {
@@ -254,7 +252,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                     }
 
                     // res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
-                    // return res.redirect(`https://${serverInfo.customDomain ? serverInfo.customDomain : req.headers.host}/verify/${state}`);
+                    // return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
 
 
                     // res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
@@ -262,7 +260,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                 }
 
                 // res.setHeader("Set-Cookie", `RC_err=000; Path=/; Max-Age=3;`);
-                // return res.redirect(`https://${serverInfo.customDomain ? serverInfo.customDomain : req.headers.host}/verify/${state}`);
+                // return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
             }
             else {
                 let error_detail;

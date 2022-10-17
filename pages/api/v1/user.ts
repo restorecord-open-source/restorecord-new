@@ -82,6 +82,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         botToken: bot.botToken,
                         publicKey: bot.publicKey,
                         botSecret: bot.botSecret,
+                        customDomain: bot.customDomain ? bot.customDomain : null,
                     })),
                 });
 

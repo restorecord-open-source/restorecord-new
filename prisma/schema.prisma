@@ -46,7 +46,6 @@ model servers {
     webhook      String?
     bgImage      String?
     description  String         @default("Just a Discord Server.")
-    customDomain String?
     createdAt    DateTime       @default(now())
     customBotId  Int
     pulling      Boolean        @default(false)
@@ -179,15 +178,16 @@ model blacklist {
 }
 
 model customBots {
-    id        Int       @id @default(autoincrement())
-    name      String
-    clientId  BigInt    @unique @db.UnsignedBigInt
-    botToken  String
-    botSecret String
-    publicKey String?
-    ownerId   Int
-    owner     accounts  @relation(fields: [ownerId], references: [id])
-    servers   servers[]
+    id           Int       @id @default(autoincrement())
+    name         String
+    clientId     BigInt    @unique @db.UnsignedBigInt
+    botToken     String
+    botSecret    String
+    publicKey    String?
+    customDomain String?
+    ownerId      Int
+    owner        accounts  @relation(fields: [ownerId], references: [id])
+    servers      servers[]
 }
 
 model news {
