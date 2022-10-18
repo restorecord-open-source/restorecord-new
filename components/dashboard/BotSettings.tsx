@@ -67,9 +67,9 @@ export default function DashBotSettings({ user, id }: any) {
                 else {
                     setNotiTextS(res.message);
                     setOpenS(true);
-                    // setTimeout(() => {
-                    //     router.push("/dashboard/custombots");
-                    // }, 1500);
+                    setTimeout(() => {
+                        router.push("/dashboard/custombots");
+                    }, 1500);
                 }
             })
             .catch(err => {
