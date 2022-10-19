@@ -245,7 +245,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 let succPulled: number = 0;
                 const pullingProcess = new Promise<void>(async (resolve, reject) => {
                     let membersNew = await shuffle(members);
-                    let delay: number = 300;
+                    let delay: number = 350;
 
                     await prisma.logs.create({
                         data: {
@@ -262,12 +262,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         });
 
                         if (!newServer) return reject("Server not found");
-                        // if (!newServer.pulling) return reject();
+                        // if (!newServer.pulling) return reject("Pulling stopped");
 
-                        console.log(`Adding ${member.username} to ${server.name}`);
+                        console.log(`[${server.name}] Adding ${member.username}`);
                         await addMember(server.guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, [BigInt(server.roleId).toString()]).then(async (resp: any) => {
-                            console.log(resp?.response?.status ?? "");
-                            console.log(resp?.status ?? "");
+                            console.log(`[${member.username}] ${resp?.response?.status}`);
+                            console.log(`[${member.username}] ${JSON.stringify(resp?.response?.data)}`);
+                            console.log(`[${member.username}] ${resp?.status}`);
                     
                             if (resp?.response?.status) {
                                 switch (resp.response.status) {
@@ -283,40 +284,56 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                     }
                                     break;
                                 case 403:
-                                    refreshTokenAddDB( 
-                                        member.userId.toString(), member.id, guildId.toString(), 
-                                        bot?.botToken, server.roleId, member.refreshToken,
-                                        bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
+                                    refreshTokenAddDB(member.userId.toString(), member.id, guildId.toString(), bot?.botToken, server.roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
+                                    break;
+                                case 407:
+                                    console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);
+                                    break;
+                                case 204:
+                                    succPulled++;
+                                    await addRole(server.guildId.toString(), member.userId.toString(), bot?.botToken, BigInt(server.roleId).toString());
+                                    break;
+                                case 201:
+                                    succPulled++;
+                                    if (delay > 500) delay -= delay / 1.5;
+                                    break;
+                                default:
+                                    reject("Unknown error");
                                     break;
                                 }
                             }
-                            switch (resp.status) {
-                            case 403:
-                                refreshTokenAddDB(member.userId.toString(), member.id, guildId.toString(), bot?.botToken, server.roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
-                                break;
-                            case 407:
-                                console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);
-                                break;
-                            case 204:
-                                succPulled++;
-                                await addRole(server.guildId.toString(), member.userId.toString(), bot?.botToken, BigInt(server.roleId).toString());
-                                resolve();
-                                break;
-                            case 201:
-                                succPulled++;
-                                if (delay > 500) delay -= delay / 2;
-                                resolve();
-                                break;
-                            default:
-                                reject("Unknown error");
-                                break;
+                            else {
+                                switch (resp.status) {
+                                case 403:
+                                    refreshTokenAddDB(member.userId.toString(), member.id, guildId.toString(), bot?.botToken, server.roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
+                                    break;
+                                case 407:
+                                    console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);
+                                    break;
+                                case 204:
+                                    succPulled++;
+                                    await addRole(server.guildId.toString(), member.userId.toString(), bot?.botToken, BigInt(server.roleId).toString());
+                                    break;
+                                case 201:
+                                    succPulled++;
+                                    if (delay > 500) delay -= delay / 1.5;
+                                    break;
+                                default:
+                                    reject("Unknown error");
+                                    break;
+                                }
                             }
                         }).catch(async (err: Error) => {
+                            console.log(err);
                             return res.status(400).json({ success: false, message: err?.message ? err?.message : "Something went wrong" });
                         });
 
                         await sleep(delay);
                     }
+
+                    console.log(`[${server.name}] Finished pulling`);
+
+                    resolve();
                 }).catch(async (err: Error) => {
                     console.log(`3 ${err}`);
                 });
@@ -339,6 +356,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 // when pulling is done update the db
                 pullingProcess.then(async () => {
+                    console.log(`[${server.name}] Pulling done with ${succPulled} members pulled`);
                     await prisma.servers.update({
                         where: {
                             id: server.id
