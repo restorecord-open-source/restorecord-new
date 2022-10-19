@@ -45,7 +45,7 @@ model servers {
     vpncheck     Boolean        @default(false)
     webhook      String?
     bgImage      String?
-    description  String         @default("Just a Discord Server.")
+    description  String         @default("Verify to view the rest of the server.")
     createdAt    DateTime       @default(now())
     customBotId  Int
     pulling      Boolean        @default(false)
