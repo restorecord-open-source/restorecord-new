@@ -25,7 +25,7 @@
         "discord-api-types": "^0.37.8",
         "discord-interactions": "^3.2.0",
         "discord.js": "^13.6.0",
-        "dotenv": "^16.0.2",
+        "dotenv": "^16.0.3",
         "https-proxy-agent": "^5.0.1",
         "jsonwebtoken": "^8.5.1",
         "lru-cache": "^7.14.0",
