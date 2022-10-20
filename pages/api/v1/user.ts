@@ -134,7 +134,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         accountId: account.id,
                         title: "Password Change",
                         createdAt: {
-                            lt: new Date(Date.now() - 30 * 60 * 1000)
+                            gte: new Date(new Date().getTime() - 24 * 60 * 60 * 1000)
                         }
                     }
                 });

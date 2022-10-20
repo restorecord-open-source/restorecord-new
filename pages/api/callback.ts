@@ -276,7 +276,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                 } else if (err?.includes("invalid_request")) {
                     error_detail = "Verification took too long, please try again."
                 } else {
-                    error_detail = "Unknown error, please contact Restorecord support."
+                    error_detail = "Took too long to verify, please try again."
                 }
 
                 return res.status(400).json({
