@@ -18,8 +18,9 @@ import Tooltip from "@mui/material/Tooltip";
 import Fade from "@mui/material/Fade";
 import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
+import { prisma } from "../../src/db";
 
-export default function Verify({ status, err }: any) {
+export default function Verify({ status, err, server }: any) {
     const router = useRouter();
     const guildId = router.query.server;
 
@@ -40,6 +41,11 @@ export default function Verify({ status, err }: any) {
     return (
         <>
             <Head>
+                <meta name="description" content={server.description} />
+                <meta property="og:description" content={server.description} />
+                <meta property="og:title" content={`Verify in ${server.name}`} />
+                <meta property="og:url" content={`/verify/${server.name}`} />
+                <meta property="og:image" content={server.icon} />
                 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
                 <meta name="apple-mobile-web-app-capable" content="yes" />
                 <meta name="mobile-web-app-capable" content="yes" />
@@ -93,7 +99,6 @@ export default function Verify({ status, err }: any) {
                         )}
                         
 
-                        {/* Server name */}
                         {isLoading ? (
                             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                                 <Skeleton animation="wave" variant="text" width="20rem" height="56px" />
@@ -182,22 +187,37 @@ export default function Verify({ status, err }: any) {
     )
 }
 
-export function getServerSideProps({ req }: any) {
+
+export async function getServerSideProps({ req }: any) {
     if (req) {
         const cookies = req.headers.cookie ? req.headers.cookie : "";
 
-        // if (cookies.includes("verified=true")) {
-        //     return { props: { status: "finished", } }
-        // }
-        // if (cookies.includes("RC_err=")) {
-        //     return { props: { err: cookies.split("RC_err=")[1].split(";")[0] } }
-        // }
+
+        const serverDB = await prisma.servers.findUnique({
+            where: {
+                name: req.url.split("/verify/")[1]
+            }
+        })
+
+        const serverInfo = {
+            name: serverDB?.name ?? req.url.split("/verify/")[1],
+            description: serverDB?.description ?? "Verify to view the rest of the server.",
+            icon: serverDB?.picture ?? "https://cdn.restorecord.com/logo512.png",
+        }
 
         return { 
-            props: { 
+            props: {
+                server: JSON.parse(JSON.stringify(serverInfo)),
                 status: cookies.includes("verified=true") ? "finished" : "verifying",
                 err: cookies.includes("RC_err=") ? cookies.split("RC_err=")[1].split(";")[0] : "",
-            } 
+            }
         }
+
+        // return {
+        //     props: {
+        //         status: cookies.includes("verified=true") ? "finished" : "verifying",
+        //         err: cookies.includes("RC_err=") ? cookies.split("RC_err=")[1].split(";")[0] : "",
+        //     }
+        // }
     }
 }

@@ -9,7 +9,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     let totalMembers: any = await prisma.members.count();
     let backups: any = await prisma.backups.count();
-    let subscribers: any = await prisma.accounts.count({ where: { role: { not: "free" } } });
 
     res.status(200).json({
         accounts: accounts,
@@ -17,7 +16,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         members: members,
         bots: bots,
         totalMembers: req.query.details ? totalMembers : undefined,
-        subscribers: req.query.details ? subscribers : undefined,
         backups: req.query.details ? backups : undefined,
     });
 }
