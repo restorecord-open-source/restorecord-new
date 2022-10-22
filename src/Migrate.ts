@@ -95,6 +95,7 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
             }).catch(async (err: any) => {
                 console.log(`${err}`);
             });
+            console.log(`[INFO] Refreshed token for ${userId} in ${guildId}`);
             await addMember(guildId, userId, botToken, resp.data.access_token, [BigInt(roleId).toString()])
         }
     }).catch(async (err) => { 
