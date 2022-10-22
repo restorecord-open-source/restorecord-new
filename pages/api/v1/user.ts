@@ -135,7 +135,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         title: "Password Change",
                         createdAt: {
                             gte: new Date(new Date().getTime() - 24 * 60 * 60 * 1000)
-                        }
+                        },
+                        used: true,
                     }
                 });
 
@@ -223,7 +224,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         where: {
                             accountId: account.id,
                             code: confirmCode,
-                        }
+                        },
                     });
 
                     if (!email || email.expires < new Date()) return res.status(400).json({ success: false, message: "Invalid confirmation code." });

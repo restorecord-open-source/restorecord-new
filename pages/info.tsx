@@ -33,7 +33,6 @@ export default function Info() {
     const serversRef = useRef(null);
     const membersRef = useRef(null);
     const botsRef = useRef(null);
-    const subscribersRef = useRef(null);
     const backupsRef = useRef(null);
     const totalMembersRef = useRef(null);
 
@@ -42,7 +41,6 @@ export default function Info() {
         serversStart();
         membersStart();
         botsStart();
-        subscribersStart();
         backupsStart();
         totalMembersStart();
 
@@ -54,7 +52,6 @@ export default function Info() {
                 serversUpdate(stats.servers);
                 membersUpdate(stats.members);
                 botsUpdate(stats.bots);
-                subscribersUpdate(stats.subscribers);
                 backupsUpdate(stats.backups);
                 totalMembersUpdate(stats.totalMembers);
             });
@@ -101,14 +98,6 @@ export default function Info() {
         ref: botsRef,
         start: 0,
         end: stats.bots,
-        duration: 1,
-        separator: ","
-    });
-
-    const { start: subscribersStart, update: subscribersUpdate } = useCountUp({
-        ref: subscribersRef,
-        start: 0,
-        end: stats.subscribers,
         duration: 1,
         separator: ","
     });
@@ -176,17 +165,6 @@ export default function Info() {
                                     <Typography variant="h5" ref={botsRef} />
                                     <Typography variant="body2" component="p" color="textSecondary">
                                         Custom Bots
-                                    </Typography>
-                                </CardContent>
-                            </Paper>
-                        </Grid>
-                        <Grid item xs={6} sm={5} md={3}>
-                            <Paper elevation={3}>
-                                <CardContent sx={{ alignItems: "center", justifyContent: "center", display: "flex", flexDirection: "column" }}>
-                                    <AccountBalanceWalletIcon sx={{ fontSize: 64, color: theme.palette.primary.main }} />
-                                    <Typography variant="h5" ref={subscribersRef} />
-                                    <Typography variant="body2" component="p" color="textSecondary">
-                                        Subscribers
                                     </Typography>
                                 </CardContent>
                             </Paper>
