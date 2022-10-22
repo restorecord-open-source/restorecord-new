@@ -17,6 +17,7 @@ import VpnKeyOffRoundedIcon from '@mui/icons-material/VpnKeyOffRounded';
 import TuneRoundedIcon from '@mui/icons-material/TuneRounded';
 import Badge from "@mui/material/Badge";
 import theme from "../src/theme";
+import Head from "next/head";
 
 const FeatureList: Features[] = [
     {
@@ -61,6 +62,12 @@ export default function Home() {
     return (
         <>
             <Box sx={{ minHeight: "100vh", flexDirection: "column", display: "flex", pt: "2.5rem" }}>
+                <Head>
+                    <meta name="description" content="RestoreCord is a Recovery Service, it can Backup and Restore your Servers Members, Channels, Categories, Roles and much more" />
+                    <meta property="og:description" content="RestoreCord is a Recovery Service, it can Backup and Restore your Servers Members, Channels, Categories, Roles and do much more" />
+                    <meta property="og:title" content="RestoreCord - The Recovery Service" />
+                </Head>
+
                 <Container maxWidth="xl" sx={{ mx: "auto", justifyContent: "center", alignItems: "center"}}>
                     <NavBar />
 

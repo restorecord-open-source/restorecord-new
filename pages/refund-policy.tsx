@@ -4,12 +4,19 @@ import Footer from "../components/landing/Footer";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import Head from "next/head";
 
 
 export default function Terms() {
     return (
         <>
             <Box sx={{ minHeight: "100vh", flexDirection: "column", display: "flex", pt: "2.5rem", background: "rgba(0, 0, 0, 0.75)" }}>
+                <Head>
+                    <meta name="description" content="RestoreCord is a Recovery Service, it can Backup and Restore your Servers Members, Channels, Categories, Roles and much more" />
+                    <meta property="og:description" content="RestoreCord is a Recovery Service, it can Backup and Restore your Servers Members, Channels, Categories, Roles and do much more" />
+                    <meta property="og:title" content="RestoreCord - Refund Policy" />
+                </Head>
+                
                 <Container maxWidth="lg" sx={{ mx: "auto", justifyContent: "center", alignItems: "center" }}>
 
                     <NavBar />

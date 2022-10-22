@@ -14,6 +14,7 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import Head from "next/head";
 
 export default function Login() {
     const router = useRouter();
@@ -111,6 +112,12 @@ export default function Login() {
     return (
         <>
             <Box sx={{ minHeight: "100vh", flexDirection: "column", display: "flex", pt: "2.5rem", background: "rgba(0, 0, 0, 0.75)" }}>
+                <Head>
+                    <meta name="description" content="RestoreCord is a Recovery Service, it can Backup and Restore your Servers Members, Channels, Categories, Roles and much more" />
+                    <meta property="og:description" content="RestoreCord is a Recovery Service, it can Backup and Restore your Servers Members, Channels, Categories, Roles and do much more" />
+                    <meta property="og:title" content="RestoreCord - Login" />
+                </Head>
+
                 <Container maxWidth="lg" sx={{ mx: "auto", justifyContent: "center", alignItems: "center" }}>
 
                     <NavBar />

@@ -7,6 +7,7 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import Head from "next/head";
 
 export default function Logout() {
     const [token]: any = useToken();
@@ -44,6 +45,12 @@ export default function Logout() {
     return (
         <>
             <Container maxWidth="xl">
+                <Head>
+                    <meta name="description" content="RestoreCord is a Recovery Service, it can Backup and Restore your Servers Members, Channels, Categories, Roles and much more" />
+                    <meta property="og:description" content="RestoreCord is a Recovery Service, it can Backup and Restore your Servers Members, Channels, Categories, Roles and do much more" />
+                    <meta property="og:title" content="RestoreCord - Logout" />
+                </Head>
+
                 <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
                     <CardContent>
                         <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>

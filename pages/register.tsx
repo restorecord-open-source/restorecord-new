@@ -103,6 +103,12 @@ export default function Register() {
     return (
         <>
             <Box sx={{ minHeight: "100vh", flexDirection: "column", display: "flex", pt: "2.5rem", background: "rgba(0, 0, 0, 0.75)" }}>
+                <Head>
+                    <meta name="description" content="RestoreCord is a Recovery Service, it can Backup and Restore your Servers Members, Channels, Categories, Roles and much more" />
+                    <meta property="og:description" content="RestoreCord is a Recovery Service, it can Backup and Restore your Servers Members, Channels, Categories, Roles and do much more" />
+                    <meta property="og:title" content="RestoreCord - Register" />
+                </Head>
+
                 <Container maxWidth="lg" sx={{ mx: "auto", justifyContent: "center", alignItems: "center" }}>
 
                     <NavBar />
