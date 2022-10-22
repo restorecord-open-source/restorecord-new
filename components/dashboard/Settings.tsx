@@ -149,6 +149,8 @@ export default function DashSettings({ user }: any) {
                                                                 Edit
                                                             </Button>
                                                             <Button variant="contained" sx={{ background: "#43a047", "&:hover": { background: "#388e3c" } }} onClick={() => {
+                                                                setNotiTextI("Pulling members please wait...");
+                                                                setOpenI(true);
                                                                 axios.put(`/api/v1/server/${item.guildId}`, {}, { 
                                                                     headers: {
                                                                         "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
@@ -156,9 +158,15 @@ export default function DashSettings({ user }: any) {
                                                                     validateStatus: () => true
                                                                 })
                                                                     .then(res => {
+                                                                        setOpenI(false);
                                                                         if (!res.data.success) {
                                                                             if (res.data.pullTimeout) {
-                                                                                setNotiTextE(`${res.data.message} ${new Intl.DateTimeFormat(navigator.language, { dateStyle: "medium", timeStyle: "short" }).format(new Date(res.data.pullTimeout))}`);
+                                                                                const timeArr = new Date(new Date(res.data.pullTimeout).getTime() - new Date().getTime()).toISOString().substr(11, 8).split(":");
+                                                                                const hours = parseInt(timeArr[0]);
+                                                                                const minutes = parseInt(timeArr[1]);
+                                                                                const seconds = parseInt(timeArr[2]);
+                                                                                const timeString = `${hours > 0 ? `${hours} hour${hours > 1 ? "s" : ""} ` : ""}${minutes > 0 ? `${minutes} minute${minutes > 1 ? "s" : ""} ` : ""}${seconds > 0 ? `${seconds} second${seconds > 1 ? "s" : ""} ` : ""}`;
+                                                                                setNotiTextE(`${res.data.message} ${timeString}`);
                                                                             }
                                                                             else {
                                                                                 setNotiTextE(res.data.message);

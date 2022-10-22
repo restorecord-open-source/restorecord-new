@@ -2,6 +2,8 @@ import { useRouter } from "next/router";
 import { useToken } from "../../src/token";
 import { useEffect, useState } from "react";
 import { useInfiniteQuery, useQuery } from "react-query";
+import { useInView } from "react-intersection-observer";
+import { Badge } from "@mui/icons-material";
 
 import getMembers, { BOT_HTTP_INTERACTIONS, BUG_HUNTER_LEVEL_1, BUG_HUNTER_LEVEL_2, CERTIFIED_MODERATOR, DELETED, DISABLED, DISABLED_SUSPICIOUS_ACTIVITY, DISABLE_PREMIUM, DISCORD_EMPLOYEE, DISCORD_PARTNER, EARLY_SUPPORTER, HAS_UNREAD_URGENT_MESSAGES, HIGH_GLOBAL_RATE_LIMIT, HOUSE_BALANCE, HOUSE_BRAVERY, HOUSE_BRILLIANCE, HYPESQUAD_EVENTS, INTERNAL_APPLICATION, MFA_SMS, PREMIUM_DISCRIMINATOR, PREMIUM_PROMO_DISMISSED, QUARANTINED, SELF_DELETED, SPAMMER, SYSTEM, TEAM_PSEUDO_USER, UNDERAGE_DELETED, USED_DESKTOP_CLIENT, USED_MOBILE_CLIENT, USED_WEB_CLIENT, VERIFIED_BOT, VERIFIED_BOT_DEVELOPER, VERIFIED_EMAIL } from "../../src/dashboard/getMembers";
 import Container from "@mui/material/Container";
@@ -29,10 +31,9 @@ import CloseIcon from "@mui/icons-material/Close";
 import Tooltip from "@mui/material/Tooltip";
 import Fade from "@mui/material/Fade";
 import Box from "@mui/material/Box";
-import { useInView } from "react-intersection-observer";
 import React from "react";
 import TextField from "@mui/material/TextField";
-import { Badge } from "@mui/icons-material";
+import DialogActions from "@mui/material/DialogActions";
 
 export default function VerifiedMembers({ user }: any) {
     const { ref, inView } = useInView()
@@ -49,6 +50,7 @@ export default function VerifiedMembers({ user }: any) {
 
     const [open, setOpen] = useState(false);
     const [userId, setUserId] = useState("");
+    const [userInfoGuild, setUserInfoGuild] = useState("");
     const [userInfo, setUserInfo]: any = useState({});
 
     const [loading, setLoading] = useState(false);
@@ -104,7 +106,7 @@ export default function VerifiedMembers({ user }: any) {
                 if (hasNextPage) await fetchNextPage();
                 fetching = false;
             }
-        };
+        }
 
         const delayDebounceFn = setTimeout(() => {
             refetch();
@@ -114,9 +116,7 @@ export default function VerifiedMembers({ user }: any) {
         return () => {
             document.addEventListener('scroll', onScroll);
             clearTimeout(delayDebounceFn);
-        }
-        
-       
+        }       
     }, [hasNextPage, fetchNextPage, refetch, search]);
 
     return (
@@ -217,6 +217,64 @@ export default function VerifiedMembers({ user }: any) {
                                     </>
                                 }
                             </DialogContent>
+                            <DialogActions sx={{ mx: 2, mb: 2, justifyContent: "flex-start" }}>
+                                <LoadingButton loading={loading} variant="contained" sx={{ background: "#43a047", "&:hover": { background: "#388e3c" } }} onClick={() => {
+                                    setLoading(true);
+                                                                
+                                    axios.put(`/api/v1/member/${userInfo.id}?guild=${userInfoGuild}`, {}, { 
+                                        headers: {
+                                            "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                        },
+                                        validateStatus: () => true
+                                    })
+                                        .then((res: any) => {
+                                            if (!res.data.success) {
+                                                setNotiTextE(res.data.message);
+                                                setOpenE(true);
+                                            }
+                                            else {
+                                                setNotiTextS(res.data.message);
+                                                setOpenS(true);
+                                            }
+                                                                        
+                                            setTimeout(() => {
+                                                setLoading(false);
+                                            }, 200);
+                                        })
+                                        .catch((err): any => {
+                                            setNotiTextE(err.message);
+                                            setOpenE(true);
+                                            console.error(err);
+                                        });
+                                }}>Pull</LoadingButton>
+                                <Button variant="contained" color="error" onClick={() => {
+                                    axios.delete(`/api/v1/member/${userInfo.id}?guild=${userInfoGuild}`, { 
+                                        headers: {
+                                            "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                        },
+                                        validateStatus: () => true
+                                    })
+                                        .then((res: any) => {
+                                            if (!res.data.success) {
+                                                setNotiTextE(res.data.message);
+                                                setOpenE(true);
+                                            }
+                                            else {                                                
+                                                setNotiTextS(res.data.message);
+                                                setOpenS(true);
+                                                setOpen(false);
+                                                setLoadingInfo(true);
+                                                setTimeout(() => { refetch(); }, 100);
+                                                setUserInfo({});
+                                            }
+                                        })
+                                        .catch((err): any => {
+                                            setNotiTextE(err.message);
+                                            setOpenE(true);
+                                            console.error(err);
+                                        });
+                                }}>Delete</Button>
+                            </DialogActions>
                         </Dialog>
                         
                         <Grid justifyContent={"space-between"}>
@@ -285,44 +343,43 @@ export default function VerifiedMembers({ user }: any) {
                             </Stack>
                         ) : (
                             <>
-                                {data?.pages?.map((page) =>
-                                    page.members.map((item: any) => {
-                                        return (
-                                            <Paper key={item.id} variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
-                                                <CardContent>
-                                                    <Grid container spacing={3} direction="row" justifyContent={"space-between"}>
-                                                        <Grid item>
-                                                            <div style={{ display: "inline-flex", alignItems: "center" }}>
-                                                                {item.avatar.length > 1 ? (
-                                                                    <Avatar alt={item.username} src={`https://cdn.discordapp.com/avatars/${item.userId}/${item.avatar}.png?size=32`} srcSet={`https://cdn.discordapp.com/avatars/${item.userId}/${item.avatar}.png?size=64 2x, https://cdn.discordapp.com/avatars/${item.userId}/${item.avatar}.png?size=128 3x`} sx={{ mr: "0.5rem" }} />
-                                                                ) : (
-                                                                    <Avatar alt={item.username} src={`https://cdn.discordapp.com/embed/avatars/${item.username.charCodeAt(0) % 5}.png?size=32`} srcSet={`https://cdn.discordapp.com/embed/avatars/${item.username.charCodeAt(0) % 5}.png?size=64 2x, https://cdn.discordapp.com/embed/avatars/${item.username.charCodeAt(0) % 5}.png?size=128 3x`} sx={{ mr: "0.5rem" }} />
-                                                                )}
-                                                                {item.username ? (
-                                                                    <Typography variant="h6" sx={{ fontWeight: "500", wordBreak: "break-word" }}>
-                                                                        {item.username}
-                                                                    </Typography>
-                                                                ) : (
-                                                                    <Skeleton variant="text" width={150} />
-                                                                )}
-                                                                {item.unauthorized && (
-                                                                    <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} placement="top" disableInteractive title="Unauthorized">
-                                                                        <Badge color="error" sx={{ ml: "0.5rem" }}>
-                                                                            Unauthorized
-                                                                        </Badge>
-                                                                    </Tooltip>
-                                                                )}
-                                                            </div>
-                                                            <Typography variant="body2" color="textSecondary" sx={{ wordBreak: "break-word" }}>
-                                                                ID: {item.userId}
-                                                            </Typography>
-                                                            <Typography variant="body2" color="textSecondary" sx={{ wordBreak: "break-word" }}>
-                                                                Verified: {new Date(item.createdAt).toLocaleString()}
-                                                            </Typography>
-                                                        </Grid>
-                                                        <Grid item xs={12} sm={12} md={3} lg={2} xl={1}>
-                                                            <Stack spacing={2} direction="column" justifyContent={"space-between"}>
-                                                                {item.unauthorized ? (<></>) : (
+                                {data?.pages?.map((page) => page.members.map((item: any) => {
+                                    return (
+                                        <Paper key={item.id} variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                                            <CardContent>
+                                                <Grid container spacing={3} direction="row" justifyContent={"space-between"}>
+                                                    <Grid item>
+                                                        <div style={{ display: "inline-flex", alignItems: "center" }}>
+                                                            {item.avatar.length > 1 ? (
+                                                                <Avatar alt={item.username} src={`https://cdn.discordapp.com/avatars/${item.userId}/${item.avatar}.png?size=32`} srcSet={`https://cdn.discordapp.com/avatars/${item.userId}/${item.avatar}.png?size=64 2x, https://cdn.discordapp.com/avatars/${item.userId}/${item.avatar}.png?size=128 3x`} sx={{ mr: "0.5rem" }} />
+                                                            ) : (
+                                                                <Avatar alt={item.username} src={`https://cdn.discordapp.com/embed/avatars/${item.username.charCodeAt(0) % 5}.png?size=32`} srcSet={`https://cdn.discordapp.com/embed/avatars/${item.username.charCodeAt(0) % 5}.png?size=64 2x, https://cdn.discordapp.com/embed/avatars/${item.username.charCodeAt(0) % 5}.png?size=128 3x`} sx={{ mr: "0.5rem" }} />
+                                                            )}
+                                                            {item.username ? (
+                                                                <Typography variant="h6" sx={{ fontWeight: "500", wordBreak: "break-word" }}>
+                                                                    {item.username}
+                                                                </Typography>
+                                                            ) : (
+                                                                <Skeleton variant="text" width={150} />
+                                                            )}
+                                                            {item.unauthorized && (
+                                                                <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} placement="top" disableInteractive title="Unauthorized">
+                                                                    <Badge color="error" sx={{ ml: "0.5rem" }}>
+                                                                        Unauthorized
+                                                                    </Badge>
+                                                                </Tooltip>
+                                                            )}
+                                                        </div>
+                                                        <Typography variant="body2" color="textSecondary" sx={{ wordBreak: "break-word" }}>
+                                                            ID: {item.userId}
+                                                        </Typography>
+                                                        <Typography variant="body2" color="textSecondary" sx={{ wordBreak: "break-word" }}>
+                                                            Verified: {new Date(item.createdAt).toLocaleString()}
+                                                        </Typography>
+                                                    </Grid>
+                                                    <Grid item xs={12} sm={12} md={3} lg={2} xl={1}>
+                                                        <Stack spacing={2} direction="column" justifyContent={"space-between"}>
+                                                            {/* {item.unauthorized ? (<></>) : (
                                                                     <LoadingButton id={`user_${item.userId}`} loading={loading} variant="contained" sx={{ background: "#43a047", "&:hover": { background: "#388e3c" } }} onClick={() => {
                                                                         setLoading(true);
                                                                 
@@ -352,20 +409,21 @@ export default function VerifiedMembers({ user }: any) {
                                                                                 console.error(err);
                                                                             });
                                                                     }}>Pull</LoadingButton>
-                                                                )}
-                                                                <Button variant="contained" color="info" onClick={() => {
-                                                                    setUserId(item.userId);
-                                                                    requestInfo(item.userId);
-                                                                    setLoadingInfo(true);
-                                                                    setOpen(true);
-                                                                }}>Info</Button>
-                                                            </Stack>
-                                                        </Grid>
+                                                                )} */}
+                                                            <Button variant="contained" color="info" onClick={() => {
+                                                                // setUserId(item.userId);
+                                                                setUserInfoGuild(item.guildId);
+                                                                requestInfo(item.userId);
+                                                                setLoadingInfo(true);
+                                                                setOpen(true);
+                                                            }}>Actions</Button>
+                                                        </Stack>
                                                     </Grid>
-                                                </CardContent>
-                                            </Paper>
-                                        );
-                                    }))}
+                                                </Grid>
+                                            </CardContent>
+                                        </Paper>
+                                    );
+                                }))}
                             </>
                         )}
 

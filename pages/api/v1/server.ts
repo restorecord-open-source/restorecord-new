@@ -19,11 +19,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         },
                     });
                 } else {
-                    server = await prisma.servers.findUnique({
-                        where: {
-                            guildId: BigInt(req.query.id as any),
-                        },
-                    });
+                    try {
+                        server = await prisma.servers.findUnique({
+                            where: {
+                                guildId: BigInt(req.query.id as any),
+                            },
+                        });
+                    } catch {
+                        server = await prisma.servers.findFirst({
+                            where: {
+                                name: req.query.id.toString(),
+                            },
+                        });
+                    }
                 }
 
                 if (!server) return res.status(404).json({ success: false, message: "Server not found" });
@@ -56,7 +64,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         createdAt: server.createdAt,
                         clientId: customBot?.clientId.toString(),
                         owner: ownerAccount?.username,
-                        domain: server.customDomain,
+                        domain: customBot?.customDomain,
                         verified: members.length >= 1000,
                     } });
                 }
