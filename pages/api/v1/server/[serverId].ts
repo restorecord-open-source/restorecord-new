@@ -266,9 +266,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                         console.log(`[${server.name}] Adding ${member.username}`);
                         await addMember(server.guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, [BigInt(server.roleId).toString()]).then(async (resp: any) => {
-                            console.log(`[${member.username}] ${resp?.response?.status}`);
-                            console.log(`[${member.username}] ${JSON.stringify(resp?.response?.data)}`);
-                            console.log(`[${member.username}] ${resp?.status}`);
+                            if (resp.reponse.status) console.log(`[${member.username}] ${resp?.response?.status}`);
+                            if (resp.response.data) console.log(`[${member.username}] ${JSON.stringify(resp?.response?.data)}`);
+                            if (resp.status) console.log(`[${member.username}] ${resp?.status}`);
                     
                             if (resp?.response?.status) {
                                 switch (resp.response.status) {

@@ -152,7 +152,7 @@ export async function resolveUser(token: string): Promise<User> {
 
     return await axios.get("https://discord.com/api/users/@me", {
         headers: {
-            Authorization: `Bearer ${token}`,
+            "Authorization": `Bearer ${token}`,
             "X-RateLimit-Precision": "millisecond",
             "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
         },

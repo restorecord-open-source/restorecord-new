@@ -50,6 +50,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
                 const userId: any = BigInt(account?.id as any);
 
+                if (!account) return res.status(400).json({ success: false, message: "Took too long to verify. (No account info)" });
+
                 if (account) {
                     const user = await prisma.members.findFirst({
                         where: {
