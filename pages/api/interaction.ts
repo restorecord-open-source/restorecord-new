@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { InteractionResponseFlags, } from 'discord-interactions';
-import { APIApplicationCommand, APIApplicationCommandGuildInteraction, APIApplicationCommandInteraction, APIChatInputApplicationCommandInteraction, APIChatInputApplicationCommandInteractionData, APIEmbed, APIInteractionResponse, ApplicationCommandType } from "discord-api-types/v10"
+import { APIEmbed, APIInteractionResponse, ApplicationCommandType } from "discord-api-types/v10"
 import withDiscordInteraction from "../../src/withDiscordInteraction";
 import withErrorHandler from "../../src/withErrorHandler";
 import axios from "axios";
@@ -90,7 +90,7 @@ const handler = async(_: NextApiRequest, res: NextApiResponse<APIInteractionResp
                     type: 2,
                     label: "Verify",
                     style: 5,
-                    url: `https://discord.com/oauth2/authorize?client_id=${application_id}&redirect_uri=https://restorecord.com/api/callback&response_type=code&scope=identify+guilds.join&state=${server.data.id}`
+                    url: `https://discord.com/oauth2/authorize?client_id=${application_id}&redirect_uri=https://${cBot.customDomain ? cBot.customDomain : "restorecord.com"}/api/callback&response_type=code&scope=identify+guilds.join&state=${server.data.id}`
                 }]
             }]
         }, {

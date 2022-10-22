@@ -267,11 +267,12 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
             else {
                 let error_detail;
                 const err = respon?.response?.data?.error;
+                const err_des = respon?.response?.data?.error_description;
 
                 console.log(respon?.response?.data);
                 
 
-                if (err?.includes("redirect_uri")) {
+                if (err?.includes("redirect_uri") || err_des?.includes("redirect_uri")) {
                     error_detail = "Redirect is missing, follow this: https://docs.restorecord.com/guides/create-a-custom-bot/#setup-oauth2-redirect"
                 } else if (err?.includes("invalid_client")) {
                     error_detail = "Bot secret is missing and/or invalid, please reset it on Discord and update the bot on Restorecord."
