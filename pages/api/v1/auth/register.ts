@@ -28,19 +28,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (data.email.length < 6 || data.email.length > 50) return res.status(400).json({ success: false, message: "Email must be between 6 and 50 characters" });
         
 
-        await fetch(`https://hcaptcha.com/siteverify`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body: `response=${data.captcha}&secret=${process.env.HCAPTCHA_SECRET}`
-            })
+        await fetch(`https://hcaptcha.com/siteverify`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: `response=${data.captcha}&secret=${process.env.HCAPTCHA_SECRET}`
+        })
             .then(res => res.json())
             .then(res => {
                 if (!res.success) { console.log(res); throw new Error("Invalid captcha"); }
-            }
-            );
+            });
 
         const accounts: accounts[] = await prisma.accounts.findMany({
             where: {
