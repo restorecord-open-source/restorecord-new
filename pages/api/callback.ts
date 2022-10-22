@@ -190,13 +190,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
                     addMember(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, respon.data.access_token, [BigInt(serverInfo?.roleId).toString()]).then(async (resp) => {
                         try {
-                            if (resp?.status === 201 || resp?.status === 204) {
-                                console.log(`${account?.username} adding member ${resp?.status} (${rGuildId.toString()}, ${userId.toString()}, ${respon.data.access_token}, ${[BigInt(serverInfo?.roleId).toString()]})`);
-                                if (resp?.status === 403 || resp?.response?.status === 403 || resp?.response?.data?.code === "50013") {
-                                    res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=5;`);
-                                    return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
-                                }
-                                else if (resp?.status === 204 || resp?.response?.status === 204) {
+                            if (resp?.status === 201 || resp?.status === 204 || resp?.response?.status === 201 || resp?.response?.status === 204) {
+                                console.log(`${account?.username} adding member ${resp.status ? resp.status : resp.response.status} (${rGuildId.toString()}, ${userId.toString()}, ${respon.data.access_token}, ${[BigInt(serverInfo?.roleId).toString()]})`);
+                                if (resp?.status === 204 || resp?.response?.status === 204) {
                                     await addRole(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, serverInfo?.roleId.toString()).then(async (response) => {
                                         console.log(`${account?.username} adding role: ${response?.status} (${rGuildId.toString()}, ${userId.toString()}, ${serverInfo?.roleId.toString()})`);
                                         if (response.status !== 204) { res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=5;`); return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`); }
@@ -208,7 +204,11 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                     res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
                                     return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
                                 }
-                            } else {
+                            } else if (resp?.status === 403 || resp?.response?.status === 403 || resp?.response?.data?.code === "50013") {
+                                res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=5;`);
+                                return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
+                            }
+                            else {
                                 return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
                             }
                         } catch (err: any) {
