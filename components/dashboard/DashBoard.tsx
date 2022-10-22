@@ -2,7 +2,6 @@ import { useQuery } from "react-query";
 import { useToken } from "../../src/token"
 
 import { getMemberList } from "../../src/dashboard/getMembers";
-import getNews from "../../src/dashboard/getNews";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
@@ -25,10 +24,6 @@ export default function DashBoard({ user }: any) {
     const [token]: any = useToken();
 
     let memberArr: any = [];
-
-    const { data, isError, isLoading } = useQuery('news', async () => await getNews({
-        Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
-    }), { retry: false });
 
     const { data: data2, isError: isError2, isLoading: isLoading2 } = useQuery('memberList', async () => await getMemberList({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
@@ -282,41 +277,6 @@ export default function DashBoard({ user }: any) {
                         </Paper>
                     </Grid>
                 </Grid>
-                
-                {/* <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
-                    <CardContent>
-                        {isLoading ? (
-                            <>
-                                <Skeleton animation="wave" variant="text" width={85} height={42} sx={{ mb: 2 }} />
-                                <Card variant="outlined" sx={{ width: "100%", padding: "1rem", borderRadius: "1rem" }}>
-                                    <Skeleton animation="wave" variant="text" width={195} height={32} sx={{ mb: 2 }} />
-                                    <Skeleton animation="wave" variant="rectangular" width={"100%"} height={300} />
-                                </Card>
-                            </>
-                        ) : (
-                            <>
-                                <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
-                                    News
-                                </Typography>
-
-                                {Array.isArray(data.news) && data.news.map((item: any) => {
-                                    let content = item.content.replace(/\[(.*?)\]\((.*?)\)/g, (match: any, p1: any, p2: any) => {
-                                        return `<a href="${p2}">${p1}</a>`
-                                    });
-
-                                    return (
-                                        <Card variant="outlined" key={item.id} sx={{ width: '100%', padding: "1rem", borderRadius: "1rem" }}>
-                                            <Typography variant="h5" sx={{ mb: 2, fontWeight: "500" }}>
-                                                {item.title}
-                                            </Typography>
-                                            <Typography variant="body1" color={"grey.200"} sx={{ whiteSpace: "pre-line" }} dangerouslySetInnerHTML={{ __html: content }} />
-                                        </Card>
-                                    )
-                                })}
-                            </>
-                        )}
-                    </CardContent>
-                </Paper> */}
             </Container>
         </>
     )

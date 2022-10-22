@@ -1,5 +1,8 @@
+import { useRouter } from "next/router";
+import { useRef, useState } from "react";
+import { useToken } from "../../src/token";
+
 import Alert from "@mui/material/Alert";
-import Button from "@mui/material/Button";
 import LoadingButton from "@mui/lab/LoadingButton";
 import CardContent from "@mui/material/CardContent";
 import Container from "@mui/material/Container";
@@ -8,12 +11,7 @@ import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { useRouter } from "next/router";
-import { useRef, useState } from "react";
-import { useToken } from "../../src/token";
-import Slide from "@mui/material/Slide";
 import axios from "axios";
-import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 
 export default function Account({ user }: any) {

@@ -1,6 +1,7 @@
 
 import { useRouter } from "next/router";
 import { useToken } from "../../src/token";
+
 import SubscriptionList from "../../src/SubscriptionList";
 import Typography from "@mui/material/Typography";
 import CardContent from "@mui/material/CardContent";
@@ -9,14 +10,10 @@ import Container from "@mui/material/Container";
 import CardActions from "@mui/material/CardActions";
 import Button from "@mui/material/Button";
 import CardHeader from "@mui/material/CardHeader";
-import Card from "@mui/material/Card";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 
 export default function DashUpgrade({ user }: any) {
-    const [token]: any = useToken();
-    const router = useRouter();
-
     return (
         <>
             <Container maxWidth="xl">

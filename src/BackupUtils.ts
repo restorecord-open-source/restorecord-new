@@ -20,6 +20,7 @@ export function generateKey(size = 32) {
 export async function getMembers(guild: servers, bot: customBots) {
     try {
         const memberRoles: MemberData[] = [];
+        let done;
 
         const members = await axios.get(`https://discord.com/api/v10/guilds/${guild.guildId}/members?limit=1000`, {
             headers: {
@@ -33,7 +34,7 @@ export async function getMembers(guild: servers, bot: customBots) {
             validateStatus: () => true,
         });
 
-        while (members.data.length === 1000) {
+        while (!done) {
             const lastMember = members.data[members.data.length - 1];
             const moreMembers = await axios.get(`https://discord.com/api/v10/guilds/${guild.guildId}/members?limit=1000&after=${lastMember.user.id}`, {
                 headers: {
@@ -47,6 +48,8 @@ export async function getMembers(guild: servers, bot: customBots) {
                 validateStatus: () => true,
             });
             members.data.push(...moreMembers.data);
+
+            if (moreMembers.data.length < 1000) done = true;
         }
 
         for (const member of members.data) {

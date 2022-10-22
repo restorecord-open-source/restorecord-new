@@ -32,29 +32,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     const body: any = JSON.parse(rawBody) as any;
 
                     if (body.status === "COMPLETED") {
-                        const expiry: Date = body.variant.product.slug.includes('monthly') ? new Date(new Date().getTime() + (1000 * 60 * 60 * 24 * 30)) : new Date(new Date().getTime() + (1000 * 60 * 60 * 24 * 365));
+                        const expiry: Date = body.listing.slug.includes('monthly') ? new Date(new Date().getTime() + (1000 * 60 * 60 * 24 * 30)) : new Date(new Date().getTime() + (1000 * 60 * 60 * 24 * 365));
 
-                        await Email.post("send", {'version': 'v3.1'}).request({
-                            "Messages": [
-                                {
-                                    "From": {
-                                        "Email": "noreply@restorecord.com",
-                                        "Name": "RestoreCord",
-                                    },
-                                    "To": [
-                                        {
-                                            "Email": body.invoice.customer_information.email,
-                                            "Name": body.additional_information[0].value,
+                        const account = await prisma.accounts.findFirst({
+                            where: {
+                                username: body.additional_information[0].value,
+                            },
+                        });
+                        if (account) {
+
+                            await Email.post("send", {'version': 'v3.1'}).request({
+                                "Messages": [
+                                    {
+                                        "From": {
+                                            "Email": "noreply@restorecord.com",
+                                            "Name": "RestoreCord",
                                         },
-                                    ],
-                                    "Bcc": [
-                                        {
-                                            "Email": "restorecord.com+90b3e0c33f@invite.trustpilot.com",
-                                            "Name": "TrustPilot",
-                                        },
-                                    ],
-                                    "Subject": `Thank you for upgrading to ${body.variant.product.title}!`,
-                                    "HTMLPart": 
+                                        "To": [
+                                            {
+                                                "Email": body.invoice.customer_information.email,
+                                                "Name": body.additional_information[0].value,
+                                            },
+                                        ],
+                                        "Bcc": [
+                                            {
+                                                "Email": "restorecord.com+90b3e0c33f@invite.trustpilot.com",
+                                                "Name": "TrustPilot",
+                                            },
+                                        ],
+                                        "Subject": `Thank you for upgrading to ${body.listing.title}!`,
+                                        "HTMLPart": 
                                     `
                                         <!DOCTYPE html>
                                         <html>
@@ -67,13 +74,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                                 </h1>
                                                 <div style="padding: 1rem; max-width: 30rem; margin-left: auto;margin-right: auto; width: 100%; border-radius: 0.75rem; border-width: 1px; background: rgb(250, 250, 250);">
                                                     <h2 style="color: rgb(0, 0, 0); font-size: 1.75rem; line-height: 2rem; font-weight: 600; line-height: 1.25; margin-bottom: 1rem">
-                                                        Thanks for purchasing ${body.variant.product.title}!
+                                                        Thanks for purchasing ${body.listing.title}!
                                                     </h2>
                                                     <div>
                                                         <p style="white-space: pre-line; color: rgb(0, 0, 0); font-weight: 400; margin-bottom: 0.75rem; overflow-wrap: break-word; font-size: 1rem;">
                                                             Hello ${body.additional_information[0].value},
                                                             <br />
-                                                            Thank you for your purchase of RestoreCord ${body.variant.product.title}.
+                                                            Thank you for your purchase of RestoreCord ${body.listing.title}.
                                                             If you have any questions, please contact us at <a style="color: rgb(56,189, 248);" href="mailto:contact@restorecord.com">contact@restorecord.com</a>.
                                                             <br />
                                                             Sincerely,
@@ -89,26 +96,93 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                             </body>
                                         </html>
                                     `,
-                                }
-                            ]
-                        }).then(() => {
-                            console.log(`[Email] Successfully upgraded ${body.additional_information[0].value} (${body.invoice.customer_information.email}) to ${body.variant.product.title}!`);
-                        }).catch((err: any) => {
-                            console.error(err);
-                        })
+                                    }
+                                ]
+                            }).then(() => {
+                                console.log(`[Email] Successfully upgraded ${body.additional_information[0].value} (${body.invoice.customer_information.email}) to ${body.listing.title}!`);
+                            }).catch((err: any) => {
+                                console.error(err);
+                            })
 
+                            await prisma.accounts.update({
+                                where: {
+                                    username: body.additional_information[0].value,
+                                },
+                                data: {
+                                    role: body.listing.slug.split("-")[0],
+                                    expiry: account.expiry ? new Date(account.expiry.getTime() + (expiry.getTime() - new Date().getTime())) : expiry,
+                                },
+                            }).then(() => {
+                                return res.status(200).end(`Successfully upgraded ${body.additional_information[0].value} to ${body.listing.title}!`);
+                            });
+                        } else {
+                            await Email.post("send", {'version': 'v3.1'}).request({
+                                "Messages": [
+                                    {
+                                        "From": {
+                                            "Email": "noreply@restorecord.com",
+                                            "Name": "RestoreCord",
+                                        },
+                                        "To": [
+                                            {
+                                                "Email": body.invoice.customer_information.email,
+                                                "Name": body.additional_information[0].value,
+                                            },
+                                        ],
+                                        "Bcc": [
+                                            {
+                                                "Email": "restorecord.com+90b3e0c33f@invite.trustpilot.com",
+                                                "Name": "TrustPilot",
+                                            },
+                                        ],
+                                        "Subject": `Purchase failed for: ${body.listing.title}!`,
+                                        "HTMLPart": 
+                                    `
+                                        <!DOCTYPE html>
+                                        <html>
+                                            <head>
+                                                <title>RestoreCord</title>
+                                            </head>
+                                            <body>
+                                                <h1 style="text-align: center; margin-top: 1.5rem; line-height: 2rem; font-size: 2.25rem; font-weight: 600; margin-bottom: 1rem; color: rgb(79, 70, 229);">
+                                                    RestoreCord
+                                                </h1>
+                                                <div style="padding: 1rem; max-width: 30rem; margin-left: auto;margin-right: auto; width: 100%; border-radius: 0.75rem; border-width: 1px; background: rgb(250, 250, 250);">
+                                                    <h2 style="color: rgb(0, 0, 0); font-size: 1.75rem; line-height: 2rem; font-weight: 600; line-height: 1.25; margin-bottom: 1rem">
+                                                        Sorry we couldn't process your purchase!
+                                                    </h2>
+                                                    <div>
+                                                        <p style="white-space: pre-line; color: rgb(0, 0, 0); font-weight: 400; margin-bottom: 0.75rem; overflow-wrap: break-word; font-size: 1rem;">
+                                                            Hello ${body.additional_information[0].value},
+                                                            <br />
+                                                            Thank you for your purchase of RestoreCord ${body.listing.title},
+                                                            however, we were unable to process your payment.
+                                                            We couldn't find your account in our database, so we couldn't upgrade you. please contact support below.
+                                                            If you have any questions, please contact us at <a style="color: rgb(56,189, 248);" href="mailto:contact@restorecord.com">contact@restorecord.com</a>.
+                                                            <br />
+                                                            Sincerely,
+                                                            RestoreCord
+                                                        </p>
+                                                    </div>
+                                                    <div style="text-align: center; margin-top: 1rem;">
+                                                        <em style="color: rb(190, 198, 213)">
+                                                            Copyright © 2022 RestoreCord. All rights reserved.
+                                                        </em>
+                                                    </div>
+                                                </div>
+                                            </body>
+                                        </html>
+                                    `,
+                                    }
+                                ]
+                            }).then(() => {
+                                console.log(`[Email] Failed to upgraded ${body.additional_information[0].value} (${body.invoice.customer_information.email}) to ${body.listing.title}!`);
+                            }).catch((err: any) => {
+                                console.error(err);
+                            })
 
-                        await prisma.accounts.update({
-                            where: {
-                                username: body.additional_information[0].value,
-                            },
-                            data: {
-                                role: body.variant.product.slug.split("-")[0],
-                                expiry: expiry,
-                            },
-                        }).then(() => {
-                            return res.status(200).end(`Successfully upgraded ${body.additional_information[0].value} to ${body.variant.product.title}!`);
-                        });
+                            return res.status(200).end(`Failed to upgrade ${body.additional_information[0].value} to ${body.listing.title}, contact support! support@restorecord.com`);
+                        }
                     }
                 }
                 else {
