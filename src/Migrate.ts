@@ -95,6 +95,7 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
             }).catch(async (err: any) => {
                 console.log(`${err}`);
             });
+            console.log(`[INFO] Refreshed token for ${userId} in ${guildId}`);
             await addMember(guildId, userId, botToken, resp.data.access_token, [BigInt(roleId).toString()])
         }
     }).catch(async (err) => { 
@@ -151,7 +152,7 @@ export async function resolveUser(token: string): Promise<User> {
 
     return await axios.get("https://discord.com/api/users/@me", {
         headers: {
-            Authorization: `Bearer ${token}`,
+            "Authorization": `Bearer ${token}`,
             "X-RateLimit-Precision": "millisecond",
             "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
         },

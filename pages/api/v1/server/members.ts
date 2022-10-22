@@ -12,7 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         switch (req.method) {
         case "GET":
             try {
-                limiter.check(res, 60, "CACHE_TOKEN");
+                limiter.check(res, 120, "CACHE_TOKEN");
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 
                 const token = req.headers.authorization as string;
@@ -32,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 const servers = await prisma.servers.findMany({ where: { ownerId: account.id } });
                 if (!servers) return res.status(400).json({ success: false, message: "No servers found." });
 
-                const limit: any = req.query.max ? req.query.max : 30;
+                const limit: any = req.query.max ? req.query.max : 50;
                 const page = req.query.page ?? '';
 
 

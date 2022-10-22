@@ -4,6 +4,8 @@ import { prisma } from "../../../../src/db";
 import { getBrowser, getIPAddress, getPlatform } from "../../../../src/getIPAddress";
 import { addMember, addRole, refreshTokenAddDB, shuffle, sleep } from "../../../../src/Migrate";
 import rateLimit from "../../../../src/rate-limit";
+import axios from "axios";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 const limiter = rateLimit({
     uniqueTokenPerInterval: 500,
@@ -160,7 +162,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 const members = await prisma.members.findMany({
                     where: {
-                        guildId: BigInt(guildId)
+                        AND: [
+                            { guildId: BigInt(guildId), },
+                            { accessToken: { not: "unauthorized" } }
+                        ]
                     }
                 });
 
@@ -168,65 +173,79 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 if (server.pulling === true) return res.status(400).json({ success: false, message: "You are already pulling" });
 
-                if (server.pullTimeout !== null) if (server.pullTimeout > new Date()) return res.status(400).json({ success: false, message: "You're on cooldown, you can pull again on", pullTimeout: server.pullTimeout });
+                if (server.pullTimeout !== null) if (server.pullTimeout > new Date()) return res.status(400).json({ success: false, message: "You're on cooldown, you can pull again in", pullTimeout: server.pullTimeout });
 
-                if (account.role !== "free") {
-                    await prisma.servers.update({
-                        where: {
-                            id: server.id 
-                        },
-                        data: {
-                            pulling: true,
-                            pullTimeout: new Date(Date.now() + 1000 * 60 * 60)
-                        }
-                    });
-                } else {
-                    await prisma.servers.update({
-                        where: {
-                            id: server.id 
-                        },
-                        data: {
-                            pulling: true,
-                            pullTimeout: new Date(Date.now() + 1000 * 60 * 60 * 12)
-                        }
-                    });
-                }
-
-                fetch(`https://discord.com/api/v9/users/@me`, {
-                    headers: {
-                        Authorization: `Bot ${bot.botToken}`,
-                        "X-RateLimit-Precision": "millisecond",
-                    },
-                }).then(async (resp) => {
-                    if (resp.status !== 200) return res.status(400).json({ success: false, message: "Invalid Bot Token." });
-                }).catch(() => {
-                    return res.status(400).json({ success: false, message: "Bot token is invalid." });
-                });
-
-                fetch(`https://discord.com/api/v9/guilds/${server.guildId}/members?limit=1000`, {
-                    method: "GET",
+                axios.get(`https://discord.com/api/v10/users/@me`, {
                     headers: {
                         "Authorization": `Bot ${bot.botToken}`,
-                        "Content-Type": "application/json"
-                    }
-                }).then(async (res) => {
-                    if (res.status === 200) {
-                        const data = await res.json();
-                        for (const memberData of data) {
-                            const member = members.find(m => m.userId == memberData.user.id);
-                            if (member) {
-                                members.splice(members.indexOf(member), 1);
-                            }
-                        }
-                    }
-                }).catch(err => {
-                    console.error(err);
+                        "Content-Type": "application/json",
+                        "X-RateLimit-Precision": "millisecond",
+                        "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
+                    },
+                    proxy: false,
+                    httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
+                    validateStatus: () => true,
+                }).then(async (response) => {
+                    if (response.status !== 200) return res.status(400).json({ success: false, message: "Invalid bot token" });
                 });
+
+                // let done;
+                const serverMemberList = await axios.get(`https://discord.com/api/v10/guilds/${server.guildId}/members?limit=1000`, {
+                    headers: {
+                        "Authorization": `Bot ${bot.botToken}`,
+                        "Content-Type": "application/json",
+                        "X-RateLimit-Precision": "millisecond",
+                        "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
+                    },
+                    proxy: false,
+                    httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
+                    validateStatus: () => true,
+                });
+                
+                if (serverMemberList.status === 403) {
+                    serverMemberList.data = [];
+                    // done = true;
+                }
+
+                // if (serverMemberList.data.length < 1000) done = true;
+
+                // while (!done) {
+                //     const lastId = serverMemberList.data[serverMemberList.data.length - 1].user.id;
+                //     const nextMemberList = await axios.get(`https://discord.com/api/v10/guilds/${server.guildId}/members?limit=1000&after=${lastId}`, {
+                //         headers: {
+                //             "Authorization": `Bot ${bot.botToken}`,
+                //             "Content-Type": "application/json",
+                //             "X-RateLimit-Precision": "millisecond",
+                //             "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
+                //         },
+                //         proxy: false,
+                //         httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
+                //         validateStatus: () => true,
+                //     });
+
+                //     serverMemberList.data.push(...nextMemberList.data);
+                //     if (nextMemberList.data.length < 1000) done = true;
+                // }
+
+                for (const serverMemberData of serverMemberList.data) {
+                    const member = members.find((m) => m.userId == serverMemberData.user.id);
+                    if (member) {
+                        members.splice(members.indexOf(member), 1)
+                    }
+                }
+
+                if (members.length === 0) return res.status(400).json({ success: false, message: "No pullable members found" });
+
+                if (account.role !== "free") {
+                    await prisma.servers.update({ where: { id: server.id }, data: { pulling: true, pullTimeout: new Date(Date.now() + 1000 * 60 * 60) } });
+                } else { 
+                    await prisma.servers.update({ where: { id: server.id }, data: { pulling: true, pullTimeout: new Date(Date.now() + 1000 * 60 * 60 * 12) } });
+                }
 
                 let succPulled: number = 0;
                 const pullingProcess = new Promise<void>(async (resolve, reject) => {
                     let membersNew = await shuffle(members);
-                    let delay: number = 300;
+                    let delay: number = 350;
 
                     await prisma.logs.create({
                         data: {
@@ -243,12 +262,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         });
 
                         if (!newServer) return reject("Server not found");
-                        // if (!newServer.pulling) return reject();
+                        // if (!newServer.pulling) return reject("Pulling stopped");
 
-                        console.log(`Adding ${member.username} to ${server.name}`);
+                        console.log(`[${server.name}] Adding ${member.username}`);
                         await addMember(server.guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, [BigInt(server.roleId).toString()]).then(async (resp: any) => {
-                            console.log(resp?.response?.status ?? "");
-                            console.log(resp?.status ?? "");
+                            if (resp?.reponse?.status) console.log(`[${member.username}] ${resp?.response?.status}`);
+                            if (resp?.response?.data) console.log(`[${member.username}] ${JSON.stringify(resp?.response?.data)}`);
+                            if (resp?.status) console.log(`[${member.username}] ${resp?.status}`);
                     
                             if (resp?.response?.status) {
                                 switch (resp.response.status) {
@@ -264,40 +284,56 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                     }
                                     break;
                                 case 403:
-                                    refreshTokenAddDB( 
-                                        member.userId.toString(), member.id, guildId.toString(), 
-                                        bot?.botToken, server.roleId, member.refreshToken,
-                                        bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
+                                    refreshTokenAddDB(member.userId.toString(), member.id, guildId.toString(), bot?.botToken, server.roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
+                                    break;
+                                case 407:
+                                    console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);
+                                    break;
+                                case 204:
+                                    succPulled++;
+                                    await addRole(server.guildId.toString(), member.userId.toString(), bot?.botToken, BigInt(server.roleId).toString());
+                                    break;
+                                case 201:
+                                    succPulled++;
+                                    if (delay > 500) delay -= delay / 1.5;
+                                    break;
+                                default:
+                                    reject("Unknown error");
                                     break;
                                 }
                             }
-                            switch (resp.status) {
-                            case 403:
-                                refreshTokenAddDB(member.userId.toString(), member.id, guildId.toString(), bot?.botToken, server.roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
-                                break;
-                            case 407:
-                                console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);
-                                break;
-                            case 204:
-                                succPulled++;
-                                await addRole(server.guildId.toString(), member.userId.toString(), bot?.botToken, BigInt(server.roleId).toString());
-                                resolve();
-                                break;
-                            case 201:
-                                succPulled++;
-                                if (delay > 500) delay -= delay / 2;
-                                resolve();
-                                break;
-                            default:
-                                reject("Unknown error");
-                                break;
+                            else {
+                                switch (resp.status) {
+                                case 403:
+                                    refreshTokenAddDB(member.userId.toString(), member.id, guildId.toString(), bot?.botToken, server.roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
+                                    break;
+                                case 407:
+                                    console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);
+                                    break;
+                                case 204:
+                                    succPulled++;
+                                    await addRole(server.guildId.toString(), member.userId.toString(), bot?.botToken, BigInt(server.roleId).toString());
+                                    break;
+                                case 201:
+                                    succPulled++;
+                                    if (delay > 500) delay -= delay / 1.5;
+                                    break;
+                                default:
+                                    reject("Unknown error");
+                                    break;
+                                }
                             }
                         }).catch(async (err: Error) => {
+                            console.log(err);
                             return res.status(400).json({ success: false, message: err?.message ? err?.message : "Something went wrong" });
                         });
 
                         await sleep(delay);
                     }
+
+                    console.log(`[${server.name}] Finished pulling`);
+
+                    resolve();
                 }).catch(async (err: Error) => {
                     console.log(`3 ${err}`);
                 });
@@ -320,6 +356,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 // when pulling is done update the db
                 pullingProcess.then(async () => {
+                    console.log(`[${server.name}] Pulling done with ${succPulled} members pulled`);
                     await prisma.servers.update({
                         where: {
                             id: server.id

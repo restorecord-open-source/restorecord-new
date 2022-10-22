@@ -82,6 +82,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         botToken: bot.botToken,
                         publicKey: bot.publicKey,
                         botSecret: bot.botSecret,
+                        customDomain: bot.customDomain ? bot.customDomain : null,
                     })),
                 });
 
@@ -133,8 +134,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         accountId: account.id,
                         title: "Password Change",
                         createdAt: {
-                            lt: new Date(Date.now() - 30 * 60 * 1000)
-                        }
+                            gte: new Date(new Date().getTime() - 24 * 60 * 60 * 1000)
+                        },
+                        used: true,
                     }
                 });
 
@@ -222,7 +224,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         where: {
                             accountId: account.id,
                             code: confirmCode,
-                        }
+                        },
                     });
 
                     if (!email || email.expires < new Date()) return res.status(400).json({ success: false, message: "Invalid confirmation code." });

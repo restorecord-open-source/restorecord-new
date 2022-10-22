@@ -207,6 +207,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         botSecret: data.newBotSecret,
                         botToken: data.newBotToken,
                         publicKey: data.newPublicKey,
+                        customDomain: data.newCustomDomain,
                     }
                 });
                 return res.status(200).json({ success: true, message: "Bot successfully Updated", bot: {
