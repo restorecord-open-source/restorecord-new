@@ -17,6 +17,7 @@ import ListItemText from "@mui/material/ListItemText";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import Skeleton from "@mui/material/Skeleton";
+import theme from "../../src/theme";
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
@@ -76,8 +77,8 @@ export default function DashBoard({ user }: any) {
                 enabled: false
             },
             stroke: {
+                colors: [theme.palette.primary.main],
                 curve: "smooth",
-                colors: ['#4f46e5'],
             },
             legend: {
                 horizontalAlign: 'left'
@@ -89,8 +90,15 @@ export default function DashBoard({ user }: any) {
                 },
             },
             fill: {
-                colors: ['#4f46e5'],
+                colors: [theme.palette.primary.light, theme.palette.primary.main],
+                gradient: {
+                    shadeIntensity: 1,
+                    opacityFrom: 0.7,
+                    opacityTo: 0.9,
+                    stops: [200, 90, 100]
+                }
             },
+            colors: [theme.palette.primary.main],
             tooltip: {
                 theme: 'dark',
                 // remove the dot
