@@ -85,14 +85,14 @@ export default function NavBar({ ...props }: any) {
                     <Box sx={{ overflow: "auto" }}>
                         {navItemWrappers.map((item, index) => {
                             return (
-                                <List key={index}>
+                                <List key={index} sx={{ margin: "0.25rem" }}>
                                     {item.items.map((item, index) => {
                                         if (item.admin) {
                                             return null
                                         }
                                         return (
                                             <MuiLink key={index} href={item.href} underline="none" color="inherit">
-                                                <ListItem disablePadding selected={pathName === item.href} sx={{ ["&.Mui-selected"]: { borderRadius: "0.5rem", backgroundColor: "#12121a" } }}>
+                                                <ListItem disablePadding selected={pathName === item.href} sx={{ my: "0.25rem", ["&.Mui-selected"]: { borderRadius: "0.5rem", backgroundColor: "#12121a" } }}>
                                                     <Link href={item.href}>
                                                         <ListItemButton sx={{ borderRadius: "0.5rem" }}>
                                                             {/* <ListItem button selected={pathName === item.href} disablePadding> */}
