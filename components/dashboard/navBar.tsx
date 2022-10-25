@@ -66,7 +66,7 @@ export default function NavBar({ ...props }: any) {
         <>
             <Box sx={{ display: "flex" }}>
                 <CssBaseline />
-                <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+                <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, background: "#13131f", borderBottomLeftRadius: "1rem", borderBottomRightRadius: "1rem" }}>
                     <Toolbar>
                         {isMobile && (
                             <>
@@ -80,7 +80,7 @@ export default function NavBar({ ...props }: any) {
                         </Typography>
                     </Toolbar>
                 </AppBar>
-                <Drawer open={openDrawer} onClose={() => setOpenDrawer(false)} variant="persistent" sx={{ width: drawerWidth, flexShrink: 0, [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: "border-box" } }}>
+                <Drawer open={openDrawer} onClose={() => setOpenDrawer(false)} variant="persistent" sx={{ width: drawerWidth, flexShrink: 0, [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: "border-box", background: "#0c0c12" } }}>
                     <Toolbar />
                     <Box sx={{ overflow: "auto" }}>
                         {navItemWrappers.map((item, index) => {
@@ -92,9 +92,9 @@ export default function NavBar({ ...props }: any) {
                                         }
                                         return (
                                             <MuiLink key={index} href={item.href} underline="none" color="inherit">
-                                                <ListItem disablePadding selected={pathName === item.href} sx={{ "&.Mui-selected": { backgroundColor: "#1e1e1e" } }}>
+                                                <ListItem disablePadding selected={pathName === item.href} sx={{ ["&.Mui-selected"]: { borderRadius: "0.5rem", backgroundColor: "#12121a" } }}>
                                                     <Link href={item.href}>
-                                                        <ListItemButton>
+                                                        <ListItemButton sx={{ borderRadius: "0.5rem" }}>
                                                             {/* <ListItem button selected={pathName === item.href} disablePadding> */}
                                                             <ListItemIcon>
                                                                 {item.icon}
