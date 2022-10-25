@@ -1,4 +1,7 @@
-import styles from "../public/styles/error.module.css";
+import Box from "@mui/material/Box"
+import Button from "@mui/material/Button"
+import Stack from "@mui/material/Stack"
+import Typography from "@mui/material/Typography"
 
 const statusTexts: { [code: number]: string} = {
     400: "Bad Request",
@@ -30,15 +33,16 @@ export default function ErrorPage<ErrorProps>({ statusCode, title: titleOrigin }
 
     return (
         <>
-            <section className={styles.mainWrapper}>
-                <div className={styles.main}>
-                    <div>
-                        <h1 className={styles.header}>{statusCode}</h1>
-                        <p className={styles.subHeader}>{title}</p>
-                        <a className={styles.button} onClick={() => { window.location.href = "/"; }}>Go Back to Homepage</a>
-                    </div>   
-                </div>
-            </section>
+            <Box display="flex" justifyContent="center" alignItems="center" height="100vh" sx={{ textAlign: "center" }}>
+                <Stack spacing={2} sx={{ width: "50%" }}>
+                    <Typography variant="h2" component="h2" sx={{ fontWeight: "bold" }}>{statusCode}</Typography>
+                    <Typography variant="h4" component="h4">{title}</Typography>
+                    <Button variant="contained" onClick={() => { window.location.href = "/"; }}>Go Back to Homepage</Button>
+
+                    {/* titleOrigion as code */}
+                    <Typography variant="h4" component="h4">{titleOrigin}</Typography>
+                </Stack>
+            </Box>
         </>
     )
 }

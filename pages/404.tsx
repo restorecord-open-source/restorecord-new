@@ -1,18 +1,20 @@
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import styles from "../public/styles/error.module.css";
 
 export default function Error404() {
 
     return (
         <>
-            <section className={styles.mainWrapper}>
-                <div className={styles.main}>
-                    <div>
-                        <h1 className={styles.header}>404</h1>
-                        <p className={styles.subHeader}>Not Found</p>
-                        <a className={styles.button} onClick={() => { window.location.href = "/"; }}>Go Back to Homepage</a>
-                    </div>   
-                </div>
-            </section>
+            <Box display="flex" justifyContent="center" alignItems="center" height="100vh" sx={{ textAlign: "center" }}>
+                <Stack spacing={2} sx={{ width: "50%" }}>
+                    <Typography variant="h2" component="h2" sx={{ fontWeight: "bold" }}>404</Typography>
+                    <Typography variant="h4" component="h4" >Not Found</Typography>
+                    <Button variant="contained" onClick={() => { window.location.href = "/"; }}>Go Back to Homepage</Button>
+                </Stack>
+            </Box>
         </>
     )
 }

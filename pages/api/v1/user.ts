@@ -17,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         switch (req.method) {
         case "GET":
             try {
-                limiter.check(res, 60, "CACHE_TOKEN");
+                limiter.check(res, 500, "CACHE_TOKEN");
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 
                 const token = req.headers.authorization as string;
@@ -62,6 +62,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     ...(account.admin === true && { admin: true }),
                     createdAt: account.createdAt,
                     expiry: account.expiry,
+                    tfa: account.twoFactor,
                     servers: servers.map(server => ({
                         id: server.id,
                         name: server.name,
