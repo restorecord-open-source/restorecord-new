@@ -100,7 +100,7 @@ export default function Home() {
                                 <Grid item xs={12} sm={6} md={4} key={id}>
                                     <Paper elevation={1} sx={{ borderRadius: "8px", background: "rgba(0, 0, 0, 0.5)", backdropFilter: "blur(0.25rem)", transition: "all 0.2s ease-in-out", "&:hover": { transform: "scale(1.05)", boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)" }, border: "1px solid rgba(255, 255, 255, 0.125)" }}>
                                         <CardContent sx={{ alignItems: "center", display: "flex", flexDirection: "column" }}>
-                                            <Paper elevation={0} sx={{ width: "56px", height: "56px", marginBottom: 2, borderRadius: "50%", alignItems: "center", justifyContent: "center", display: "flex", backgroundColor: "rgba(79, 70, 229, 0.85)", boxShadow: "0px 0px 15px rgba(0, 0, 0, 0.5)" }}>
+                                            <Paper elevation={0} sx={{ width: "56px", height: "56px", marginBottom: 2, borderRadius: "50%", alignItems: "center", justifyContent: "center", display: "flex", backgroundColor: theme.palette.primary.main, boxShadow: "0px 0px 15px rgba(0, 0, 0, 0.5)" }}>
                                                 {feature.icon}
                                             </Paper>
                                             <Typography variant="h5" component="h2" sx={{ textAlign: "center", fontWeight: "700", fontSize: "1.5rem" }}>
