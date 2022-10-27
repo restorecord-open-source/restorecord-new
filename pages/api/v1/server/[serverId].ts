@@ -91,6 +91,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 if (!server) return res.status(400).json({ success: false, message: "Server not found" });
 
+                const backup = await prisma.backups.findFirst({ where: { guildId: server.guildId } });
+
+                if (backup) {
+                    await prisma.roles.deleteMany({ where: { backupId: backup.backupId } });
+                    const channels = await prisma.channels.findMany({ where: { backupId: backup.backupId } });
+                    for (const channel of channels) {
+                        await prisma.channelPermissions.deleteMany({ where: { channelId: channel.channelId } });
+                    }
+                    await prisma.channels.deleteMany({ where: { backupId: backup.backupId } });
+                    await prisma.guildMembers.deleteMany({ where: { backupId: backup.backupId } });
+                    await prisma.backups.deleteMany({ where: { backupId: backup.backupId } });
+                }
+
+
                 await prisma.members.deleteMany({
                     where: {
                         AND: [
