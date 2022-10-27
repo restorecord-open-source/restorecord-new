@@ -13,10 +13,16 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import axios from "axios";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Head from "next/head";
+import Script from "next/script";
+import { Badge, FormControl } from "@mui/material";
+import { useQRCode } from "next-qrcode";
 
 export default function Account({ user }: any) {
     const [token]: any = useToken();
     const router = useRouter();
+    const { Canvas: QRCode } = useQRCode();
 
     const [openS, setOpenS] = useState(false);
     const [openE, setOpenE] = useState(false);
@@ -30,16 +36,21 @@ export default function Account({ user }: any) {
     const [loading3, setLoading3] = useState(false);
     const [loading4, setLoading4] = useState(false);
 
+    const [twoFASecret, setTwoFASecret] = useState("NULL");
+    const [twoFAUrl, setTwoFAUrl] = useState("NULL");
+
     const [password, setPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [newPassword2, setNewPassword2] = useState("");
     const [confirmCode, setConfirmCode] = useState("");
+
+    const [twoFACode, setTwoFACode] = useState("");
+
     const codeRef: any = useRef<HTMLInputElement>();
 
     return (
         <>
             <Container maxWidth="xl">
-
                 <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
                     <Alert elevation={6} variant="filled" severity="error">
                         {notiTextE}
@@ -58,7 +69,7 @@ export default function Account({ user }: any) {
                     </Alert>
                 </Snackbar>
 
-                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #2f2f2f" }}>
+                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
                     <CardContent>
                         <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
                             Settings
@@ -97,37 +108,142 @@ export default function Account({ user }: any) {
                     </CardContent>
                 </Paper>
 
-                {/* <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #2f2f2f" }}>
+                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
                     <CardContent>
-                        <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
-                            2-Factor Authentication
-                        </Typography>
+                        <Badge badgeContent={<>BETA</>} color="primary" sx={{ [`& .MuiBadge-badge`]: { mt: "1.5rem", mr: "-2.5rem", color: "#fff", padding: "0.85rem", fontSize: "0.95rem", fontWeight: "bold" } }}>
+                            <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                                2-Factor Authentication
+                            </Typography>
+                        </Badge>
 
                         <Typography variant="body1" sx={{ mb: 2 }}>
-                            <b>2-Factor Authentication</b>: {user.auth ? "Enabled" : "Disabled"}
+                            <b>2-Factor Authentication Status</b>: {user.tfa ? "Enabled" : "Disabled"}
                         </Typography>
-                        
+
+                        {twoFASecret !== "NULL" ? (
+                            <>
+                                <QRCode 
+                                    text={twoFAUrl}
+                                    options={{
+                                        type: "image/png",
+                                        level: "H",
+                                        margin: 0,
+                                        scale: 6,
+                                        color: {
+                                            dark: "#ffffff",
+                                            light: "#1e1e1e",
+                                        }
+                                    }} />
+                                <Typography variant="body1" sx={{ mb: 2 }}>
+                                    Or use the secret (hover for 3s): <Typography variant="caption" sx={{
+                                        filter: "blur(0.25rem)",
+                                        transition: "0.5s all",
+                                        transitionDelay: "0s",
+                                        [`&:hover`]: {
+                                            filter: "blur(0px)",
+                                            transitionDelay: "0.5s",
+                                        },
+                                    }}>{twoFASecret}</Typography>
+                                </Typography>
+                            </>
+                        ) : null}
+
                         <Stack spacing={2}>
-                            {user.auth ? (
+                            <TextField label="Confirm Password" variant="outlined" type="password" fullWidth required onChange={(e) => { setPassword(e.target.value); }} onPaste={(e) => { setPassword(e.clipboardData.getData("text")); }} />
+                            {user.tfa === true && ( 
+                                <LoadingButton variant="contained" color="primary" loading={loading2} sx={{ mt: 2}} fullWidth onClick={() => { }} disabled>Remove 2-Factor Authentication</LoadingButton>
+                            )}
+
+                            {(twoFASecret == "NULL" && user.tfa == false) && (
+                                <LoadingButton variant="contained" color="primary" loading={loading2} fullWidth onClick={(e: any) => {
+                                    setLoading2(true);
+                                    setNotiTextI("Updating...");
+                                    setOpenI(true);
+
+                                    axios.patch(`/api/v1/user`, {
+                                        password: password,
+                                        code: twoFACode,
+                                    }, {
+                                        headers: {
+                                            "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                        },
+                                        validateStatus: () => true
+                                    }).then((res: any) => {
+                                        setOpenI(false);
+        
+                                        if (!res.data.success) {
+                                            setNotiTextE(res.data.message);
+                                            setOpenE(true);
+                                        }
+                                        else {
+                                            setNotiTextS(res.data.message);
+                                            setOpenS(true);
+                                            setTwoFASecret(res.data.secret);
+                                            setTwoFAUrl(res.data.url);
+                                        }
+                                        
+                                        setTimeout(() => {
+                                            setLoading2(false);
+                                        }, 500);
+                                    }).catch((err: any) => {
+                                        console.error(err);
+                                        setNotiTextE(err);
+                                        setOpenE(true);
+                                    });
+                                }}>
+                                    Rquest 2-Factor Authentication
+                                </LoadingButton>
+                            )}
+                            {(twoFASecret !== "NULL" && user.tfa == false) && (
                                 <>
-                                    <TextField label="2-Factor Authentication code" variant="outlined" type="password" fullWidth />
-                                    <Button variant="contained" color="error" fullWidth onClick={(e: any) => { setOpenE(true); setNotiTextE("2-Factor Authentication disabled"); }}>
-                                        Disable 2-Factor Authentication
-                                    </Button>
-                                </>
-                            ) : (
-                                <>
-                                    <TextField label="2-Factor Authentication code" variant="outlined" type="password" fullWidth />
-                                    <Button variant="contained" color="primary" fullWidth onClick={(e: any) => { setOpenS(true); setNotiTextS("2-Factor Authentication enabled"); }}>
+                                    <TextField label="2-Factor Authentication code" variant="outlined" type="twoFACode" placeholder="123 456" defaultValue="" fullWidth required onChange={(e) => { setTwoFACode(e.target.value); }} onPaste={(e) => { setTwoFACode(e.clipboardData.getData("text")); }} />
+                                    <LoadingButton variant="contained" color="success" loading={loading1} fullWidth onClick={(e: any) => { 
+                                        setLoading1(true);
+                                        setNotiTextI("Updating...");
+                                        setOpenI(true);
+
+                                        axios.patch(`/api/v1/user`, {
+                                            password: password,
+                                            code: twoFACode,
+                                        }, {
+                                            headers: {
+                                                "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                            },
+                                            validateStatus: () => true
+                                        }).then((res: any) => {
+                                            setOpenI(false);
+        
+                                            if (!res.data.success) {
+                                                setNotiTextE(res.data.message);
+                                                setOpenE(true);
+                                            }
+                                            else {
+                                                setNotiTextS(res.data.message);
+                                                setOpenS(true);
+                                                
+                                                setTimeout(() => {
+                                                    location.reload();
+                                                }, 2000);
+                                            }
+                                        
+                                            setTimeout(() => {
+                                                setLoading1(false);
+                                            }, 500);
+                                        }).catch((err: any) => {
+                                            console.error(err);
+                                            setNotiTextE(err);
+                                            setOpenE(true);
+                                        });
+                                    }}>
                                         Enable 2-Factor Authentication
-                                    </Button>
+                                    </LoadingButton>
                                 </>
                             )}
                         </Stack>
                     </CardContent>
-                </Paper> */}
+                </Paper>
 
-                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #2f2f2f" }}>
+                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
                     <CardContent>
                         <form method="POST">
                             <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
@@ -141,8 +257,8 @@ export default function Account({ user }: any) {
                                 <TextField label="Code" variant="outlined" fullWidth required onChange={(e) => { setConfirmCode(e.target.value); }} onPaste={(e) => { setConfirmCode(e.clipboardData.getData("text")); }} ref={codeRef} sx={{ display: "none" }} />
                             </Stack>
 
-                            <LoadingButton variant="contained" color="primary" loading={loading2} fullWidth sx={{ mt: 2 }} onClick={(e: any) => {
-                                setLoading2(true);
+                            <LoadingButton variant="contained" color="primary" loading={loading3} fullWidth sx={{ mt: 2 }} onClick={(e: any) => {
+                                setLoading3(true);
                                 setNotiTextI("Updating...");
                                 setOpenI(true);
                             
@@ -180,7 +296,7 @@ export default function Account({ user }: any) {
                                     }
                                 
                                     setTimeout(() => {
-                                        setLoading2(false);
+                                        setLoading3(false);
                                     }, 500);
                                 }).catch((err: any) => {
                                     console.error(err);

@@ -1,4 +1,5 @@
 import { SxProps } from "@mui/material";
+import { createHmac, randomBytes } from "crypto";
 
 export function stringToColor(string: string) {
     let hash = 0;
@@ -28,4 +29,10 @@ export function stringAvatar(name: string, props: { sx: SxProps }) {
         },
         children: `${name.split(' ')[0][0]}`,
     };
+}
+
+export function generateQRUrl(secret: string, username: string, issuer: string = "RestoreCord") {
+    const otpauth = `otpauth://totp/${username}?secret=${secret}&issuer=${issuer}`;
+    return otpauth;
+    // return `https://chart.googleapis.com/chart?chs=512x512&chld=L|0&cht=qr&chl=${encodeURIComponent(otpauth)}`;
 }

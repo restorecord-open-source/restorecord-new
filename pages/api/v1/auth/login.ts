@@ -7,6 +7,7 @@ import { prisma } from "../../../../src/db";
 import { getIPAddress, getBrowser, getPlatform } from "../../../../src/getIPAddress";
 import { ProxyCheck } from "../../../../src/proxycheck";
 import { Email } from "../../../../src/email";
+import * as speakeasy from "speakeasy";
 dotenv.config({ path: "../../" });
 
 
@@ -21,6 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     try {
         const data = { ...req.body };
+        let tokenExpiry: string = "30d";
 
         if (!data.username || !data.password) {
             return res.status(400).json({ message: "Missing username or password" });
@@ -44,7 +46,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         if (!isValid) return res.status(400).json({ message: "Some Credentials are incorrect" });
 
-        const token = sign({ id: account.id, }, `${process.env.JWT_SECRET}`, { expiresIn: "30d" });
+        if ((account.twoFactor && account.googleAuthCode) && !data.totp) return res.status(400).json({ message: "2FA Code Required" });
+
+        if (account.twoFactor && account.googleAuthCode) {
+            const totpVerify = speakeasy.totp.verify({
+                secret: account.googleAuthCode,
+                encoding: "base32",
+                token: data.totp
+            });
+
+            if (!totpVerify) return res.status(400).json({ message: "Invalid 2FA Code" });
+
+            tokenExpiry = "7d";
+        }
+
+        const token = sign({ id: account.id }, `${process.env.JWT_SECRET}`, { expiresIn: tokenExpiry });
 
         await prisma.sessions.create({
             data: {

@@ -21,6 +21,7 @@ export default function Login() {
 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [totp, setTotp] = useState("");
 
     const [openS, setOpenS] = useState(false);
     const [openE, setOpenE] = useState(false);
@@ -41,7 +42,8 @@ export default function Login() {
             },
             body: JSON.stringify({
                 username: username,
-                password: password
+                password: password,
+                totp: totp
             })
         })
             .then(res => res.json())
@@ -71,6 +73,9 @@ export default function Login() {
             break;
         case "password":
             setPassword(value);
+            break;
+        case "totp":
+            setTotp(value);
             break;
         default:
             break;
@@ -149,6 +154,7 @@ export default function Login() {
                                     id="username"
                                     label="Username"
                                     name="username"
+                                    placeholder="Username"
                                     autoComplete="username"
                                     InputProps={{ inputProps: { minLength: 2, maxLength: 20 } }}
                                     autoFocus
@@ -166,8 +172,22 @@ export default function Login() {
                                     type="password"
                                     id="password"
                                     autoComplete="password"
+                                    placeholder="••••••••••••"
                                     InputProps={{ inputProps: { minLength: 6, maxLength: 45 } }}
                                     value={password}
+                                    onChange={handleChange}
+                                />
+                                <TextField
+                                    variant="outlined"
+                                    margin="normal"
+                                    fullWidth
+                                    name="totp"
+                                    label="2FA Code"
+                                    id="totp"
+                                    placeholder="Leave blank if you don't have 2FA enabled"
+                                    autoComplete="2fa"
+                                    InputProps={{ inputProps: { minLength: 6, maxLength: 6, pattern: "[0-9]*" } }}
+                                    value={totp}
                                     onChange={handleChange}
                                 />
                                 <Button
@@ -183,7 +203,7 @@ export default function Login() {
                                     <Grid item xs>
                                         <Link href="/forgot">
                                             <MuiLink variant="body2" component="a" href="/forgot">
-                                            Forgot password?
+                                                Forgot password?
                                             </MuiLink>
                                         </Link>
                                     </Grid>
