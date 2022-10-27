@@ -13,7 +13,7 @@ html {
 
 body {
 	scrollbar-color: hsla(0, 0%, 100%, 0.25) transparent;
-	background-color: #09090d !important;
+	background-color: transparent !important;
 }
 
 :root {
