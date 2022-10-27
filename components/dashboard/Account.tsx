@@ -191,7 +191,7 @@ export default function Account({ user }: any) {
                                         setOpenE(true);
                                     });
                                 }}>
-                                    Rquest 2-Factor Authentication
+                                    Start 2-Factor Authentication Setup
                                 </LoadingButton>
                             )}
                             {(twoFASecret !== "NULL" && user.tfa == false) && (
