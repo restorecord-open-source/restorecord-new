@@ -70,8 +70,60 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
                     if (!serverOwner) return res.status(400).json({ success: false, message: "No server owner found" });
 
+                    addMember(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, respon.data.access_token, [BigInt(serverInfo?.roleId).toString()]).then(async (resp) => {
+                        try {
+                            if (resp?.status === 201 || resp?.status === 204 || resp?.response?.status === 201 || resp?.response?.status === 204) {
+                                console.log(`${account?.username} adding member ${resp.status ? resp.status : resp.response.status} (${rGuildId.toString()}, ${userId.toString()}, ${respon.data.access_token}, ${[BigInt(serverInfo?.roleId).toString()]})`);
+                                if (resp?.status === 204 || resp?.response?.status === 204) {
+                                    await addRole(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, serverInfo?.roleId.toString()).then(async (response) => {
+                                        console.log(`${account?.username} adding role: ${response?.status} (${rGuildId.toString()}, ${userId.toString()}, ${serverInfo?.roleId.toString()})`);
+                                        if (response.status !== 204) { res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=5;`); return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`); }
+                                        else if (response.status === 204) { res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`); return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`); } else { return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`); }
+                                    }).catch((err) => {
+                                        console.error(`addRole: ${err}`);
+                                    })
+                                } else {
+                                    res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
+                                    return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
+                                }
+                            } else if (resp?.status === 403 || resp?.response?.status === 403 || resp?.response?.data?.code === "50013") {
+                                res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=5;`);
+                                return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
+                            } else if (resp?.status === 429 || resp?.response?.status === 429 || resp?.response?.data?.retry_after) {
+                                // try again to add member
+                                setTimeout(async () => {
+                                    addMember(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, respon.data.access_token, [BigInt(serverInfo?.roleId).toString()]).then(async (resp) => {
+                                        console.log(`${account?.username} adding member ${resp.status ? resp.status : resp.response.status} (${rGuildId.toString()}, ${userId.toString()}, ${respon.data.access_token}, ${[BigInt(serverInfo?.roleId).toString()]})`);
+                                        if (resp?.status === 204 || resp?.response?.status === 204) {
+                                            await addRole(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, serverInfo?.roleId.toString()).then(async (response) => {
+                                                console.log(`${account?.username} adding role: ${response?.status} (${rGuildId.toString()}, ${userId.toString()}, ${serverInfo?.roleId.toString()})`);
+                                                if (response.status !== 204) { res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=5;`); return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`); }
+                                                else if (response.status === 204) { res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`); return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`); } else { return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`); }
+                                            }).catch((err) => {
+                                                console.error(`addRole: ${err}`);
+                                            })
+                                        } else {
+                                            res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
+                                            return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
+                                        }
+                                    }).catch((err) => {
+                                        console.error(`2: addMember: ${err}`);
+                                        return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
+                                    })
+                                }, resp?.response?.data?.retry_after ? resp?.response?.data?.retry_after : 1000);
+                            }
+                            else {
+                                return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
+                            }
+                        } catch (err: any) {
+                            console.error(`addMember: ${err}`);
+                            return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
+                        }
+                    }).catch((err) => {
+                        console.error(`addMember ${err}`);
+                        return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
+                    });
 
-                    // if (!user) {
                     if (serverInfo.webhook) {
                         const createdAt: number = account.id / 4194304 + 1420070400000;
                         const pCheck = await ProxyCheck.check(IPAddr, { vpn: true, asn: true });
@@ -186,61 +238,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                             }
                         }
                     }
-                    // }
-
-                    addMember(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, respon.data.access_token, [BigInt(serverInfo?.roleId).toString()]).then(async (resp) => {
-                        try {
-                            if (resp?.status === 201 || resp?.status === 204 || resp?.response?.status === 201 || resp?.response?.status === 204) {
-                                console.log(`${account?.username} adding member ${resp.status ? resp.status : resp.response.status} (${rGuildId.toString()}, ${userId.toString()}, ${respon.data.access_token}, ${[BigInt(serverInfo?.roleId).toString()]})`);
-                                if (resp?.status === 204 || resp?.response?.status === 204) {
-                                    await addRole(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, serverInfo?.roleId.toString()).then(async (response) => {
-                                        console.log(`${account?.username} adding role: ${response?.status} (${rGuildId.toString()}, ${userId.toString()}, ${serverInfo?.roleId.toString()})`);
-                                        if (response.status !== 204) { res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=5;`); return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`); }
-                                        else if (response.status === 204) { res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`); return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`); } else { return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`); }
-                                    }).catch((err) => {
-                                        console.error(`addRole: ${err}`);
-                                    })
-                                } else {
-                                    res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
-                                    return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
-                                }
-                            } else if (resp?.status === 403 || resp?.response?.status === 403 || resp?.response?.data?.code === "50013") {
-                                res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=5;`);
-                                return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
-                            } else if (resp?.status === 429 || resp?.response?.status === 429 || resp?.response?.data?.retry_after) {
-                                // try again to add member
-                                setTimeout(async () => {
-                                    addMember(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, respon.data.access_token, [BigInt(serverInfo?.roleId).toString()]).then(async (resp) => {
-                                        console.log(`${account?.username} adding member ${resp.status ? resp.status : resp.response.status} (${rGuildId.toString()}, ${userId.toString()}, ${respon.data.access_token}, ${[BigInt(serverInfo?.roleId).toString()]})`);
-                                        if (resp?.status === 204 || resp?.response?.status === 204) {
-                                            await addRole(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, serverInfo?.roleId.toString()).then(async (response) => {
-                                                console.log(`${account?.username} adding role: ${response?.status} (${rGuildId.toString()}, ${userId.toString()}, ${serverInfo?.roleId.toString()})`);
-                                                if (response.status !== 204) { res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=5;`); return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`); }
-                                                else if (response.status === 204) { res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`); return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`); } else { return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`); }
-                                            }).catch((err) => {
-                                                console.error(`addRole: ${err}`);
-                                            })
-                                        } else {
-                                            res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
-                                            return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
-                                        }
-                                    }).catch((err) => {
-                                        console.error(`2: addMember: ${err}`);
-                                        return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
-                                    })
-                                }, resp?.response?.data?.retry_after ? resp?.response?.data?.retry_after : 1000);
-                            }
-                            else {
-                                return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
-                            }
-                        } catch (err: any) {
-                            console.error(`addMember: ${err}`);
-                            return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
-                        }
-                    }).catch((err) => {
-                        console.error(`addMember ${err}`);
-                        return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
-                    });
                     
                     if (!user) {
                         await prisma.members.create({
