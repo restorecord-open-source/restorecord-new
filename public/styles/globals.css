@@ -35,3 +35,30 @@ body {
 	background: #4f46e5;
 	z-index: 99999;
 }
+.fadeIn {
+	animation: fadeIn 0.25s ease both;
+}
+
+.fadeOut {
+	animation: fadeOut 0.25s ease both;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes fadeOut {
+	from {
+		opacity: 1;
+	}
+
+	to {
+		opacity: 0;
+	}
+}

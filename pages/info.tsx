@@ -58,7 +58,7 @@ export default function Info() {
         }, 1000);
 
         return () => clearInterval(interval);
-    }, []);
+    });
 
     const [stats, setStats]: any = useState({
         accounts: 0,
