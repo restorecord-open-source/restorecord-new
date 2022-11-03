@@ -8,6 +8,7 @@ import getUser from "../../../src/dashboard/getUser";
 
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function Custombots() {
     const [ token ]: any = useToken()
@@ -19,7 +20,7 @@ export default function Custombots() {
 
 
     if (isLoading) {
-        return <div>Loading...</div>
+        return <CircularProgress />
     }
 
     if (isError) {
@@ -29,7 +30,7 @@ export default function Custombots() {
     if (!data.username) {
         router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
 
-        return <p>Loading...</p>
+        return <CircularProgress />
     }
     
     return (

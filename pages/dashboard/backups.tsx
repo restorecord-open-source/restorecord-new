@@ -7,6 +7,7 @@ import Toolbar from "@mui/material/Toolbar";
 import NavBar from "../../components/dashboard/navBar";
 import DashBackups from "../../components/dashboard/Backups";
 import getUser from "../../src/dashboard/getUser";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function Backups() {
     const [ token ]: any = useToken()
@@ -17,7 +18,7 @@ export default function Backups() {
     }), { retry: false, refetchOnWindowFocus: false });
 
     if (isLoading) {
-        return <div>Loading...</div>
+        return <CircularProgress />
     }
 
     if (isError) {
@@ -27,7 +28,7 @@ export default function Backups() {
     if (!data.username) {
         router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
 
-        return <p>Loading...</p>
+        return <CircularProgress />
     }
     
     return (

@@ -18,6 +18,7 @@ import TextField from "@mui/material/TextField";
 import { useMemo, useState } from "react";
 import axios from "axios";
 import Alert from "@mui/lab/Alert";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function Admin() {
     const router = useRouter();
@@ -62,7 +63,7 @@ export default function Admin() {
 
 
     if (isLoading) {
-        return <div>Loading...</div>
+        return <CircularProgress />
     }
 
     if (isError) {
@@ -72,7 +73,7 @@ export default function Admin() {
     if (!data.username) {
         router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
 
-        return <p>Loading...</p>
+        return <CircularProgress />
     }
 
     if (!data.admin) {

@@ -8,6 +8,7 @@ import getUser from "../../../src/dashboard/getUser";
 
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function Settings() {
     const [ token ]: any = useToken()
@@ -18,7 +19,7 @@ export default function Settings() {
     }), { retry: false, refetchOnWindowFocus: false });
 
     if (isLoading) {
-        return <div>Loading...</div>
+        return <CircularProgress />
     }
 
     if (isError) {
@@ -28,7 +29,7 @@ export default function Settings() {
     if (!data.username) {
         router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
 
-        return <p>Loading...</p>
+        return <CircularProgress />
     }
     
     return (
