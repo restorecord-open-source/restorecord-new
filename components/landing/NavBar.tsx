@@ -40,9 +40,9 @@ function ElevationScroll(props: Props = { children: <div style={{ backgroundColo
 }
 
 export default function NavBar() {
-    const [button, setButten] = useState({
-        text: "Login",
-        href: "/login"
+    const [button, setButton] = useState({
+        text: "Dashboard",
+        href: "/dashboard"
     });
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -52,30 +52,19 @@ export default function NavBar() {
     const handleClose = () => setAnchorEl(null);
 
     const checkSession = async () => {
-        await fetch(`/api/v1/user`, {
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `${localStorage.getItem("token")}`
-            }
-        })
-            .then(res => res.json())
-            .then(res => {
-                if (!res.success) {
-                    setButten({
-                        text: "Login",
-                        href: "/login"
-                    });
-                }
-                else {
-                    setButten({
-                        text: "Dashboard",
-                        href: "/dashboard"
-                    });
-                }
-            })
+        if (localStorage.getItem("token")) {
+            const token = localStorage?.getItem("token")?.split(".");
+            if (token) {
+                const payload = JSON.parse(atob(token[1]));
+                if (!payload.id && new Date(payload.exp * 1000) < new Date()) { setButton({ text: "Login", href: "/login" }); }
+                else { setButton({ text: "Dashboard", href: "/dashboard" }); }
+            } else { setButton({ text: "Login", href: "/login" }); }
+        } else { setButton({ text: "Login", href: "/login" }); }
     }
 
     useEffect(() => {
+        checkSession();
+
         window.addEventListener("storage", async function (e) {
             checkSession();
         });
