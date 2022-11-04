@@ -10,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 const token = req.headers.authorization as string;
                 const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
 
-                if (!valid) return res.status(400).json({ success: false });
+                if (!valid) return res.status(400).json({ success: false, message: "invalid token" });
 
                 const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
 
@@ -23,7 +23,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 if (!account.admin) return res.status(400).json({ success: false, message: "Account is not an admin." });
 
                 let search: any = req.body.query ?? '';
-                let idSearch: any = search ? (isNaN(search) ? undefined : parseInt(search)) : undefined;
+                let idSearch: any = search ? (isNaN(search) ? undefined : (search.length > 16 ? undefined : parseInt(search))) : undefined;
                 let guildIdSearch: any = search ? (isNaN(search) ? undefined : (search.length >= 17 && search.length <= 19 ? BigInt(search) : undefined)) : undefined;
 
                 if (search === undefined || search === null || search === "") return res.status(400).json({ success: false, message: "No search query provided." });
@@ -38,7 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }
                 });
 
-                if (!server) return res.status(400).json({ success: false, message: "No account found." });
+                if (!server) return res.status(400).json({ success: false, message: "Server not found." });
 
                 return res.status(200).json({ success: true, server: {
                     id: server.id,

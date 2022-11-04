@@ -10,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 const token = req.headers.authorization as string;
                 const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
 
-                if (!valid) return res.status(400).json({ success: false });
+                if (!valid) return res.status(400).json({ success: false, message: "invalid token" });
 
                 const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
 
