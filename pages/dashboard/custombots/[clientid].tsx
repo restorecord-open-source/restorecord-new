@@ -1,4 +1,5 @@
 import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
 import Toolbar from "@mui/material/Toolbar";
 import { useRouter } from "next/router";
 import { useQuery } from "react-query";
@@ -19,7 +20,7 @@ export default function CustomSettings() {
 
 
     if (isLoading) {
-        return <div>Loading...</div>
+        return <CircularProgress />
     }
 
     if (isError) {
@@ -29,7 +30,7 @@ export default function CustomSettings() {
     if (!data.username) {
         router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
 
-        return <p>Loading...</p>
+        return <CircularProgress />
     }
 
     return (

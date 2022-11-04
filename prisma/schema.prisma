@@ -81,7 +81,7 @@ model channels {
     bitrate          Int?
     userLimit        Int?
     parentId         BigInt?              @db.UnsignedBigInt
-    topic            String?
+    topic            String?              @db.VarChar(999)
     rateLimitPerUser Int?
     nsfw             Boolean
     createdAt        DateTime             @default(now())

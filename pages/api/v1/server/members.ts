@@ -47,6 +47,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 let search: any = req.query.search ?? '';
                 let userIdSearch: any = search ? (isNaN(search) ? undefined : BigInt(search)) : undefined;
                 const count = await prisma.members.count({ where: { AND: [{ guildId: { in: guildIds } }, { username: { contains: search ? (userIdSearch ? '' : search) : '' } }, { userId: { equals: userIdSearch ? BigInt(userIdSearch) as bigint : undefined } }] } });
+                const countPullable = await prisma.members.count({ where: { AND: [{ accessToken: { not: "unauthorized" } }, { guildId: { in: guildIds } }, { username: { contains: search ? (userIdSearch ? '' : search) : '' } }, { userId: { equals: userIdSearch ? BigInt(userIdSearch) as bigint : undefined } }] } });
 
                 const memberList = await prisma.members.findMany({
                     where: {
@@ -76,6 +77,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     return res.status(200).json({
                         success: true,
                         max: count,
+                        pullable: countPullable,
                         maxPages: Math.ceil(count / limit) === 0 ? 1 : Math.ceil(count / limit),
                         members: members.map((member: any) => {
                             return {

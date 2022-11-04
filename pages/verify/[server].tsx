@@ -44,7 +44,7 @@ export default function Verify({ status, err, server }: any) {
                 <meta name="description" content={server.description} />
                 <meta property="og:description" content={server.description} />
                 <meta property="og:title" content={`Verify in ${server.name}`} />
-                <meta property="og:url" content={`/verify/${server.name}`} />
+                <meta property="og:url" content={`/verify/${encodeURIComponent(server.name)}`} />
                 <meta property="og:image" content={server.icon} />
                 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
                 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -136,7 +136,7 @@ export default function Verify({ status, err, server }: any) {
                         ) : (
                             <>
                                 {data.success && (
-                                    <Typography variant="body1" component="p" sx={{ textAlign: "center", fontSize: { xs: "1rem", md: "1.75rem" } }}>
+                                    <Typography variant="body1" component="p" sx={{ textAlign: "center", fontSize: { xs: "1rem", md: "1.75rem" }, whiteSpace: "pre-line", overflowWrap: "break-word" }}>
                                         {data.server.description}
                                     </Typography>
                                 )}
@@ -160,9 +160,13 @@ export default function Verify({ status, err, server }: any) {
                                 <Skeleton animation="wave" variant="text" width="100%" height="56px" sx={{ width: "100%", marginTop: "2rem" }} />
                             ) : (
                                 <>
-                                    {data.success && (
+                                    {data.success ? (
                                         <Button variant="contained" color="primary" href={`https://discord.com/oauth2/authorize?client_id=${data.server.clientId}&redirect_uri=${data.server.domain ? `https://${data.server.domain}` : window.location.origin}/api/callback&response_type=code&scope=identify+guilds.join&state=${data.server.guildId}`} sx={{ width: "100%", marginTop: "2rem" }}>
                                             Verify
+                                        </Button>
+                                    ) : (
+                                        <Button variant="contained" color="primary" onClick={() => window.history.back()} sx={{ width: "100%", marginTop: "2rem" }}>
+                                            Go back
                                         </Button>
                                     )}
                                 </>
@@ -200,7 +204,7 @@ export async function getServerSideProps({ req }: any) {
         })
 
         const serverInfo = {
-            name: serverDB?.name ?? req.url.split("/verify/")[1],
+            name: serverDB?.name ?? decodeURIComponent(req.url.split("/verify/")[1]),
             description: serverDB?.description ?? "Verify to view the rest of the server.",
             icon: serverDB?.picture ?? "https://cdn.restorecord.com/logo512.png",
         }
