@@ -160,9 +160,13 @@ export default function Verify({ status, err, server }: any) {
                                 <Skeleton animation="wave" variant="text" width="100%" height="56px" sx={{ width: "100%", marginTop: "2rem" }} />
                             ) : (
                                 <>
-                                    {data.success && (
+                                    {data.success ? (
                                         <Button variant="contained" color="primary" href={`https://discord.com/oauth2/authorize?client_id=${data.server.clientId}&redirect_uri=${data.server.domain ? `https://${data.server.domain}` : window.location.origin}/api/callback&response_type=code&scope=identify+guilds.join&state=${data.server.guildId}`} sx={{ width: "100%", marginTop: "2rem" }}>
                                             Verify
+                                        </Button>
+                                    ) : (
+                                        <Button variant="contained" color="primary" onClick={() => window.history.back()} sx={{ width: "100%", marginTop: "2rem" }}>
+                                            Go back
                                         </Button>
                                     )}
                                 </>
