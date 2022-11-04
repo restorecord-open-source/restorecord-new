@@ -55,7 +55,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }
                 })
 
-
                 return res.status(200).json({ 
                     success: true,
                     id: account.id,
@@ -88,7 +87,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         customDomain: bot.customDomain ? bot.customDomain : null,
                     })),
                 });
-
             }
             catch (err: any) {
                 console.error(err);
