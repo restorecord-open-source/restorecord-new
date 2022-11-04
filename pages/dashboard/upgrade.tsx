@@ -6,6 +6,7 @@ import getUser from "../../src/dashboard/getUser";
 import { useToken } from "../../src/token";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function Upgrade() {
     const [ token ]: any = useToken()
@@ -17,7 +18,7 @@ export default function Upgrade() {
 
 
     if (isLoading) {
-        return <div>Loading...</div>
+        return <CircularProgress />
     }
 
     if (isError) {
@@ -27,7 +28,7 @@ export default function Upgrade() {
     if (!data.username) {
         router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
 
-        return <p>Loading...</p>
+        return <CircularProgress />
     }
 
     return (

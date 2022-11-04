@@ -18,6 +18,7 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import Skeleton from "@mui/material/Skeleton";
 import theme from "../../src/theme";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
@@ -160,11 +161,7 @@ export default function DashBoard({ user }: any) {
     };
 
     if (!user.username) {
-        return (
-            <>
-                <p>Loading...</p>
-            </>
-        )
+        return <CircularProgress />
     }
 
     return (

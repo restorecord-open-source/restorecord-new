@@ -266,20 +266,20 @@ export default function DashServerSettings({ user, id }: any) {
                                             <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                                 Server Description
                                             </Typography>
-                                            <TextField fullWidth variant="outlined" name="description" value={description} onChange={handleChange} inputProps={{ maxLength: 50 }} placeholder="Description" />
+                                            <TextField fullWidth variant="outlined" name="description" value={description} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Description" rows={3} multiline />
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                                 Server Icon
                                             </Typography>
-                                            <TextField fullWidth variant="outlined" name="picture" value={picture} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Server Icon URL" />
+                                            <TextField fullWidth variant="outlined" name="picture" value={picture} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Server Icon URL" type="url" />
                                         </Grid>
                                         {user.role === "business" && (
                                             <Grid item>
                                                 <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                                     Server Background
                                                 </Typography>
-                                                <TextField fullWidth variant="outlined" name="background" value={background} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Background Image URL" />
+                                                <TextField fullWidth variant="outlined" name="background" value={background} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Background Image URL" type="url" />
                                             </Grid>
                                         )}
                                         <Grid item>
@@ -290,10 +290,10 @@ export default function DashServerSettings({ user, id }: any) {
                                                 <Switch onChange={handleChange} name="webhookcheck" defaultChecked={server.webhook ? true : false} />
                                             </Stack>
                                             {webhookcheck && (
-                                                <TextField fullWidth variant="outlined" name="webhook" value={webhook} onChange={handleChange} placeholder="Webhook Url" />
+                                                <TextField fullWidth variant="outlined" name="webhook" value={webhook} onChange={handleChange} placeholder="Webhook Url" type="url" />
                                             )}
                                         </Grid>
-                                        {webhookcheck && (
+                                        {(user.role !== "free" && webhookcheck) && (
                                             <Grid item>
                                                 <Stack direction="row" spacing={1}>
                                                     <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>

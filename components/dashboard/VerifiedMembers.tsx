@@ -286,7 +286,7 @@ export default function VerifiedMembers({ user }: any) {
                                         <>
                                             {data?.pages ? (
                                                 <>
-                                                    {data?.pages?.[0]?.max === 0 ? "No verified members" : `Showing ${data?.pages?.[0]?.max} verified members.`}
+                                                    {data?.pages?.[0]?.max === 0 ? "No verified members" : `Showing ${data?.pages?.[0]?.max} verified members. (pullable ${data?.pages?.[0]?.pullable})`}
                                                 </>
                                             ) : (
                                                 "Loading..."

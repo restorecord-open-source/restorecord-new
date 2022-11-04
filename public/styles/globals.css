@@ -35,3 +35,88 @@ body {
 	background: #4f46e5;
 	z-index: 99999;
 }
+
+.image-outline circle,
+.image-outline line,
+.image-outline path,
+.image-outline rect {
+	animation: svg-reveal 10s ease both;
+}
+
+.image-outline > path#Outline {
+	background-color: rgba(0, 0, 0, 0.5);
+}
+
+.image-outline path#AppBar-2,
+.image-outline path#Statistics_Form,
+.image-outline path#Graph,
+.image-outline path#Recent_Activity_Form,
+.image-outline g#Recent_Activity > path#Button,
+.image-outline path#Outline,
+.image-outline path#NavBar_Line {
+	animation: svg-reveal-big 4s ease both;
+}
+
+@keyframes svg-reveal {
+	0% {
+		stroke-dashoffset: 3000;
+		stroke-dasharray: 3000;
+		stroke: hsla(0, 0%, 100%, 0.05);
+	}
+
+	40% {
+		stroke: hsla(0, 0%, 100%, 0.2);
+	}
+
+	to {
+		stroke-dashoffset: 0;
+		stroke-dasharray: 3000;
+		stroke: hsla(0, 0%, 100%, 0.2);
+	}
+}
+
+@keyframes svg-reveal-big {
+	0% {
+		stroke-dashoffset: 6000;
+		stroke-dasharray: 6000;
+		stroke: hsla(0, 0%, 100%, 0);
+	}
+
+	40% {
+		stroke: hsla(0, 0%, 100%, 0.2);
+	}
+
+	to {
+		stroke-dashoffset: 0;
+		stroke-dasharray: 6000;
+		stroke: hsla(0, 0%, 100%, 0.2);
+	}
+}
+
+.fadeIn {
+	animation: fadeIn 0.25s ease both;
+}
+
+.fadeOut {
+	animation: fadeOut 0.25s ease both;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes fadeOut {
+	from {
+		opacity: 1;
+	}
+
+	to {
+		opacity: 0;
+	}
+}

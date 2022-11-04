@@ -27,16 +27,16 @@ const SubscriptionList: Subscription[] = [
                 icon: <Check sx={{ color: "#22c55e" }} />,
             },
             {
-                name: "ipBans",
-                value: "IP Bans",
-                description: "IP Ban members from your server",
-                icon: <Check sx={{ color: "#22c55e" }} />,
-            },
-            {
                 name: "proxied",
                 value: "Proxied Requests",
                 description: "All requests sent to Discord are anonymous and proxied",
                 icon: <Check sx={{ color: "#22c55e" }} />,
+            },
+            {
+                name: "blacklist",
+                value: "Blacklist",
+                description: "Blacklist people from verifying with id, asn, ip and more",
+                icon: <Clear sx={{ color: "#ef4444" }} />,
             },
             {
                 name: "antiVPN",
@@ -49,6 +49,12 @@ const SubscriptionList: Subscription[] = [
                 value: "Verification Logs",
                 description: "Log all verifications in your server",
                 icon: <Clear sx={{ color: "#ef4444" }} />,
+            },
+            {
+                name: "verificationLogging",
+                value: "Verification Logging",
+                description: "See more information about verified members",
+                icon: <Clear sx={{ color: "#ef4444 "}} />
             },
             {
                 name: "serverBackups",
@@ -101,15 +107,15 @@ const SubscriptionList: Subscription[] = [
                 icon: <Check sx={{ color: "#22c55e" }} />,
             },
             {
-                name: "ipBans",
-                value: "IP Bans",
-                description: "IP Ban members from your server",
-                icon: <Check sx={{ color: "#22c55e" }} />,
-            },
-            {
                 name: "proxied",
                 value: "Proxied Requests",
                 description: "All requests sent to Discord are anonymous and proxied",
+                icon: <Check sx={{ color: "#22c55e" }} />,
+            },
+            {
+                name: "blacklist",
+                value: "Blacklist",
+                description: "Blacklist people from verifying with id, asn, ip and more",
                 icon: <Check sx={{ color: "#22c55e" }} />,
             },
             {
@@ -123,6 +129,12 @@ const SubscriptionList: Subscription[] = [
                 value: "Verification Logs",
                 description: "Log all verifications in your server",
                 icon: <Check sx={{ color: "#22c55e" }} />,
+            },
+            {
+                name: "verificationLogging",
+                value: "Basic Verification Logging",
+                description: "See more information about verified members",
+                icon: <Check sx={{ color: "#22c55e "}} />
             },
             {
                 name: "serverBackups",
@@ -164,7 +176,7 @@ const SubscriptionList: Subscription[] = [
             },
             {
                 name: "serverCapacity",
-                value: "250 Servers",
+                value: "25 Servers",
                 description: "Maximum number of Servers you can add",
                 icon: <Check sx={{ color: "#22c55e" }} />,
             },
@@ -175,15 +187,15 @@ const SubscriptionList: Subscription[] = [
                 icon: <Check sx={{ color: "#22c55e" }} />,
             },
             {
-                name: "ipBans",
-                value: "IP Bans",
-                description: "IP Ban members from your server",
-                icon: <Check sx={{ color: "#22c55e" }} />,
-            },
-            {
                 name: "proxied",
                 value: "Proxied Requests",
                 description: "All requests sent to Discord are anonymous and proxied",
+                icon: <Check sx={{ color: "#22c55e" }} />,
+            },
+            {
+                name: "blacklist",
+                value: "Blacklist",
+                description: "Blacklist people from verifying with id, asn, ip and more",
                 icon: <Check sx={{ color: "#22c55e" }} />,
             },
             {
@@ -197,6 +209,12 @@ const SubscriptionList: Subscription[] = [
                 value: "Advanced Verification Logs",
                 description: "Log all verifications in your server",
                 icon: <Check sx={{ color: "#22c55e" }} />,
+            },
+            {
+                name: "verificationLogging",
+                value: "Advanced Verification Logging",
+                description: "See more information about verified members",
+                icon: <Check sx={{ color: "#22c55e "}} />
             },
             {
                 name: "serverBackups",

@@ -85,8 +85,7 @@ export default function Home() {
                             </Button>
                         </Badge>
 
-
-                        <Box id="features" sx={{ marginTop: 8 }} />
+                        <Box id="features" sx={{ marginTop: 4 }} />
 
                         <Typography variant="h3" component="h2" sx={{ textAlign: "center", marginTop: 24, fontWeight: "semibold" }}>
                             Our Features

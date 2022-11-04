@@ -55,7 +55,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }
                 })
 
-
                 return res.status(200).json({ 
                     success: true,
                     id: account.id,
@@ -88,7 +87,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         customDomain: bot.customDomain ? bot.customDomain : null,
                     })),
                 });
-
             }
             catch (err: any) {
                 console.error(err);
@@ -499,6 +497,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 if (err?.name === "" || err?.name === "JsonWebTokenError") return res.status(400).json({ success: false, message: "User not logged in" }); 
                 return res.status(400).json({ success: false, message: "Something went wrong" });
             }
+            break;
         default:
             res.setHeader("Allow", "GET");
             res.status(405).end(`Method ${req.method} Not Allowed`);

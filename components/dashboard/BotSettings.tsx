@@ -128,7 +128,6 @@ export default function DashBotSettings({ user, id }: any) {
 
                         {(user.bots.find((bot: any) => bot.clientId === id)) ? (
                             <>
-                     
                                 <Button variant="contained" sx={{ mb: 2 }} onClick={() => { router.push(`/dashboard/custombots/`)} }>
                                     Go Back
                                 </Button>

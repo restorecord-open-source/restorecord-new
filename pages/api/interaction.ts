@@ -16,14 +16,6 @@ export const config = {
 const BASE_RESPONSE = { type: 4 }
 const INVALID_COMMAND_OPTIONS = { ...BASE_RESPONSE, data: { content: "Invalid command options.", flags: InteractionResponseFlags.EPHEMERAL } }
 const INVALID_COMMAND_RESPONSE = { ...BASE_RESPONSE, data: { content: "Sorry, this command does not exist.", flags: InteractionResponseFlags.EPHEMERAL  } }
-const PULL_COMMAND_RESPONSE = { ...BASE_RESPONSE, data: { 
-    embeds: [{
-        title: "Pull Members",
-        description: "This command is currently not available, please use the dashboard to pull/migrate members.",
-        color: 0x00ff00
-    }] as APIEmbed[],
-    flags: InteractionResponseFlags.EPHEMERAL
-} }
 
 const VERIFY_EMBED_COMMAND = { ...BASE_RESPONSE, data: { 
     embeds: [{
@@ -98,9 +90,6 @@ const handler = async(_: NextApiRequest, res: NextApiResponse<APIInteractionResp
             httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) 
         });
         
-        break;
-    case "pull":
-        return res.status(200).json(PULL_COMMAND_RESPONSE);
         break;
     default:
         return res.status(200).json(INVALID_COMMAND_RESPONSE);

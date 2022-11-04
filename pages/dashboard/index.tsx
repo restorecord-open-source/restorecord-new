@@ -14,6 +14,8 @@ import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Menu from "@mui/icons-material/Menu";
+import CircularProgress from "@mui/material/CircularProgress";
+import DashLoading from "../../components/extra/dashLoading";
 
 
 export default function Dashboard() {
@@ -24,9 +26,8 @@ export default function Dashboard() {
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
     }), { retry: false,  refetchOnWindowFocus: true });
 
-
     if (isLoading) {
-        return <div>Loading...</div>
+        return <DashLoading />
     }
 
     if (isError) {
@@ -36,7 +37,7 @@ export default function Dashboard() {
     if (!data.username) {
         router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
 
-        return <p>Loading...</p>
+        return <DashLoading />
     }
 
     return (

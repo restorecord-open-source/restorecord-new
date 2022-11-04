@@ -174,6 +174,14 @@ export const createBackup = async (guildId: bigint) => {
                 //     }
                 // });
 
+                const previousBackup = await prisma.backups.findFirst({
+                    where: {
+                        guildId: BigInt(server.guildId),
+                    },
+                });
+
+                if (previousBackup) return reject("Another Backup already exists, probably on another account");
+
                 await makeBackup(backupData);
                 return resolve({ success: true, message: "Backup Updated" });
             } else {
@@ -186,7 +194,7 @@ export const createBackup = async (guildId: bigint) => {
             if (e.response && e.response.data && e.response.data.message) {
                 return reject({ success: false, message: e.response.data.message });
             } else {
-                return reject({ success: false, message: "182 error" });
+                return reject({ success: false, message: "Something went wrong, contact support." });
             }
         }
     });
