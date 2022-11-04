@@ -293,7 +293,7 @@ export default function DashServerSettings({ user, id }: any) {
                                                 <TextField fullWidth variant="outlined" name="webhook" value={webhook} onChange={handleChange} placeholder="Webhook Url" type="url" />
                                             )}
                                         </Grid>
-                                        {(user.role === "premium" && webhookcheck) && (
+                                        {(user.role !== "free" && webhookcheck) && (
                                             <Grid item>
                                                 <Stack direction="row" spacing={1}>
                                                     <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
