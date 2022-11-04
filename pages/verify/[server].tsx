@@ -44,7 +44,7 @@ export default function Verify({ status, err, server }: any) {
                 <meta name="description" content={server.description} />
                 <meta property="og:description" content={server.description} />
                 <meta property="og:title" content={`Verify in ${server.name}`} />
-                <meta property="og:url" content={`/verify/${server.name}`} />
+                <meta property="og:url" content={`/verify/${encodeURIComponent(server.name)}`} />
                 <meta property="og:image" content={server.icon} />
                 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
                 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -136,7 +136,7 @@ export default function Verify({ status, err, server }: any) {
                         ) : (
                             <>
                                 {data.success && (
-                                    <Typography variant="body1" component="p" sx={{ textAlign: "center", fontSize: { xs: "1rem", md: "1.75rem" } }}>
+                                    <Typography variant="body1" component="p" sx={{ textAlign: "center", fontSize: { xs: "1rem", md: "1.75rem" }, whiteSpace: "pre-line", overflowWrap: "break-word" }}>
                                         {data.server.description}
                                     </Typography>
                                 )}
@@ -200,7 +200,7 @@ export async function getServerSideProps({ req }: any) {
         })
 
         const serverInfo = {
-            name: serverDB?.name ?? req.url.split("/verify/")[1],
+            name: serverDB?.name ?? decodeURIComponent(req.url.split("/verify/")[1]),
             description: serverDB?.description ?? "Verify to view the rest of the server.",
             icon: serverDB?.picture ?? "https://cdn.restorecord.com/logo512.png",
         }
