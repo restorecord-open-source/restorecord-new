@@ -3,14 +3,6 @@ html {
 	height: 100% !important;
 }
 
-.loading-bar {
-	z-index: 9999;
-}
-
-:target {
-	scroll-margin-top: 0;
-}
-
 body {
 	scrollbar-color: hsla(0, 0%, 100%, 0.25) transparent;
 	background-color: transparent !important;
@@ -18,6 +10,14 @@ body {
 
 :root {
 	color-scheme: dark;
+}
+
+:target {
+	scroll-margin-top: 0;
+}
+
+.loading-bar {
+	z-index: 9999;
 }
 
 #nprogress {
@@ -94,11 +94,11 @@ body {
 }
 
 .fadeIn {
-	animation: fadeIn 0.25s ease both;
+	animation: fadeIn 0.325s ease both;
 }
 
 .fadeOut {
-	animation: fadeOut 0.25s ease both;
+	animation: fadeOut 0.325s ease both;
 }
 
 @keyframes fadeIn {

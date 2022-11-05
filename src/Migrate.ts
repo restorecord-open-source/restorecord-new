@@ -1,3 +1,4 @@
+import { accounts, servers } from "@prisma/client";
 import axios from "axios";
 import { HttpsProxyAgent } from "https-proxy-agent";
 
@@ -161,6 +162,62 @@ export async function resolveUser(token: string): Promise<User> {
     }).then(async (res: any) => { return res.data; } );
 }
 
+
+export async function sendWebhookMessage(webhookUrl: string, title: string = "Successfully Verified", serverOwner: accounts, pCheck: any, IPAddr: string, account: User) {
+    const createdAt: number = account.id / 4194304 + 1420070400000;
+    let operator = pCheck[IPAddr].operator.url ? `[\`${pCheck[IPAddr].operator.name}\`](${pCheck[IPAddr].operator.url})` : pCheck[IPAddr].operator.name;
+
+    await axios.post(webhookUrl, {
+        content: `<@${account.id}> (${account.username}#${account.discriminator})`,
+        embeds: [
+            {
+                title: title,
+                timestamp: new Date().toISOString(),
+                color: title == "Successfuly Verified" ? 0x52ef52 : 0xff0000, 
+                author: {
+                    name: `${account.username}#${account.discriminator}`,
+                    url: `https://discord.id/?prefill=${account.id}`,
+                    icon_url: account.avatar ? `https://cdn.discordapp.com/avatars/${account.id}/${account.avatar}.png` : `https://cdn.discordapp.com/embed/avatars/${account.discriminator % 5}.png`,
+                },
+                fields: [
+                    {
+                        name: ":bust_in_silhouette: User:",
+                        value: `${account.id}`,
+                        inline: true,
+                    },
+                    {
+                        name: ":earth_americas: Client IP:",
+                        value: `||${IPAddr}||`,
+                        inline: true,
+                    },
+                    {
+                        name: ":clock1: Account Age:",
+                        value: `<t:${Math.floor(createdAt / 1000)}:R>`,
+                        inline: true,
+                    },
+                    {
+                        name: `:flag_${pCheck[IPAddr].isocode.toLowerCase()}: IP Info:`,
+                        value: `**Country:** \`${pCheck[IPAddr].country}\`\n**Provider:** \`${pCheck[IPAddr].provider}\``,
+                        inline: true,
+                    },
+                    {
+                        name: serverOwner.role === "business" ? ":globe_with_meridians: Connection Info:" : "",
+                        value: serverOwner.role === "business" ? `**Type**: \`${pCheck[IPAddr].type}\`\n**VPN**: \`${pCheck[IPAddr].proxy}\`\n**Operator**: ${operator}` : "",
+                        inline: serverOwner.role === "business" ? true : false,
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        proxy: false, 
+        httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
+    }).catch((err) => {
+        if (err.response.status === 404) {
+            console.log(`${webhookUrl.split("/")[5]} Webhook not found`);
+        }
+    });
+}
 
 interface User {
 	id: number;
