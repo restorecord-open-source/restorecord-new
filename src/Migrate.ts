@@ -215,7 +215,9 @@ export async function sendWebhookMessage(webhookUrl: string, title: string = "Su
         httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
     }).catch((err) => {
         if (err.response.status === 404) {
-            console.log(`${webhookUrl.split("/")[5]} Webhook not found`);
+            console.error(`${webhookUrl.split("/")[5]} Webhook not found`);
+        } else {
+            console.error(err);
         }
     });
 }
