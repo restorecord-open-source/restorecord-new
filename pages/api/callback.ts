@@ -26,20 +26,21 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         const serverInfo = await prisma.servers.findUnique({where: { guildId: rGuildId } });
         if (!serverInfo) return res.status(400).json({ success: false, message: "No server info" });
 
-        const customBotInfo = await prisma.customBots.findUnique({where: { id: serverInfo?.customBotId } });
+        const customBotInfo = await prisma.customBots.findUnique({where: { id: serverInfo.customBotId } });
         if (!customBotInfo)return res.status(400).json({ success: false, message: "No custom bot info" });
 
-        console.log(`Verify Attempt: ${serverInfo.name}, ${code}, ${req.headers.host}, ${customBotInfo?.clientId}, ${customBotInfo?.botSecret}`);
+        console.log(`Verify Attempt: ${serverInfo.name}, ${code}, ${req.headers.host}, ${customBotInfo.clientId}, ${customBotInfo.botSecret}`);
 
-        exchange(code as string, `https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/api/callback`, customBotInfo?.clientId, customBotInfo?.botSecret)
+        exchange(code as string, `https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/api/callback`, customBotInfo.clientId, customBotInfo.botSecret)
             .then(async (respon) => {
                 if (respon.status === 200) {
                     let account = respon.data.access_token ? await resolveUser(respon.data.access_token) : null;
 
-                    const userId: any = BigInt(account?.id as any);
 
                     if (!account || account === null) return res.status(400).json({ success: false, message: "Took too long to verify. (No account info)" });
                     if (account) {
+                        const userId: any = BigInt(account.id as any);
+
                         const user = await prisma.members.findFirst({ where: { AND: [{ guildId: rGuildId }, { userId: userId }] } });
 
                         const serverOwner = await prisma.accounts.findFirst({ where: { id: serverInfo.ownerId } });
@@ -59,15 +60,15 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                             }
                         }
 
-                        addMember(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, respon.data.access_token, [BigInt(serverInfo?.roleId).toString()])
+                        addMember(rGuildId.toString(), userId.toString(), customBotInfo.botToken, respon.data.access_token, [BigInt(serverInfo.roleId).toString()])
                             .then(async (resp) => {
                                 try {
-                                    if (resp?.status === 201 || resp?.status === 204 || resp?.response?.status === 201 || resp?.response?.status === 204)
+                                    if (resp?.status === 201 || resp?.response?.status === 201 || resp?.status === 204 || resp?.response?.status === 204)
                                     {
                                         if (resp?.status === 204 || resp?.response?.status === 204) 
                                         {
-                                            await addRole(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, serverInfo?.roleId.toString()).then(async (response) => {
-                                                console.log(`${account?.username} adding role: ${response?.status} (${rGuildId.toString()}, ${userId.toString()}, ${serverInfo?.roleId.toString()})`);
+                                            await addRole(rGuildId.toString(), userId.toString(), customBotInfo.botToken, serverInfo.roleId.toString()).then(async (response) => {
+                                                console.log(`${account?.username} adding role: ${response?.status} (${rGuildId.toString()}, ${userId.toString()}, ${serverInfo.roleId.toString()})`);
 
                                                 switch (response?.status || response?.response?.status) {
                                                 case 204:
@@ -77,7 +78,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                                     res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=5;`);
                                                     return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
                                                 default:
-                                                    console.error(`addRole 0/1: ${response?.status}`);
+                                                    console.error(`addRole 0/1: ${response?.status}|${response?.response?.status}`);
                                                     return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
                                                 }
                                             }).catch((err) => {
@@ -104,15 +105,15 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                     {
                                         // try again to add member
                                         setTimeout(async () => {
-                                            addMember(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, respon.data.access_token, [BigInt(serverInfo?.roleId).toString()]).then(async (resp) => {
+                                            addMember(rGuildId.toString(), userId.toString(), customBotInfo.botToken, respon.data.access_token, [BigInt(serverInfo.roleId).toString()]).then(async (resp) => {
 
-                                                console.log(`${account?.username} adding member ${resp.status ? resp.status : resp.response.status} (${rGuildId.toString()}, ${userId.toString()}, ${respon.data.access_token}, ${[BigInt(serverInfo?.roleId).toString()]})`);
+                                                console.log(`${account?.username} adding member ${resp.status ? resp.status : resp.response.status} (${rGuildId.toString()}, ${userId.toString()}, ${respon.data.access_token}, ${[BigInt(serverInfo.roleId).toString()]})`);
                                         
                                                 if (resp?.status === 204 || resp?.response?.status === 204)
                                                 {
-                                                    await addRole(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, serverInfo?.roleId.toString())
+                                                    await addRole(rGuildId.toString(), userId.toString(), customBotInfo.botToken, serverInfo.roleId.toString())
                                                         .then(async (response) => {
-                                                            console.log(`${account?.username} adding role: ${response?.status} (${rGuildId.toString()}, ${userId.toString()}, ${serverInfo?.roleId.toString()})`);
+                                                            console.log(`${account?.username} adding role: ${response?.status} (${rGuildId.toString()}, ${userId.toString()}, ${serverInfo.roleId.toString()})`);
 
                                                             switch (response.status) {
                                                             case 204:
