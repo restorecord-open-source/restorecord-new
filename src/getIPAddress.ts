@@ -43,13 +43,13 @@ export function getBrowser(userAgent: string) {
     if (browser) return `IE ${browser[1]}`;
 
     const chrome = userAgent.match(/\b(?:Chrome\/)(\d+)/);
-    if (chrome) return `Chrome ${chrome[1]}`;
+    if (chrome) return `Chrome v${chrome[1]}`;
 
     const safari = userAgent.match(/\b(?:Version\/)(\d+)/);
     if (safari) return `Safari ${safari[1]}`;
 
     const firefox = userAgent.match(/\b(?:Firefox\/)(\d+)/);
-    if (firefox) return `Firefox ${firefox[1]}`;
+    if (firefox) return `Firefox v${firefox[1]}`;
 
     const duckduckgo = userAgent.match(/\b(?:DuckDuckGo\/)(\d+)/);
     if (duckduckgo) return `DuckDuckGo ${duckduckgo[1]}`;
