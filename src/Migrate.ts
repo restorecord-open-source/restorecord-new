@@ -202,9 +202,9 @@ export async function sendWebhookMessage(webhookUrl: string, title: string = "Su
                         inline: true,
                     },
                     {
-                        name: serverOwner.role === "business" ? ":globe_with_meridians: Connection Info:" : "",
-                        value: serverOwner.role === "business" ? `**Type**: \`${pCheck[IPAddr].type}\`\n**VPN**: \`${pCheck[IPAddr].proxy}\`${pCheck[IPAddr].proxy === "yes" ? `\n**Operator**: ${operator}` : ""}` : "",
-                        inline: serverOwner.role === "business" ? true : false,
+                        name: ":globe_with_meridians: Connection Info:",
+                        value: serverOwner.role === "business" ? `**Type**: \`${pCheck[IPAddr].type}\`\n**VPN**: \`${pCheck[IPAddr].proxy}\`${pCheck[IPAddr].proxy === "yes" ? `\n**Operator**: ${operator}` : ""}` : "Upgrade to Business plan to view",
+                        inline: true,
                     },
                 ],
             },
