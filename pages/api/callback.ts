@@ -78,6 +78,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                                 case 403:
                                                     res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=5;`);
                                                     return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
+                                                case 404:
+                                                    res.setHeader("Set-Cookie", `RC_err=404; Path=/; Max-Age=5;`);
+                                                    return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
                                                 default:
                                                     console.error(`addRole 0/1: ${response?.status}|${response?.response?.status}|${JSON.stringify(response?.data)}|${JSON.stringify(response?.response?.data)}`);
                                                     return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
@@ -146,7 +149,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                     else 
                                     {
                                         console.error(`addMember 2: ${resp?.status}|${resp?.response?.status}|${JSON.stringify(resp?.data)}|${JSON.stringify(resp?.response?.data)}`);
-                                        return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
+                                        if (resp?.response?.data?.code === "30001") {
+                                            res.setHeader("Set-Cookie", `RC_err=30001; Path=/; Max-Age=5;`);
+                                            return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
+                                        } else { return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`); }
                                     }
                                 } catch (err: any) {
                                     console.error(`addMember 3: ${err}`);

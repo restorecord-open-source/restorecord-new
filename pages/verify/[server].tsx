@@ -38,6 +38,46 @@ export default function Verify({ status, err, server }: any) {
         )
     }
 
+    function ErrorAlert(err: string) {
+        switch (err) {
+        case "404":
+            return (
+                <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
+                    <AlertTitle>Error</AlertTitle>
+                    Seems like this server hasn&#39;t been setup correctly, please contact the owner and let him know: <b><code>Unknown Role</code></b>.
+                </Alert>
+            );
+        case "403":
+            return (
+                <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
+                    <AlertTitle>Error</AlertTitle>
+                    Seems like this server hasn&#39;t been setup correctly, please contact the owner and let him know: <b><code>Missing Permission</code></b>.
+                </Alert>
+            );
+        case "401":
+            return (
+                <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
+                    <AlertTitle>Error</AlertTitle>
+                    Seems like this bot hasn&#39;t been setup correctly, please contact the owner and let him know: <b><code>Invalid Token</code></b>.
+                </Alert>
+            );
+        case "306":
+            return (
+                <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
+                    <AlertTitle>Error</AlertTitle>
+                    VPN or Proxy detected, please disable it and try again.
+                </Alert>
+            );
+        case "30001":
+            return (
+                <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
+                    <AlertTitle>Error</AlertTitle>
+                    Seems like you have reached the 100 server limit, please leave a server and try again.
+                </Alert>
+            );
+        }
+    }
+
     return (
         <>
             <Head>
@@ -82,26 +122,7 @@ export default function Verify({ status, err, server }: any) {
 
                         {isLoading ? ( <></> ) : (
                             <>
-                                {err === "403" ? (
-                                    <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
-                                        <AlertTitle>Error</AlertTitle>
-                                        Seems like this bot hasn&#39;t been setup correctly, please contact the owner telling him the bot is <b><code>Missing Permission</code></b>.
-                                    </Alert>
-                                ) : ( <></> )}
-
-                                {err === "401" ? (
-                                    <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
-                                        <AlertTitle>Error</AlertTitle>
-                                        Seems like this bot hasn&#39;t been setup correctly, please contact the owner telling him the bot is <b><code>Invalid Bot Information</code></b>.
-                                    </Alert>
-                                ) : ( <></> )}
-
-                                {err === "306" ? (
-                                    <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
-                                        <AlertTitle>Error</AlertTitle>
-                                        VPN or Proxy detected, please disable it and try again.
-                                    </Alert>
-                                ) : ( <></> )}
+                                {ErrorAlert(err)}
                             </>
                         )}
                         
