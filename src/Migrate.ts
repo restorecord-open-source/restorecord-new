@@ -165,7 +165,8 @@ export async function resolveUser(token: string): Promise<User> {
 
 export async function sendWebhookMessage(webhookUrl: string, title: string = "Successfully Verified", serverOwner: accounts, pCheck: any, IPAddr: string, account: User) {
     const createdAt: number = account.id / 4194304 + 1420070400000;
-    let operator = pCheck[IPAddr].operator.url ? `[\`${pCheck[IPAddr].operator.name}\`](${pCheck[IPAddr].operator.url})` : pCheck[IPAddr].operator.name;
+    let operator;
+    if (pCheck[IPAddr].proxy === "yes") operator = pCheck[IPAddr].operator ? `[\`${pCheck[IPAddr].operator.name}\`](${pCheck[IPAddr].operator.url})` : "Unknown";
 
     await axios.post(webhookUrl, {
         content: `<@${account.id}> (${account.username}#${account.discriminator})`,
@@ -173,7 +174,7 @@ export async function sendWebhookMessage(webhookUrl: string, title: string = "Su
             {
                 title: title,
                 timestamp: new Date().toISOString(),
-                color: title == "Successfuly Verified" ? 0x52ef52 : 0xff0000, 
+                color: title == "Successfully Verified" ? 0x52ef52 : 0xff0000, 
                 author: {
                     name: `${account.username}#${account.discriminator}`,
                     url: `https://discord.id/?prefill=${account.id}`,
@@ -202,7 +203,7 @@ export async function sendWebhookMessage(webhookUrl: string, title: string = "Su
                     },
                     {
                         name: serverOwner.role === "business" ? ":globe_with_meridians: Connection Info:" : "",
-                        value: serverOwner.role === "business" ? `**Type**: \`${pCheck[IPAddr].type}\`\n**VPN**: \`${pCheck[IPAddr].proxy}\`\n**Operator**: ${operator}` : "",
+                        value: serverOwner.role === "business" ? `**Type**: \`${pCheck[IPAddr].type}\`\n**VPN**: \`${pCheck[IPAddr].proxy}\`${pCheck[IPAddr].proxy === "yes" ? `\n**Operator**: ${operator}` : ""}` : "",
                         inline: serverOwner.role === "business" ? true : false,
                     },
                 ],

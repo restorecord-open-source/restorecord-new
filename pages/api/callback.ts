@@ -55,7 +55,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=5;`);
                                 return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
                             } else {
-                                if (user) if (Date.now() - new Date(user.createdAt).getTime() < 15000) await sendWebhookMessage(serverInfo.webhook, "Successfully Verified", serverOwner, pCheck, IPAddr, account);
+                                // if the user exist and createdAt is longer than 15s ago then send again
+                                if (user) if (Date.now() - new Date(user.createdAt).getTime() > 5000) { await sendWebhookMessage(serverInfo.webhook, "Successfully Verified", serverOwner, pCheck, IPAddr, account); } else {}
                                 else await sendWebhookMessage(serverInfo.webhook, "Successfully Verified", serverOwner, pCheck, IPAddr, account);
                             }
                         }
@@ -78,7 +79,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                                     res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=5;`);
                                                     return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
                                                 default:
-                                                    console.error(`addRole 0/1: ${response?.status}|${response?.response?.status}|${response?.data}|${response?.response?.data}`);
+                                                    console.error(`addRole 0/1: ${response?.status}|${response?.response?.status}|${JSON.stringify(response?.data)}|${JSON.stringify(response?.response?.data)}`);
                                                     return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
                                                 }
                                             }).catch((err) => {
@@ -123,7 +124,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                                                 res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=5;`);
                                                                 return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
                                                             default:
-                                                                console.error(`addRole 2/1: ${response?.status}`);
+                                                                console.error(`addRole 2/1: ${response?.status}|${response?.response?.status}|${JSON.stringify(response?.data)}|${JSON.stringify(response?.response?.data)}`);
                                                                 return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
                                                             }
 
@@ -144,7 +145,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                     }
                                     else 
                                     {
-                                        console.error(`addMember 2: ${resp?.status}|${resp?.response?.status}`);
+                                        console.error(`addMember 2: ${resp?.status}|${resp?.response?.status}|${JSON.stringify(resp?.data)}|${JSON.stringify(resp?.response?.data)}`);
                                         return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
                                     }
                                 } catch (err: any) {
@@ -197,7 +198,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                     const err = respon?.response?.data?.error;
                     const err_des = respon?.response?.data?.error_description;
 
-                    console.log(respon?.response?.data);
+                    console.error(`Verify Error: ${respon?.status}|${respon?.response?.status}|${JSON.stringify(respon?.data)}|${JSON.stringify(respon?.response?.data)}`);
 
                     if (err?.includes("redirect_uri") || err_des?.includes("redirect_uri")) {
                         error_detail =
