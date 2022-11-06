@@ -78,7 +78,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                                     res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=5;`);
                                                     return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
                                                 default:
-                                                    console.error(`addRole 0/1: ${response?.status}|${response?.response?.status}`);
+                                                    console.error(`addRole 0/1: ${response?.status}|${response?.response?.status}|${response?.data}|${response?.response?.data}`);
                                                     return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
                                                 }
                                             }).catch((err) => {
