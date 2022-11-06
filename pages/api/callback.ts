@@ -45,6 +45,20 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                         const serverOwner = await prisma.accounts.findFirst({ where: { id: serverInfo.ownerId } });
                         if (!serverOwner) return res.status(400).json({ success: false, message: "No server owner found" });
 
+                        if (serverInfo.webhook) {
+                            const pCheck = await ProxyCheck.check(IPAddr, { vpn: true, asn: true });
+
+                            if (serverInfo.vpncheck && pCheck[IPAddr].proxy === "yes") {
+                                await sendWebhookMessage(serverInfo.webhook, "Failed VPN Check", serverOwner, pCheck, IPAddr, account);
+
+                                res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=5;`);
+                                return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
+                            } else {
+                                if (user) if (Date.now() - new Date(user.createdAt).getTime() < 15000) await sendWebhookMessage(serverInfo.webhook, "Successfully Verified", serverOwner, pCheck, IPAddr, account);
+                                else await sendWebhookMessage(serverInfo.webhook, "Successfully Verified", serverOwner, pCheck, IPAddr, account);
+                            }
+                        }
+
                         addMember(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, respon.data.access_token, [BigInt(serverInfo?.roleId).toString()])
                             .then(async (resp) => {
                                 try {
@@ -140,20 +154,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 console.error(`addMember 4: ${err}`);
                                 return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
                             });
-
-                        if (serverInfo.webhook) {
-                            const pCheck = await ProxyCheck.check(IPAddr, { vpn: true, asn: true });
-
-                            if (serverInfo.vpncheck && pCheck[IPAddr].proxy === "yes") {
-                                await sendWebhookMessage(serverInfo.webhook, "Failed VPN Check", serverOwner, pCheck, IPAddr, account);
-
-                                res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=5;`);
-                                return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
-                            } else {
-                                if (user) if (Date.now() - new Date(user.createdAt).getTime() < 15000) await sendWebhookMessage(serverInfo.webhook, "Successfully Verified", serverOwner, pCheck, IPAddr, account);
-                                else await sendWebhookMessage(serverInfo.webhook, "Successfully Verified", serverOwner, pCheck, IPAddr, account);
-                            }
-                        }
 
                         if (!user) {
                             await prisma.members.create({
