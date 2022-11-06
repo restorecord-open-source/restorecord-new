@@ -55,7 +55,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                             await addRole(rGuildId.toString(), userId.toString(), customBotInfo?.botToken, serverInfo?.roleId.toString()).then(async (response) => {
                                                 console.log(`${account?.username} adding role: ${response?.status} (${rGuildId.toString()}, ${userId.toString()}, ${serverInfo?.roleId.toString()})`);
 
-                                                switch (response.status) {
+                                                switch (response?.status || response?.response?.status) {
                                                 case 204:
                                                     res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
                                                     return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
@@ -79,6 +79,11 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                     else if (resp?.status === 403 || resp?.response?.status === 403 || resp?.response?.data?.code === "50013") 
                                     {
                                         res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=5;`);
+                                        return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
+                                    }
+                                    else if (resp?.status === 401 || resp?.response?.status === 401 || resp?.response?.data?.code === "40001") 
+                                    {
+                                        res.setHeader("Set-Cookie", `RC_err=401; Path=/; Max-Age=5;`);
                                         return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
                                     } 
                                     else if (resp?.status === 429 || resp?.response?.status === 429 || resp?.response?.data?.retry_after)

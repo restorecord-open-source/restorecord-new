@@ -89,6 +89,13 @@ export default function Verify({ status, err, server }: any) {
                                     </Alert>
                                 ) : ( <></> )}
 
+                                {err === "401" ? (
+                                    <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
+                                        <AlertTitle>Error</AlertTitle>
+                                        Seems like this bot hasn&#39;t been setup correctly, please contact the owner telling him the bot is <b><code>Invalid Bot Information</code></b>.
+                                    </Alert>
+                                ) : ( <></> )}
+
                                 {err === "306" ? (
                                     <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
                                         <AlertTitle>Error</AlertTitle>
