@@ -55,9 +55,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=5;`);
                                 return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
                             } else {
-                                // if the user exist and createdAt is longer than 15s ago then send again
-                                if (user) if (Date.now() - new Date(user.createdAt).getTime() > 5000) { await sendWebhookMessage(serverInfo.webhook, "Successfully Verified", serverOwner, pCheck, IPAddr, account); } else {}
-                                else await sendWebhookMessage(serverInfo.webhook, "Successfully Verified", serverOwner, pCheck, IPAddr, account);
+                                await sendWebhookMessage(serverInfo.webhook, "Successfully Verified", serverOwner, pCheck, IPAddr, account);
                             }
                         }
 
