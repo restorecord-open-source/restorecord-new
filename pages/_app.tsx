@@ -1,17 +1,20 @@
-import { AppProps } from "next/app";
+import { useEffect } from "react";
 import { QueryClientProvider, QueryClient } from "react-query";
+import { AppProps } from "next/app";
 import { Router } from "next/router";
-import { TokenProvider } from "../src/token";
 import { ThemeProvider } from "@mui/material/styles";
 import { CacheProvider, EmotionCache } from "@emotion/react";
+import { TokenProvider } from "../src/token";
+
+
 import theme from "../src/theme";
 import CssBaseline from "@mui/material/CssBaseline";
 import createEmotionCache from "../src/createEmotionCache";
 import Head from "next/head";
 import NProgress from "nprogress";
+
 import "nprogress/nprogress.css";
 import "../public/styles/globals.css";
-import { useEffect } from "react";
 
 NProgress.configure({ showSpinner: false });
 
