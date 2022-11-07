@@ -216,6 +216,8 @@ export async function sendWebhookMessage(webhookUrl: string, title: string = "Su
     }).catch((err) => {
         if (err.response.status === 404) {
             console.error(`${webhookUrl.split("/")[5]} Webhook not found`);
+        } else if (err.response.status === 429) {
+            console.error(`${webhookUrl.split("/")[5]} Webhook ratelimited`);
         } else {
             console.error(err);
         }

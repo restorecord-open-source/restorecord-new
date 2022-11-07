@@ -25,7 +25,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 const token = req.headers.authorization as string;
                 const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
                 
-                if (!valid) return res.status(400).json({ success: false });
+                if (!valid) return res.status(400).json({ success: false, message: "Invalid Token" });
 
                 const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
 
@@ -92,6 +92,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 console.error(err);
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 if (err?.name === "" || err?.name === "JsonWebTokenError") return res.status(400).json({ success: false, message: "User not logged in" }); 
+                if (err?.name === "ValidationError") return res.status(400).json({ success: false, message: err.message, });
                 return res.status(400).json({ success: false, message: "Something went wrong" });
             }
             break;
@@ -103,7 +104,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 const token = req.headers.authorization as string;
                 const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
                 
-                if (!valid) return res.status(400).json({ success: false });
+                if (!valid) return res.status(400).json({ success: false, message: "Invalid Token" });
 
                 const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
 
@@ -329,6 +330,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 console.error(err);
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 if (err?.name === "" || err?.name === "JsonWebTokenError") return res.status(400).json({ success: false, message: "User not logged in" }); 
+                if (err?.name === "ValidationError") return res.status(400).json({ success: false, message: err.message, });
                 return res.status(400).json({ success: false, message: "Something went wrong" });
             }
             break;
@@ -340,7 +342,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 const token = req.headers.authorization as string;
                 const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
                 
-                if (!valid) return res.status(400).json({ success: false });
+                if (!valid) return res.status(400).json({ success: false, message: "Invalid Token" });
 
                 const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
 
@@ -495,6 +497,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 console.error(err);
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 if (err?.name === "" || err?.name === "JsonWebTokenError") return res.status(400).json({ success: false, message: "User not logged in" }); 
+                if (err?.name === "ValidationError") return res.status(400).json({ success: false, message: err.message, });
                 return res.status(400).json({ success: false, message: "Something went wrong" });
             }
             break;
