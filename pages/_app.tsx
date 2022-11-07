@@ -15,9 +15,9 @@ import { useEffect } from "react";
 
 NProgress.configure({ showSpinner: false });
 
-Router.events.on("routeChangeStart", () => { document.querySelector("main")?.classList.add("fadeOut"); NProgress.start(); });
-Router.events.on("routeChangeComplete", () => { document.querySelector("main")?.classList.add("fadeIn"); NProgress.done(); });
-Router.events.on("routeChangeError", () => NProgress.done());
+Router.events.on("routeChangeStart", () => { document.querySelector("main")?.classList.add("fadeOut"); NProgress.start(); setTimeout(() => { document.querySelector("main")?.classList.remove("fadeOut"); }, 500); });
+Router.events.on("routeChangeComplete", () => { document.querySelector("main")?.classList.add("fadeIn"); NProgress.done(); setTimeout(() => { document.querySelector("main")?.classList.remove("fadeOut"); document.querySelector("main")?.classList.remove("fadeIn"); }, 1500); });
+Router.events.on("routeChangeError", () => { NProgress.done(); });
 
 const queryClient = new QueryClient();
 
