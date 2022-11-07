@@ -24,7 +24,6 @@ const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 export default function DashBoard({ user }: any) {
     const [token]: any = useToken();
-
     let memberArr: any = [];
 
     const { data: data2, isError: isError2, isLoading: isLoading2 } = useQuery('memberList', async () => await getMemberList({

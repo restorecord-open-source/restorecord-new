@@ -13,16 +13,13 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import axios from "axios";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Head from "next/head";
-import Script from "next/script";
-import { Badge, FormControl } from "@mui/material";
+import Badge from "@mui/material/Badge";
 import { useQRCode } from "next-qrcode";
 
 export default function Account({ user }: any) {
     const [token]: any = useToken();
-    const router = useRouter();
     const { Canvas: QRCode } = useQRCode();
+    const router = useRouter();
 
     const [openS, setOpenS] = useState(false);
     const [openE, setOpenE] = useState(false);

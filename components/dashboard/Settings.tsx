@@ -3,7 +3,6 @@ import { useState } from "react";
 import { stringAvatar } from "../../src/functions";
 import { useToken } from "../../src/token";
 
-import Link from "next/link";
 import axios from "axios";
 
 import Button from "@mui/material/Button";
@@ -23,7 +22,6 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import Badge from "@mui/material/Badge";
 
 export default function DashSettings({ user }: any) {
     const [token]: any = useToken();

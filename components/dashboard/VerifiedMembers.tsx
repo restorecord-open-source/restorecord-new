@@ -1,11 +1,9 @@
-import { useRouter } from "next/router";
 import { useToken } from "../../src/token";
 import { useEffect, useState } from "react";
-import { useInfiniteQuery, useQuery } from "react-query";
-import { useInView } from "react-intersection-observer";
+import { useInfiniteQuery } from "react-query";
 import { Badge } from "@mui/icons-material";
 
-import getMembers, { BOT_HTTP_INTERACTIONS, BUG_HUNTER_LEVEL_1, BUG_HUNTER_LEVEL_2, CERTIFIED_MODERATOR, DELETED, DISABLED, DISABLED_SUSPICIOUS_ACTIVITY, DISABLE_PREMIUM, DISCORD_EMPLOYEE, DISCORD_PARTNER, EARLY_SUPPORTER, HAS_UNREAD_URGENT_MESSAGES, HIGH_GLOBAL_RATE_LIMIT, HOUSE_BALANCE, HOUSE_BRAVERY, HOUSE_BRILLIANCE, HYPESQUAD_EVENTS, INTERNAL_APPLICATION, MFA_SMS, PREMIUM_DISCRIMINATOR, PREMIUM_PROMO_DISMISSED, QUARANTINED, SELF_DELETED, SPAMMER, SYSTEM, TEAM_PSEUDO_USER, UNDERAGE_DELETED, USED_DESKTOP_CLIENT, USED_MOBILE_CLIENT, USED_WEB_CLIENT, VERIFIED_BOT, VERIFIED_BOT_DEVELOPER, VERIFIED_EMAIL } from "../../src/dashboard/getMembers";
+import getMembers, { BUG_HUNTER_LEVEL_1, CERTIFIED_MODERATOR, DELETED, DISABLED, DISCORD_EMPLOYEE, DISCORD_PARTNER, EARLY_SUPPORTER, HOUSE_BALANCE, HOUSE_BRAVERY, HOUSE_BRILLIANCE, HYPESQUAD_EVENTS, SELF_DELETED, SYSTEM, VERIFIED_BOT, VERIFIED_BOT_DEVELOPER } from "../../src/dashboard/getMembers";
 import Container from "@mui/material/Container";
 import Paper from "@mui/material/Paper";
 import CardContent from "@mui/material/CardContent";
@@ -36,9 +34,7 @@ import TextField from "@mui/material/TextField";
 import DialogActions from "@mui/material/DialogActions";
 
 export default function VerifiedMembers({ user }: any) {
-    const { ref, inView } = useInView()
     const [token]: any = useToken();
-    const router = useRouter();
 
     const [serverId, setServerId] = useState("");
     const [search, setSearch] = useState("");
@@ -49,14 +45,13 @@ export default function VerifiedMembers({ user }: any) {
     const [notiTextE, setNotiTextE] = useState("X");
 
     const [open, setOpen] = useState(false);
-    const [userId, setUserId] = useState("");
     const [userInfoGuild, setUserInfoGuild] = useState("");
     const [userInfo, setUserInfo]: any = useState({});
 
     const [loading, setLoading] = useState(false);
     const [loadingInfo, setLoadingInfo] = useState(true);
 
-    const { data, isSuccess, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, refetch } = useInfiniteQuery('members', async ({ pageParam = 1 }: any) => await getMembers({
+    const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, refetch } = useInfiniteQuery('members', async ({ pageParam = 1 }: any) => await getMembers({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
     }, serverId, search, pageParam), {
         getNextPageParam: (lastPage, allPages: any) => {

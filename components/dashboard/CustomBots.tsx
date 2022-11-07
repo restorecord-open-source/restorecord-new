@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useQuery } from "react-query";
 import { useToken } from "../../src/token";
 
+import Image from "next/image";
 import Container from "@mui/material/Container";
 import Paper from "@mui/material/Paper";
 import CardContent from "@mui/material/CardContent";
@@ -15,8 +16,7 @@ import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
 import Skeleton from "@mui/material/Skeleton";
 import TextField from "@mui/material/TextField";
-import { Link } from "@mui/material";
-import Image from "next/image";
+import Link from "@mui/material/Link";
 
 export default function DashCustomBot({ user }: any) {
     const [token]: any = useToken();

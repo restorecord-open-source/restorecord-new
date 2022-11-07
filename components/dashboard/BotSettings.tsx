@@ -8,7 +8,8 @@ import Typography from "@mui/material/Typography";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import Grid from "@mui/material/Grid";
-import { Button, Stack, Switch, TextField } from "@mui/material";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
 
 export default function DashBotSettings({ user, id }: any) {
     const [token]: any = useToken();
