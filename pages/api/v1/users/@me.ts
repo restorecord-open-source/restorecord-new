@@ -20,6 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 await axios.get("https://discord.com/api/users/@me", {
                     headers: {
                         Authorization: `${token}`,
+                        "Cache-Control": "max-age=604800",
                     },
                     validateStatus: () => true,
                     proxy: false,

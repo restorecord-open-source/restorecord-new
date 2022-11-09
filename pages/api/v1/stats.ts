@@ -7,10 +7,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let bots: any = await prisma.customBots.count();
     let members: any = await prisma.members.count({ where: { accessToken: { not: "unauthorized" } } });
 
-    let totalMembers: any = await prisma.members.count();
-    let backups: any = await prisma.backups.count();
+    let totalMembers: any = req.query.details ? await prisma.members.count() : 0;
+    let backups: any = req.query.details ? await prisma.backups.count() : 0;
 
-    res.status(200).json({
+    return res.status(200).json({
         accounts: accounts,
         servers: servers,
         members: members,

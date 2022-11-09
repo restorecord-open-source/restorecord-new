@@ -10,6 +10,9 @@ import Box from "@mui/material/Box";
 
 async function getStats() {
     return await axios.get(`/api/v1/stats`, {
+        headers: {
+            "Cache-Control": "max-age=1800",
+        },
         validateStatus: () => true
     })
         .then((res: any) => { return res.data; })
