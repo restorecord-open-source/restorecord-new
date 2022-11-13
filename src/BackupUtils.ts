@@ -141,6 +141,9 @@ export async function getRoles(guild: servers, bot: customBots) {
         validateStatus: () => true,
     });
 
+    if (rolesData.status !== 200) return [];
+    if (!rolesData.data || rolesData.data.length === 0) return [];
+
     for (const role of rolesData.data) {
         // if (!role.tags) {
         const roleData = {
