@@ -18,7 +18,7 @@ async function buffer(readable: Readable) {
     return Buffer.concat(chunks);
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
     return new Promise(async resolve => {
         switch (req.method) {
         case "POST":

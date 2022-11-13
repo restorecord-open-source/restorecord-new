@@ -43,12 +43,12 @@ const withDiscordInteraction = (next: any) => async (
         }
 
         createGlobalCommand(cBot.botToken, cBot.clientId, {
-            name: "pull",
-            description: "Pulls all members.",
+            name: "usercount",
+            description: "Get the verified user count of the server",
             options: [],
             type: ApplicationCommandType.ChatInput,
             dm_permission: false,
-            default_member_permissions: "8",
+            default_member_permissions: "8192 ",
             version: ""
         })
 

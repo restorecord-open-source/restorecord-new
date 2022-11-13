@@ -45,8 +45,8 @@ const SubscriptionList: Subscription[] = [
                 icon: <Clear sx={{ color: "#ef4444" }} />,
             },
             {
-                name: "verificationLogs",
-                value: "Verification Logs",
+                name: "webhookLogs",
+                value: "Webhook Logs",
                 description: "Log all verifications in your server",
                 icon: <Clear sx={{ color: "#ef4444" }} />,
             },
@@ -125,8 +125,8 @@ const SubscriptionList: Subscription[] = [
                 icon: <Check sx={{ color: "#22c55e" }} />,
             },
             {
-                name: "verificationLogs",
-                value: "Verification Logs",
+                name: "webhookLogs",
+                value: "Webhook Logs",
                 description: "Log all verifications in your server",
                 icon: <Check sx={{ color: "#22c55e" }} />,
             },
@@ -205,8 +205,8 @@ const SubscriptionList: Subscription[] = [
                 icon: <Check sx={{ color: "#22c55e" }} />,
             },
             {
-                name: "verificationLogs",
-                value: "Advanced Verification Logs",
+                name: "webhookLogs",
+                value: "Advanced Webhook Logs",
                 description: "Log all verifications in your server",
                 icon: <Check sx={{ color: "#22c55e" }} />,
             },

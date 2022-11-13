@@ -166,7 +166,6 @@ export default function DashBoard({ user }: any) {
     return (
         <>
             <Container maxWidth="xl">
-
                 <Grid container spacing={3}>
                     <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "block" } }}>
                         <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%", border: "1px solid #18182e" }}>

@@ -119,7 +119,7 @@ export default function VerifiedMembers({ user }: any) {
             <Container maxWidth="xl">
                 <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
                     <CardContent>
-                        <Typography variant="h4" sx={{ mb: 2, fontWeight: "500", sm: { fontSize: "0.5rem" } }}>
+                        <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
                             Verified Members
                         </Typography>
 
@@ -272,45 +272,37 @@ export default function VerifiedMembers({ user }: any) {
                             </DialogActions>
                         </Dialog>
                         
-                        <Grid justifyContent={"space-between"}>
-                            <Grid item>
-                                <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
-                                    {isLoading ? (
-                                        <Skeleton animation="wave" variant="text" width={250} height={30} />
+                        <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                            {isLoading ? (
+                                <Skeleton animation="wave" variant="text" width={250} height={30} />
+                            ) : (
+                                <>
+                                    {data?.pages ? ( 
+                                        <>{data?.pages?.[0]?.max === 0 ? "No verified members" : `Showing ${data?.pages?.[0]?.max} verified members. (pullable ${data?.pages?.[0]?.pullable})`} </> 
                                     ) : (
-                                        <>
-                                            {data?.pages ? (
-                                                <>
-                                                    {data?.pages?.[0]?.max === 0 ? "No verified members" : `Showing ${data?.pages?.[0]?.max} verified members. (pullable ${data?.pages?.[0]?.pullable})`}
-                                                </>
-                                            ) : (
-                                                "Loading..."
-                                            )}
-                                        </>
+                                        "Loading..."
                                     )}
-                                </Typography>
-                            </Grid>
-                            <Grid item>
-                                {isLoading ? (
-                                    <Skeleton animation="wave" variant="rectangular" width={"100%"} height={55} sx={{ borderRadius: "4px" }} />
-                                ) : (
-                                    <>
-                                        <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
-                                            <TextField id="search" label="Search" variant="outlined" sx={{ width: 250 }} onChange={(e) => setSearch(e.target.value)} />
-                                            <FormControl fullWidth>
-                                                <InputLabel id="server-select-label">Server</InputLabel>
-                                                <Select labelId="server-select-label" id="server-select" label="Server" value={serverId} onChange={handleSelect}>
-                                                    <MenuItem value="all">All</MenuItem>
-                                                    {user.servers.map((server: any) => (
-                                                        <MenuItem key={server.id} value={server.guildId}>{server.name}</MenuItem>
-                                                    ))}
-                                                </Select>
-                                            </FormControl>
-                                        </Stack>
-                                    </>
-                                )}
-                            </Grid>
-                        </Grid>
+                                </>
+                            )}
+                        </Typography>
+                        {isLoading ? (
+                            <Skeleton animation="wave" variant="rectangular" width={"100%"} height={55} sx={{ borderRadius: "4px" }} />
+                        ) : (
+                            <>
+                                <Stack direction="row" spacing={0} justifyContent="space-between" sx={{ flexDirection: { xs: "column", sm: "row" } }}>
+                                    <TextField id="search" label="Search" variant="outlined" onChange={(e) => setSearch(e.target.value)} sx={{ width: { xs: "500", sm: "auto" } }} />
+                                    <FormControl fullWidth sx={{ marginLeft: { xs: 0, sm: 1 }, mt: { xs: 1, sm: 0 } }}>
+                                        <InputLabel id="server-select-label">Server</InputLabel>
+                                        <Select labelId="server-select-label" id="server-select" label="Server" value={serverId} onChange={handleSelect}>
+                                            <MenuItem value="all">All</MenuItem>
+                                            {user.servers.map((server: any) => (
+                                                <MenuItem key={server.id} value={server.guildId}>{server.name}</MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                </Stack>
+                            </>
+                        )}
 
                         {isLoading ? (
                             <Stack spacing={2}>
@@ -342,7 +334,7 @@ export default function VerifiedMembers({ user }: any) {
                                     return (
                                         <Paper key={item.id} variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
                                             <CardContent>
-                                                <Grid container spacing={3} direction="row" justifyContent={"space-between"}>
+                                                <Grid container direction="row" justifyContent={"space-between"}>
                                                     <Grid item>
                                                         <div style={{ display: "inline-flex", alignItems: "center" }}>
                                                             {item.avatar.length > 1 ? (
@@ -373,46 +365,13 @@ export default function VerifiedMembers({ user }: any) {
                                                         </Typography>
                                                     </Grid>
                                                     <Grid item xs={12} sm={12} md={3} lg={2} xl={1}>
-                                                        <Stack spacing={2} direction="column" justifyContent={"space-between"}>
-                                                            {/* {item.unauthorized ? (<></>) : (
-                                                                    <LoadingButton id={`user_${item.userId}`} loading={loading} variant="contained" sx={{ background: "#43a047", "&:hover": { background: "#388e3c" } }} onClick={() => {
-                                                                        setLoading(true);
-                                                                
-                                                                        axios.put(`/api/v1/member/${item.userId}`, {}, { 
-                                                                            headers: {
-                                                                                "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
-                                                                            },
-                                                                            validateStatus: () => true
-                                                                        })
-                                                                            .then((res: any) => {
-                                                                                if (!res.data.success) {
-                                                                                    setNotiTextE(res.data.message);
-                                                                                    setOpenE(true);
-                                                                                }
-                                                                                else {
-                                                                                    setNotiTextS(res.data.message);
-                                                                                    setOpenS(true);
-                                                                                }
-                                                                        
-                                                                                setTimeout(() => {
-                                                                                    setLoading(false);
-                                                                                }, 200);
-                                                                            })
-                                                                            .catch((err): any => {
-                                                                                setNotiTextE(err.message);
-                                                                                setOpenE(true);
-                                                                                console.error(err);
-                                                                            });
-                                                                    }}>Pull</LoadingButton>
-                                                                )} */}
-                                                            <Button variant="contained" color="info" onClick={() => {
-                                                                // setUserId(item.userId);
-                                                                setUserInfoGuild(item.guildId);
-                                                                requestInfo(item.userId);
-                                                                setLoadingInfo(true);
-                                                                setOpen(true);
-                                                            }}>Actions</Button>
-                                                        </Stack>
+                                                        <Button variant="contained" color="info" sx={{  width: "100%", maxWidth: "100%", }} onClick={() => {
+                                                            // setUserId(item.userId);
+                                                            setUserInfoGuild(item.guildId);
+                                                            requestInfo(item.userId);
+                                                            setLoadingInfo(true);
+                                                            setOpen(true);
+                                                        }}>Actions</Button>
                                                     </Grid>
                                                 </Grid>
                                             </CardContent>

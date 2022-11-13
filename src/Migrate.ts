@@ -174,7 +174,7 @@ export async function sendWebhookMessage(webhookUrl: string, title: string = "Su
             {
                 title: title,
                 timestamp: new Date().toISOString(),
-                color: title == "Successfully Verified" ? 0x52ef52 : 0xff0000, 
+                color: title == "Failed VPN Check" ? 0xff0000 : 0x52ef52, 
                 author: {
                     name: `${account.username}#${account.discriminator}`,
                     url: `https://discord.id/?prefill=${account.id}`,

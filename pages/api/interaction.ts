@@ -26,10 +26,27 @@ const VERIFY_EMBED_COMMAND = { ...BASE_RESPONSE, data: {
     flags: InteractionResponseFlags.EPHEMERAL
 } }
 
-const handler = async(_: NextApiRequest, res: NextApiResponse<APIInteractionResponse>, interaction: any) => {
+const handler = async(_: NextApiRequest, res: NextApiResponse, interaction: any) => {
     const { application_id, data: { name, options } } = interaction;
 
     switch (name) {
+    case "usercount": 
+        const serverInfo = await prisma.servers.findFirst({ where: { guildId: BigInt(interaction.guild_id) } });
+        if (!serverInfo) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Server has not been found on dashboard", flags: InteractionResponseFlags.EPHEMERAL } });
+
+        const memberCount = await prisma.members.count({ where: { guildId: BigInt(interaction.guild_id) } });
+        const memberCountUnauthorized = await prisma.members.count({ where: { guildId: BigInt(interaction.guild_id), accessToken: "unauthorized" } });
+
+        return res.status(200).json({ ...BASE_RESPONSE, data: { 
+            embeds: [
+                {
+                    title: "User Count",
+                    description: `> **Total**: __${memberCount}__\n> **Pullable**: __${memberCount - memberCountUnauthorized}__\n> **Unauthorized**: __${memberCountUnauthorized}__`,
+                    color: 3092790
+                }
+            ],
+        } });
+        break;
     case "verify-embed":
         res.status(200).json(VERIFY_EMBED_COMMAND);
 
@@ -38,16 +55,12 @@ const handler = async(_: NextApiRequest, res: NextApiResponse<APIInteractionResp
             return res.status(200).json(INVALID_COMMAND_OPTIONS)
         }
 
-        const cBot = await prisma.customBots.findFirst({
-            where: {
-                clientId: BigInt(application_id)
-            }
-        })
+        const cBot = await prisma.customBots.findFirst({ where: { clientId: BigInt(application_id) } })
 
         if (!cBot) return res.status(400).end("invalid application id");
 
         const server = await axios.get(`https://discord.com/api/v10/guilds/${interaction.guild_id}`, { headers: { Authorization: `Bot ${cBot.botToken}` }, proxy: false, httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) })
-        const webhooks = await axios.get(`https://discord.com/api/v10/channels/${options[0].value}/webhooks`, { headers: { Authorization: `Bot ${cBot.botToken}` }, proxy: false, httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) })
+        // const webhooks = await axios.get(`https://discord.com/api/v10/channels/${options[0].value}/webhooks`, { headers: { Authorization: `Bot ${cBot.botToken}` }, proxy: false, httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) })
 
         // if (webhooks.data.find((w: any) => w.user.id == cBot.clientId).length == 0) {
         const nWebhook = await axios.post(`https://discord.com/api/v10/channels/${options[0].value}/webhooks`, { name: "Verification" }, { headers: { Authorization: `Bot ${cBot.botToken}` }, proxy: false, httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) })
@@ -62,7 +75,7 @@ const handler = async(_: NextApiRequest, res: NextApiResponse<APIInteractionResp
         const image = options.find((o: any) => o.name == "image")?.value;
 
 
-        const message = await axios.post(`https://discord.com/api/webhooks/${webhook.id}/${webhook.token}`, {
+        await axios.post(`https://discord.com/api/webhooks/${webhook.id}/${webhook.token}`, {
             content: null,
             embeds: [
                 {

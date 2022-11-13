@@ -57,7 +57,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                             } else {
                                 if (user) { 
                                     if (Date.now() - new Date(user.createdAt).getTime() > 5000) {
-                                        await sendWebhookMessage(serverInfo.webhook, "Successfully Verified", serverOwner, pCheck, IPAddr, account);
+                                        await sendWebhookMessage(serverInfo.webhook, "Successfully Verified (again)", serverOwner, pCheck, IPAddr, account);
                                     } else {}
                                 }
                                 else { 
