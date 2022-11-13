@@ -34,6 +34,9 @@ export async function getMembers(guild: servers, bot: customBots) {
             validateStatus: () => true,
         });
 
+        if (members.status !== 200) return [];
+        if (members.data.length === 0 || !members.data) return [];
+
         while (!done) {
             const lastMember = members.data[members.data.length - 1];
             const moreMembers = await axios.get(`https://discord.com/api/v10/guilds/${guild.guildId}/members?limit=1000&after=${lastMember.user.id}`, {
@@ -82,6 +85,9 @@ export async function getChannels(guild: servers, bot: customBots) {
         httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
         validateStatus: () => true,
     });
+
+    if (channelsData.status !== 200) return [];
+    if (channelsData.data.length === 0 || !channelsData.data) return [];
 
     const others = channelsData.data.filter((ch: any) => {
         return (ch.type !== 6 && ch.type !== 10 && ch.type !== 11 && ch.type !== 12);
