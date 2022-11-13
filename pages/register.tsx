@@ -32,8 +32,6 @@ export default function Register() {
     const router = useRouter();
     
 
-
-
     const onExpire = () => {
         setNotiTextE("Captcha expired");
         setOpenE(true);
@@ -69,36 +67,41 @@ export default function Register() {
     }
 
     useEffect(() => {
-        if (token) {
-            fetch(`/api/v1/auth/register`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    username: username,
-                    email: email,
-                    password: password,
-                    captcha: token
+        try {
+            if (token) {
+                fetch(`/api/v1/auth/register`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        email: email,
+                        password: password,
+                        captcha: token
+                    })
                 })
-            })
-                .then(res => res.json())
-                .then(res => {
-                    setToken(null);
-                    if (res.success) {
-                        setNotiTextS("Account created");
-                        setOpenS(true);
-                        // functions.ToastAlert("Account created", "success");
-                        router.push("/login?username=" + encodeURIComponent(username));
-                    } 
-                    else {
-                        setNotiTextE(res.message);
-                        setOpenE(true);
+                    .then(res => res.json())
+                    .then(res => {
+                        setToken(null);
+                        if (res.success) {
+                            setNotiTextS("Account created");
+                            setOpenS(true);
+                            // functions.ToastAlert("Account created", "success");
+                            router.push("/login?username=" + encodeURIComponent(username));
+                        } 
+                        else {
+                            setNotiTextE(res.message);
+                            setOpenE(true);
                         // functions.ToastAlert(res.message, "error");
-                    }
-                });
+                        }
+                    });
+            }
         }
-    }, [token, email, username, password, router]);
+        catch (err) {
+            console.error(err);
+        }
+    }, [email, password, router, token, username]);
 
     return (
         <>
