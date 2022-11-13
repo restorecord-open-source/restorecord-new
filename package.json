@@ -19,6 +19,7 @@
         "@mui/lab": "^5.0.0-alpha.98",
         "@mui/material": "^5.10.9",
         "@prisma/client": "^4.5.0",
+        "@sentry/nextjs": "^7.19.0",
         "apexcharts": "^3.36.0",
         "axios": "^0.27.2",
         "bcrypt": "^5.0.1",
