@@ -48,8 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         if (accounts.length > 0) return res.status(400).json({ message: "Username is already in use" });
 
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(data.password, salt);
+        const hashedPassword = await bcrypt.hash(data.password, await bcrypt.genSalt(10));
 
         const account = await prisma.accounts.create({
             data: {
