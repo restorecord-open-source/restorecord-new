@@ -202,7 +202,7 @@ export default function Login() {
                                         name="email"
                                         placeholder="Email"
                                         autoComplete="email"
-                                        InputProps={{ inputProps: { minLength: 2, maxLength: 20 } }}
+                                        InputProps={{ inputProps: { minLength: 6, maxLength: 50 } }}
                                         autoFocus
                                         value={email}
                                         onChange={handleChange}
