@@ -193,7 +193,7 @@ export default function DashBotSettings({ user, id }: any) {
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
-                                                Custom Domain
+                                                Custom Domain <small>(optional)</small>
                                             </Typography>
                                             <TextField fullWidth variant="outlined" name="customDomain" value={customDomain} onChange={handleChange} placeholder="example.com" />
                                         </Grid>
