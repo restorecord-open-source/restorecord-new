@@ -9,18 +9,17 @@ import { ProxyCheck } from "../../src/proxycheck";
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
     return new Promise(async (resolve, reject) => {
         const { code, state } = req.query;
-        const IPAddr: any = getIPAddress(req);
 
         if (!code || !state) {
             const missing = [];
-            if (!code) missing.push("Discord OAuth2 Code");
-            if (!state) missing.push("Guild Id");
-            return res.status(400).json({ success: false, message: `Missing ${missing.join(", ")}` });
+            if (!code) missing.push("Discord OAuth2 Code (&code=)");
+            if (!state) missing.push("Guild Id (&state=)");
+            return res.status(400).json({ success: false, message: `Missing ${missing.join(", ")} in url` });
         }
 
         if (!Number.isInteger(Number(state))) return res.status(400).json({ success: false, message: "Invalid Guild Id" });
-
-
+       
+        const IPAddr: any = getIPAddress(req);
         const rGuildId: any = BigInt(req.query.state as any);
 
         const serverInfo = await prisma.servers.findUnique({where: { guildId: rGuildId } });
@@ -41,7 +40,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                     if (account) {
                         const userId: any = BigInt(account.id as any);
 
-                        const user = await prisma.members.findFirst({ where: { AND: [{ guildId: rGuildId }, { userId: userId }] } });
+                        const user = await prisma.members.findFirst({ where: { AND: [ { guildId: rGuildId }, { userId: userId } ] } });
 
                         const serverOwner = await prisma.accounts.findFirst({ where: { id: serverInfo.ownerId } });
                         if (!serverOwner) return res.status(400).json({ success: false, message: "No server owner found" });

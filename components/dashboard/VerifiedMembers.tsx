@@ -330,7 +330,8 @@ export default function VerifiedMembers({ user }: any) {
                             </Stack>
                         ) : (
                             <>
-                                {data?.pages?.map((page) => page.members.map((item: any) => {
+                                {/* {data?.pages?.map((page) => page.members.map((item: any) => { */}
+                                {(data?.pages?.[0]?.members ?? []).map((item: any) => {
                                     return (
                                         <Paper key={item.id} variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
                                             <CardContent>
@@ -377,7 +378,7 @@ export default function VerifiedMembers({ user }: any) {
                                             </CardContent>
                                         </Paper>
                                     );
-                                }))}
+                                })}
                             </>
                         )}
 

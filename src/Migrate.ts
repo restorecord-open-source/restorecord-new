@@ -197,7 +197,7 @@ export async function sendWebhookMessage(webhookUrl: string, title: string = "Su
                         inline: true,
                     },
                     {
-                        name: `:flag_${pCheck[IPAddr].isocode.toLowerCase()}: IP Info:`,
+                        name: `:flag_${pCheck[IPAddr].isocode ? pCheck[IPAddr].isocode.toLowerCase() : "us"}: IP Info:`,
                         value: `**Country:** \`${pCheck[IPAddr].country}\`\n**Provider:** \`${pCheck[IPAddr].provider}\``,
                         inline: true,
                     },

@@ -24,10 +24,10 @@ export default function StatisticsSection() {
     const serversRef: any = useRef();
     const membersRef: any = useRef();
 
-    useQuery('stats', async () => await getStats(), { retry: false, onSuccess(data: any) {
-        accountsRef.current.innerText = data.accounts.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        serversRef.current.innerText = data.servers.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        membersRef.current.innerText = data.members.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    useQuery('stats', async () => await getStats(), { retry: true, onSuccess(data: any) {
+        if (data.accounts) accountsRef.current.innerText = data.accounts.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        if (data.servers) serversRef.current.innerText = data.servers.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        if (data.members) membersRef.current.innerText = data.members.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }, });
 
     return (

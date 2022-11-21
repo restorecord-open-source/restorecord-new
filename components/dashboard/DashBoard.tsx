@@ -205,7 +205,7 @@ export default function DashBoard({ user }: any) {
                                             Recent Activity
                                         </Typography>
                                         <Typography variant="body1" color={"grey.200"}>
-                                            Last {data2.members.length > 3 ? 3 : data2.members.length} verified members.
+                                            Last {Array.isArray(data2.members) ? (data2.members.length > 3 ? 3 : data2.members.length) : 0} verified members.
                                         </Typography>
                                     </>
                                 )}
