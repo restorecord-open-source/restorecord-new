@@ -30,7 +30,7 @@
         "https-proxy-agent": "^5.0.1",
         "jsonwebtoken": "^8.5.1",
         "lru-cache": "^7.14.0",
-        "next": "^12.3.1",
+        "next": "^12.3.2",
         "next-qrcode": "^2.2.2",
         "node-mailjet": "^5.1.1",
         "nprogress": "^0.2.0",
