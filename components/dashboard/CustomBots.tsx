@@ -58,7 +58,7 @@ export default function DashCustomBot({ user }: any) {
                             return bot;
                         } else if (res.message === "401: Unauthorized") {
                             bot.avatar = `https://cdn.discordapp.com/embed/avatars/0.png`;
-                            bot.username = `Unknown Bot`;
+                            bot.username = `Unknown Bot/Deleted`;
                             bot.clientId = atob(bot.botToken.split(".")[0]);
                             return bot;
                         }
@@ -114,6 +114,24 @@ export default function DashCustomBot({ user }: any) {
                 setNotiTextE(err.message);
                 setOpenE(true);
             });
+
+        fetch(`/api/v1/bot/${clientId}/refresh`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+            },
+        })
+            .then(res => res.json())
+            .then(res => {
+                if (!res.success) {
+                    console.error(res.message);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+            });
+                
     }
 
     function handleChange(e: any) {

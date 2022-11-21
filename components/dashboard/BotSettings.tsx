@@ -10,6 +10,8 @@ import Alert from "@mui/material/Alert";
 import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
+import axios from "axios";
+import Stack from "@mui/material/Stack";
 
 export default function DashBotSettings({ user, id }: any) {
     const [token]: any = useToken();
@@ -129,9 +131,34 @@ export default function DashBotSettings({ user, id }: any) {
 
                         {(user.bots.find((bot: any) => bot.clientId === id)) ? (
                             <>
-                                <Button variant="contained" sx={{ mb: 2 }} onClick={() => { router.push(`/dashboard/custombots/`)} }>
-                                    Go Back
-                                </Button>
+                                <Stack spacing={2} direction="row" sx={{ mb: 2 }}>
+                                    <Button variant="contained" onClick={() => { router.push(`/dashboard/custombots/`)} }>
+                                        Go Back
+                                    </Button>
+                                    <Button variant="contained" onClick={() => {
+                                        axios.get(`/api/v1/bot/${bot.clientId}/refresh`, {
+                                            headers: {
+                                                "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                            }
+                                        }).then(res => {
+                                            if (!res.data.success) {
+                                                setNotiTextE(res.data.message);
+                                                setOpenE(true);
+                                            }
+                                            else {
+                                                setNotiTextS(res.data.message);
+                                                setOpenS(true);
+                                            }
+                                        }).catch(err => {
+                                            console.error(err);
+                                            setNotiTextE(err.message);
+                                            setOpenE(true);
+                                        });
+                                    }}>
+                                        Refresh Commands
+                                    </Button>
+                                </Stack>
+                                
 
                                 <form onSubmit={handleSubmit}>
                                     <Grid container spacing={3} direction="column">

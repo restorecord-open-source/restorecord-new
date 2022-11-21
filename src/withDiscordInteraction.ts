@@ -1,5 +1,5 @@
 import axios from "axios"
-import { APIApplicationCommand, APIChatInputApplicationCommandInteraction, APIInteractionResponse, ApplicationCommandOptionType, ApplicationCommandType } from "discord-api-types/v10"
+import { APIApplicationCommand, APIChatInputApplicationCommandInteraction } from "discord-api-types/v10"
 import { NextApiRequest, NextApiResponse } from "next"
 import nacl from "tweetnacl"
 import { prisma } from "./db"
@@ -39,54 +39,8 @@ const withDiscordInteraction = (next: any) => async (
 
         const isVerified = verifyHeaders(timestamp, rawBody, signature, cBot.publicKey)
         if (!isVerified) {
-            return res.status(401).end("invalid request signature")
+            return res.status(401).end("Request does not come from Discord (invalid signature)")
         }
-
-        createGlobalCommand(cBot.botToken, cBot.clientId, {
-            name: "usercount",
-            description: "Get the verified user count of the server",
-            options: [],
-            type: ApplicationCommandType.ChatInput,
-            dm_permission: false,
-            default_member_permissions: "8192 ",
-            version: ""
-        })
-
-        createGlobalCommand(cBot.botToken, cBot.clientId, {
-            name: "verify-embed",
-            description: "Creates a verification embed.",
-            options: [ 
-                {
-                    name: "channel",
-                    description: "The channel to send the embed to.",
-                    type: ApplicationCommandOptionType.Channel,
-                    required: true
-                },
-                {
-                    name: "title",
-                    description: "Embed title",
-                    type: ApplicationCommandOptionType.String,
-                    required: false
-                },
-                {
-                    name: "description",
-                    description: "Embed Description",
-                    type: ApplicationCommandOptionType.String,
-                    required: false
-                },
-                {
-                    name: "image",
-                    description: "The image to use for the embed. (Please use direct link ending in .png, .jpg, .jpeg, .gif)",
-                    type: ApplicationCommandOptionType.String,
-                    required: false
-                },
-            ],
-            type: ApplicationCommandType.ChatInput,
-            dm_permission: false,
-            default_member_permissions: "8224",
-            version: ""
-        })
-
 
         // @ts-ignore
         if (type === 1) {

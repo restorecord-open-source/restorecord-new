@@ -22,6 +22,18 @@ const theme = createTheme({
             'Roboto',
         ].join(','),
     },
+    components: {
+        MuiDialog: { 
+            styleOverrides: {
+                paper: {
+                    backgroundColor: "#13131f",
+                    backgroundImage: "unset",
+                    padding: "0.5rem",
+                    borderRadius: "1rem",
+                }
+            }
+        }
+    }
 });
 
 export default theme;

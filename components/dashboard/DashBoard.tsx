@@ -101,7 +101,6 @@ export default function DashBoard({ user }: any) {
             colors: [theme.palette.primary.main],
             tooltip: {
                 theme: 'dark',
-                // remove the dot
                 marker: {
                     show: false
                 },
