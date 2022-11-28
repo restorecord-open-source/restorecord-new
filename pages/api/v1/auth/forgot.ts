@@ -49,7 +49,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const resetToken = sign({
                 id: account.id, 
                 email: account.email,
-                i: atob((Math.random() + 1).toString(36).substring(7))
             }, process.env.JWT_SECRET!, { expiresIn: "1h" });
 
             await prisma.logs.create({

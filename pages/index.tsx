@@ -79,11 +79,17 @@ export default function Home() {
                             We provide a free and easy to use Discord server backup service.
                         </Typography>
 
-                        <Badge badgeContent={<>FOR FREE</>} color="success" sx={{ mb: 4, boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)", [`& .MuiBadge-badge`]: { backgroundColor: "rgb(52, 168, 83)", color: "#fff", padding: "0.75rem" } }}>
-                            <Button variant="contained" color="primary" href="/login" size="large">
-                                Get Started
+                        <Stack direction="row" spacing={6} sx={{ mb: 4, padding: 4, paddingLeft: { xs: 2, sm: 16 }, paddingRight: { xs: 2, sm: 16 } }}>
+                            <Badge badgeContent={<>FOR FREE</>} color="success" sx={{ boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)", [`& .MuiBadge-badge`]: { backgroundColor: "rgb(52, 168, 83)", color: "#fff" } }}>
+                                <Button variant="contained" color="primary" href="/login" size="large">
+                                    Get Started
+                                </Button>
+                            </Badge>
+                            
+                            <Button variant="outlined" color="primary" href="/verify/demo" size="large" sx={{ borderColor: theme.palette.primary.main }}>
+                                View Demo
                             </Button>
-                        </Badge>
+                        </Stack>
 
                         <Box id="features" sx={{ marginTop: 4 }} />
 

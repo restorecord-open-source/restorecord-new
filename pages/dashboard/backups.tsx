@@ -248,7 +248,7 @@ export default function Backups() {
                                                 <CardActions sx={{ justifyContent: "flex-start", ml: "0.5rem", mb: "0.75rem" }}>
                                                     {/* <Button variant="contained" color="primary" disabled={true}>View Channels</Button> */}
                                                     {/* <Button variant="contained" color="primary" disabled={true}>View Roles</Button> */}
-                                                    <Button variant="contained" sx={{ background: "#43a047", "&:hover": { background: "#388e3c" } }} onClick={(e) => {
+                                                    <Button variant="contained" color="success" onClick={(e) => {
                                                         setBackupId(backup.backupId);
                                                         setRestoreDialog(true);
                                                     }}>Restore</Button>

@@ -20,7 +20,7 @@ import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
 import { prisma } from "../../src/db";
 
-export default function Verify({ status, err, server }: any) {
+export default function Verify({ server, status, err, errStack }: any) {
     const router = useRouter();
     const guildId = router.query.server;
 
@@ -75,6 +75,13 @@ export default function Verify({ status, err, server }: any) {
                     Seems like you have reached the 100 server limit, please leave a server and try again.
                 </Alert>
             );
+        default:
+            return (
+                <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
+                    <AlertTitle>Error</AlertTitle>
+                    An unknown error has occured: {errStack}
+                </Alert>
+            );
         }
     }
 
@@ -121,9 +128,9 @@ export default function Verify({ status, err, server }: any) {
                         )}
 
                         {isLoading ? ( <></> ) : (
-                            <>
-                                {ErrorAlert(err)}
-                            </>
+                            <>{err ? (
+                                <>{ErrorAlert(err)}</>
+                            ) : ( <></> )}</>
                         )}
                         
 
@@ -224,24 +231,33 @@ export async function getServerSideProps({ req }: any) {
     if (req) {
         const cookies = req.headers.cookie ? req.headers.cookie : "";
 
+        let serverInfo: { name: string, description: string, icon: string } = {
+            name: decodeURI(req.url.split("/verify/")[1]),
+            description: "Verify to view the rest of the server.",
+            icon: "https://cdn.restorecord.com/logo512.png",
+        }
 
-        const serverDB = await prisma.servers.findUnique({
+
+        await prisma.servers.findUnique({
             where: {
                 name: req.url.split("/verify/")[1]
             }
+        }).then((res) => {
+            if (res) {
+                serverInfo = {
+                    name: res.name,
+                    description: res.description,
+                    icon: res.picture ?? "https://cdn.restorecord.com/logo512.png",
+                }
+            }
         })
-
-        const serverInfo = {
-            name: serverDB?.name ?? decodeURIComponent(req.url.split("/verify/")[1]),
-            description: serverDB?.description ?? "Verify to view the rest of the server.",
-            icon: serverDB?.picture ?? "https://cdn.restorecord.com/logo512.png",
-        }
 
         return { 
             props: {
                 server: JSON.parse(JSON.stringify(serverInfo)),
                 status: cookies.includes("verified=true") ? "finished" : "verifying",
                 err: cookies.includes("RC_err=") ? cookies.split("RC_err=")[1].split(";")[0] : "",
+                errStack: cookies.includes("RC_errStack=") ? cookies.split("RC_errStack=")[1].split(";")[0] : "",
             }
         }
 

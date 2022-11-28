@@ -170,7 +170,7 @@ export default function DashBotSettings({ user, id }: any) {
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
-                                                Bot Secret
+                                                Client Secret
                                             </Typography>
                                             <TextField fullWidth variant="outlined" name="botSecret" value={botSecret} onChange={handleChange} />
                                         </Grid>

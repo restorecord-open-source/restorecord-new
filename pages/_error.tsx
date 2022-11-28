@@ -28,7 +28,7 @@ export interface ErrorProps {
     namespacesRequired?: string[]
 }  
 
-export default function ErrorPage<ErrorProps>({ statusCode, title: titleOrigin }: any) {
+export default function ErrorPage<ErrorProps>({ statusCode, title: titleOrigin, err }: any) {
 
     const title = titleOrigin || statusTexts[statusCode] || 'An unexpected error has occurred'
 
@@ -41,19 +41,22 @@ export default function ErrorPage<ErrorProps>({ statusCode, title: titleOrigin }
                     <Button variant="contained" onClick={() => { window.location.href = "/"; }}>Go Back to Homepage</Button>
 
                     {/* titleOrigion as code */}
-                    <Typography variant="h4" component="h4">{titleOrigin}</Typography>
+                    <Typography variant="h4" component="code" sx={{ fontFamily: "monospace", backgroundColor: "rgba(0,0,0,0.05)", padding: "0.5rem" }}>
+                        {err && err.stack}
+                    </Typography>
                 </Stack>
             </Box>
         </>
     )
 }
 
-ErrorPage.getInitialProps = async ({ res, err, }: any): Promise<Promise<ErrorProps> | ErrorProps> => {
+ErrorPage.getInitialProps = async ({ res, err, }: any) => {
     await Sentry.captureUnderscoreErrorException(err);
 
     const statusCode = res && res.statusCode ? res.statusCode : err ? err.statusCode! : 404
     return {
         statusCode,
         namespacesRequired: ['common'],
+        err,
     }
 }

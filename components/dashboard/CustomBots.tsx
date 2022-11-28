@@ -161,10 +161,6 @@ export default function DashCustomBot({ user }: any) {
             <Container maxWidth="xl">
                 <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
                     <CardContent>
-                        <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
-                            Custom Bots
-                        </Typography>
-
                         <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
                             <Alert elevation={6} variant="filled" severity="error">
                                 {notiTextE}
@@ -180,9 +176,14 @@ export default function DashCustomBot({ user }: any) {
 
                         {(Array.isArray(user.bots) && user.bots.length > 0) && !createNewBot && (
                             <>
-                                <Button variant="contained" sx={{ mb: 2 }} onClick={() => setcreateNewBot(true)}>
-                                    Create New Bot
-                                </Button>
+                                <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="center">
+                                    <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                                        Custom Bots
+                                    </Typography>
+                                    <Button variant="contained" sx={{ mb: 2 }} onClick={() => setcreateNewBot(true)}>
+                                        + Create New Bot
+                                    </Button>
+                                </Stack>
                                 {user.bots.map((item: any) => {
                                     return (
                                         <Paper key={item.id} variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
@@ -213,17 +214,17 @@ export default function DashCustomBot({ user }: any) {
                                                         <Stack spacing={1} direction="column" justifyContent={"space-between"}>
                                                             {item.username ? (
                                                                 <>
-                                                                    <Button variant="contained" onClick={() => { router.push(`/dashboard/custombots/${item.clientId}`) }}>
+                                                                    <Button variant="contained" color="primary" onClick={() => { router.push(`/dashboard/custombots/${item.clientId}`) }}>
                                                                         Edit
                                                                     </Button>
-                                                                    <Button variant="contained" sx={{ background: "#43a047", "&:hover": { background: "#388e3c" } }} href={`https://discord.com/oauth2/authorize?client_id=${item.clientId}&scope=bot%20applications.commands&permissions=8`} target="_blank">
+                                                                    <Button variant="contained" color="success" href={`https://discord.com/oauth2/authorize?client_id=${item.clientId}&scope=bot&permissions=8`} target="_blank" rel="noreferrer">
                                                                         Invite
                                                                     </Button>
                                                                 </>
                                                             ) : (
                                                                 <>
-                                                                    <Skeleton variant="rectangular" width={100} height={36} sx={{ borderRadius: "4px" }} />
-                                                                    <Skeleton variant="rectangular" width={100} height={36} sx={{ borderRadius: "4px" }} />
+                                                                    <Skeleton variant="rectangular" width={100} height={36} sx={{ borderRadius: "14px" }} />
+                                                                    <Skeleton variant="rectangular" width={100} height={36} sx={{ borderRadius: "14px" }} />
                                                                 </>
                                                             )}
                                                         </Stack>
@@ -248,7 +249,7 @@ export default function DashCustomBot({ user }: any) {
                                             <TextField label="Bot Name" name="botName" value={botName} onChange={handleChange} required />
                                             <TextField label="Client ID" name="clientId" value={clientId} onChange={handleChange} required />
                                             <TextField label="Bot Token" name="botToken" value={botToken} onChange={handleChange} required />
-                                            <TextField label="Bot Secret" name="botSecret" value={botSecret} onChange={handleChange} required />
+                                            <TextField label="Client Secret" name="botSecret" value={botSecret} onChange={handleChange} required />
                                             {user.role === "business" && (
                                                 <TextField label="Public Key" name="publicKey" value={publicKey} onChange={handleChange} required />
                                             )}

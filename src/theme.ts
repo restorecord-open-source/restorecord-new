@@ -4,25 +4,175 @@ const theme = createTheme({
     palette: {
         mode: "dark",
         primary: {
-            main: '#4f46e5',
-            // main: '#0090ff',
+            main: "#4f46e5",
+            // main: "#0090ff",
         },
         secondary: {
-            main: '#433add',
+            main: "#433add",
         },
         info: {
-            main: '#3f84f6',
+            main: "#3f84f6",
+        },
+        success: {
+            main: "#43a047",
+        },
+        yellow: {
+            main: "#fbc02d",
         },
         background: {
-            paper: '#0a0a12',
-        } 
+            paper: "#0a0a12",
+        },
     },
     typography: {
         fontFamily: [
-            'Roboto',
-        ].join(','),
+            "Roboto",
+        ].join(","),
     },
     components: {
+        MuiButton: {
+            styleOverrides: {
+                root: ({ ownerState }: any) => ({
+                    borderRadius: 14,
+                    padding: "8px 14px",
+                    transitionDuration: "0.3s",
+                    ...(ownerState?.color === "primary" && {
+                        outline: `1px solid ${theme.palette.primary.main}`,
+                    }),
+                    ...(ownerState?.color === "secondary" && {
+                        outline: `1px solid ${theme.palette.secondary.main}`,
+                    }),
+                    ...(ownerState?.color === "info" && {
+                        outline: `1px solid ${theme.palette.info.main}`,
+                    }),
+                    ...(ownerState?.color === "default" && {
+                        outline: `1px solid ${theme.palette.text.primary}`,
+                    }),
+                    ...(ownerState?.color === "error" && {
+                        outline: `1px solid ${theme.palette.error.main}`,
+                    }),
+                    ...(ownerState?.color === "warning" && {
+                        outline: `1px solid ${theme.palette.warning.main}`,
+                    }),
+                    ...(ownerState?.color === "success" && {
+                        outline: `1px solid ${theme.palette.success.main}`,
+                    }),
+                    ...(ownerState?.color === "yellow" && {
+                        outline: `1px solid ${theme.palette.yellow.main}`,
+                    }),
+                    "&:hover": {
+                        backgroundColor: "transparent",
+                        ...(ownerState?.color === "primary" && {
+                            color: theme.palette.primary.main,
+                        }),
+                        ...(ownerState?.color === "secondary" && {
+                            color: theme.palette.secondary.main,
+                        }),
+                        ...(ownerState?.color === "info" && {
+                            color: theme.palette.info.main,
+                        }),
+                        ...(ownerState?.color === "default" && {
+                            color: theme.palette.text.primary,
+                        }),
+                        ...(ownerState?.color === "error" && {
+                            color: theme.palette.error.main,
+                        }),
+                        ...(ownerState?.color === "warning" && {
+                            color: theme.palette.warning.main,
+                        }),
+                        ...(ownerState?.color === "success" && {
+                            color: theme.palette.success.main,
+                        }),
+                        ...(ownerState?.color === "yellow" && {
+                            color: theme.palette.yellow.main,
+                        }),
+                    },
+                }),
+            },
+            variants: [
+                {
+                    props: { variant: "filled", color: "white" },
+                    style: ({ ownerState }: any) => ({
+                        outline: `1px solid ${theme.palette.grey[700]}`,
+                        backgroundColor: "transparent",
+                        color: "#fff",
+                        "&:hover": {
+                            backgroundColor: "#fff",
+                            color: theme.palette.grey[700],
+                        },
+                    }),
+                },
+            ],         
+        },
+        MuiTextField: {
+            styleOverrides: {
+                root: ({ ownerState }: any) => ({
+                    borderRadius: 14,
+                    "& .MuiOutlinedInput-root": {
+                        borderRadius: 14,
+                        "& fieldset": {
+                            borderRadius: 14,
+                        },
+                        "&:hover fieldset": {
+                            borderColor: theme.palette.primary.main,
+                        },
+                        "&.Mui-focused fieldset": {
+                            borderColor: theme.palette.primary.main,
+                        },
+                    },
+                }),
+            },
+        },
+        MuiOutlinedInput: {
+            styleOverrides: {
+                root: ({ ownerState }: any) => ({
+                    borderRadius: 14,
+                    "& fieldset": {
+                        borderRadius: 14,
+                    },
+                    "&:hover fieldset": {
+                        borderColor: theme.palette.primary.main,
+                    },
+                    "&.Mui-focused fieldset": {
+                        borderColor: theme.palette.primary.main,
+                    },
+                }),
+            },
+        },
+        MuiInputLabel: {
+            styleOverrides: {
+                root: ({ ownerState }: any) => ({
+                    "&.Mui-focused": {
+                        color: theme.palette.primary.main,
+                    },
+                }),
+            },
+        },
+        MuiInputBase: {
+            styleOverrides: {
+                root:{
+                    borderRadius: 14,
+                },
+            },
+        },
+        MuiFormControl: {
+            styleOverrides: {
+                root:{
+                    borderRadius: 14,
+                },
+            },
+        },
+        MuiMenu: {
+            styleOverrides: {
+                paper: ({ ownerState }: any) => ({
+                    backgroundColor: theme.palette.background.paper,
+                    backgroundImage: "unset !important",
+                    border: `1px solid ${theme.palette.grey[900]}`,
+                    "& .MuiList-padding": {
+                        padding: 0,
+                    },
+                }),
+            },
+        },
         MuiDialog: { 
             styleOverrides: {
                 paper: {

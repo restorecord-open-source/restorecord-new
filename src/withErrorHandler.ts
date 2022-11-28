@@ -6,6 +6,7 @@ const withErrorHandler = (fn: NextApiHandler) => async (req: NextApiRequest, res
     } catch (err: any) {
         const statusCode = err.statusCode || 500
         const message = err.message || "Oops, something went wrong!"
+        console.error(`[Error]: ${statusCode} - ${message}`)
         res.status(statusCode).json({ statusCode, message })
     }
 }
