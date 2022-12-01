@@ -17,7 +17,9 @@ const theme = createTheme({
             main: "#43a047",
         },
         yellow: {
+            light: "#fbd67c",
             main: "#fbc02d",
+            dark: "#9b6e00",
         },
         background: {
             paper: "#0a0a12",
@@ -59,32 +61,39 @@ const theme = createTheme({
                     ...(ownerState?.color === "yellow" && {
                         outline: `1px solid ${theme.palette.yellow.main}`,
                     }),
-                    "&:hover": {
-                        backgroundColor: "transparent",
-                        ...(ownerState?.color === "primary" && {
-                            color: theme.palette.primary.main,
-                        }),
-                        ...(ownerState?.color === "secondary" && {
-                            color: theme.palette.secondary.main,
-                        }),
-                        ...(ownerState?.color === "info" && {
-                            color: theme.palette.info.main,
-                        }),
-                        ...(ownerState?.color === "default" && {
-                            color: theme.palette.text.primary,
-                        }),
-                        ...(ownerState?.color === "error" && {
-                            color: theme.palette.error.main,
-                        }),
-                        ...(ownerState?.color === "warning" && {
-                            color: theme.palette.warning.main,
-                        }),
-                        ...(ownerState?.color === "success" && {
-                            color: theme.palette.success.main,
-                        }),
-                        ...(ownerState?.color === "yellow" && {
-                            color: theme.palette.yellow.main,
-                        }),
+                    // change outline to backgroundColor for safari browser
+                    "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (min-device-pixel-ratio: 1.5)": {
+                        outline: "none",
+                    },
+                    // if not safari browser
+                    "@media not all and (-webkit-min-device-pixel-ratio: 1.5), not all and (-o-min-device-pixel-ratio: 3/2), not all and (min--moz-device-pixel-ratio: 1.5), not all and (min-device-pixel-ratio: 1.5)": {
+                        "&:hover": {
+                            backgroundColor: "transparent",
+                            ...(ownerState?.color === "primary" && {
+                                color: theme.palette.primary.main,
+                            }),
+                            ...(ownerState?.color === "secondary" && {
+                                color: theme.palette.secondary.main,
+                            }),
+                            ...(ownerState?.color === "info" && {
+                                color: theme.palette.info.main,
+                            }),
+                            ...(ownerState?.color === "default" && {
+                                color: theme.palette.text.primary,
+                            }),
+                            ...(ownerState?.color === "error" && {
+                                color: theme.palette.error.main,
+                            }),
+                            ...(ownerState?.color === "warning" && {
+                                color: theme.palette.warning.main,
+                            }),
+                            ...(ownerState?.color === "success" && {
+                                color: theme.palette.success.main,
+                            }),
+                            ...(ownerState?.color === "yellow" && {
+                                color: theme.palette.yellow.main,
+                            }),
+                        },
                     },
                 }),
             },
@@ -93,12 +102,23 @@ const theme = createTheme({
                     props: { variant: "filled", color: "white" },
                     style: ({ ownerState }: any) => ({
                         outline: `1px solid ${theme.palette.grey[700]}`,
-                        backgroundColor: "transparent",
-                        color: "#fff",
-                        "&:hover": {
-                            backgroundColor: "#fff",
-                            color: theme.palette.grey[700],
+                        "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (min-device-pixel-ratio: 1.5)": {
+                            outline: "none",
+                            backgroundColor: theme.palette.grey[400],
+                            color: theme.palette.grey[900],
+                            "&:hover": {
+                                backgroundColor: "#fff",
+                                color: theme.palette.grey[700],
+                            },
                         },
+                        "@media not all and (-webkit-min-device-pixel-ratio: 1.5), not all and (-o-min-device-pixel-ratio: 3/2), not all and (min--moz-device-pixel-ratio: 1.5), not all and (min-device-pixel-ratio: 1.5)": {
+                            backgroundColor: "transparent",
+                            color: "#fff",
+                            "&:hover": {
+                                backgroundColor: "#fff",
+                                color: theme.palette.grey[700],
+                            },
+                        }
                     }),
                 },
             ],         
@@ -152,6 +172,18 @@ const theme = createTheme({
                 root:{
                     borderRadius: 14,
                 },
+            },
+        },
+        MuiInput: {
+            styleOverrides: {
+                underline: ({ ownerState }: any) => ({
+                    "&:after": {
+                        borderBottom: `2px solid ${theme.palette.primary.main}`,
+                    },
+                    "&:before": {
+                        borderBottom: `2px solid ${theme.palette.primary.dark}`,
+                    },
+                }),
             },
         },
         MuiFormControl: {

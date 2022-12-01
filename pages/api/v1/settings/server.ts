@@ -28,17 +28,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     return res.status(400).json({ success: false, message: `Missing ${errors}` });
                 }
 
-                if (isNaN(Number(data.guildId)) || isNaN(Number(data.roleId)) || BigInt(data.guildId) > 18446744073709551615 || BigInt(data.roleId) > 18446744073709551615) return res.status(400).json({ success: false, message: "Invalid Server Id or Role Id" });
+                if (isNaN(Number(data.guildId)) || isNaN(Number(data.roleId))) return res.status(400).json({ success: false, message: "Server ID or Role ID is not a number" });
+                if (BigInt(data.guildId) > 18446744073709551615 || BigInt(data.roleId) > 18446744073709551615) return res.status(400).json({ success: false, message: "Server ID or Role ID is not a discord ID" });
 
                 const token = req.headers.authorization as string;
                 const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
-                
                 if (!valid) return res.status(400).json({ success: false, message: "Invalid Token" });
 
-                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, } });
                 const account = await prisma.accounts.findFirst({ where: { id: valid.id, } });
+                if (!account) return res.status(400).json({ success: false, message: "Account not found." });
 
-                if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
+                const sess = await prisma.sessions.findMany({ where: { accountId: account.id, } });
+                if (sess.length === 0) return res.status(400).json({ success: false, message: "Session not found." });
+
 
                 const server = await prisma.servers.findFirst({
                     where: {
@@ -50,16 +52,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     },
                 });
 
-                if (server?.name.toLowerCase() === data.serverName.toLowerCase()) return res.status(400).json({ success: false, message: "Server name is already in use" });
-                if (server?.guildId === BigInt(data.guildId)) return res.status(400).json({ success: false, message: "Guild ID is already in use" });
-                if (server?.roleId === BigInt(data.roleId)) return res.status(400).json({ success: false, message: "Role ID is already in use" });
+                if (server) {
+                    if (server.name.toLowerCase() === data.serverName.toLowerCase()) return res.status(400).json({ success: false, message: "Server name is already in use" });
+                    if (server.guildId === BigInt(data.guildId) as bigint) return res.status(400).json({ success: false, message: "Guild ID is already in use" });
+                    if (server.roleId === BigInt(data.roleId) as bigint) return res.status(400).json({ success: false, message: "Role ID is already in use" });
+                }
 
                 const accountServers = await prisma.servers.findMany({ where: { ownerId: valid.id, } });
 
-                if (account?.role === "free" && accountServers.length >= 1) 
-                    return res.status(400).json({ success: false, message: "You can't have more than 1 server." });
-                if (account?.role === "premium" && accountServers.length >= 5)
-                    return res.status(400).json({ success: false, message: "You can't have more than 5 servers." });
+                if (account.role === "free" && accountServers.length >= 1) return res.status(400).json({ success: false, message: "You can't have more than 1 server." });
+                if (account.role === "premium" && accountServers.length >= 5) return res.status(400).json({ success: false, message: "You can't have more than 5 servers." });
 
                 const newServer = await prisma.servers.create({
                     data: {
@@ -103,7 +105,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
 
-                const account = await prisma.accounts.findFirst({ where: { id: valid.id, } });
+                const account = await prisma.accounts.findFirst({ where: { id: valid.id } });
+                if (!account) return res.status(400).json({ success: false, message: "Account Not found." });
 
                 if (data.newServerName && data.newGuildId && data.newRoleId && data.serverName && data.guildId && data.roleId) {
                     const serverNameCheck = await prisma.servers.findFirst({ where: { name: data.newServerName, } });
@@ -126,8 +129,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     });
 
                     if (!server) return res.status(400).json({ success: false, message: "Server not found" });
-                    if (data.newPicture === "") return res.status(400).json({ success: false, message: "Picture can't be empty" });
                     if (data.newWebhook) if (/^.*(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-zA-Z0-9_-]+)$/.test(data.newWebhook) === false) return res.status(400).json({ success: false, message: "Invalid Webhook" });
+                    if (data.newThemeColor) if (/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(data.newThemeColor) === false) return res.status(400).json({ success: false, message: "Invalid Theme Color" });
 
                     const newServer = await prisma.servers.update({
                         where: {
@@ -137,11 +140,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             name: data.newServerName,
                             guildId: BigInt(data.newGuildId as any),
                             roleId: BigInt(data.newRoleId as any),
-                            webhook: data.newWebhookCheck ? data.newWebhook : null,
+                            webhook: data.newWebhookCheck ? (data.newWebhook ? (account.role !== "free" ? data.newWebhook : null) : null) : server.webhook,
                             picture: data.newPicture,
-                            bgImage: data.newBackground,
+                            bgImage: data.newBackground ? (account.role === "business" ? data.newBackground : null) : null,
                             description: data.newDescription,
-                            vpncheck: data.newWebhookCheck ? (data.newVpnCheck ? true : false) : false,
+                            vpncheck: data.newWebhookCheck ? (data.newVpnCheck ? (account.role !== "free" ? true : false) : false) : false,
+                            themeColor: data.newThemeColor ? (account.role === "business" ? data.newThemeColor.replace("#", "") : "4f46e5") : "#4f46e5",
                         }
                     });
 
