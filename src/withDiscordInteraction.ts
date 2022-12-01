@@ -24,8 +24,11 @@ const withDiscordInteraction = (next: any) => async (
 
     try {
         const rawBody = await parseRawBodyAsString(req)
-        const interaction: APIChatInputApplicationCommandInteraction = JSON.parse(rawBody)
+        const interaction: APIChatInputApplicationCommandInteraction = JSON.parse(rawBody);
+        if (!interaction) { return res.status(401).end("invalid request signature") }
+
         const { type, application_id } = interaction
+        if (!type || !application_id) { return res.status(401).end("invalid request signature") }
 
         const cBot = await prisma.customBots.findFirst({
             where: {

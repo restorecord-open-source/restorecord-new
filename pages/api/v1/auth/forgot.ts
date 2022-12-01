@@ -8,6 +8,7 @@ import { getIPAddress, getBrowser, getPlatform } from "../../../../src/getIPAddr
 import { ProxyCheck } from "../../../../src/proxycheck";
 import { Email } from "../../../../src/email";
 import * as speakeasy from "speakeasy";
+import axios from "axios";
 dotenv.config({ path: "../../" });
 
 
@@ -30,17 +31,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             if (!data) return res.status(400).json({ message: "Please provide all fields" });
             if (!data.email || !data.captcha) return res.status(400).json({ message: "Missing email or captcha" });
 
-            await fetch(`https://hcaptcha.com/siteverify`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body: `response=${data.captcha}&secret=${process.env.HCAPTCHA_SECRET}`
-            }).then(res => res.json()).then(res => {
-                if (!res.success) {
-                    console.error(res); 
-                    return res.status(400).json({ success: false, message: "Invalid captcha" });
-                }
+            await axios.post(`https://hcaptcha.com/siteverify`, {
+                secret: process.env.HCAPTCHA_SECRET,
+                response: data.captcha,
+                remoteip: getIPAddress(req)
+            }).then(async (response) => {
+                if (!response.data.success) return res.status(400).json({ message: "Invalid captcha" });
+            }).catch((error) => {
+                console.error(`[ERROR/FORGOT/HCAPTCHA] ${error}`);
+                return res.status(400).json({ message: "Captcha error" });
             });
 
             const account = await prisma.accounts.findFirst({ where: { email: data.email } });
