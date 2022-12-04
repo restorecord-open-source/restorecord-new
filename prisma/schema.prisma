@@ -171,11 +171,13 @@ model members {
 }
 
 model blacklist {
-    id      Int     @id @default(autoincrement())
-    ip      String? @unique
-    userId  BigInt? @db.UnsignedBigInt
-    guildId BigInt  @db.UnsignedBigInt
-    guild   servers @relation(fields: [guildId], references: [guildId])
+    id        Int      @id @default(autoincrement())
+    type      Int
+    value     String
+    reason    String?  @db.VarChar(999)
+    guildId   BigInt   @db.UnsignedBigInt
+    guild     servers  @relation(fields: [guildId], references: [guildId])
+    createdAt DateTime @default(now())
 }
 
 model customBots {

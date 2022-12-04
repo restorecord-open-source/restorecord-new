@@ -213,7 +213,7 @@ export default function VerifiedMembers({ user }: any) {
                                 }
                             </DialogContent>
                             <DialogActions sx={{ mx: 2, mb: 2, justifyContent: "flex-start" }}>
-                                <LoadingButton loading={loading} variant="contained" sx={{ background: "#43a047", "&:hover": { background: "#388e3c" } }} onClick={() => {
+                                <LoadingButton loading={loading} variant="contained" color="success" onClick={() => {
                                     setLoading(true);
                                                                 
                                     axios.put(`/api/v1/member/${userInfo.id}?guild=${userInfoGuild}`, {}, { 

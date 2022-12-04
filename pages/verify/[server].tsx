@@ -68,6 +68,13 @@ export default function Verify({ server, status, err, errStack }: any) {
                     VPN or Proxy detected, please disable it and try again.
                 </Alert>
             );
+        case "307":
+            return (
+                <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
+                    <AlertTitle>Error</AlertTitle>
+                    You&#39;re blacklisted in this server, please contact the owner.<br/>{errStack}
+                </Alert>
+            );
         case "30001":
             return (
                 <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
@@ -298,7 +305,8 @@ export async function getServerSideProps({ req }: any) {
             props: {
                 server: JSON.parse(JSON.stringify(serverInfo)),
                 status: cookies.includes("verified=true") ? "finished" : "verifying",
-                err: cookies.includes("RC_err=") ? cookies.split("RC_err=")[1].split(";")[0] : "",
+                // err: is cookies "RC_err" value get value until RC_errStack
+                err: cookies.includes("RC_err") ? cookies.split("RC_err=")[1].split("RC_errStack")[0].trim() : null, 
                 errStack: cookies.includes("RC_errStack=") ? cookies.split("RC_errStack=")[1].split(";")[0] : "",
             }
         }
