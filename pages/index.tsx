@@ -83,7 +83,7 @@ export default function Home() {
                             <Button variant="contained" color="primary" href="/login" size="large">
                                 Get Started
                             </Button>
-                        </Stack>
+                        </Badge>
 
                         <Box id="features" sx={{ marginTop: 4 }} />
 
