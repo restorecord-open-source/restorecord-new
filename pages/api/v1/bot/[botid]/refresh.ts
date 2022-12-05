@@ -72,7 +72,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                 default_member_permissions: "8224",
                 version: ""
             }).then(() => {
-                return res.status(200).json({ success: true, message: "Refreshed/Added commands." });
+                return res.status(200).json({ success: true, message: " Commands have been refreshed." });
             }).catch((err) => {
                 console.error(err);
                 return res.status(500).json({ success: false, message: "An error occurred." });

@@ -94,7 +94,7 @@ export default function Blacklist() {
                                                 <Select value={blacklistType} onChange={(e) => setBlacklistType(e.target.value)} name="blacklist-type" label="Blacklist Type" id="blacklist-type">
                                                     <MenuItem value="user">User</MenuItem>
                                                     <MenuItem value="ip">IP</MenuItem>
-                                                    <MenuItem value="asn">ASN (Premium)</MenuItem>
+                                                    <MenuItem value="asn">ASN (Business)</MenuItem>
                                                 </Select>
                                             </FormControl>
                                             {/* input: UserId, IP Address, ASN Number, Country */}
