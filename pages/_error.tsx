@@ -41,7 +41,7 @@ export default function ErrorPage<ErrorProps>({ statusCode, title: titleOrigin, 
                     <Button variant="contained" onClick={() => { window.location.href = "/"; }}>Go Back to Homepage</Button>
 
                     {/* titleOrigion as code */}
-                    <Typography variant="caption" component="code" sx={{ fontFamily: "monospace", backgroundColor: "rgba(0,0,0,0.05)", padding: "0.5rem" }}>
+                    <Typography variant="body2" component="code" sx={{ fontFamily: "monospace", backgroundColor: "rgba(0,0,0,0.05)", padding: "0.5rem" }}>
                         {err && err.stack}
                     </Typography>
                 </Stack>
