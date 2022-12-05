@@ -51,7 +51,7 @@ export default function Blacklist() {
     }), { retry: false,  refetchOnWindowFocus: false });
 
     
-    const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, refetch } = useInfiniteQuery("members", async ({ pageParam = 1 }: any) => await getBlacklist({
+    const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading: listsLoading, refetch } = useInfiniteQuery("members", async ({ pageParam = 1 }: any) => await getBlacklist({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
     }, serverId, search, pageParam), {
         getNextPageParam: (lastPage, allPages: any) => {
@@ -78,12 +78,12 @@ export default function Blacklist() {
             refetch();
         }, 1000)
 
-        document.addEventListener("scroll", onScroll);
+        document.addEventListener('scroll', onScroll);
         return () => {
-            document.addEventListener("scroll", onScroll);
+            document.addEventListener('scroll', onScroll);
             clearTimeout(delayDebounceFn);
-        }  
-    }, []);
+        }       
+    }, [hasNextPage, fetchNextPage, refetch, search]);
 
     function ShowType(type: number) {
         switch (type) {
@@ -145,7 +145,7 @@ export default function Blacklist() {
                                 <Grid item>
                                     <Stack direction="row" justifyContent={"space-between"} alignItems={"center"} sx={{ mb: 2 }}>
                                         <Typography variant="h6" sx={{ fontWeight: "500" }}>
-                                            {isLoading ? (
+                                            {listsLoading ? (
                                                 <Skeleton animation="wave" variant="text" width={250} height={30} />
                                             ) : (
                                                 <>
@@ -165,7 +165,7 @@ export default function Blacklist() {
                                     </Stack>
                                 </Grid>
                                 <Grid item>
-                                    {isLoading ? (
+                                    {listsLoading ? (
                                         <Skeleton animation="wave" variant="rectangular" width={"100%"} height={55} sx={{ borderRadius: "14px" }} />
                                     ) : (
                                         <TextField id="search" label="Search" variant="outlined" sx={{ width: "100%" }} onChange={(e) => setSearch(e.target.value)} />
@@ -173,7 +173,7 @@ export default function Blacklist() {
                                 </Grid>
                             </Grid>
 
-                            {isLoading ? (
+                            {listsLoading ? (
                                 <Stack spacing={2}>
                                     {[...Array(15)].map((_, i) => (
                                         <Paper key={i} variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
@@ -199,7 +199,8 @@ export default function Blacklist() {
                                 </Stack>
                             ) : (
                                 <>
-                                    {data?.pages?.map((page) => page.list.map((item: any) => {
+                                    {(data?.pages?.[0]?.list ?? []).map((item: any) => {
+                                    // {data?.pages?.map((page) => page?.list?.map((item: any) => {
                                         return (
                                             <Paper key={item.id} variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
                                                 <CardContent>
@@ -272,7 +273,7 @@ export default function Blacklist() {
                                                 </CardContent>
                                             </Paper>
                                         );
-                                    }))}
+                                    })}
                                 </>
                             )}
 

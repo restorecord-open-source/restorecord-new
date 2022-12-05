@@ -212,9 +212,16 @@ const theme = createTheme({
                     backgroundImage: "unset",
                     padding: "0.5rem",
                     borderRadius: "1rem",
+                },
+            }
+        },
+        MuiDialogTitle: {
+            styleOverrides: {
+                root: {
+                    backgroundColor: "unset !important",
                 }
             }
-        }
+        },
     }
 });
 
