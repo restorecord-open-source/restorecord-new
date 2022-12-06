@@ -140,7 +140,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             name: data.newServerName,
                             guildId: BigInt(data.newGuildId as any),
                             roleId: BigInt(data.newRoleId as any),
-                            webhook: data.newWebhookCheck ? (data.newWebhook ? (account.role !== "free" ? data.newWebhook : null) : null) : server.webhook,
+                            webhook: data.newWebhookCheck ? data.newWebhook : null,
                             picture: data.newPicture,
                             bgImage: data.newBackground ? (account.role === "business" ? data.newBackground : null) : null,
                             description: data.newDescription,
