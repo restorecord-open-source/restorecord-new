@@ -79,7 +79,7 @@ export default function Home() {
                             We provide a free and easy to use Discord server backup service.
                         </Typography>
 
-                        <Badge badgeContent={<>FOR FREE</>} color="success" sx={{ mb: 4, boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)", [`& .MuiBadge-badge`]: { backgroundColor: "rgb(52, 168, 83)", color: "#fff", padding: "0.75rem" } }}>
+                        <Badge badgeContent={<>FOR FREE</>} color="success" sx={{ boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)", [`& .MuiBadge-badge`]: { backgroundColor: "rgb(52, 168, 83)", color: "#fff" } }}>
                             <Button variant="contained" color="primary" href="/login" size="large">
                                 Get Started
                             </Button>
@@ -97,7 +97,9 @@ export default function Home() {
                         <Grid container spacing={4}>
                             {FeatureList.map((feature, id) => (
                                 <Grid item xs={12} sm={6} md={4} key={id}>
-                                    <Paper elevation={1} sx={{ borderRadius: "8px", background: "rgba(0, 0, 0, 0.5)", backdropFilter: "blur(0.25rem)", transition: "all 0.2s ease-in-out", "&:hover": { transform: "scale(1.05)", boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)" }, border: "1px solid rgba(255, 255, 255, 0.125)" }}>
+                                    <Paper 
+                                        elevation={1} 
+                                        sx={{ borderRadius: "8px", background: "rgba(0, 0, 0, 0.5)", backdropFilter: "blur(0.25rem)", transition: "all 0.2s ease-in-out", "&:hover": { transform: "scale(1.05)", boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)" }, border: "1px solid rgba(255, 255, 255, 0.125)" }}>
                                         <CardContent sx={{ alignItems: "center", display: "flex", flexDirection: "column" }}>
                                             <Paper elevation={0} sx={{ width: "56px", height: "56px", marginBottom: 2, borderRadius: "50%", alignItems: "center", justifyContent: "center", display: "flex", backgroundColor: theme.palette.primary.main, boxShadow: "0px 0px 15px rgba(0, 0, 0, 0.5)" }}>
                                                 {feature.icon}

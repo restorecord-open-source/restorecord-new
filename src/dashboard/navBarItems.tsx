@@ -2,7 +2,6 @@ import { ReactElement } from "react";
 
 import Dashboard from "@mui/icons-material/Dashboard";
 import Storage from "@mui/icons-material/Storage";
-import CloudSync from '@mui/icons-material/CloudSync';
 import Save from '@mui/icons-material/Save';
 import Code from "@mui/icons-material/Code";
 import VerifiedUser from "@mui/icons-material/VerifiedUser";
@@ -12,6 +11,7 @@ import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import Help from "@mui/icons-material/Help";
 import FindInPage from "@mui/icons-material/FindInPage";
 import Logout from "@mui/icons-material/Logout";
+import PersonOffIcon from '@mui/icons-material/PersonOff';
 
 const navItemWrappers: navItemWrapper[] = [
     {
@@ -55,6 +55,12 @@ const navItemWrappers: navItemWrapper[] = [
                 name: "Verified Members",
                 icon: <VerifiedUser />,
                 href: "/dashboard/members",
+                admin: false,
+            },
+            {
+                name: "Blacklist",
+                icon: <PersonOffIcon />,
+                href: "/dashboard/blacklist",
                 admin: false,
             }
         ]

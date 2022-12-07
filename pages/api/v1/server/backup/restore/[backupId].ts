@@ -1,8 +1,8 @@
 import { verify } from "jsonwebtoken";
 import { NextApiRequest, NextApiResponse } from "next";
-import { prisma } from "../../../../../src/db";
-import rateLimit from "../../../../../src/rate-limit";
-import { startRestore } from "../../../../../src/Restore";
+import { prisma } from "../../../../../../src/db";
+import rateLimit from "../../../../../../src/rate-limit";
+import { startRestore } from "../../../../../../src/Restore";
 
 const limiter = rateLimit({
     uniqueTokenPerInterval: 500,

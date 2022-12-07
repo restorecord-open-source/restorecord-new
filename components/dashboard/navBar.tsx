@@ -23,6 +23,7 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import MenuIcon from "@mui/icons-material/Menu";
 import styled from "@emotion/styled";
 import { Button } from "@mui/material";
+import theme from "../../src/theme";
 
 
 const drawerWidth = 240;
@@ -92,9 +93,11 @@ export default function NavBar({ ...props }: any) {
                                         }
                                         return (
                                             <MuiLink key={index} href={item.href} underline="none" color="inherit">
-                                                <ListItem disablePadding selected={pathName === item.href} sx={{ my: "0.25rem", ["&.Mui-selected"]: { borderRadius: "0.5rem", backgroundColor: "#12121a" } }}>
+                                                {/* add border at the left of the selected item */}
+                                                <ListItem disablePadding selected={pathName === item.href} sx={{ my: "0.25rem", ["&.Mui-selected"]: { borderRadius: "0 0.5rem 0.5rem 0", backgroundColor: "#12121a", "&:hover": { borderRadius: "0 0.5rem 0.5rem 0", }, "&:before": { backgroundColor: theme.palette.primary.main, content: "''", height: "100%", position: "absolute", width: "3px" } }, "&:hover": { backgroundColor: "#25252c" }, borderRadius: "0.5rem", transition: "all 0.1s ease-in-out" }}> 
+                                                    {/* <ListItemButton sx={{ borderLeft: pathName === item.href ? "3px solid #4f46e5" : "none", background: "none",  padding: "0", ["&:hover"]: { background: "none" } }}> */}
                                                     <Link href={item.href}>
-                                                        <ListItemButton sx={{ borderRadius: "0.5rem" }}>
+                                                        <ListItemButton sx={{ borderRadius: "0.5rem", background: "none", ["&:hover"]: { background: "none" } }}>
                                                             {/* <ListItem button selected={pathName === item.href} disablePadding> */}
                                                             <ListItemIcon>
                                                                 {item.icon}
@@ -103,6 +106,7 @@ export default function NavBar({ ...props }: any) {
                                                             {/* </ListItem> */}
                                                         </ListItemButton>
                                                     </Link>
+                                                    {/* </ListItemButton> */}
                                                 </ListItem>
                                             </MuiLink>
 

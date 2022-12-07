@@ -34,6 +34,11 @@ const handler = async(_: NextApiRequest, res: NextApiResponse, interaction: any)
         const serverInfo = await prisma.servers.findFirst({ where: { guildId: BigInt(interaction.guild_id) } });
         if (!serverInfo) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Server has not been found on dashboard", flags: InteractionResponseFlags.EPHEMERAL } });
 
+        const customBot = await prisma.customBots.findFirst({ where: { clientId: BigInt(application_id) as bigint } });
+        if (!customBot) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Bot has not been found on dashboard", flags: InteractionResponseFlags.EPHEMERAL } });
+
+        if (serverInfo.ownerId !== customBot.ownerId) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Bot and server owners do not match", flags: InteractionResponseFlags.EPHEMERAL } });
+
         const memberCount = await prisma.members.count({ where: { guildId: BigInt(interaction.guild_id) } });
         const memberCountUnauthorized = await prisma.members.count({ where: { guildId: BigInt(interaction.guild_id), accessToken: "unauthorized" } });
 

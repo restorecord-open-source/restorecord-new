@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useToken } from "../../src/token";
+import { MuiColorInput, MuiColorInputColors } from "mui-color-input"
 
 import Container from "@mui/material/Container";
 import Paper from "@mui/material/Paper";
@@ -36,6 +37,7 @@ export default function DashServerSettings({ user, id }: any) {
     const [description, setDescription] = useState("");
     const [webhookcheck, setWebhookCheck] = useState(false);
     const [vpncheck, setVpnCheck] = useState(false);
+    const [themeColor, setThemeColor] = useState("#4e46ef");
 
     const server = user.servers.find((server: any) => server.guildId === id);
     
@@ -58,6 +60,7 @@ export default function DashServerSettings({ user, id }: any) {
             setDescription(server.description ? server.description : "");
             setBackground(server.bgImage ? server.bgImage : "");
             setVpnCheck(server.vpncheck);
+            setThemeColor(server.themeColor ? `#${server.themeColor}` : "#4e46ef");
         }
     }, [server]);
 
@@ -80,6 +83,7 @@ export default function DashServerSettings({ user, id }: any) {
                 newPicture: picture,
                 newBackground: background,
                 newDescription: description,
+                newThemeColor: themeColor,
                 
                 serverName: server.name,
                 guildId: server.guildId,
@@ -145,6 +149,10 @@ export default function DashServerSettings({ user, id }: any) {
         }
     }
 
+    function onColorChange(color: string, colors: MuiColorInputColors) {
+        setThemeColor(colors.hex);
+    }
+
 
 
     return (
@@ -170,7 +178,7 @@ export default function DashServerSettings({ user, id }: any) {
 
                         <Dialog open={confirmDelete} onClose={() => setConfirmDelete(false)} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" fullWidth maxWidth="sm">
                             <DialogTitle id="alert-dialog-title">{"Are you sure you?"}
-                                <IconButton aria-label="close" onClick={() => setConfirmDelete(false)} sx={{ position: 'absolute', right: 8, top: 8, color: theme.palette.grey[500] }}>
+                                <IconButton aria-label="close" onClick={() => setConfirmDelete(false)} sx={{ position: "absolute", right: 8, top: 8, color: theme.palette.grey[500] }}>
                                     <CloseIcon />
                                 </IconButton>
                             </DialogTitle>
@@ -275,12 +283,20 @@ export default function DashServerSettings({ user, id }: any) {
                                             <TextField fullWidth variant="outlined" name="picture" value={picture} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Server Icon URL" type="url" />
                                         </Grid>
                                         {user.role === "business" && (
-                                            <Grid item>
-                                                <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
-                                                    Server Background
-                                                </Typography>
-                                                <TextField fullWidth variant="outlined" name="background" value={background} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Background Image URL" type="url" />
-                                            </Grid>
+                                            <>
+                                                <Grid item>
+                                                    <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                                        Server Background Image
+                                                    </Typography>
+                                                    <TextField fullWidth variant="outlined" name="background" value={background} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Background Image URL" type="url" />
+                                                </Grid>
+                                                <Grid item>
+                                                    <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                                        Theme Color
+                                                    </Typography>
+                                                    <MuiColorInput format="hex" fallbackValue="#4e46ef" isAlphaHidden value={themeColor} onChange={onColorChange} sx={{ width: "100%" }} />
+                                                </Grid>
+                                            </>
                                         )}
                                         <Grid item>
                                             <Stack direction="row" spacing={1}>
