@@ -129,8 +129,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     });
 
                     if (!server) return res.status(400).json({ success: false, message: "Server not found" });
-                    if (data.newWebhook) if (/^.*(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-zA-Z0-9_-]+)$/.test(data.newWebhook) === false) return res.status(400).json({ success: false, message: "Invalid Webhook" });
-                    if (data.newThemeColor) if (/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(data.newThemeColor) === false) return res.status(400).json({ success: false, message: "Invalid Theme Color" });
+                    if (data?.newWebhook) if (/^.*(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-zA-Z0-9_-]+)$/.test(data.newWebhook) === false) return res.status(400).json({ success: false, message: "Invalid Webhook" });
+                    if (data?.newThemeColor && account.role === "business") if (/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(data.newThemeColor) === false) return res.status(400).json({ success: false, message: "Invalid Theme Color" });
 
                     const newServer = await prisma.servers.update({
                         where: {
@@ -145,7 +145,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             bgImage: data.newBackground ? (account.role === "business" ? data.newBackground : null) : null,
                             description: data.newDescription,
                             vpncheck: data.newWebhookCheck ? (data.newVpnCheck ? (account.role !== "free" ? true : false) : false) : false,
-                            themeColor: data.newThemeColor ? (account.role === "business" ? data.newThemeColor.replace("#", "") : "4f46e5") : "#4f46e5",
+                            themeColor: data.newThemeColor ? (account.role === "business" ? data.newThemeColor.replace("#", "") : null) : null,
                         }
                     });
 

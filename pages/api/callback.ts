@@ -28,7 +28,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         const customBotInfo = await prisma.customBots.findUnique({where: { id: serverInfo.customBotId } });
         if (!customBotInfo)return res.status(400).json({ success: false, message: "No custom bot info" });
 
-        console.log(`Verify Attempt: ${serverInfo.name}, ${code}, ${req.headers.host}, ${customBotInfo.clientId}, ${customBotInfo.botSecret}`);
+        // console.log(`Verify Attempt: ${serverInfo.name}, ${code}, ${req.headers.host}, ${customBotInfo.clientId}, ${customBotInfo.botSecret}`);
 
         exchange(code as string, `https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/api/callback`, customBotInfo.clientId, customBotInfo.botSecret)
             .then(async (respon) => {
@@ -59,6 +59,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 const proxCheck = await ProxyCheck.check(IPAddr, { vpn: true, asn: true });
                                 if (blacklist.find((b) => b.type === 2 && b.value === proxCheck[IPAddr].asn.replace("AS", "") as string)) {
                                     let reason = blacklist.find((b) => b.type === 2 && b.value === proxCheck[IPAddr].asn.replace("AS", "") as string)?.reason;
+
+                                    // await sendWebhookMessage(serverInfo?.webhook, "Tried to verify while being blacklisted", serverOwner, proxCheck, IPAddr, account);
+                                    
                                     res.setHeader("Set-Cookie", `RC_err=307 RC_errStack=ASN: ${String(proxCheck[IPAddr].asn.replace("AS", "")) as string} ${reason ? `Reason: ${reason}` : ""}; Path=/; Max-Age=5;`);
                                     return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
                                 }
