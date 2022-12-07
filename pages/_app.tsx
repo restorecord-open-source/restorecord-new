@@ -1,23 +1,26 @@
-import { AppProps } from "next/app";
+import { useEffect } from "react";
 import { QueryClientProvider, QueryClient } from "react-query";
+import { AppProps } from "next/app";
 import { Router } from "next/router";
-import { TokenProvider } from "../src/token";
 import { ThemeProvider } from "@mui/material/styles";
 import { CacheProvider, EmotionCache } from "@emotion/react";
+import { TokenProvider } from "../src/token";
+
+
 import theme from "../src/theme";
 import CssBaseline from "@mui/material/CssBaseline";
 import createEmotionCache from "../src/createEmotionCache";
 import Head from "next/head";
 import NProgress from "nprogress";
+
 import "nprogress/nprogress.css";
 import "../public/styles/globals.css";
-import { useEffect } from "react";
 
 NProgress.configure({ showSpinner: false });
 
-Router.events.on("routeChangeStart", () => { document.querySelector("main")?.classList.add("fadeOut"); NProgress.start(); });
-Router.events.on("routeChangeComplete", () => { document.querySelector("main")?.classList.add("fadeIn"); NProgress.done(); });
-Router.events.on("routeChangeError", () => NProgress.done());
+Router.events.on("routeChangeStart", () => { document.querySelector("main")?.classList.add("fadeOut"); NProgress.start(); setTimeout(() => { document.querySelector("main")?.classList.remove("fadeOut"); }, 500); });
+Router.events.on("routeChangeComplete", () => { document.querySelector("main")?.classList.add("fadeIn"); NProgress.done(); setTimeout(() => { document.querySelector("main")?.classList.remove("fadeOut"); document.querySelector("main")?.classList.remove("fadeIn"); }, 1500); });
+Router.events.on("routeChangeError", () => { NProgress.done(); });
 
 const queryClient = new QueryClient();
 

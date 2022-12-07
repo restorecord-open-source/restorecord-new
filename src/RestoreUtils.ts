@@ -89,6 +89,10 @@ export const loadRoles = async(server: servers, bot: customBots, backup: backups
             validateStatus: () => true,
         });
 
+        if (!roles.status.toString().startsWith("2")) {
+            roles.data = [];
+        }
+
         const everyoneRole = roles.data.find((r: any) => r.name === "@everyone");
 
         const modify = await axios.patch(`https://discord.com/api/v10/guilds/${server.guildId}/roles/${everyoneRole.id}`, {

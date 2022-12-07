@@ -66,6 +66,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 const token = req.headers.authorization as string;
                 const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
 
+                const serverId: any = BigInt(req.query.serverId as any);
+                if (!serverId) return res.status(400).json({ success: false, message: "Server ID not provided" });
+
                 if (!valid) return res.status(400).json({ success: false });
 
                 const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, } });
@@ -84,7 +87,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     where: {
                         AND: [
                             { ownerId: account.id },
-                            { guildId: BigInt(`${req.query.serverId}`) }
+                            { guildId: serverId }
                         ]
                     }
                 });
@@ -104,18 +107,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     await prisma.backups.deleteMany({ where: { backupId: backup.backupId } });
                 }
 
-
-                await prisma.members.deleteMany({
-                    where: {
-                        AND: [
-                            { guildId: BigInt(`${req.query.serverId}`) },
-                        ]
-                    }
-                });
-
+                await prisma.members.deleteMany({where: { guildId: serverId } });
+                await prisma.blacklist.deleteMany({ where: { guildId: serverId } });
+                
                 await prisma.servers.delete({
                     where: {
-                        guildId: BigInt(`${req.query.serverId}`),
+                        guildId: serverId,
                     }
                 });
 
@@ -216,7 +213,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     validateStatus: () => true,
                 });
                 
-                if (serverMemberList.status === 403) {
+                if (!serverMemberList.status.toString().startsWith("2")) {
                     serverMemberList.data = [];
                     // done = true;
                 }

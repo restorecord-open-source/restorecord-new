@@ -43,8 +43,8 @@ export default function Info() {
         servers: 0,
         members: 0,
         bots: 0,
+        backups: 0,
         totalMembers: 0,
-        subscribers: 0
     });
 
 
@@ -59,7 +59,7 @@ export default function Info() {
                             <Paper elevation={3}>
                                 <CardContent sx={{ alignItems: "center", justifyContent: "center", display: "flex", flexDirection: "column" }}>
                                     <ContactPageIcon sx={{ fontSize: 64, color: theme.palette.primary.main }} />
-                                    <Typography variant="h5">{stats.accounts}</Typography>
+                                    <Typography variant="h5">{stats.accounts.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Typography>
                                     <Typography variant="body2" component="p" color="textSecondary">
                                         Accounts
                                     </Typography>
@@ -70,7 +70,7 @@ export default function Info() {
                             <Paper elevation={3}>
                                 <CardContent sx={{ alignItems: "center", justifyContent: "center", display: "flex", flexDirection: "column" }}>
                                     <StorageIcon sx={{ fontSize: 64, color: theme.palette.primary.main }} />
-                                    <Typography variant="h5">{stats.servers}</Typography>
+                                    <Typography variant="h5">{stats.servers.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Typography>
                                     <Typography variant="body2" component="p" color="textSecondary">
                                         Servers
                                     </Typography>
@@ -81,7 +81,7 @@ export default function Info() {
                             <Paper elevation={3}>
                                 <CardContent sx={{ alignItems: "center", justifyContent: "center", display: "flex", flexDirection: "column" }}>
                                     <PersonIcon sx={{ fontSize: 64, color: theme.palette.primary.main }} />
-                                    <Typography variant="h5">{stats.members}</Typography>
+                                    <Typography variant="h5">{stats.members.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Typography>
                                     <Typography variant="body2" component="p" color="textSecondary">
                                         Members
                                     </Typography>
@@ -92,7 +92,7 @@ export default function Info() {
                             <Paper elevation={3}>
                                 <CardContent sx={{ alignItems: "center", justifyContent: "center", display: "flex", flexDirection: "column" }}>
                                     <CodeIcon sx={{ fontSize: 64, color: theme.palette.primary.main }} />
-                                    <Typography variant="h5">{stats.bots}</Typography>
+                                    <Typography variant="h5">{stats.bots.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Typography>
                                     <Typography variant="body2" component="p" color="textSecondary">
                                         Custom Bots
                                     </Typography>
@@ -103,7 +103,7 @@ export default function Info() {
                             <Paper elevation={3}>
                                 <CardContent sx={{ alignItems: "center", justifyContent: "center", display: "flex", flexDirection: "column" }}>
                                     <SaveIcon sx={{ fontSize: 64, color: theme.palette.primary.main }} />
-                                    <Typography variant="h5">{stats.backups}</Typography>
+                                    <Typography variant="h5">{stats.backups.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Typography>
                                     <Typography variant="body2" component="p" color="textSecondary">
                                         Backups
                                     </Typography>
@@ -114,7 +114,7 @@ export default function Info() {
                             <Paper elevation={3}>
                                 <CardContent sx={{ alignItems: "center", justifyContent: "center", display: "flex", flexDirection: "column" }}>
                                     <PeopleIcon sx={{ fontSize: 64, color: theme.palette.primary.main }} />
-                                    <Typography variant="h5">{stats.totalMembers}</Typography>
+                                    <Typography variant="h5">{stats.totalMembers.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Typography>
                                     <Typography variant="body2" component="p" color="textSecondary">
                                         Total Members
                                     </Typography>
