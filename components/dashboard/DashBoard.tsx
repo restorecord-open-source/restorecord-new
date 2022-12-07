@@ -101,7 +101,6 @@ export default function DashBoard({ user }: any) {
             colors: [theme.palette.primary.main],
             tooltip: {
                 theme: 'dark',
-                // remove the dot
                 marker: {
                     show: false
                 },
@@ -205,7 +204,7 @@ export default function DashBoard({ user }: any) {
                                             Recent Activity
                                         </Typography>
                                         <Typography variant="body1" color={"grey.200"}>
-                                            Last {data2.members.length > 3 ? 3 : data2.members.length} verified members.
+                                            Last {Array.isArray(data2.members) ? (data2.members.length > 3 ? 3 : data2.members.length) : 0} verified members.
                                         </Typography>
                                     </>
                                 )}
@@ -262,13 +261,13 @@ export default function DashBoard({ user }: any) {
 
                                 {isLoading2 ? (
                                     <>
-                                        <Skeleton animation="wave" variant="rectangular" width={"100%"} height={36} sx={{ borderRadius: "4px" }} />
+                                        <Skeleton animation="wave" variant="rectangular" width={"100%"} height={36} sx={{ borderRadius: "14px" }} />
                                     </>
                                 ) : (
                                     <>
                                         {Array.isArray(data2.members) && data2.members.length > 3 && (
                                             <Link href="/dashboard/members">
-                                                <Button variant="contained" color="primary" sx={{ width: '100%' }}>
+                                                <Button variant="filled" color="white" sx={{ width: '100%' }}>
                                                     View All
                                                 </Button>
                                             </Link>

@@ -116,11 +116,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     let errors = [];
 
                     if (!data.botName) errors.push("Bot Name");
-                    if (!data.botSecret) errors.push("Bot Secret");
+                    if (!data.botSecret) errors.push("Client Secret");
                     if (!data.botToken) errors.push("Bot Token");
 
                     if (!data.newBotName) errors.push("New Bot Name");
-                    if (!data.newBotSecret) errors.push("New Bot Secret");
+                    if (!data.newBotSecret) errors.push("New Client Secret");
                     if (!data.newBotToken) errors.push("New Bot Token");
 
                     return res.status(400).json({ success: false, message: `Missing ${errors}` });

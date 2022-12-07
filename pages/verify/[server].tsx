@@ -20,7 +20,7 @@ import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
 import { prisma } from "../../src/db";
 
-export default function Verify({ status, err, server }: any) {
+export default function Verify({ server, status, err, errStack }: any) {
     const router = useRouter();
     const guildId = router.query.server;
 
@@ -68,11 +68,25 @@ export default function Verify({ status, err, server }: any) {
                     VPN or Proxy detected, please disable it and try again.
                 </Alert>
             );
+        case "307":
+            return (
+                <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
+                    <AlertTitle>Error</AlertTitle>
+                    You&#39;re blacklisted in this server, please contact the owner.<br/>{errStack}
+                </Alert>
+            );
         case "30001":
             return (
                 <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
                     <AlertTitle>Error</AlertTitle>
                     Seems like you have reached the 100 server limit, please leave a server and try again.
+                </Alert>
+            );
+        default:
+            return (
+                <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
+                    <AlertTitle>Error</AlertTitle>
+                    An unknown error has occured: {errStack}
                 </Alert>
             );
         }
@@ -121,9 +135,9 @@ export default function Verify({ status, err, server }: any) {
                         )}
 
                         {isLoading ? ( <></> ) : (
-                            <>
-                                {ErrorAlert(err)}
-                            </>
+                            <>{err ? (
+                                <>{ErrorAlert(err)}</>
+                            ) : ( <></> )}</>
                         )}
                         
 
@@ -189,11 +203,42 @@ export default function Verify({ status, err, server }: any) {
                             ) : (
                                 <>
                                     {data.success ? (
-                                        <Button variant="contained" color="primary" href={`https://discord.com/oauth2/authorize?client_id=${data.server.clientId}&redirect_uri=${data.server.domain ? `https://${data.server.domain}` : window.location.origin}/api/callback&response_type=code&scope=identify+guilds.join&state=${data.server.guildId}`} sx={{ width: "100%", marginTop: "2rem" }}>
+                                        <Button variant="contained" color="primary" href={`https://discord.com/oauth2/authorize?client_id=${data.server.clientId}&redirect_uri=${data.server.domain ? `https://${data.server.domain}` : window.location.origin}/api/callback&response_type=code&scope=identify+guilds.join&state=${data.server.guildId}`} target="_blank" rel="noreferrer"
+                                            sx={{ 
+                                                width: "100%",
+                                                marginTop: "2rem",
+                                                backgroundColor: server.color,
+                                                outline: `1px solid ${server.color}`,
+                                                color: theme.palette.getContrastText(server.color),
+                                                "@media not all and (-webkit-min-device-pixel-ratio: 1.5), not all and (-o-min-device-pixel-ratio: 3/2), not all and (min--moz-device-pixel-ratio: 1.5), not all and (min-device-pixel-ratio: 1.5)": {
+                                                    "&:hover": {
+                                                        outline: `1px solid ${server.color}`,
+                                                        color: server.color,
+                                                    },
+                                                },
+                                                "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (min-device-pixel-ratio: 1.5)": {
+                                                    "&:hover": {
+                                                        backgroundColor: `rgba(${parseInt(server.color.slice(1, 3), 16)}, ${parseInt(server.color.slice(3, 5), 16)}, ${parseInt(server.color.slice(5, 7), 16)}, 0.65)`,
+                                                        color: theme.palette.getContrastText(server.color),
+                                                    },
+                                                },
+                                            }}>
                                             Verify
                                         </Button>
                                     ) : (
-                                        <Button variant="contained" color="primary" onClick={() => window.history.back()} sx={{ width: "100%", marginTop: "2rem" }}>
+                                        <Button variant="contained" color="primary" onClick={() => window.history.back()} sx={{
+                                            width: "100%", 
+                                            marginTop: "2rem",
+                                            backgroundColor: server.color,
+                                            outline: `1px solid ${server.color}`,
+                                            color: `${theme.palette.getContrastText(server.color)}`,
+                                            "@media not all and (-webkit-min-device-pixel-ratio: 1.5), not all and (-o-min-device-pixel-ratio: 3/2), not all and (min--moz-device-pixel-ratio: 1.5), not all and (min-device-pixel-ratio: 1.5)": {
+                                                "&:hover": {
+                                                    outline: `1px solid ${server.color}`,
+                                                    color: server.color,
+                                                },
+                                            },
+                                        }}>
                                             Go back
                                         </Button>
                                     )}
@@ -223,25 +268,46 @@ export default function Verify({ status, err, server }: any) {
 export async function getServerSideProps({ req }: any) {
     if (req) {
         const cookies = req.headers.cookie ? req.headers.cookie : "";
+        let serverName = req.url.split("/")[2];
+        let type = 1;
 
+        let serverInfo: { name: string, description: string, icon: string, color: string } = {
+            name: decodeURI(serverName),
+            description: "Verify to view the rest of the server.",
+            icon: "https://cdn.restorecord.com/logo512.png",
+            color: "#4f46e5"
+        }
 
-        const serverDB = await prisma.servers.findUnique({
+        if (isNaN(Number.parseInt(serverName as any))) type = 0;
+        try {
+            if (isNaN(Number(serverName)) || isNaN(Number(serverName))) type = 0;
+            if (BigInt(serverName) > 18446744073709551615 || BigInt(serverName) > 18446744073709551615) type = 0;
+            else type = 1;
+        } catch (e) { type = 0; }
+
+        await prisma.servers.findUnique({
             where: {
-                name: req.url.split("/verify/")[1]
+                name: type === 0 ? serverName : undefined,
+                guildId: type === 1 ? BigInt(serverName) as bigint : undefined
+            }
+        }).then((res) => {
+            if (res) {
+                serverInfo = {
+                    name: res.name,
+                    description: res.description,
+                    icon: res.picture ?? "https://cdn.restorecord.com/logo512.png",
+                    color: `#${res.themeColor}`,
+                }
             }
         })
-
-        const serverInfo = {
-            name: serverDB?.name ?? decodeURIComponent(req.url.split("/verify/")[1]),
-            description: serverDB?.description ?? "Verify to view the rest of the server.",
-            icon: serverDB?.picture ?? "https://cdn.restorecord.com/logo512.png",
-        }
 
         return { 
             props: {
                 server: JSON.parse(JSON.stringify(serverInfo)),
                 status: cookies.includes("verified=true") ? "finished" : "verifying",
-                err: cookies.includes("RC_err=") ? cookies.split("RC_err=")[1].split(";")[0] : "",
+                // err: is cookies "RC_err" value get value until RC_errStack
+                err: cookies.includes("RC_err") ? cookies.split("RC_err=")[1].split("RC_errStack")[0].trim() : null, 
+                errStack: cookies.includes("RC_errStack=") ? cookies.split("RC_errStack=")[1].split(";")[0] : "",
             }
         }
 

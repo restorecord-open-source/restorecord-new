@@ -73,6 +73,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         description: server.description,
                         webhook: server.webhook,
                         bgImage: server.bgImage,
+                        themeColor: server.themeColor,
                         vpncheck: server.vpncheck,
                         createdAt: server.createdAt
                     })),

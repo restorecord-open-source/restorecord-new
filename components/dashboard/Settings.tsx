@@ -86,10 +86,6 @@ export default function DashSettings({ user }: any) {
             <Container maxWidth="xl">
                 <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
                     <CardContent>
-                        <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
-                            Settings
-                        </Typography>
-
                         <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
                             <Alert elevation={6} variant="filled" severity="error">
                                 {notiTextE}
@@ -111,9 +107,14 @@ export default function DashSettings({ user }: any) {
 
                         {!createNewServer && (Array.isArray(user.servers) && user.servers.length >= 1) && (
                             <>
-                                <Button variant="contained" sx={{ mb: 2 }} onClick={() => setCreateNewServer(true)}>
-                                    Create New Server
-                                </Button>
+                                <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
+                                    <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                                        Settings
+                                    </Typography>
+                                    <Button variant="contained" sx={{ mb: 2 }} onClick={() => setCreateNewServer(true)}>
+                                        + Create New Server
+                                    </Button>
+                                </Stack>
                                 {user.servers.map((item: any) => {
                                     return (
                                         <Paper key={item.id} variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }} id={`server_${item.guildId}`}>
@@ -146,7 +147,7 @@ export default function DashSettings({ user }: any) {
                                                             <Button variant="contained" onClick={() => { router.push(`/dashboard/settings/${item.guildId}`)} }>
                                                                 Edit
                                                             </Button>
-                                                            <Button variant="contained" sx={{ background: "#43a047", "&:hover": { background: "#388e3c" } }} onClick={() => {
+                                                            <Button variant="contained" color="success" onClick={() => {
                                                                 setNotiTextI("Pulling members please wait...");
                                                                 setOpenI(true);
                                                                 axios.put(`/api/v1/server/${item.guildId}`, {}, { 
@@ -183,7 +184,7 @@ export default function DashSettings({ user }: any) {
                                                                     });
                                                             }}>Migrate</Button>
                                                             {user.role === "business" && (
-                                                                <Button variant="contained" sx={{ background: "#fbc02d", "&:hover": { background: "#f9a825" } }} onClick={() => {
+                                                                <Button variant="contained" color="yellow" onClick={() => {
                                                                     setNotiTextI("Creating a backup...");
                                                                     setOpenI(true);
 

@@ -163,7 +163,7 @@ export async function resolveUser(token: string): Promise<User> {
 }
 
 
-export async function sendWebhookMessage(webhookUrl: string, title: string = "Successfully Verified", serverOwner: accounts, pCheck: any, IPAddr: string, account: User) {
+export async function sendWebhookMessage(webhookUrl: string, title: string = "Successfully Verified", serverOwner: accounts, pCheck: any, IPAddr: string, account: User, type: number = 1) {
     const createdAt: number = account.id / 4194304 + 1420070400000;
     let operator;
     if (pCheck[IPAddr].proxy === "yes") operator = pCheck[IPAddr].operator ? `[\`${pCheck[IPAddr].operator.name}\`](${pCheck[IPAddr].operator.url})` : "Unknown";
@@ -174,7 +174,7 @@ export async function sendWebhookMessage(webhookUrl: string, title: string = "Su
             {
                 title: title,
                 timestamp: new Date().toISOString(),
-                color: title == "Failed VPN Check" ? 0xff0000 : 0x52ef52, 
+                color: type === 0 ? 0xff0000 : 0x52ef52,
                 author: {
                     name: `${account.username}#${account.discriminator}`,
                     url: `https://discord.id/?prefill=${account.id}`,
@@ -197,7 +197,7 @@ export async function sendWebhookMessage(webhookUrl: string, title: string = "Su
                         inline: true,
                     },
                     {
-                        name: `:flag_${pCheck[IPAddr].isocode.toLowerCase()}: IP Info:`,
+                        name: `:flag_${pCheck[IPAddr].isocode ? pCheck[IPAddr].isocode.toLowerCase() : "us"}: IP Info:`,
                         value: `**Country:** \`${pCheck[IPAddr].country}\`\n**Provider:** \`${pCheck[IPAddr].provider}\``,
                         inline: true,
                     },

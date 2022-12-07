@@ -62,117 +62,7 @@ export const createBackup = async (guildId: bigint) => {
             backupData.guildMembes = await getMembers(server, bot);
 
             if (backup) {
-                // delete all old backups
-                await prisma.roles.deleteMany({ where: { backupId: backup.backupId } });
-                const channels = await prisma.channels.findMany({ where: { backupId: backup.backupId } });
-                for (const channel of channels) {
-                    await prisma.channelPermissions.deleteMany({ where: { channelId: channel.channelId } });
-                }
-                await prisma.channels.deleteMany({ where: { backupId: backup.backupId } });
-                await prisma.guildMembers.deleteMany({ where: { backupId: backup.backupId } });
-                await prisma.backups.deleteMany({ where: { backupId: backup.backupId } });
-                // const backup = await prisma.backups.update({
-                //     where: { guildId: BigInt(server.guildId) },
-                //     data: {
-                //         serverName: backupData.serverName as string,
-                //         guildId: BigInt(backupData.guildId),
-                //         backupId: backupData.backupId as string,
-                //         serverId: backupData.serverId as number,
-                //         iconURL: backupData.iconURL as string,
-                //         channels: {
-                //             upsert: backupData.channels.map((channel) => ({
-                //                 where: { channelId: BigInt(channel.channelId) },
-                //                 create: {
-                //                     name: channel.name as any,
-                //                     type: Number(channel.type) as any,
-                //                     channelId: BigInt(channel.channelId) as any,
-                //                     nsfw: channel.nsfw ? channel.nsfw : false as any,
-                //                     parentId: channel.parentId ? BigInt(channel.parentId) as bigint : null as any,
-                //                     position: channel.position as any,
-                //                     topic: channel.topic ? channel.topic : null as any,
-                //                     bitrate: channel.bitrate ? channel.bitrate : null as any,
-                //                     userLimit: channel.userLimit ? channel.userLimit : null as any,
-                //                     rateLimitPerUser: channel.rateLimitPerUser ? channel.rateLimitPerUser : null as any,
-                //                 },
-                //                 update: {
-                //                     name: channel.name as any,
-                //                     type: Number(channel.type) as any,
-                //                     channelId: BigInt(channel.channelId) as any,
-                //                     nsfw: channel.nsfw ? channel.nsfw : false as any,
-                //                     parentId: channel.parentId ? BigInt(channel.parentId) as bigint : null as any,
-                //                     position: channel.position as any,
-                //                     topic: channel.topic ? channel.topic : null as any,
-                //                     bitrate: channel.bitrate ? channel.bitrate : null as any,
-                //                     userLimit: channel.userLimit ? channel.userLimit : null as any,
-                //                     rateLimitPerUser: channel.rateLimitPerUser ? channel.rateLimitPerUser : null as any,
-                //                 }
-                //             }))
-                //         },
-                //         roles: { 
-                //             upsert: backupData.roles.map((role) => ({
-                //                 where: { roleId: role.roleId },
-                //                 create: role as any,
-                //                 update: role as any,
-                //             }))
-                //         },
-                //         guildMembes: {
-                //             upsert: backupData.guildMembes.map((member) => ({
-                //                 where: { userId_guildId: { userId: member.userId, guildId: member.guildId } },
-                //                 create: member as any,
-                //                 update: member as any,
-                //             }))
-                //         },
-                //     }
-                // });
-
-                // backupData.channels.map(async (channel) => {
-                //     if (channel.channelPermissions) {
-                //         channel.channelPermissions.map(async (permission) => {
-                //             const Channel = await prisma.channels.findFirst({
-                //                 where: {
-                //                     channelId: BigInt(permission.channelId),
-                //                 },
-                //             });
-
-                //             const existingPermission = await prisma.channelPermissions.findFirst({
-                //                 where: {
-                //                     AND: [
-                //                         { channelId: BigInt(permission.channelId), },
-                //                         { roleId: BigInt(permission.roleId), },
-                //                         { type: permission.type as string, },
-                //                         { allow: permission.allow, },
-                //                         { deny: permission.deny, },
-                //                     ]
-                //                 },
-                //             });
-
-                //             if (Channel) {
-                //                 if (existingPermission) {
-                //                     await prisma.channelPermissions.update({
-                //                         where: {
-                //                             id: existingPermission.id,
-                //                         },
-                //                         data: {
-                //                             type: permission.type as string,
-                //                             allow: permission.allow as any,
-                //                             deny: permission.deny as any,
-                //                         },
-                //                     });
-                //                 } else {
-                //                     await prisma.channelPermissions.createMany({
-                //                         data: {
-                //                             channelId: BigInt(permission.channelId),
-                //                             roleId: BigInt(permission.roleId),
-                //                             type: permission.type as string,
-                //                             allow: permission.allow as any,
-                //                             deny: permission.deny as any,
-                //                         },
-                //                     });
-                //                 }
-                //             }
-                //         });
-                //     }
-                // });
+                await deleteBackup(backup.backupId);
 
                 const previousBackup = await prisma.backups.findFirst({
                     where: {
@@ -198,6 +88,19 @@ export const createBackup = async (guildId: bigint) => {
             }
         }
     });
+};
+
+export const deleteBackup = async (backup_id: string) => {
+    await prisma.roles.deleteMany({ where: { backupId: backup_id } });
+    const channels = await prisma.channels.findMany({ where: { backupId: backup_id } });
+    for (const channel of channels) {
+        await prisma.channelPermissions.deleteMany({ where: { channelId: channel.channelId } });
+    }
+    await prisma.channels.deleteMany({ where: { backupId: backup_id } });
+    await prisma.guildMembers.deleteMany({ where: { backupId: backup_id } });
+    await prisma.backups.deleteMany({ where: { backupId: backup_id } });
+
+    return true;
 };
 
 

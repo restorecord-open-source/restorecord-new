@@ -151,7 +151,7 @@ export default function VerifiedMembers({ user }: any) {
                                     {loadingInfo ? <Skeleton animation="wave" variant="circular" width={40} height={40}  /> : <Avatar alt={userInfo.username} src={userInfo.avatar.length < 5 ? `https://cdn.discordapp.com/embed/avatars/${userInfo.discriminator % 5}.png` : `https://cdn.discordapp.com/avatars/${userInfo.id}/${userInfo.avatar}?size=2048`} />}
                                     {loadingInfo ? 
                                         <>
-                                            <Skeleton animation="wave" variant="rectangular" width={135} height={28} sx={{ borderRadius: "4px" }} />
+                                            <Skeleton animation="wave" variant="rectangular" width={135} height={28} sx={{ borderRadius: "14px" }} />
                                         </> : <>
                                             <Tooltip title={`${userInfo.username}#${userInfo.discriminator}`} placement="top">
                                                 <Typography variant="h5" sx={{ fontWeight: "600", zIndex: 9999  }}>
@@ -185,8 +185,8 @@ export default function VerifiedMembers({ user }: any) {
                                 <Stack spacing={1} direction="row" alignItems="center" sx={{ mt: 2 }}>
                                     {loadingInfo ? 
                                         <>
-                                            <Skeleton animation="wave" variant="rectangular" width={30} height={16} sx={{ borderRadius: "4px" }} /> 
-                                            <Skeleton animation="wave" variant="rectangular" width={120} height={16} sx={{ borderRadius: "4px" }} /> 
+                                            <Skeleton animation="wave" variant="rectangular" width={30} height={16} sx={{ borderRadius: "14px" }} /> 
+                                            <Skeleton animation="wave" variant="rectangular" width={120} height={16} sx={{ borderRadius: "14px" }} /> 
                                         </> : <>
                                             {userInfo.location.isocode && <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200}} title={userInfo.location.country} placement="top"><Avatar alt="Bot" src={`https://cdn.ipregistry.co/flags/twemoji/${userInfo.location.isocode.toLowerCase()}.svg`} sx={{ width: 20, height: 20, borderRadius: 0 }} /></Tooltip>}
                                             {userInfo.ip && <Typography color="textSecondary" variant="body2">IP: <b>{userInfo.ip}</b></Typography>}
@@ -196,11 +196,11 @@ export default function VerifiedMembers({ user }: any) {
                                 </Stack>
                                 {loadingInfo ? 
                                     <>
-                                        <Skeleton animation="wave" variant="rectangular" width={225} height={16} sx={{ borderRadius: "4px", mt: 0.5 }} />
-                                        <Skeleton animation="wave" variant="rectangular" width={230} height={16} sx={{ borderRadius: "4px", mt: 0.5 }} />
-                                        <Skeleton animation="wave" variant="rectangular" width={200} height={16} sx={{ borderRadius: "4px", mt: 0.5 }} />
-                                        <Skeleton animation="wave" variant="rectangular" width={190} height={16} sx={{ borderRadius: "4px", mt: 0.5 }} />
-                                        <Skeleton animation="wave" variant="rectangular" width={170} height={16} sx={{ borderRadius: "4px", mt: 0.5 }} />
+                                        <Skeleton animation="wave" variant="rectangular" width={225} height={16} sx={{ borderRadius: "14px", mt: 0.5 }} />
+                                        <Skeleton animation="wave" variant="rectangular" width={230} height={16} sx={{ borderRadius: "14px", mt: 0.5 }} />
+                                        <Skeleton animation="wave" variant="rectangular" width={200} height={16} sx={{ borderRadius: "14px", mt: 0.5 }} />
+                                        <Skeleton animation="wave" variant="rectangular" width={190} height={16} sx={{ borderRadius: "14px", mt: 0.5 }} />
+                                        <Skeleton animation="wave" variant="rectangular" width={170} height={16} sx={{ borderRadius: "14px", mt: 0.5 }} />
                                     </> : <>
                                         {userInfo.location.country && <Typography color="textSecondary" variant="body2">Country: <b>{userInfo.location.country}</b></Typography>}
                                         {userInfo.location.region && <Typography color="textSecondary" variant="body2">Region: <b>{userInfo.location.region}</b></Typography>}
@@ -213,7 +213,7 @@ export default function VerifiedMembers({ user }: any) {
                                 }
                             </DialogContent>
                             <DialogActions sx={{ mx: 2, mb: 2, justifyContent: "flex-start" }}>
-                                <LoadingButton loading={loading} variant="contained" sx={{ background: "#43a047", "&:hover": { background: "#388e3c" } }} onClick={() => {
+                                <LoadingButton loading={loading} variant="contained" color="success" onClick={() => {
                                     setLoading(true);
                                                                 
                                     axios.put(`/api/v1/member/${userInfo.id}?guild=${userInfoGuild}`, {}, { 
@@ -286,7 +286,7 @@ export default function VerifiedMembers({ user }: any) {
                             )}
                         </Typography>
                         {isLoading ? (
-                            <Skeleton animation="wave" variant="rectangular" width={"100%"} height={55} sx={{ borderRadius: "4px" }} />
+                            <Skeleton animation="wave" variant="rectangular" width={"100%"} height={55} sx={{ borderRadius: "14px" }} />
                         ) : (
                             <>
                                 <Stack direction="row" spacing={0} justifyContent="space-between" sx={{ flexDirection: { xs: "column", sm: "row" } }}>
@@ -319,8 +319,8 @@ export default function VerifiedMembers({ user }: any) {
                                                 </Grid>
                                                 <Grid item>
                                                     <Stack spacing={1} direction="column" justifyContent={"space-between"}>
-                                                        <Skeleton animation="wave" variant="rectangular" width={100} height={35} sx={{ borderRadius: "4px" }} />
-                                                        <Skeleton animation="wave" variant="rectangular" width={100} height={35} sx={{ borderRadius: "4px" }} />
+                                                        <Skeleton animation="wave" variant="rectangular" width={100} height={35} sx={{ borderRadius: "14px" }} />
+                                                        <Skeleton animation="wave" variant="rectangular" width={100} height={35} sx={{ borderRadius: "14px" }} />
                                                     </Stack>
                                                 </Grid>
                                             </Grid>
@@ -330,7 +330,8 @@ export default function VerifiedMembers({ user }: any) {
                             </Stack>
                         ) : (
                             <>
-                                {data?.pages?.map((page) => page.members.map((item: any) => {
+                                {/* {data?.pages?.map((page) => page.members.map((item: any) => { */}
+                                {(data?.pages?.[0]?.members ?? []).map((item: any) => {
                                     return (
                                         <Paper key={item.id} variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
                                             <CardContent>
@@ -377,7 +378,7 @@ export default function VerifiedMembers({ user }: any) {
                                             </CardContent>
                                         </Paper>
                                     );
-                                }))}
+                                })}
                             </>
                         )}
 
