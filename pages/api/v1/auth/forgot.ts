@@ -35,8 +35,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 secret: process.env.HCAPTCHA_SECRET,
                 response: data.captcha,
                 remoteip: getIPAddress(req)
-            }).then(async (res) => {
-                if (!res?.data?.success || !res?.request?.data?.success) { console.error(response.data); return res.status(400).json({ message: "Invalid captcha" }); }
+            }).then(async (resp) => {
+                if (!resp?.data?.success || !resp?.request?.data?.success) { console.error(JSON.stringify(resp.data)); return res.status(400).json({ message: "Invalid captcha" }); }
             }).catch((error) => {
                 console.error(`[ERROR/FORGOT/HCAPTCHA] ${error}`);
                 return res.status(400).json({ message: "Captcha error" });
