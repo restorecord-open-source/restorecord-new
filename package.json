@@ -23,7 +23,7 @@
         "apexcharts": "^3.36.0",
         "axios": "^0.27.2",
         "bcrypt": "^5.0.1",
-        "discord-api-types": "^0.37.11",
+        "discord-api-types": "^0.37.16",
         "discord-interactions": "^3.2.0",
         "discord.js": "^13.12.0",
         "dotenv": "^16.0.3",
