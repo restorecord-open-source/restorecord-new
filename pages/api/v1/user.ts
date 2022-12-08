@@ -90,10 +90,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 });
             }
             catch (err: any) {
-                console.error(err);
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 if (err?.name === "" || err?.name === "JsonWebTokenError") return res.status(400).json({ success: false, message: "User not logged in" }); 
                 if (err?.name === "ValidationError") return res.status(400).json({ success: false, message: err.message, });
+                else console.error(err);
                 return res.status(400).json({ success: false, message: "Something went wrong" });
             }
             break;
@@ -328,10 +328,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 }
             }
             catch (err: any) {
-                console.error(err);
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 if (err?.name === "" || err?.name === "JsonWebTokenError") return res.status(400).json({ success: false, message: "User not logged in" }); 
                 if (err?.name === "ValidationError") return res.status(400).json({ success: false, message: err.message, });
+                else console.error(err);
                 return res.status(400).json({ success: false, message: "Something went wrong" });
             }
             break;
@@ -495,10 +495,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 }
             }
             catch (err: any) {
-                console.error(err);
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 if (err?.name === "" || err?.name === "JsonWebTokenError") return res.status(400).json({ success: false, message: "User not logged in" }); 
                 if (err?.name === "ValidationError") return res.status(400).json({ success: false, message: err.message, });
+                else console.error(err);
                 return res.status(400).json({ success: false, message: "Something went wrong" });
             }
             break;
