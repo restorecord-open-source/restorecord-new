@@ -31,17 +31,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             if (!data) return res.status(400).json({ message: "Please provide all fields" });
             if (!data.email || !data.captcha) return res.status(400).json({ message: "Missing email or captcha" });
 
-            await axios.post(`https://hcaptcha.com/siteverify`, {
-                secret: process.env.HCAPTCHA_SECRET,
-                response: data.captcha,
-                remoteip: getIPAddress(req)
-            }).then(async (resp) => {
-                if (!resp?.data?.success || !resp?.request?.data?.success) { console.error(JSON.stringify(resp.data)); return res.status(400).json({ message: "Invalid captcha" }); }
-            }).catch((error) => {
-                console.error(`[ERROR/FORGOT/HCAPTCHA] ${error}`);
-                return res.status(400).json({ message: "Captcha error" });
-            });
-
+            await fetch(`https://hcaptcha.com/siteverify`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: `response=${data.captcha}&secret=${process.env.HCAPTCHA_SECRET}`
+            })
+                .then(res => res.json())
+                .then(res => {
+                    if (!res.success) { console.log(res); throw new Error("Invalid captcha"); }
+                });
+                
             const account = await prisma.accounts.findFirst({ where: { email: data.email } });
             if (!account) return res.status(400).json({ message: "Account not found" });
 
