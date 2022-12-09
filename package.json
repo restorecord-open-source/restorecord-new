@@ -20,7 +20,7 @@
         "@mui/material": "^5.10.17",
         "@prisma/client": "^4.7.1",
         "@sentry/nextjs": "^7.19.0",
-        "apexcharts": "^3.36.0",
+        "apexcharts": "^3.36.3",
         "axios": "^0.27.2",
         "bcrypt": "^5.0.1",
         "discord-api-types": "^0.37.16",
