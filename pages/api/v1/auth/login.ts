@@ -58,6 +58,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             tokenExpiry = "7d";
         }
 
+        if (account.banned) return res.status(400).json({ message: "Account is Banned. Contact: admin@restorecord.com" });
+
         const token = sign({ id: account.id }, `${process.env.JWT_SECRET}`, { expiresIn: tokenExpiry });
 
         await prisma.sessions.create({

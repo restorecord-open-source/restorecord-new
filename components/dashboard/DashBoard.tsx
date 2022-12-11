@@ -117,7 +117,7 @@ export default function DashBoard({ user }: any) {
                 style: {
                     color: '#fff',
                     fontSize: '14px',
-                    fontFamily: 'Roboto',
+                    fontFamily: 'Inter',
                     fontWeight: 'bold'
                 },
             },

@@ -7,7 +7,7 @@ export default class MyDocument extends Document {
         return (
             <Html style={{ overflow: "overlay", scrollBehavior: "smooth" }}>
                 <Head>
-                    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,200,300,400,500,600,700,800,900&display=swap" />
+                    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:100,200,300,400,500,600,700,800,900&display=swap" />
                     <meta name="emotion-insertion-point" content="" />
                     {(this.props as any).emotionStyleTags}
                 </Head>

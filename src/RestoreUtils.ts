@@ -5,9 +5,9 @@ import { prisma } from "./db";
 import { sleep } from "./Migrate";
 import { HttpsProxyAgent } from "https-proxy-agent";
 
-/**
- * Restores the guild configuration
- */
+const DISCORD_API_BASE = "https://discord.com/api/v10";
+
+
 export const loadConfig = async(server: servers, bot: customBots, backup: backups) => {
     // send a request to PATCH https://discord.com/api/v10/guilds/ and update name and icon
 
@@ -16,7 +16,7 @@ export const loadConfig = async(server: servers, bot: customBots, backup: backup
         image = await axios.get(backup.iconURL, { responseType: "arraybuffer", validateStatus: () => true });
     }
     
-    const modify = await axios.patch(`https://discord.com/api/v10/guilds/${server.guildId}`, {
+    const modify = await axios.patch(`${DISCORD_API_BASE}/guilds/${server.guildId}`, {
         name: backup.serverName,
         icon: backup.iconURL !== null && backup.iconURL !== "" ? `data:image/png;base64,${image ? image.data.toString("base64") : ""}` : null,
     }, {
@@ -77,7 +77,7 @@ export const loadRoles = async(server: servers, bot: customBots, backup: backups
 
     const everyoneRole = backupRoles.find((r) => r.isEveryone);
     if (everyoneRole) {
-        const roles = await axios.get(`https://discord.com/api/v10/guilds/${server.guildId}/roles`, {
+        const roles = await axios.get(`${DISCORD_API_BASE}/guilds/${server.guildId}/roles`, {
             headers: {
                 "Authorization": `Bot ${bot.botToken}`,
                 "Content-Type": "application/json",
@@ -95,7 +95,7 @@ export const loadRoles = async(server: servers, bot: customBots, backup: backups
 
         const everyoneRole = roles.data.find((r: any) => r.name === "@everyone");
 
-        const modify = await axios.patch(`https://discord.com/api/v10/guilds/${server.guildId}/roles/${everyoneRole.id}`, {
+        const modify = await axios.patch(`${DISCORD_API_BASE}/guilds/${server.guildId}/roles/${everyoneRole.id}`, {
             color: everyoneRole.color,
             permissions: everyoneRole.permissions,
             mentionable: everyoneRole.mentionable,
@@ -120,7 +120,7 @@ export const loadRoles = async(server: servers, bot: customBots, backup: backups
     const rolesArr = backupRoles.filter((role) => role.name !== "@everyone" && role.botId == null).sort((a, b) => b.position - a.position);
 
     for (const roleData of rolesArr) {
-        const resp = await axios.post(`https://discord.com/api/v10/guilds/${server.guildId}/roles`, {
+        const resp = await axios.post(`${DISCORD_API_BASE}/guilds/${server.guildId}/roles`, {
             name: roleData.name,
             permissions: String(roleData.permissions) as string,
             color: roleData.color,
@@ -167,7 +167,7 @@ export const loadChannels = async(server: servers, bot: customBots, backup: back
             const permissions = await prisma.channelPermissions.findMany({ where: { channelId: channelData.channelId } });
             const backupRoles = await prisma.roles.findMany({ where: { backupId: backup.backupId } });
 
-            const roles = await axios.get(`https://discord.com/api/v10/guilds/${server.guildId}/roles`, {
+            const roles = await axios.get(`${DISCORD_API_BASE}/guilds/${server.guildId}/roles`, {
                 headers: {
                     "Authorization": `Bot ${bot.botToken}`,
                     "Content-Type": "application/json",
@@ -179,7 +179,7 @@ export const loadChannels = async(server: servers, bot: customBots, backup: back
                 validateStatus: () => true,
             });
 
-            const resp = await axios.post(`https://discord.com/api/v10/guilds/${server.guildId}/channels`, {
+            const resp = await axios.post(`${DISCORD_API_BASE}/guilds/${server.guildId}/channels`, {
                 name: channelData.name,
                 type: channelData.type,
                 user_limit: channelData.userLimit ? channelData.userLimit : undefined,
@@ -218,7 +218,7 @@ export const loadChannels = async(server: servers, bot: customBots, backup: back
         }, 1000);
     }).then(async () => {
 
-        const channels = await axios.get(`https://discord.com/api/v10/guilds/${server.guildId}/channels`, {
+        const channels = await axios.get(`${DISCORD_API_BASE}/guilds/${server.guildId}/channels`, {
             headers: {
                 "Authorization": `Bot ${bot.botToken}`,
                 "Content-Type": "application/json",
@@ -236,7 +236,7 @@ export const loadChannels = async(server: servers, bot: customBots, backup: back
             const permissions = await prisma.channelPermissions.findMany({ where: { channelId: channelData.channelId } });
             const backupRoles = await prisma.roles.findMany({ where: { backupId: backup.backupId } });
 
-            const roles = await axios.get(`https://discord.com/api/v10/guilds/${server.guildId}/roles`, {
+            const roles = await axios.get(`${DISCORD_API_BASE}/guilds/${server.guildId}/roles`, {
                 headers: {
                     "Authorization": `Bot ${bot.botToken}`,
                     "Content-Type": "application/json",
@@ -251,7 +251,7 @@ export const loadChannels = async(server: servers, bot: customBots, backup: back
             const parentOwner = await prisma.channels.findFirst({ where: { backupId: backup.backupId, type: 4, channelId: channelData.parentId ?? 0 } });
             const parent = channels.data.find((c: any) => c.name === parentOwner?.name && c.type === 4);
 
-            const resp = await axios.post(`https://discord.com/api/v10/guilds/${server.guildId}/channels`, {
+            const resp = await axios.post(`${DISCORD_API_BASE}/guilds/${server.guildId}/channels`, {
                 name: channelData.name,
                 type: channelData.type,
                 topic: channelData.topic,

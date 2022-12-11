@@ -27,7 +27,8 @@ const theme = createTheme({
     },
     typography: {
         fontFamily: [
-            "Roboto",
+            "Inter",
+            // "Roboto",
         ].join(","),
     },
     components: {

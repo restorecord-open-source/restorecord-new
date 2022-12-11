@@ -6,6 +6,8 @@ import { HttpsProxyAgent } from "https-proxy-agent";
 import { sleep } from "./Migrate";
 import { ChannelPermissionsData, MessageData, VoiceChannelData, roleData, channelData, MemberData, BaseChannelData, } from "./types";
 
+const DISCORD_API_BASE = "https://discord.com/api/v10";
+
 const MaxBitratePerTier: Record<PremiumTier, number> = {
     NONE: 64000,
     TIER_1: 128000,
@@ -22,7 +24,7 @@ export async function getMembers(guild: servers, bot: customBots) {
         const memberRoles: MemberData[] = [];
         let done;
 
-        const members = await axios.get(`https://discord.com/api/v10/guilds/${guild.guildId}/members?limit=1000`, {
+        const members = await axios.get(`${DISCORD_API_BASE}/guilds/${guild.guildId}/members?limit=1000`, {
             headers: {
                 "Authorization": `Bot ${bot.botToken}`,
                 "Content-Type": "application/json",
@@ -39,7 +41,7 @@ export async function getMembers(guild: servers, bot: customBots) {
 
         while (!done) {
             const lastMember = members.data[members.data.length - 1];
-            const moreMembers = await axios.get(`https://discord.com/api/v10/guilds/${guild.guildId}/members?limit=1000&after=${lastMember.user.id}`, {
+            const moreMembers = await axios.get(`${DISCORD_API_BASE}/guilds/${guild.guildId}/members?limit=1000&after=${lastMember.user.id}`, {
                 headers: {
                     "Authorization": `Bot ${bot.botToken}`,
                     "Content-Type": "application/json",
@@ -74,7 +76,7 @@ export async function getMembers(guild: servers, bot: customBots) {
 export async function getChannels(guild: servers, bot: customBots) {
     const channels: channelData[] = [];
 
-    const channelsData = await axios.get(`https://discord.com/api/v10/guilds/${guild.guildId}/channels`, {
+    const channelsData = await axios.get(`${DISCORD_API_BASE}/guilds/${guild.guildId}/channels`, {
         headers: {
             "Authorization": `Bot ${bot.botToken}`,
             "Content-Type": "application/json",
@@ -135,7 +137,7 @@ export async function getChannels(guild: servers, bot: customBots) {
 export async function getRoles(guild: servers, bot: customBots) {
     const roles: roleData[] = [];
 
-    const rolesData = await axios.get(`https://discord.com/api/v10/guilds/${guild.guildId}/roles`, {
+    const rolesData = await axios.get(`${DISCORD_API_BASE}/guilds/${guild.guildId}/roles`, {
         headers: {
             "Authorization": `Bot ${bot.botToken}`,
             "Content-Type": "application/json",
@@ -310,7 +312,7 @@ export const clearGuild = async(server: servers, bot: customBots, channels: bool
             const channels = await getChannels(server, bot);
 
             channelPromise = channels.map(async (channel) => {
-                const resp = await axios.delete(`https://discord.com/api/v10/channels/${channel.channelId}`, {
+                const resp = await axios.delete(`${DISCORD_API_BASE}/channels/${channel.channelId}`, {
                     headers: {
                         "Authorization": `Bot ${bot.botToken}`,
                         "Content-Type": "application/json",
@@ -337,7 +339,7 @@ export const clearGuild = async(server: servers, bot: customBots, channels: bool
             const roles = await getRoles(server, bot);
 
             rolesPromise = roles.map(async (role) => {
-                const resp = await axios.delete(`https://discord.com/api/v10/guilds/${server.guildId}/roles/${role.roleId}`, {
+                const resp = await axios.delete(`${DISCORD_API_BASE}/guilds/${server.guildId}/roles/${role.roleId}`, {
                     headers: {
                         "Authorization": `Bot ${bot.botToken}`,
                         "Content-Type": "application/json",

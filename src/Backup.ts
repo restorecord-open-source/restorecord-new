@@ -10,6 +10,8 @@ import {
 import { prisma } from "./db";
 import { BackupData, channelData, MemberData, roleData } from "./types";
 
+const DISCORD_API_BASE = "https://discord.com/api/v10";
+
 export const getBackupData = (backup_id: string) => {
     return new Promise(async (resolve, reject) => {
         let backupData = await prisma.backups.findUnique({ where: { backupId: backup_id } });
@@ -42,7 +44,7 @@ export const createBackup = async (guildId: bigint) => {
                 guildMembes: Array<MemberData>(),
             };
 
-            const guild = await axios.get(`https://discord.com/api/v10/guilds/${guildId}`, {
+            const guild = await axios.get(`${DISCORD_API_BASE}/guilds/${guildId}`, {
                 headers: {
                     "Authorization": `Bot ${bot.botToken}`,
                     "Content-Type": "application/json",

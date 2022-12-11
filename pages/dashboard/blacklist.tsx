@@ -30,6 +30,7 @@ import HubIcon from "@mui/icons-material/Hub";
 // eslint-disable-next-line no-restricted-imports
 import useTheme from "@mui/material/styles/useTheme";
 import axios from "axios";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function Blacklist() {
     const router = useRouter();
@@ -46,10 +47,11 @@ export default function Blacklist() {
     const [notiTextE, setNotiTextE] = useState("X");
     const [notiTextI, setNotiTextI] = useState("X");
 
-    const { data: user, isError, isLoading: userLoading } = useQuery("user", async () => await getUser({
+    const { data: user, isError: userError, isLoading: userLoading } = useQuery("user", async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
     }), { retry: false,  refetchOnWindowFocus: false });
 
+   
     
     const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading: listsLoading, refetch } = useInfiniteQuery("members", async ({ pageParam = 1 }: any) => await getBlacklist({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
@@ -84,6 +86,21 @@ export default function Blacklist() {
             clearTimeout(delayDebounceFn);
         }       
     }, [hasNextPage, fetchNextPage, refetch, search]);
+
+    
+    if (userLoading || listsLoading) {
+        return <CircularProgress />
+    }
+
+    if (userError) {
+        return <div>Error</div>
+    }
+
+    if (!user.username) {
+        router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
+
+        return <CircularProgress />
+    }
 
     function ShowType(type: number) {
         switch (type) {
