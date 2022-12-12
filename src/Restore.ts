@@ -24,7 +24,7 @@ export const startRestore = async (
                 // if (clear) await clearGuild(server, bot);
                 // run wait until clearGuild(server, bot) is done
                 if (clear) new Promise((resolve) => resolve(clearGuild(server, bot)));
-                await new Promise((resolve) => setTimeout(resolve, 10000));
+                await new Promise((resolve) => setTimeout(resolve, 20000));
 
                 if (settings) await loadConfig(server, bot, backup);
                 await new Promise((resolve) => setTimeout(resolve, 2000));

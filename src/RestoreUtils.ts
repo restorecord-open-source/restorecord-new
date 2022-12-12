@@ -164,11 +164,11 @@ export const loadChannels = async(server: servers, bot: customBots, backup: back
     const channelPromises: Promise<channels>[] = [];
 
     // const categoriesPromise = new Promise((resolve, reject) => {
+    // backupChannels.filter((channel) => channel.type === 4).forEach(async (channelData) => {
+    for (const channelData of backupChannels.filter((channel) => channel.type === 4)) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
 
-    backupChannels.filter((channel) => channel.type === 4).forEach(async (channelData) => {
-        await new Promise((resolve) => setTimeout(resolve, 500)); setTimeout(() => {}, 500);
-
-        const permissions = await prisma.channelPermissions.findMany({ where: { channelId: channelData.channelId } });
+        const permissions = await prisma.channelPermissions.findMany({ where: { channelId: channelData.channelId } }) ?? [];
         const backupRoles = await prisma.roles.findMany({ where: { backupId: backup.backupId } });
 
         const roles = await axios.get(`${DISCORD_API_BASE}/guilds/${server.guildId}/roles`, {
@@ -216,9 +216,10 @@ export const loadChannels = async(server: servers, bot: customBots, backup: back
             await new Promise((resolve) => setTimeout(resolve, resp.data.retry_after));
         }
         // });
-    });
+    }
+    // });
 
-    await new Promise((resolve) => setTimeout(resolve, 2000)); setTimeout(() => {}, 2000);
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     const channels = await axios.get(`${DISCORD_API_BASE}/guilds/${server.guildId}/channels`, {
         headers: {
@@ -235,10 +236,11 @@ export const loadChannels = async(server: servers, bot: customBots, backup: back
     if (channels.data.retry_after) { await new Promise((resolve) => setTimeout(resolve, channels.data.retry_after)); }
     if (!channels.status.toString().startsWith("2")) { channels.data = []; console.error(`[Restore] [Channels] ${channels.status} ${channels.statusText} ${JSON.stringify(channels.data)}`); }
 
-    backupChannels.filter((channel) => channel.type !== 4).forEach(async (channelData) => {
-        await new Promise((resolve) => setTimeout(resolve, 500)); setTimeout(() => {}, 500);
+    // backupChannels.filter((channel) => channel.type !== 4).forEach(async (channelData) => {
+    for (const channelData of backupChannels.filter((channel) => channel.type !== 4)) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
 
-        const permissions = await prisma.channelPermissions.findMany({ where: { channelId: channelData.channelId } });
+        const permissions = await prisma.channelPermissions.findMany({ where: { channelId: channelData.channelId } }) ?? [];
         const backupRoles = await prisma.roles.findMany({ where: { backupId: backup.backupId } });
 
         const roles = await axios.get(`${DISCORD_API_BASE}/guilds/${server.guildId}/roles`, {
@@ -290,8 +292,8 @@ export const loadChannels = async(server: servers, bot: customBots, backup: back
 
         if (!resp.status.toString().startsWith("2")) { console.error(`[Restore] [Channels] [Channels] ${resp.status} ${resp.statusText} ${JSON.stringify(resp.data)}`); }
         if (resp.data.retry_after) { await new Promise((resolve) => setTimeout(resolve, resp.data.retry_after)); }
-        
-    });
+    }
+    // });
 
 
     return Promise.all(channelPromises);

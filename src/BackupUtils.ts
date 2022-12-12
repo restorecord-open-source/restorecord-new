@@ -304,16 +304,31 @@ export async function loadChannel(channelData: TextChannelData | VoiceChannelDat
  * Delete all roles, all channels, all emojis, etc... of a guild
  */
 export const clearGuild = async(server: servers, bot: customBots, channels: boolean = true, roles: boolean = true) => {
-    return new Promise(async (resolve, reject) => {
-        if (channels) {
-            const channels = await getChannels(server, bot);
+    if (channels) {
+        const channels = await getChannels(server, bot);
 
-            channels.forEach(async (channel) => {
-                console.log(`[Restore] Deleting channel ${channel.name} (${channel.channelId}) ${new Date().toLocaleTimeString()}`)
+        // channels.forEach(async (channel) => {
+        for (const channel of channels) {
+            // console.log(`[Restore] Deleting channel ${channel.name} (${channel.channelId}) ${new Date().toLocaleTimeString()}`)
+            await new Promise((resolve) => setTimeout(resolve, 5));
 
-                await new Promise((resolve) => setTimeout(resolve, 100)); setTimeout(() => {}, 100);
+            const resp = await axios.delete(`${DISCORD_API_BASE}/channels/${channel.channelId}`, {
+                headers: {
+                    "Authorization": `Bot ${bot.botToken}`,
+                    "Content-Type": "application/json",
+                    "X-RateLimit-Precision": "millisecond",
+                    "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
+                },
+                proxy: false,
+                httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
+                validateStatus: () => true,
+            });
 
-                const resp = await axios.delete(`${DISCORD_API_BASE}/channels/${channel.channelId}`, {
+            if (!resp.status.toString().startsWith("2")) { console.error(`[Restore] [Clear] [Roles] ${resp.status} ${resp.statusText} ${JSON.stringify(resp.data)}`); }
+
+            if (resp.data.retry_after) {
+                await new Promise((resolve) => setTimeout(resolve, ((resp.data.retry_after * 3) ?? 1000)));
+                await axios.delete(`${DISCORD_API_BASE}/channels/${channel.channelId}`, {
                     headers: {
                         "Authorization": `Bot ${bot.botToken}`,
                         "Content-Type": "application/json",
@@ -324,28 +339,38 @@ export const clearGuild = async(server: servers, bot: customBots, channels: bool
                     httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
                     validateStatus: () => true,
                 });
-
-                if (!resp.status.toString().startsWith("2")) { console.error(`[Restore] [Clear] [Roles] ${resp.status} ${resp.statusText} ${JSON.stringify(resp.data)}`); }
-
-                if (resp.data.retry_after) {
-                    await new Promise((resolve) => setTimeout(resolve, (resp.data.retry_after ?? 1000)));
-                } else if (resp.status === 204) {
-                    return true;
-                } else {
-                    return false;
-                }
-
-            });
+            }
         }
+        // });
+    }
 
-        if (roles) {
-            const roles = await getRoles(server, bot);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-            roles.forEach(async (role) => {
-                console.log(`[Restore] Deleting role ${role.name} (${role.roleId}) ${new Date().toLocaleTimeString()}`)
-                await new Promise((resolve) => setTimeout(resolve, 100)); setTimeout(() => {}, 100);
+    if (roles) {
+        const roles = await getRoles(server, bot);
 
-                const resp = await axios.delete(`${DISCORD_API_BASE}/guilds/${server.guildId}/roles/${role.roleId}`, {
+        // roles.filter((role) => (role.isEveryone === false)).forEach(async (role) => {
+        for (const role of roles.filter((role) => (role.isEveryone === false))) {
+            // console.log(`[Restore] Deleting role ${role.name} (${role.roleId}) ${new Date().toLocaleTimeString()}`)
+            await new Promise((resolve) => setTimeout(resolve, 300));
+
+            const resp = await axios.delete(`${DISCORD_API_BASE}/guilds/${server.guildId}/roles/${role.roleId}`, {
+                headers: {
+                    "Authorization": `Bot ${bot.botToken}`,
+                    "Content-Type": "application/json",
+                    "X-RateLimit-Precision": "millisecond",
+                    "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
+                },
+                proxy: false,
+                httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
+                validateStatus: () => true,
+            });
+
+            if (!resp.status.toString().startsWith("2")) { console.error(`[Restore] [Clear] [Roles] ${resp.status} ${resp.statusText} ${JSON.stringify(resp.data)}`); }
+
+            if (resp.data.retry_after) {
+                await new Promise((resolve) => setTimeout(resolve, ((resp.data.retry_after * 3) ?? 1000)));
+                await axios.delete(`${DISCORD_API_BASE}/guilds/${server.guildId}/roles/${role.roleId}`, {
                     headers: {
                         "Authorization": `Bot ${bot.botToken}`,
                         "Content-Type": "application/json",
@@ -356,21 +381,10 @@ export const clearGuild = async(server: servers, bot: customBots, channels: bool
                     httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
                     validateStatus: () => true,
                 });
-
-                if (!resp.status.toString().startsWith("2")) { console.error(`[Restore] [Clear] [Roles] ${resp.status} ${resp.statusText} ${JSON.stringify(resp.data)}`); }
-
-                if (resp.data.retry_after) {
-                    await new Promise((resolve) => setTimeout(resolve, (resp.data.retry_after ?? 1000)));
-                } else if (resp.status === 204) {
-                    return true;
-                } else {
-                    return false;
-                }
-
-            });
+            }
         }
+        // });
+    }
 
-        await new Promise((resolve) => setTimeout(resolve, 10000));
-        resolve(true);
-    });
+    await new Promise((resolve) => setTimeout(resolve, 10000));
 }
