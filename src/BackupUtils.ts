@@ -311,7 +311,8 @@ export const clearGuild = async(server: servers, bot: customBots, channels: bool
         if (channels) {
             const channels = await getChannels(server, bot);
 
-            channelPromise = channels.map(async (channel) => {
+            channelPromise = channels.forEach(async (channel) => {
+                await new Promise((resolve) => setTimeout(resolve, 100));
                 const resp = await axios.delete(`${DISCORD_API_BASE}/channels/${channel.channelId}`, {
                     headers: {
                         "Authorization": `Bot ${bot.botToken}`,
@@ -325,7 +326,7 @@ export const clearGuild = async(server: servers, bot: customBots, channels: bool
                 });
 
                 if (resp.data.retry_after) {
-                    await sleep(resp.data.retry_after);
+                    await new Promise((resolve) => setTimeout(resolve, (resp.data.retry_after ?? 1000)));
                 } else if (resp.status === 204) {
                     return true;
                 } else {
@@ -338,7 +339,8 @@ export const clearGuild = async(server: servers, bot: customBots, channels: bool
         if (roles) {
             const roles = await getRoles(server, bot);
 
-            rolesPromise = roles.map(async (role) => {
+            rolesPromise = roles.forEach(async (role) => {
+                await new Promise((resolve) => setTimeout(resolve, 100));
                 const resp = await axios.delete(`${DISCORD_API_BASE}/guilds/${server.guildId}/roles/${role.roleId}`, {
                     headers: {
                         "Authorization": `Bot ${bot.botToken}`,
@@ -352,7 +354,7 @@ export const clearGuild = async(server: servers, bot: customBots, channels: bool
                 });
 
                 if (resp.data.retry_after) {
-                    await sleep(resp.data.retry_after);
+                    await new Promise((resolve) => setTimeout(resolve, (resp.data.retry_after ?? 1000)));
                 } else if (resp.status === 204) {
                     return true;
                 } else {

@@ -31,16 +31,16 @@ export const startRestore = async (
 
                 if (channels) await loadChannels(server, bot, backup);
                 await new Promise((resolve) => setTimeout(resolve, 5000));
-                
+
                 if (roles) await loadRoles(server, bot, backup);
                 await new Promise((resolve) => setTimeout(resolve, 5000));                
             } catch (e) {
-                console.error(e);
+                console.error(`[Restore 1] [ERROR] ${e}`);
                 return reject(e);
             }
             return resolve("Restored");
         } catch (e) {
-            console.error(e);
+            console.error(`[Restore 2] [ERROR] ${e}`);
             return reject("Invalid Backup");
         }
     });
