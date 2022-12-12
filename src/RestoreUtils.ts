@@ -215,7 +215,7 @@ export const loadChannels = async(server: servers, bot: customBots, backup: back
         // wait 1s for all categories to be created then resolve
         setTimeout(() => {
             resolve(true);
-        }, 1000);
+        }, 3000);
     }).then(async () => {
 
         const channels = await axios.get(`${DISCORD_API_BASE}/guilds/${server.guildId}/channels`, {
