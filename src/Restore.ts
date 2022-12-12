@@ -29,11 +29,12 @@ export const startRestore = async (
                 if (settings) await loadConfig(server, bot, backup);
                 await new Promise((resolve) => setTimeout(resolve, 2000));
 
-                if (channels) await loadChannels(server, bot, backup);
+                if (roles) await loadRoles(server, bot, backup);
                 await new Promise((resolve) => setTimeout(resolve, 5000));
 
-                if (roles) await loadRoles(server, bot, backup);
-                await new Promise((resolve) => setTimeout(resolve, 5000));                
+                if (channels) await loadChannels(server, bot, backup);
+                await new Promise((resolve) => setTimeout(resolve, 5000));
+          
             } catch (e) {
                 console.error(`[Restore 1] [ERROR] ${e}`);
                 return reject(e);

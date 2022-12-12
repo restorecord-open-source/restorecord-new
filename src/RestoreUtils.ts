@@ -91,7 +91,7 @@ export const loadRoles = async(server: servers, bot: customBots, backup: backups
 
         if (!roles.status.toString().startsWith("2")) {
             roles.data = [];
-            console.error(`[Restore] [Roles] ${roles.status} ${roles.statusText} ${roles.data.message}`);
+            console.error(`[Restore] [Roles] ${roles.status} ${roles.statusText} ${JSON.stringify(roles.data)}`);
         }
 
         const everyoneRole = roles.data.find((r: any) => r.name === "@everyone") ?? server.guildId;
@@ -210,6 +210,8 @@ export const loadChannels = async(server: servers, bot: customBots, backup: back
             validateStatus: () => true,
         });
 
+        if (!resp.status.toString().startsWith("2")) { console.error(`[Restore] [Channels] [Categories] ${resp.status} ${resp.statusText} ${JSON.stringify(resp.data)}`); }
+
         if (resp.data.retry_after) {
             await new Promise((resolve) => setTimeout(resolve, resp.data.retry_after));
         }
@@ -231,7 +233,7 @@ export const loadChannels = async(server: servers, bot: customBots, backup: back
     });
 
     if (channels.data.retry_after) { await new Promise((resolve) => setTimeout(resolve, channels.data.retry_after)); }
-    if (!channels.status.toString().startsWith("2")) { channels.data = []; console.error(`[Restore] [Channels] ${channels.status} ${channels.statusText} ${channels.data.message}`); }
+    if (!channels.status.toString().startsWith("2")) { channels.data = []; console.error(`[Restore] [Channels] ${channels.status} ${channels.statusText} ${JSON.stringify(channels.data)}`); }
 
     backupChannels.filter((channel) => channel.type !== 4).forEach(async (channelData) => {
         await new Promise((resolve) => setTimeout(resolve, 500)); setTimeout(() => {}, 500);
@@ -286,7 +288,9 @@ export const loadChannels = async(server: servers, bot: customBots, backup: back
 
         channelPromises.push(resp.data);
 
+        if (!resp.status.toString().startsWith("2")) { console.error(`[Restore] [Channels] [Channels] ${resp.status} ${resp.statusText} ${JSON.stringify(resp.data)}`); }
         if (resp.data.retry_after) { await new Promise((resolve) => setTimeout(resolve, resp.data.retry_after)); }
+        
     });
 
 
