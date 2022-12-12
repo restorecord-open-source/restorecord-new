@@ -305,13 +305,10 @@ export async function loadChannel(channelData: TextChannelData | VoiceChannelDat
  */
 export const clearGuild = async(server: servers, bot: customBots, channels: boolean = true, roles: boolean = true) => {
     return new Promise(async (resolve, reject) => {
-        let channelPromise: any = [];
-        let rolesPromise: any = [];
-
         if (channels) {
             const channels = await getChannels(server, bot);
 
-            channelPromise = channels.forEach(async (channel) => {
+            channels.forEach(async (channel) => {
                 await new Promise((resolve) => setTimeout(resolve, 100));
                 const resp = await axios.delete(`${DISCORD_API_BASE}/channels/${channel.channelId}`, {
                     headers: {
@@ -339,7 +336,7 @@ export const clearGuild = async(server: servers, bot: customBots, channels: bool
         if (roles) {
             const roles = await getRoles(server, bot);
 
-            rolesPromise = roles.forEach(async (role) => {
+            roles.forEach(async (role) => {
                 await new Promise((resolve) => setTimeout(resolve, 100));
                 const resp = await axios.delete(`${DISCORD_API_BASE}/guilds/${server.guildId}/roles/${role.roleId}`, {
                     headers: {
@@ -364,8 +361,7 @@ export const clearGuild = async(server: servers, bot: customBots, channels: bool
             });
         }
 
-        await Promise.all([channelPromise, rolesPromise]).then((values) => {
-            resolve(values);
-        });
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+        resolve(true);
     });
 }
