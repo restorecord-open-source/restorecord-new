@@ -93,7 +93,7 @@ export const loadRoles = async(server: servers, bot: customBots, backup: backups
             roles.data = [];
         }
 
-        const everyoneRole = roles.data.find((r: any) => r.name === "@everyone");
+        const everyoneRole = roles.data.find((r: any) => r.name === "@everyone") ?? server.guildId;
 
         const modify = await axios.patch(`${DISCORD_API_BASE}/guilds/${server.guildId}/roles/${everyoneRole.id}`, {
             color: everyoneRole.color,
@@ -120,6 +120,8 @@ export const loadRoles = async(server: servers, bot: customBots, backup: backups
     const rolesArr = backupRoles.filter((role) => role.name !== "@everyone" && role.botId == null).sort((a, b) => b.position - a.position);
 
     for (const roleData of rolesArr) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
         const resp = await axios.post(`${DISCORD_API_BASE}/guilds/${server.guildId}/roles`, {
             name: roleData.name,
             permissions: String(roleData.permissions) as string,
@@ -141,8 +143,6 @@ export const loadRoles = async(server: servers, bot: customBots, backup: backups
         if (resp.data.retry_after) {
             await new Promise((resolve) => setTimeout(resolve, resp.data.retry_after));
         }
-
-        await sleep(100);
     }
 
     return Promise.all(rolePromises);
@@ -162,63 +162,15 @@ export const loadChannels = async(server: servers, bot: customBots, backup: back
 
     const channelPromises: Promise<channels>[] = [];
 
-    const categoriesPromise = new Promise((resolve, reject) => {
-        backupChannels.filter((channel) => channel.type === 4).forEach(async (channelData) => {
-            const permissions = await prisma.channelPermissions.findMany({ where: { channelId: channelData.channelId } });
-            const backupRoles = await prisma.roles.findMany({ where: { backupId: backup.backupId } });
+    // const categoriesPromise = new Promise((resolve, reject) => {
 
-            const roles = await axios.get(`${DISCORD_API_BASE}/guilds/${server.guildId}/roles`, {
-                headers: {
-                    "Authorization": `Bot ${bot.botToken}`,
-                    "Content-Type": "application/json",
-                    "X-RateLimit-Precision": "millisecond",
-                    "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
-                },
-                proxy: false,
-                httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
-                validateStatus: () => true,
-            });
+    backupChannels.filter((channel) => channel.type === 4).forEach(async (channelData) => {
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
-            const resp = await axios.post(`${DISCORD_API_BASE}/guilds/${server.guildId}/channels`, {
-                name: channelData.name,
-                type: channelData.type,
-                user_limit: channelData.userLimit ? channelData.userLimit : undefined,
-                rate_limit_per_user: channelData.rateLimitPerUser ? channelData.rateLimitPerUser : undefined,
-                position: channelData.position,
-                nsfw: channelData.nsfw ? channelData.nsfw : undefined,
-                permission_overwrites: permissions.map((permission) => {
-                    return {
-                        id: String(roles.data.find((r: any) => r.name === backupRoles.find((r) => r.roleId === permission.roleId)?.name)?.id) as string,
-                        type: permission.type,
-                        allow: String(permission.allow) as string,
-                        deny: String(permission.deny) as string,
-                    };
-                }),
-            }, {
-                headers: {
-                    "Authorization": `Bot ${bot.botToken}`,
-                    "Content-Type": "application/json",
-                    "X-RateLimit-Precision": "millisecond",
-                    "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
-                },
-                proxy: false,
-                httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
-                validateStatus: () => true,
-            });
+        const permissions = await prisma.channelPermissions.findMany({ where: { channelId: channelData.channelId } });
+        const backupRoles = await prisma.roles.findMany({ where: { backupId: backup.backupId } });
 
-            if (resp.data.retry_after) {
-                await new Promise((resolve) => setTimeout(resolve, resp.data.retry_after));
-            }
-
-            await new Promise((resolve) => setTimeout(resolve, 300));
-        });
-        // wait 1s for all categories to be created then resolve
-        setTimeout(() => {
-            resolve(true);
-        }, 3000);
-    }).then(async () => {
-
-        const channels = await axios.get(`${DISCORD_API_BASE}/guilds/${server.guildId}/channels`, {
+        const roles = await axios.get(`${DISCORD_API_BASE}/guilds/${server.guildId}/roles`, {
             headers: {
                 "Authorization": `Bot ${bot.botToken}`,
                 "Content-Type": "application/json",
@@ -230,63 +182,110 @@ export const loadChannels = async(server: servers, bot: customBots, backup: back
             validateStatus: () => true,
         });
 
-        if (channels.data.retry_after) { await new Promise((resolve) => setTimeout(resolve, channels.data.retry_after)); }
-
-        backupChannels.filter((channel) => channel.type !== 4).forEach(async (channelData) => {
-            const permissions = await prisma.channelPermissions.findMany({ where: { channelId: channelData.channelId } });
-            const backupRoles = await prisma.roles.findMany({ where: { backupId: backup.backupId } });
-
-            const roles = await axios.get(`${DISCORD_API_BASE}/guilds/${server.guildId}/roles`, {
-                headers: {
-                    "Authorization": `Bot ${bot.botToken}`,
-                    "Content-Type": "application/json",
-                    "X-RateLimit-Precision": "millisecond",
-                    "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
-                },
-                proxy: false,
-                httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
-                validateStatus: () => true,
-            });
-
-            const parentOwner = await prisma.channels.findFirst({ where: { backupId: backup.backupId, type: 4, channelId: channelData.parentId ?? 0 } });
-            const parent = channels.data.find((c: any) => c.name === parentOwner?.name && c.type === 4);
-
-            const resp = await axios.post(`${DISCORD_API_BASE}/guilds/${server.guildId}/channels`, {
-                name: channelData.name,
-                type: channelData.type,
-                topic: channelData.topic,
-                bitrate: channelData.bitrate ? channelData.bitrate : undefined,
-                user_limit: channelData.userLimit ? channelData.userLimit : undefined,
-                rate_limit_per_user: channelData.rateLimitPerUser ? channelData.rateLimitPerUser : undefined,
-                position: channelData.position,
-                parent_id: parent ? parent.id : undefined,
-                nsfw: channelData.nsfw ? channelData.nsfw : undefined,
-                permission_overwrites: permissions.map((permission) => {
-                    return {
-                        id: String(roles.data.find((r: any) => r.name === backupRoles.find((r) => r.roleId === permission.roleId)?.name)?.id) as string,
-                        type: permission.type,
-                        allow: String(permission.allow) as string,
-                        deny: String(permission.deny) as string,
-                    };
-                }),
-            }, {
-                headers: {
-                    "Authorization": `Bot ${bot.botToken}`,
-                    "Content-Type": "application/json",
-                    "X-RateLimit-Precision": "millisecond",
-                    "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
-                },
-                proxy: false,
-                httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
-                validateStatus: () => true,
-            });
-
-            channelPromises.push(resp.data);
-
-            if (resp.data.retry_after) { await new Promise((resolve) => setTimeout(resolve, resp.data.retry_after)); }
-
-            await new Promise((resolve) => setTimeout(resolve, 300));
+        const resp = await axios.post(`${DISCORD_API_BASE}/guilds/${server.guildId}/channels`, {
+            name: channelData.name,
+            type: channelData.type,
+            user_limit: channelData.userLimit ? channelData.userLimit : undefined,
+            rate_limit_per_user: channelData.rateLimitPerUser ? channelData.rateLimitPerUser : undefined,
+            position: channelData.position,
+            nsfw: channelData.nsfw ? channelData.nsfw : undefined,
+            permission_overwrites: permissions.map((permission) => {
+                return {
+                    id: String(roles.data.find((r: any) => r.name === backupRoles.find((r) => r.roleId === permission.roleId)?.name)?.id) as string,
+                    type: permission.type,
+                    allow: String(permission.allow) as string,
+                    deny: String(permission.deny) as string,
+                };
+            }),
+        }, {
+            headers: {
+                "Authorization": `Bot ${bot.botToken}`,
+                "Content-Type": "application/json",
+                "X-RateLimit-Precision": "millisecond",
+                "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
+            },
+            proxy: false,
+            httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
+            validateStatus: () => true,
         });
+
+        if (resp.data.retry_after) {
+            await new Promise((resolve) => setTimeout(resolve, resp.data.retry_after));
+        }
+        // });
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    const channels = await axios.get(`${DISCORD_API_BASE}/guilds/${server.guildId}/channels`, {
+        headers: {
+            "Authorization": `Bot ${bot.botToken}`,
+            "Content-Type": "application/json",
+            "X-RateLimit-Precision": "millisecond",
+            "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
+        },
+        proxy: false,
+        httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
+        validateStatus: () => true,
+    });
+
+    if (channels.data.retry_after) { await new Promise((resolve) => setTimeout(resolve, channels.data.retry_after)); }
+    if (!channels.status.toString().startsWith("2")) { channels.data = []; }
+
+    backupChannels.filter((channel) => channel.type !== 4).forEach(async (channelData) => {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        const permissions = await prisma.channelPermissions.findMany({ where: { channelId: channelData.channelId } });
+        const backupRoles = await prisma.roles.findMany({ where: { backupId: backup.backupId } });
+
+        const roles = await axios.get(`${DISCORD_API_BASE}/guilds/${server.guildId}/roles`, {
+            headers: {
+                "Authorization": `Bot ${bot.botToken}`,
+                "Content-Type": "application/json",
+                "X-RateLimit-Precision": "millisecond",
+                "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
+            },
+            proxy: false,
+            httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
+            validateStatus: () => true,
+        });
+
+        const parentOwner = await prisma.channels.findFirst({ where: { backupId: backup.backupId, type: 4, channelId: channelData.parentId ?? 0 } });
+        const parent = channels.data.find((c: any) => c.name === parentOwner?.name && c.type === 4) ?? undefined;
+
+        const resp = await axios.post(`${DISCORD_API_BASE}/guilds/${server.guildId}/channels`, {
+            name: channelData.name,
+            type: channelData.type,
+            topic: channelData.topic,
+            bitrate: channelData.bitrate ? channelData.bitrate : undefined,
+            user_limit: channelData.userLimit ? channelData.userLimit : undefined,
+            rate_limit_per_user: channelData.rateLimitPerUser ? channelData.rateLimitPerUser : undefined,
+            position: channelData.position,
+            parent_id: parent ? parent.id : undefined,
+            nsfw: channelData.nsfw ? channelData.nsfw : undefined,
+            permission_overwrites: permissions.map((permission) => {
+                return {
+                    id: String(roles.data.find((r: any) => r.name === backupRoles.find((r) => r.roleId === permission.roleId)?.name)?.id) as string,
+                    type: permission.type,
+                    allow: String(permission.allow) as string,
+                    deny: String(permission.deny) as string,
+                };
+            }),
+        }, {
+            headers: {
+                "Authorization": `Bot ${bot.botToken}`,
+                "Content-Type": "application/json",
+                "X-RateLimit-Precision": "millisecond",
+                "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
+            },
+            proxy: false,
+            httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
+            validateStatus: () => true,
+        });
+
+        channelPromises.push(resp.data);
+
+        if (resp.data.retry_after) { await new Promise((resolve) => setTimeout(resolve, resp.data.retry_after)); }
     });
 
 
