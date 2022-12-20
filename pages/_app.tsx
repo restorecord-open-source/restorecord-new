@@ -15,6 +15,7 @@ import NProgress from "nprogress";
 
 import "nprogress/nprogress.css";
 import "../public/styles/globals.css";
+import "aos/dist/aos.css";
 
 NProgress.configure({ showSpinner: false });
 

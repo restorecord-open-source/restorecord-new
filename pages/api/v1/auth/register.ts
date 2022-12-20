@@ -42,11 +42,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         const accounts: accounts[] = await prisma.accounts.findMany({
             where: {
-                username: data.username
+                OR: [
+                    { username: data.username },
+                    { email: data.email },
+                ]
             }
         });
 
-        if (accounts.length > 0) return res.status(400).json({ message: "Username is already in use" });
+        if (accounts.length > 0) {
+            let errors = [];
+            if (accounts.find(account => account.username === data.username)) errors.push("Username");
+            if (accounts.find(account => account.email === data.email)) errors.push("Email");
+
+            return res.status(400).json({ success: false, message: `${errors.join(" and ")} already exists` });
+        }
 
         const hashedPassword = await bcrypt.hash(data.password, await bcrypt.genSalt(10));
 

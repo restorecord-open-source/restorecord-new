@@ -1,5 +1,7 @@
-import Check from "@mui/icons-material/Check"
+import { ClearOutlined, HighlightOffOutlined } from "@mui/icons-material";
+import CheckCircleOutlineRounded from "@mui/icons-material/CheckCircleOutlineRounded"
 import Clear from "@mui/icons-material/Clear"
+import theme from "./theme";
 
 const SubscriptionList: Subscription[] = [
     {
@@ -12,73 +14,73 @@ const SubscriptionList: Subscription[] = [
                 name: "memberCapacity",
                 value: "Unlimited Restorable Members",
                 description: "Maximum number of Restorable Members",
-                icon: <Check sx={{ color: "#22c55e" }} />,
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
                 name: "serverCapacity",
                 value: "1 Server",
                 description: "Maximum number of Servers you can add",
-                icon: <Check sx={{ color: "#22c55e" }} />,
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
                 name: "customBots",
                 value: "Custom Bot",
                 description: "Custom Bot just for you",
-                icon: <Check sx={{ color: "#22c55e" }} />,
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
                 name: "proxied",
                 value: "Proxied Requests",
                 description: "All requests sent to Discord are anonymous and proxied",
-                icon: <Check sx={{ color: "#22c55e" }} />,
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
                 name: "blacklist",
                 value: "Blacklist",
                 description: "Blacklist people from verifying with id, asn, ip and more",
-                icon: <Clear sx={{ color: "#ef4444" }} />,
+                icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
             },
             {
                 name: "antiVPN",
                 value: "Anti VPN & Proxy",
                 description: "Prevent members from using a VPN or Proxy to verify in your server",
-                icon: <Clear sx={{ color: "#ef4444" }} />,
+                icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
             },
             {
                 name: "webhookLogs",
                 value: "Webhook Logs",
                 description: "Log all verifications in your server",
-                icon: <Clear sx={{ color: "#ef4444" }} />,
+                icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
             },
             {
                 name: "verificationLogging",
                 value: "Verification Logging",
                 description: "See more information about verified members",
-                icon: <Clear sx={{ color: "#ef4444 "}} />
+                icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
             },
             {
                 name: "serverBackups",
                 value: "Server Backup",
                 description: "Backup all your Server Settings, Channels, Roles and more",
-                icon: <Clear sx={{ color: "#ef4444" }} />,
+                icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
             },
             {
                 name: "customization",
                 value: "Customization",
                 description: "Customize your verify page with your own color, icon and background",
-                icon: <Clear sx={{ color: "#ef4444" }} />,
+                icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
             },
             {
                 name: "onlineStatus",
                 value: "Online Status",
                 description: "Shows your bot as online in the Member List",
-                icon: <Clear sx={{ color: "#ef4444" }} />,
+                icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
             },
             {
                 name: "botCommands",
                 value: "Bot Commands",
                 description: "Send verify embed, pull members and more directly from Discord",
-                icon: <Clear sx={{ color: "#ef4444" }} />,
+                icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
             }
         ]
     },
@@ -92,73 +94,73 @@ const SubscriptionList: Subscription[] = [
                 name: "memberCapacity",
                 value: "Unlimited Restorable Members",
                 description: "Maximum number of Restorable Members",
-                icon: <Check sx={{ color: "#22c55e" }} />,
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
                 name: "serverCapacity",
                 value: "5 Servers",
                 description: "Maximum number of Servers you can add",
-                icon: <Check sx={{ color: "#22c55e" }} />,
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
                 name: "customBots",
                 value: "Custom Bot",
                 description: "Custom Bot just for you",
-                icon: <Check sx={{ color: "#22c55e" }} />,
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
                 name: "proxied",
                 value: "Proxied Requests",
                 description: "All requests sent to Discord are anonymous and proxied",
-                icon: <Check sx={{ color: "#22c55e" }} />,
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
                 name: "blacklist",
                 value: "Blacklist",
                 description: "Blacklist people from verifying with id, asn, ip and more",
-                icon: <Check sx={{ color: "#22c55e" }} />,
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
                 name: "antiVPN",
                 value: "Anti VPN & Proxy",
                 description: "Prevent members from using a VPN or Proxy to verify in your server",
-                icon: <Check sx={{ color: "#22c55e" }} />,
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
                 name: "webhookLogs",
                 value: "Webhook Logs",
                 description: "Log all verifications in your server",
-                icon: <Check sx={{ color: "#22c55e" }} />,
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
                 name: "verificationLogging",
                 value: "Basic Verification Logging",
                 description: "See more information about verified members",
-                icon: <Check sx={{ color: "#22c55e "}} />
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
                 name: "serverBackups",
                 value: "Server Backup",
                 description: "Backup all your Server Settings, Channels, Roles and more",
-                icon: <Clear sx={{ color: "#ef4444" }} />,
+                icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
             },
             {
                 name: "customization",
                 value: "Customization",
                 description: "Customize your verify page with your own color, icon and background",
-                icon: <Clear sx={{ color: "#ef4444" }} />,
+                icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
             },
             {
                 name: "onlineStatus",
                 value: "Online Status",
                 description: "Shows your bot as online in the Member List",
-                icon: <Clear sx={{ color: "#ef4444" }} />,
+                icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
             },
             {
                 name: "botCommands",
                 value: "Bot Commands",
                 description: "Send verify embed, pull members and more directly from Discord",
-                icon: <Clear sx={{ color: "#ef4444" }} />,
+                icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
             }
         ]
     },
@@ -172,73 +174,73 @@ const SubscriptionList: Subscription[] = [
                 name: "memberCapacity",
                 value: "Unlimited Restorable Members",
                 description: "Maximum number of Restorable Members",
-                icon: <Check sx={{ color: "#22c55e" }} />,
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
                 name: "serverCapacity",
                 value: "25 Servers",
                 description: "Maximum number of Servers you can add",
-                icon: <Check sx={{ color: "#22c55e" }} />,
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
                 name: "customBots",
                 value: "Custom Bot",
                 description: "Custom Bot just for you",
-                icon: <Check sx={{ color: "#22c55e" }} />,
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
                 name: "proxied",
                 value: "Proxied Requests",
                 description: "All requests sent to Discord are anonymous and proxied",
-                icon: <Check sx={{ color: "#22c55e" }} />,
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
                 name: "blacklist",
                 value: "Blacklist",
                 description: "Blacklist people from verifying with id, asn, ip and more",
-                icon: <Check sx={{ color: "#22c55e" }} />,
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
                 name: "antiVPN",
                 value: "Anti VPN & Proxy",
                 description: "Prevent members from using a VPN or Proxy to verify in your server",
-                icon: <Check sx={{ color: "#22c55e" }} />,
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
                 name: "webhookLogs",
                 value: "Advanced Webhook Logs",
                 description: "Log all verifications in your server",
-                icon: <Check sx={{ color: "#22c55e" }} />,
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
                 name: "verificationLogging",
                 value: "Advanced Verification Logging",
                 description: "See more information about verified members",
-                icon: <Check sx={{ color: "#22c55e "}} />
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
                 name: "serverBackups",
                 value: "Server Backup",
                 description: "Backup all your Server Settings, Channels, Roles and more",
-                icon: <Check sx={{ color: "#22c55e" }} />,
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
                 name: "customization",
                 value: "Customization",
                 description: "Customize your verify page with your own color, icon and background",
-                icon: <Check sx={{ color: "#22c55e" }} />,
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
                 name: "onlineStatus",
                 value: "Online Status",
                 description: "Shows your bot as online in the Member List",
-                icon: <Check sx={{ color: "#22c55e" }} />,
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
                 name: "botCommands",
                 value: "Bot Commands",
                 description: "Send verify embed, pull members and more directly from Discord",
-                icon: <Check sx={{ color: "#22c55e" }} />,
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             }
         ]
     },

@@ -89,3 +89,22 @@ export function getBrowser(userAgent: string) {
     
     return "Unknown";
 }
+
+export function isValidSnowflake(snowflake: string): boolean {
+    const snowflakeRegex = /^\d{16,21}$/;
+
+    if (!snowflakeRegex.test(snowflake)) {
+        return false;
+    }
+
+    const timestamp = parseInt(snowflake.slice(0, -4));
+    const date = new Date(timestamp + 1420070400000);
+
+    
+}
+
+export function isValidEmail(email: string): boolean {
+    const emailRegex = /^[\w!#$%&'*+/=?^`{|}~-]+(?:\.[\w!#$%&'*+/=?^`{|}~-]+)*@(?:[\w](?:[\w-]*[\w])?\.)+[\w](?:[\w-]*[\w])?$/;
+    return emailRegex.test(email);
+}
+  

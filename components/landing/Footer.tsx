@@ -3,10 +3,11 @@ import MuiLink from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
+import theme from "../../src/theme";
 
 export default function Footer() {
     return (
-        <Container component="footer" maxWidth={false} sx={{ padding: "16px 0", px: { xs: 3, sm: 24, md: 32 }, paddingTop: 2, paddingBottom: 5, marginTop: "auto", backgroundColor: "rgba(0, 0, 0, 0.35)", borderTop: "1px solid rgba(255, 255, 255, 0.125)" }}>
+        <Container component="footer" maxWidth={false} sx={{ padding: "16px 0", px: { xs: 3, sm: 24, md: 32 }, paddingTop: 2, paddingBottom: 5, marginTop: "auto", backgroundColor: "transparent", borderTop: `1px solid ${theme.palette.primary.main}`  }}>
             <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, justifyContent: "space-between", alignItems: { sm: "center" } , flexWrap: "wrap" }}>
                 
                 <Box sx={{ display: { xs: "none", sm: "flex" }, flexDirection: "column", justifyContent: "center", flexWrap: "wrap", marginBottom: "auto", maxWidth: "30%" }}>

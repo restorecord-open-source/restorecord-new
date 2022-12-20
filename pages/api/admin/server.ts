@@ -9,17 +9,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             try {
                 const token = req.headers.authorization as string;
                 const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
-
-                if (!valid) return res.status(400).json({ success: false, message: "invalid token" });
+                if (!valid) return res.status(400).json({ success: false, message: "Invalid token" });
 
                 const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
-
-                if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
+                if (sess.length === 0) return res.status(400).json({ success: false, message: "Session Not found." });
 
                 const account = await prisma.accounts.findFirst({ where: { id: valid.id } });
-
-                if (!account) return res.status(400).json({ success: false, message: "No account found." });
-
+                if (!account) return res.status(400).json({ success: false, message: "Account not found." });
                 if (!account.admin) return res.status(400).json({ success: false, message: "Account is not an admin." });
 
                 let search: any = req.body.query ?? '';

@@ -191,6 +191,11 @@ export const loadChannels = async(server: servers, bot: customBots, backup: back
             position: channelData.position,
             nsfw: channelData.nsfw ? channelData.nsfw : undefined,
             permission_overwrites: permissions.map((permission) => {
+                // check if the role exists
+                if (!backupRoles.find((r) => r.roleId === permission.roleId)) {
+                    return null;
+                }
+
                 return {
                     id: String(roles.data.find((r: any) => r.name === backupRoles.find((r) => r.roleId === permission.roleId)?.name)?.id) as string,
                     type: permission.type,
@@ -269,6 +274,10 @@ export const loadChannels = async(server: servers, bot: customBots, backup: back
             parent_id: parent ? parent.id : undefined,
             nsfw: channelData.nsfw ? channelData.nsfw : undefined,
             permission_overwrites: permissions.map((permission) => {
+                if (!backupRoles.find((r) => r.roleId === permission.roleId)) {
+                    return null;
+                }
+
                 return {
                     id: String(roles.data.find((r: any) => r.name === backupRoles.find((r) => r.roleId === permission.roleId)?.name)?.id) as string,
                     type: permission.type,

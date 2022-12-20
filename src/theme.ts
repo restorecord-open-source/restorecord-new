@@ -124,6 +124,15 @@ const theme = createTheme({
                 },
             ],         
         },
+        MuiButtonBase: {
+            styleOverrides: {
+                root: ({ ownerState }: any) => ({
+                    "&.Mui-disabled": {
+                        backgroundColor: `rgba(${parseInt(theme.palette.primary.main.slice(1, 3), 16)}, ${parseInt(theme.palette.primary.main.slice(3, 5), 16)}, ${parseInt(theme.palette.primary.main.slice(5, 7), 16)}, 0.15) !important`,
+                    }
+                }),
+            },
+        },
         MuiTextField: {
             styleOverrides: {
                 root: ({ ownerState }: any) => ({

@@ -19,6 +19,8 @@ import Typography from "@mui/material/Typography";
 import Skeleton from "@mui/material/Skeleton";
 import theme from "../../src/theme";
 import CircularProgress from "@mui/material/CircularProgress";
+import Alert from "@mui/material/Alert";
+import AlertTitle from "@mui/material/AlertTitle";
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
@@ -165,6 +167,17 @@ export default function DashBoard({ user }: any) {
     return (
         <>
             <Container maxWidth="xl">
+                <Alert severity="error" sx={{ width: "100%", my: 2 }}>
+                    <AlertTitle>Warning</AlertTitle>
+                    <Typography variant="body2" component="p" sx={{ whiteSpace: "pre-line", wordBreak: "break-word" }}>{`We would like to inform you that the Discord server https://discord.gg/restorecord is not owned or affiliated with us in any way. We strongly advise against joining this server or trusting anyone within it. Please be cautious and protect your personal information at all times when using online platforms.
+                    
+                    We would also like to remind you that our only official Discord accounts are xenos#0001 (853058505649029190) and Bl4ckBl1zZ#5652 (853404526613889064). Any other accounts claiming to be affiliated with us should be treated as suspicious and potentially fraudulent.
+                        
+                    Please be aware that we will never ask for your password or for you to change any server settings. If you receive any suspicious requests or messages, do not provide any personal information and report the incident to us immediately.
+                        
+                    Thank you for your understanding and stay safe online.`}</Typography>
+                </Alert>
+
                 <Grid container spacing={3}>
                     <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "block" } }}>
                         <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%", border: "1px solid #18182e" }}>

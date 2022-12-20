@@ -1,15 +1,8 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-import { useRouter } from "next/router";
-import { useQuery } from "react-query";
-import NavBar from "../../components/landing/NavBar";
-import getServer from "../../src/getServer";
-import Link from "next/link";
 import Head from "next/head";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
-import Skeleton from "@mui/material/Skeleton";
 import Avatar from "@mui/material/Avatar";
 import theme from "../../src/theme";
 import Button from "@mui/material/Button";
@@ -19,24 +12,18 @@ import Fade from "@mui/material/Fade";
 import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
 import { prisma } from "../../src/db";
+import { useEffect, useState } from "react";
 
 export default function Verify({ server, status, err, errStack }: any) {
-    const router = useRouter();
-    const guildId = router.query.server;
+    const [rediUrl, setRediUrl] = useState("");
 
-    const { data, isLoading, error } = useQuery("server", async () => {
-        return await getServer(guildId);
-    }, { retry: false, refetchOnWindowFocus: false });
+    useEffect(() => {
+        if (server.success) {
+            document.title = `Verify in ${server.name}`;
 
-    if (error) {
-        return (
-            <>
-                <Typography variant="h1">
-                    Error
-                </Typography>
-            </>
-        )
-    }
+            setRediUrl(`https://discord.com/oauth2/authorize?client_id=${server.clientId}&redirect_uri=${server.domain ? `https://${server.domain}` : window.location.origin}/api/callback&response_type=code&scope=identify+guilds.join&state=${server.guildId}`);
+        }
+    }, []);
 
     function ErrorAlert(err: string) {
         switch (err) {
@@ -108,156 +95,116 @@ export default function Verify({ server, status, err, errStack }: any) {
                 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
                 <meta name="apple-mobile-web-app-capable" content="yes" />
                 <meta name="mobile-web-app-capable" content="yes" />
-                {isLoading ? <title>Loading...</title> : <title>{data.success ? data.server.name : "RestoreCord"}</title>}
+                <title>{server.name ? server.name : "RestoreCord"}</title>
             </Head>
 
-            {isLoading ? ( <></> ) : (
-                <>
-                    {data.success ? (
-                        <Box sx={{ backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${data.server.bg})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", height: "100vh", width: "100vw", position: "absolute", top: "0", left: "0", zIndex: "-999", filter: "blur(0.5rem)" }} />
-                    ) : ( <></> )}
-                </>
-            )}
+            {server.success ? (
+                <Box sx={{ backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${server.bg})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", height: "100vh", width: "100vw", position: "absolute", top: "0", left: "0", zIndex: "-999", filter: "blur(0.5rem)" }} />
+            ) : ( <></> )}
 
             <Container maxWidth="lg">
                 <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", flexDirection: "column" }}>
                     <Paper sx={{ borderRadius: "1rem", padding: "2rem", marginTop: "1rem", width: { xs: "100%", md: "50%" }, marginBottom: "2rem", boxShadow: "0px 10px 10px 5px rgba(0, 0, 0, 0.25)", backgroundColor: "#00000026", backdropFilter: "blur(1.5rem)" }}>
 
-                        {isLoading ? ( <></> ) : (
+                        {server.success ? (
                             <>
                                 {status === "finished" ? (
                                     <Alert severity="success" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(28, 205, 30, 0.25)", backdropFilter: "blur(0.5rem)" }}>
                                         <AlertTitle>Success</AlertTitle>
-                                        You have successfully verified in <b>{data.server.name}</b>!
+                                        You have successfully verified in <b>{server.name}</b>!
                                     </Alert>
                                 ) : ( <></> )}
                             </>
-                        )}
+                        ) : ( <></> )}
 
-                        {isLoading ? ( <></> ) : (
-                            <>{err ? (
-                                <>{ErrorAlert(err)}</>
-                            ) : ( <></> )}</>
-                        )}
+                        {server.success ? (
+                            <>{err ? ( <>{ErrorAlert(err)}</> ) : ( <></> )}</>
+                        ) : ( <></> )}
                         
 
-                        {isLoading ? (
+                        {server.success ? (
                             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                <Skeleton animation="wave" variant="text" width="20rem" height="56px" />
-                            </Box>
-                        ) : (
-                            <>
-                                {data.success ? (
-                                    <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                        <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} placement="top" disableInteractive title={data.server.name}>
-                                            <Typography variant="h1" component="h1" sx={{ fontWeight: "700", fontSize: { xs: "1.5rem", md: "3rem" }, pl: "1rem", mr: "1rem", textShadow: "0px 0px 15px rgba(0, 0, 0, 0.25)", textAlign: "center" }}>
-                                                {data.server.name}
-                                            </Typography>
-                                        </Tooltip>
-
-                                        {data.server.verified && (
-                                            <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} placement="top" disableInteractive title={`Verified`}>
-                                                <CheckCircle sx={{ color: theme.palette.grey[500], width: "2rem", height: "2rem" }} />
-                                            </Tooltip>
-                                        )}
-                                    </Box>
-                                ) : ( 
-                                    <>
-                                        <Typography variant="h1" component="h1" sx={{ textAlign: "center", fontWeight: "700", fontSize: { xs: "1.5rem", md: "3rem" } }}>
-                                            Server not found
-                                        </Typography>
-                                    </>
-                                )}
-                            </>
-                        )}
-
-                        {isLoading ? (
-                            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                <Skeleton animation="wave" variant="text" width="10rem" height="48px" />
-                            </Box>
-                        ) : (
-                            <>
-                                {data.success && (
-                                    <Typography variant="body1" component="p" sx={{ textAlign: "center", fontSize: { xs: "1rem", md: "1.75rem" }, whiteSpace: "pre-line", overflowWrap: "break-word" }}>
-                                        {data.server.description}
+                                <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} placement="top" disableInteractive title={server.name}>
+                                    <Typography variant="h1" component="h1" sx={{ fontWeight: "700", fontSize: { xs: "1.5rem", md: "3rem" }, pl: "1rem", mr: "1rem", textShadow: "0px 0px 15px rgba(0, 0, 0, 0.25)", textAlign: "center" }}>
+                                        {server.name}
                                     </Typography>
+                                </Tooltip>
+
+                                {server.verified && (
+                                    <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} placement="top" disableInteractive title={`Verified`}>
+                                        <CheckCircle sx={{ color: theme.palette.grey[500], width: "2rem", height: "2rem" }} />
+                                    </Tooltip>
                                 )}
+                            </Box>
+                        ) : ( 
+                            <>
+                                <Typography variant="h1" component="h1" sx={{ textAlign: "center", fontWeight: "700", fontSize: { xs: "1.5rem", md: "3rem" } }}>
+                                    Server not found
+                                </Typography>
                             </>
                         )}
+
+                        {server.success ? (
+                            <Typography variant="body1" component="p" sx={{ textAlign: "center", fontSize: { xs: "1rem", md: "1.75rem" }, whiteSpace: "pre-line", overflowWrap: "break-word" }}>
+                                {server.description}
+                            </Typography>
+                        ) : ( <></> )}
 
                         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", mt: "1rem" }}>
-                            {isLoading ? (
-                                <Skeleton animation="wave" variant="circular" width="122px" height="122px" />
-                            ) : (
-                                <>
-                                    {data.success && (
-                                        <Avatar src={data.server.icon} sx={{ width: { xs: "6rem", md: "8rem" }, height: { xs: "6rem", md: "8rem" } }} />
-                                    )}
-                                </>
-                            )}
+                            {server.success ? (
+                                <Avatar src={server.icon} sx={{ width: { xs: "6rem", md: "8rem" }, height: { xs: "6rem", md: "8rem" } }} />
+                            ) : ( <></> )}
                         </Box>
 
                         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                            {isLoading ? (
-                                <Skeleton animation="wave" variant="text" width="100%" height="56px" sx={{ width: "100%", marginTop: "2rem" }} />
-                            ) : (
-                                <>
-                                    {data.success ? (
-                                        <Button variant="contained" color="primary" href={`https://discord.com/oauth2/authorize?client_id=${data.server.clientId}&redirect_uri=${data.server.domain ? `https://${data.server.domain}` : window.location.origin}/api/callback&response_type=code&scope=identify+guilds.join&state=${data.server.guildId}`} target="_blank" rel="noreferrer"
-                                            sx={{ 
-                                                width: "100%",
-                                                marginTop: "2rem",
-                                                backgroundColor: server.color,
+                            {server.success ? (
+                                <Button variant="contained" color="primary" href={rediUrl} target="_blank" rel="noreferrer"
+                                    sx={{ 
+                                        width: "100%",
+                                        marginTop: "2rem",
+                                        backgroundColor: server.color,
+                                        outline: `1px solid ${server.color}`,
+                                        color: theme.palette.getContrastText(server.color),
+                                        "@media not all and (-webkit-min-device-pixel-ratio: 1.5), not all and (-o-min-device-pixel-ratio: 3/2), not all and (min--moz-device-pixel-ratio: 1.5), not all and (min-device-pixel-ratio: 1.5)": {
+                                            "&:hover": {
                                                 outline: `1px solid ${server.color}`,
-                                                color: theme.palette.getContrastText(server.color),
-                                                "@media not all and (-webkit-min-device-pixel-ratio: 1.5), not all and (-o-min-device-pixel-ratio: 3/2), not all and (min--moz-device-pixel-ratio: 1.5), not all and (min-device-pixel-ratio: 1.5)": {
-                                                    "&:hover": {
-                                                        outline: `1px solid ${server.color}`,
-                                                        color: server.color,
-                                                    },
-                                                },
-                                                "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (min-device-pixel-ratio: 1.5)": {
-                                                    "&:hover": {
-                                                        backgroundColor: `rgba(${parseInt(server.color.slice(1, 3), 16)}, ${parseInt(server.color.slice(3, 5), 16)}, ${parseInt(server.color.slice(5, 7), 16)}, 0.65)`,
-                                                        color: theme.palette.getContrastText(server.color),
-                                                    },
-                                                },
-                                            }}>
-                                            Verify
-                                        </Button>
-                                    ) : (
-                                        <Button variant="contained" color="primary" onClick={() => window.history.back()} sx={{
-                                            width: "100%", 
-                                            marginTop: "2rem",
-                                            backgroundColor: server.color,
-                                            outline: `1px solid ${server.color}`,
-                                            color: `${theme.palette.getContrastText(server.color)}`,
-                                            "@media not all and (-webkit-min-device-pixel-ratio: 1.5), not all and (-o-min-device-pixel-ratio: 3/2), not all and (min--moz-device-pixel-ratio: 1.5), not all and (min-device-pixel-ratio: 1.5)": {
-                                                "&:hover": {
-                                                    outline: `1px solid ${server.color}`,
-                                                    color: server.color,
-                                                },
+                                                color: server.color,
                                             },
-                                        }}>
-                                            Go back
-                                        </Button>
-                                    )}
-                                </>
+                                        },
+                                        "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (min-device-pixel-ratio: 1.5)": {
+                                            "&:hover": {
+                                                backgroundColor: `rgba(${parseInt(server.color.slice(1, 3), 16)}, ${parseInt(server.color.slice(3, 5), 16)}, ${parseInt(server.color.slice(5, 7), 16)}, 0.65)`,
+                                                color: theme.palette.getContrastText(server.color),
+                                            },
+                                        },
+                                    }}>
+                                    Verify
+                                </Button>
+                            ) : (
+                                <Button variant="contained" color="primary" onClick={() => window.history.back()} sx={{
+                                    width: "100%", 
+                                    marginTop: "2rem",
+                                    backgroundColor: server.color,
+                                    outline: `1px solid ${server.color}`,
+                                    color: `${theme.palette.getContrastText(server.color)}`,
+                                    "@media not all and (-webkit-min-device-pixel-ratio: 1.5), not all and (-o-min-device-pixel-ratio: 3/2), not all and (min--moz-device-pixel-ratio: 1.5), not all and (min-device-pixel-ratio: 1.5)": {
+                                        "&:hover": {
+                                            outline: `1px solid ${server.color}`,
+                                            color: server.color,
+                                        },
+                                    },
+                                }}>
+                                    Go back
+                                </Button>
                             )}
                         </Box>
                     </Paper>
 
-                    {isLoading ? (
-                        <Skeleton animation="wave" variant="text" width="7.5rem" height="24px" />
-                    ) : (
-                        <>
-                            {data.success && (
-                                <Typography variant="body1" component="p" sx={{ textAlign: "center", mt: 1, color: "rgba(255, 255, 255, 0.15)", bottom: 0, position: "absolute", marginBottom: { xs: "0.25rem", md: "2rem" }, display: { xs: "none", md: "block" } }}>
-                                    Created on {new Date(data.server.createdAt).toLocaleDateString()} by {data.server.owner}
-                                </Typography>
-                            )}
-                        </>
-                    )}
+                    {server.success ? (
+                        <Typography variant="body1" component="p" sx={{ textAlign: "center", mt: 1, color: "rgba(255, 255, 255, 0.15)", bottom: 0, position: "absolute", marginBottom: { xs: "0.25rem", md: "2rem" }, display: { xs: "none", md: "block" } }}>
+                            Created on {new Date(server.createdAt).toDateString()} by {server.owner}
+                        </Typography>
+                    ) : ( <></> )}
                 </Box>
             </Container>
         </>
@@ -271,11 +218,18 @@ export async function getServerSideProps({ req }: any) {
         let serverName = req.url.split("/")[2];
         let type = 1;
 
-        let serverInfo: { name: string, description: string, icon: string, color: string } = {
+        let serverInfo: { success: boolean, name: string, guildId: string, icon: string, bg: string, description: string, color: string, clientId: string, owner: string, domain: string, createdAt: string } = {
+            success: false,
             name: decodeURI(serverName),
-            description: "Verify to view the rest of the server.",
+            guildId: "",
             icon: "https://cdn.restorecord.com/logo512.png",
-            color: "#4f46e5"
+            bg: "",
+            description: "Verify to view the rest of the server.",
+            color: "#4f46e5",
+            clientId: "",
+            owner: "",
+            domain: "",
+            createdAt: new Date().toISOString()
         }
 
         if (isNaN(Number.parseInt(serverName as any))) type = 0;
@@ -290,13 +244,25 @@ export async function getServerSideProps({ req }: any) {
                 name: type === 0 ? serverName : undefined,
                 guildId: type === 1 ? BigInt(serverName) as bigint : undefined
             }
-        }).then((res) => {
+        }).then(async (res) => {
             if (res) {
+                const customBot = await prisma.customBots.findUnique({ where: { id: res.customBotId }});
+                const ownerAccount = await prisma.accounts.findUnique({ where: { id: res.ownerId } });
+                if (!ownerAccount) return { props: { server: serverInfo, status: "error", err: "Owner account not found. Contact Owner", errStack: "" } }
+                if (!customBot) return { props: { server: serverInfo, status: "error", err: "Custom bot not found. Contact Owner", errStack: "" } }
+
                 serverInfo = {
+                    success: true,
                     name: res.name,
-                    description: res.description,
+                    guildId: res.guildId.toString(),
                     icon: res.picture ?? "https://cdn.restorecord.com/logo512.png",
+                    bg: res.bgImage ? res.bgImage : "",
+                    description: res.description,
                     color: `#${res.themeColor}`,
+                    clientId: customBot?.clientId.toString(),
+                    owner: ownerAccount?.username,
+                    domain: customBot?.customDomain ? customBot.customDomain : "",
+                    createdAt: new Date().toISOString(),
                 }
             }
         })
