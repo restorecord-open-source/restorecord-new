@@ -241,7 +241,7 @@ export async function getServerSideProps({ req }: any) {
 
         await prisma.servers.findUnique({
             where: {
-                name: type === 0 ? serverName : undefined,
+                name: type === 0 ? decodeURIComponent(serverName) : undefined,
                 guildId: type === 1 ? BigInt(serverName) as bigint : undefined
             }
         }).then(async (res: any) => {
