@@ -27,14 +27,12 @@ import Fade from "@mui/material/Fade";
 import PublicIcon from "@mui/icons-material/Public";
 import PersonIcon from "@mui/icons-material/Person";
 import HubIcon from "@mui/icons-material/Hub";
-// eslint-disable-next-line no-restricted-imports
-import useTheme from "@mui/material/styles/useTheme";
 import axios from "axios";
 import CircularProgress from "@mui/material/CircularProgress";
+import theme from "../../src/theme";
 
 export default function Blacklist() {
     const router = useRouter();
-    const theme = useTheme();
     const [token]: any = useToken()
     
     const [serverId, setServerId] = useState("");
