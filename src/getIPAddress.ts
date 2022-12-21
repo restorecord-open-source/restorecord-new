@@ -100,7 +100,7 @@ export function isValidSnowflake(snowflake: string): boolean {
     const timestamp = parseInt(snowflake.slice(0, -4));
     const date = new Date(timestamp + 1420070400000);
 
-    
+    return date.getFullYear() >= 2015;
 }
 
 export function isValidEmail(email: string): boolean {
