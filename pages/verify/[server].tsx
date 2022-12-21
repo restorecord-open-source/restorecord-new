@@ -23,7 +23,7 @@ export default function Verify({ server, status, err, errStack }: any) {
 
             setRediUrl(`https://discord.com/oauth2/authorize?client_id=${server.clientId}&redirect_uri=${server.domain ? `https://${server.domain}` : window.location.origin}/api/callback&response_type=code&scope=identify+guilds.join&state=${server.guildId}`);
         }
-    }, []);
+    }, [server]);
 
     function ErrorAlert(err: string) {
         switch (err) {
@@ -244,7 +244,7 @@ export async function getServerSideProps({ req }: any) {
                 name: type === 0 ? serverName : undefined,
                 guildId: type === 1 ? BigInt(serverName) as bigint : undefined
             }
-        }).then(async (res) => {
+        }).then(async (res: any) => {
             if (res) {
                 const customBot = await prisma.customBots.findUnique({ where: { id: res.customBotId }});
                 const ownerAccount = await prisma.accounts.findUnique({ where: { id: res.ownerId } });
