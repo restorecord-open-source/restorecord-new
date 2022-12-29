@@ -20,6 +20,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import CloseIcon from "@mui/icons-material/Close";
 import theme from "../../src/theme";
+import AlertTitle from "@mui/material/AlertTitle";
 
 export default function DashBotSettings({ user, id }: any) {
     const [token]: any = useToken();
@@ -32,6 +33,8 @@ export default function DashBotSettings({ user, id }: any) {
     const [customDomain, setCustomDomain] = useState("");
 
     const [botId, setBotId] = useState("");
+    const [errorText, setErrorText] = useState("");
+    const [serverList, setServerList] = useState([]);
     const [confirmDelete, setConfirmDelete] = useState(false);
     
     const [openS, setOpenS] = useState(false);
@@ -153,7 +156,11 @@ export default function DashBotSettings({ user, id }: any) {
                                         This action cannot be undone.
                                     </Typography>
 
-                                    Deleting this Bot will remove all data associated with it, including all commands, events, and settings.
+                                    Deleting this Bot will:
+                                    <ul>
+                                        <li>Remove all data associated with this bot.</li>
+                                        <li><b>Delete ALL members & servers associated with this bot.</b></li>
+                                    </ul>
                                 </DialogContentText>
                             </DialogContent>
                             <DialogActions>
@@ -167,20 +174,19 @@ export default function DashBotSettings({ user, id }: any) {
                                     })
                                         .then((res: any) => {
                                             if (!res.data.success) {
-                                                setNotiTextE(res.data.message);
-                                                setOpenE(true);
+                                                setErrorText(res.data.message);
+                                                setServerList(res.data.servers);
                                             }
                                             else {
                                                 setNotiTextS(res.data.message);
                                                 setOpenS(true);
                                                 setTimeout(() => {
-                                                    router.push("/dashboard/bots");
+                                                    router.push("/dashboard/custombots");
                                                 }, 1250);
                                             }
                                         })
                                         .catch((err: any) => {
-                                            setNotiTextE(err.message);
-                                            setOpenE(true);
+                                            setErrorText(err.message);
                                             console.error(err);
                                         });
                                 } } color="error">
@@ -196,8 +202,8 @@ export default function DashBotSettings({ user, id }: any) {
                             <>
                                 <Stack spacing={2} direction="row" sx={{ mb: 2 }}>
                                     <Button variant="contained" onClick={() => { router.push(`/dashboard/custombots/`)} }>
-                                        Go Back
-                                    </Button>]
+                                        &lt;- Go Back
+                                    </Button>
                                     <Button variant="contained" onClick={() => {
                                         axios.get(`/api/v1/bot/${bot.clientId}/refresh`, {
                                             headers: {
@@ -205,8 +211,7 @@ export default function DashBotSettings({ user, id }: any) {
                                             }
                                         }).then(res => {
                                             if (!res.data.success) {
-                                                setNotiTextE(res.data.message);
-                                                setOpenE(true);
+                                                setErrorText(res.data.message);
                                             }
                                             else {
                                                 setNotiTextS(res.data.message);
@@ -214,17 +219,34 @@ export default function DashBotSettings({ user, id }: any) {
                                             }
                                         }).catch(err => {
                                             console.error(err);
-                                            setNotiTextE(err.message);
-                                            setOpenE(true);
+                                            setErrorText(err.message);
                                         });
                                     }}>
                                         Refresh Commands
                                     </Button>
                                     {/* red delete button */}
-                                    <Button variant="contained" onClick={() => setConfirmDelete(true)} sx={{ color: theme.palette.error.main }}>
+                                    <Button variant="contained" color="error" onClick={() => { 
+                                        setBotId(bot.id);
+                                        setConfirmDelete(true);
+                                    }}>
                                         Delete Bot
                                     </Button>
                                 </Stack>
+
+                                <Alert severity="error" sx={{ mb: "1rem", width: "100%", display: errorText ? "flex" : "none" }}>
+                                    <AlertTitle>Error</AlertTitle>
+                                    <Typography variant="body1">
+                                        {errorText}
+                                        {/* if errortext contains servers then get all servers from user with the server.id equal to serverList */}
+                                        {errorText.includes("servers") && (
+                                            <ul>
+                                                {serverList.map((server: any, id: any) => (
+                                                    <li key={id}>{user.servers.find((s: any) => s.id === Number(server) as number).name ?? "Unknown Server"}</li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </Typography>
+                                </Alert>
                                 
 
                                 <form onSubmit={handleSubmit}>

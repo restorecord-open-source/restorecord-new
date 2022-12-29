@@ -229,9 +229,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 await limiter.check(res, 15, "CACHE_TOKEN"); 
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
 
-                const data = { ...req.body };
+                const data = { ...req.query };
 
-                if (!data.id) return res.status(400).json({ success: false, message: "Missin Bot ID" });
+                if (!data.id) return res.status(400).json({ success: false, message: "Missing Bot ID" });
 
                 const token = req.headers.authorization as string;
                 const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
@@ -246,7 +246,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                        
                 const bot = await prisma.customBots.findFirst({
                     where: {
-                        id: data.id,
+                        id: Number(data.id) as number,
                         ownerId: valid.id,
                     },
                 });

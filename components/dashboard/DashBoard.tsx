@@ -51,6 +51,8 @@ export default function DashBoard({ user }: any) {
                     const createdAt = new Date(member.createdAt);
                     return createdAt.getDate() === date.getDate() && createdAt.getMonth() === date.getMonth() && createdAt.getFullYear() === date.getFullYear();
                 }).length;
+            } else {
+                return 0;
             }
         }).reverse() : [];
     }
