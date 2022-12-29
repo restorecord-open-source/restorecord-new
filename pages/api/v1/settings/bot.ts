@@ -224,6 +224,63 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 if (err?.name === "ValidationError") return res.status(400).json({ success: false, message: err.message, });
                 return res.status(400).json({ success: false, message: "Something went wrong" });
             }
+        case "DELETE":
+            try {
+                await limiter.check(res, 15, "CACHE_TOKEN"); 
+                if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
+
+                const data = { ...req.body };
+
+                if (!data.id) return res.status(400).json({ success: false, message: "Missin Bot ID" });
+
+                const token = req.headers.authorization as string;
+                const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
+                
+                if (!valid) return res.status(400).json({ success: false, message: "Invalid Token" });
+
+                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
+                const account = await prisma.accounts.findFirst({ where: { id: valid.id, } });
+
+                if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
+                if (!account) return res.status(400).json({ success: false, message: "Account not found" });
+                       
+                const bot = await prisma.customBots.findFirst({
+                    where: {
+                        id: data.id,
+                        ownerId: valid.id,
+                    },
+                });
+                if (!bot) return res.status(400).json({ success: false, message: "Bot not found" });
+
+
+                const servers = await prisma.servers.findMany({
+                    where: {
+                        customBotId: bot.id,
+                    },
+                });
+
+                if (servers.length > 0) {
+                    return res.status(400).json({ success: false, message: "Please remove the bot from the following servers before deleting it", servers: servers.map((s) => s.id) });
+                }
+
+                await prisma.customBots.delete({
+                    where: {
+                        id: bot.id,
+                    },
+                }).then(() => {
+                    return res.status(200).json({ success: true, message: "Bot successfully deleted" });
+                }).catch((err) => {
+                    console.error(err);
+                    return res.status(400).json({ success: false, message: "Something went wrong" });
+                });
+            }
+            catch (err: any) {
+                console.error(err);
+                if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
+                if (err?.name === "" || err?.name === "JsonWebTokenError") return res.status(400).json({ success: false, message: "User not logged in" }); 
+                if (err?.name === "ValidationError") return res.status(400).json({ success: false, message: err.message, });
+                return res.status(400).json({ success: false, message: "Something went wrong" });
+            }
         }
     });
 }
