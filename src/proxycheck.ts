@@ -1,4 +1,4 @@
-import fetch from "node-fetch";
+import axios from "axios";
 import { URLSearchParams } from "url";
 
 class proxycheck {
@@ -72,91 +72,16 @@ class proxycheck {
             const params = new URLSearchParams();
             params.append('ips', ip.join(','));
 
-            return fetch(url, { method: 'POST', body: params }).then(res => res.json());
+            // return fetch(url, { method: 'POST', body: params }).then(res => res.json());
+            return axios.post(url, params).then(res => res.data);
         }
         else {
-            return fetch(url).then(res => res.json());
+            // return fetch(url).then(res => res.json());
+            return axios.get(url).then(res => res.data);
         }
     }
-    /**
-	 * @typedef {Object} proxycheck_getUsageReturn
-	 *
-	 * @property {String} [error] - Error?
-	 * @property {Number} [queries_today]
-	 * @property {Number} [daily_limit]
-	 * @property {Number} [queries_total]
-	 * @property {String} [plan_tier]
-	 */
-    /**
-	 * Dashboard: Gets your Usage
-	 * @example
-	 * const check = new proxy_check({ api_key: '111111-222222-333333-444444' });
-	 * const result = await check.getUsage();
-	 * console.log(result);
-	 * @returns {proxycheck_getUsageReturn} Result
-	 */
-    async getUsage() {
-        const url = 'https://proxycheck.io/dashboard/export/usage/' + '?key=' + this.api_key;
-        return fetch(url)
-            .then(res => res.json().then(x => convert(x)));
-    }
-    /**
-	 * Dashboard: Gets your Querys
-	 * @example
-	 * const check = new proxy_check({ api_key: '111111-222222-333333-444444' });
-	 * const result = await check.getQuerys();
-	 * console.log(result);
-	 * @returns {Object} Result
-	 */
-    async getQuerys() {
-        const url = 'https://proxycheck.io/dashboard/export/queries/?json=1&key=' + this.api_key;
-        return fetch(url)
-            .then(res => res.json());
-    }
-    /**
-	 * @typedef {Object} proxycheck_getDetectionsOptions
-	 *
-	 * @property {Number} [limit=100]
-	 * @property {Number} [offset=0]
-	 */
-    /**
-	 *  Gets the Detections
-	 *
-	 * @param {proxycheck_getDetectionsOptions} options
-	 * @example
-	 * const check = new proxy_check({ api_key: '111111-222222-333333-444444' });
-	 * const result = await check.getDetections({ limit: 50 });
-	 * console.log(result);
-	 * @returns {Object} Result
-	 */
-    async getDetections(options: { limit?: any; offset?: any; }) {
-        if(!options) options = {};
-        if(!options.limit) options.limit = 100;
-        if(!options.offset) options.offset = 0;
-        const url = 'https://proxycheck.io/dashboard/export/detections/?json=1&key=' + this.api_key + '&limit=' + options.limit + '&offset=' + options.offset ;
-        return fetch(url)
-            .then(res => res.json());
-    }
 }
 
-
-/**
- * @private
- *
- * @param {Object} obj
- * @returns {Object}
- */
-function convert(obj: any): any {
-    console.log(obj);
-    const result: any = {};
-    Object.keys(obj).forEach(function(key) {
-        let value = obj[key];
-        if(!isNaN(value)) value = parseInt(value);
-        result[key.replace(/ /g, '_').toLowerCase()] = value;
-
-    });
-    return result;
-}
 
 export const ProxyCheck: proxycheck = new proxycheck({ api_key: process.env.PROXYCHECK });
 

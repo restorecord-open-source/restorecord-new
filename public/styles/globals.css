@@ -92,31 +92,3 @@ body {
 		stroke: hsla(0, 0%, 100%, 0.2);
 	}
 }
-
-.fadeIn {
-	animation: fadeIn 0.325s ease both;
-}
-
-.fadeOut {
-	animation: fadeOut 0.325s ease both;
-}
-
-@keyframes fadeIn {
-	from {
-		opacity: 0;
-	}
-
-	to {
-		opacity: 1;
-	}
-}
-
-@keyframes fadeOut {
-	from {
-		opacity: 1;
-	}
-
-	to {
-		opacity: 0;
-	}
-}

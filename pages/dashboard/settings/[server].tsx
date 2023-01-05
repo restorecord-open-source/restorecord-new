@@ -36,7 +36,7 @@ export default function Settings() {
     return (
         <>
             <Box sx={{ display: "flex" }}>
-                <NavBar>
+                <NavBar user={data}>
                     <Toolbar />
                     <DashServerSettings user={data} id={server} />
                 </NavBar>

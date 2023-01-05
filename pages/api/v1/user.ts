@@ -4,10 +4,11 @@ import rateLimit from "../../../src/rate-limit";
 import { prisma } from "../../../src/db";
 import { compare, hash } from "bcrypt";
 import { getBrowser, getIPAddress, getPlatform } from "../../../src/getIPAddress";
-import { Email } from "../../../src/email";
+import Email from "../../../src/email";
 import { backups, customBots, servers } from "@prisma/client";
 import * as speakeasy from "speakeasy";
 import { generateQRUrl } from "../../../src/functions";
+import axios from "axios";
 
 const limiter = rateLimit({
     interval: 60 * 1000,
@@ -159,65 +160,67 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         }
                     });
 
-                    await Email.post("send", {'version': 'v3.1',}).request({
-                        "Messages": [
-                            {
-                                "From": {
-                                    "Email": "noreply@restorecord.com",
-                                    "Name": "RestoreCord",
-                                },
-                                "To": [
-                                    {
-                                        "Email": account.email,
-                                        "Name": account.username,
-                                    },
-                                ],
-                                "Subject": "Password Change Confirmation",
-                                "HTMLPart": 
-                                `
-                                <!DOCTYPE html>
-                                <html>
-                                    <head>
-                                        <title>RestoreCord</title>
-                                    </head>
-                                    <body>
-                                    	<h1 style="text-align: center; margin-top: 1.5rem; line-height: 2rem; font-size: 2.25rem; font-weight: 600; margin-bottom: 1rem; color: rgb(79, 70, 229);">
-                                    		RestoreCord
-                                    	</h1>
-                                    	<div style="padding: 1rem; max-width: 30rem; margin-left: auto;margin-right: auto; width: 100%; border-radius: 0.75rem; border-width: 1px; background: rgb(250, 250, 250);">
-                                            <h2 style="color: rgb(0, 0, 0); font-size: 1.75rem; line-height: 2rem; font-weight: 600; line-height: 1.25; margin-bottom: 1rem">
-                                                Password Change Confirmation
-                                    		</h2>
-                                    		<div>
-                                                   <p style="white-space: pre-line; color: rgb(0, 0, 0); font-weight: 400; margin-bottom: 0.75rem; overflow-wrap: break-word; font-size: 1rem;">
-                                    				Hello ${account.username},
-                                                    To confirm that you want to change your password, please enter the following code into the RestoreCord website (The code will expire in 30 minutes):
-                                                    <br />
-                                                    <b>${code}</b>
-                                                    <br />
-                                                    <b style="font-weight: 600">Device:</b> ${getPlatform(req.headers["user-agent"] ?? "")} (${getBrowser(req.headers["user-agent"] ?? "")})
-                                    				<b style="font-weight: 600">IP:</b> ${getIPAddress(req)} <br />
-                                    				If this was not you, you can safely ignore this email.
-                                                    If you have any questions, please contact us at <a style="color: rgb(56,189, 248);" href="mailto:contact@restorecord.com">contact@restorecord.com</a>.
-                                                    <br />
-                                                    Sincerely,
-                                                    RestoreCord
-                                    			</p>
-                                    		</div>
-                                            <div style="text-align: center; margin-top: 1rem;">
-                                                <em style="color: rb(190, 198, 213)">
-                                                    Copyright © 2022 RestoreCord. All rights reserved.
-                                                </em>
-                                            </div>
-                                    	</div>
-                                    </body>
-                                </html>
-                                `,
-                            }
-                        ]
+                    await Email.send({
+                        // "Messages": [
+                        //     {
+                        //         "From": {
+                        //             "Email": "noreply@restorecord.com",
+                        //             "Name": "RestoreCord",
+                        //         },
+                        //         "To": [
+                        //             {
+                        //                 "Email": account.email,
+                        //                 "Name": account.username,
+                        //             },
+                        //         ],
+                        //         "Subject": "Password Change Confirmation",
+                        //         "HTMLPart": 
+                        to: account.email,
+                        from: "no-reply@restorecord.com",
+                        subject: "Password Change Confirmation",
+                        html:
+                        `
+                        <!DOCTYPE html>
+                        <html>
+                            <head>
+                                <title>RestoreCord</title>
+                            </head>
+                            <body>
+                            	<h1 style="text-align: center; margin-top: 1.5rem; line-height: 2rem; font-size: 2.25rem; font-weight: 600; margin-bottom: 1rem; color: rgb(79, 70, 229);">
+                            		RestoreCord
+                            	</h1>
+                            	<div style="padding: 1rem; max-width: 30rem; margin-left: auto;margin-right: auto; width: 100%; border-radius: 0.75rem; border-width: 1px; background: rgb(250, 250, 250);">
+                                    <h2 style="color: rgb(0, 0, 0); font-size: 1.75rem; line-height: 2rem; font-weight: 600; line-height: 1.25; margin-bottom: 1rem">
+                                        Password Change Confirmation
+                            		</h2>
+                            		<div>
+                                           <p style="white-space: pre-line; color: rgb(0, 0, 0); font-weight: 400; margin-bottom: 0.75rem; overflow-wrap: break-word; font-size: 1rem;">
+                            				Hello ${account.username},
+                                            To confirm that you want to change your password, please enter the following code into the RestoreCord website (The code will expire in 30 minutes):
+                                            <br />
+                                            <b>${code}</b>
+                                            <br />
+                                            <b style="font-weight: 600">Device:</b> ${getPlatform(req.headers["user-agent"] ?? "")} (${getBrowser(req.headers["user-agent"] ?? "")})
+                            				<b style="font-weight: 600">IP:</b> ${getIPAddress(req)} <br />
+                            				If this was not you, you can safely ignore this email.
+                                            If you have any questions, please contact us at <a style="color: rgb(56,189, 248);" href="mailto:contact@restorecord.com">contact@restorecord.com</a>.
+                                            <br />
+                                            Sincerely,
+                                            RestoreCord
+                            			</p>
+                            		</div>
+                                    <div style="text-align: center; margin-top: 1rem;">
+                                        <em style="color: rb(190, 198, 213)">
+                                            Copyright © 2023 RestoreCord. All rights reserved.
+                                        </em>
+                                    </div>
+                            	</div>
+                            </body>
+                        </html>
+                        `,
                     }).then(() => {
+                        console.log(`[EMAIL] [${new Date().toLocaleString()}] Confirmation code sent to ${account.email}.`);
                         return res.status(200).json({ success: true, message: "Confirmation code sent." });
-                        // console.log("Email sent");
                     }).catch((err: any) => {
                         console.error(err);
                     })
@@ -244,70 +247,70 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         }
                     });
                     
-                    fetch(`https://ipinfo.io/${getIPAddress(req)}/json?token=${process.env.IPINFO_TOKEN}`)
-                        .then(res => res.json())
-                        .then(async (data) => {
-                            await Email.post("send", {'version': 'v3.1',}).request({
-                                "Messages": [
-                                    {
-                                        "From": {
-                                            "Email": "noreply@restorecord.com",
-                                            "Name": "RestoreCord",
-                                        },
-                                        "To": [
-                                            {
-                                                "Email": account.email,
-                                                "Name": account.username,
-                                            },
-                                        ],
-                                        "Subject": "RestoreCord Password Changed",
-                                        "HTMLPart": 
-                                `
-                                    <!DOCTYPE html>
-                                    <html>
-                                    	<head>
-                                    		<title>RestoreCord</title>
-                                    	</head>
-                                    	<body>
-                                    		<h1 style="text-align: center; margin-top: 1.5rem; line-height: 2rem; font-size: 2.25rem; font-weight: 600; margin-bottom: 1rem; color: rgb(79, 70, 229);">
-                                    			RestoreCord
-                                    		</h1>
-                                    		<div style="padding: 1rem; max-width: 30rem; margin-left: auto;margin-right: auto; width: 100%; border-radius: 0.75rem; border-width: 1px; background: rgb(250, 250, 250);">
-                                                <h2 style="color: rgb(0, 0, 0); font-size: 1.75rem; line-height: 2rem; font-weight: 600; line-height: 1.25; margin-bottom: 1rem">
-                                    				Your password has been changed
-                                    			</h2>
-                                    			<div>
-                                                    <p style="white-space: pre-line; color: rgb(0, 0, 0); font-weight: 400; margin-bottom: 0.75rem; overflow-wrap: break-word; font-size: 1rem;">
-                                    					Hello ${account.username},
-                                    					You password has been changed on ${new Date().toLocaleString()} (local time).
-                                                        <br />
-                                    					<b style="font-weight: 600">Location:</b> Near ${data.city}, ${data.region}, ${data.country}
-                                                        <b style="font-weight: 600">Device:</b> ${getPlatform(req.headers["user-agent"] ?? "")} (${getBrowser(req.headers["user-agent"] ?? "")})
-                                    					<b style="font-weight: 600">IP:</b> ${getIPAddress(req)} <br />
-                                    					If this was not you, contact us immediately at <a style="color: rgb(56,189, 248);" href="mailto:contact@restorecord.com">contact@restorecord.com</a> or <a style="color: rgb(56,189, 248);" href="https://t.me/restorecord">RestoreCord Telegram</a>.
-                                                        If you have any questions, please contact us at <a style="color: rgb(56,189, 248);" href="mailto:contact@restorecord.com">contact@restorecord.com</a>.
-                                                        <br />
-                                                        Sincerely,
-                                                        RestoreCord
-                                    				</p>
-                                    			</div>
-                                                <div style="text-align: center; margin-top: 1rem;">
-                                                    <em style="color: rb(190, 198, 213)">
-                                                        Copyright © 2022 RestoreCord. All rights reserved.
-                                                    </em>
-                                                </div>
-                                    		</div>
-                                    	</body>
-                                    </html>
-                                `,
-                                    }
-                                ]
-                            }).then(() => {
-                                // console.log("Email sent");
-                            }).catch((err: any) => {
-                                console.error(err);
-                            })
-                        });
+                    await axios.get(`https://ipinfo.io/${getIPAddress(req)}/json?token=${process.env.IPINFO_TOKEN}`).then(async (res) => {
+                        await Email.send({
+                            // "Messages": [
+                            //     {
+                            //         "From": {
+                            //             "Email": "noreply@restorecord.com",
+                            //             "Name": "RestoreCord",
+                            //         },
+                            //         "To": [
+                            //             {
+                            //                 "Email": account.email,
+                            //                 "Name": account.username,
+                            //             },
+                            //         ],
+                            //         "Subject": "RestoreCord Password Changed",
+                            //         "HTMLPart": 
+                            to: account.email,
+                            from: "no-reply@restorecord.com",
+                            subject: "RestoreCord Password Changed",
+                            html:
+                            `
+                                <!DOCTYPE html>
+                                <html>
+                                	<head>
+                                		<title>RestoreCord</title>
+                                	</head>
+                                	<body>
+                                		<h1 style="text-align: center; margin-top: 1.5rem; line-height: 2rem; font-size: 2.25rem; font-weight: 600; margin-bottom: 1rem; color: rgb(79, 70, 229);">
+                                			RestoreCord
+                                		</h1>
+                                		<div style="padding: 1rem; max-width: 30rem; margin-left: auto;margin-right: auto; width: 100%; border-radius: 0.75rem; border-width: 1px; background: rgb(250, 250, 250);">
+                                            <h2 style="color: rgb(0, 0, 0); font-size: 1.75rem; line-height: 2rem; font-weight: 600; line-height: 1.25; margin-bottom: 1rem">
+                                				Your password has been changed
+                                			</h2>
+                                			<div>
+                                                <p style="white-space: pre-line; color: rgb(0, 0, 0); font-weight: 400; margin-bottom: 0.75rem; overflow-wrap: break-word; font-size: 1rem;">
+                                					Hello ${account.username},
+                                					You password has been changed on ${new Date().toLocaleString()} (local time).
+                                                    <br />
+                                					<b style="font-weight: 600">Location:</b> Near ${res.data.city}, ${res.data.region}, ${res.data.country}
+                                                    <b style="font-weight: 600">Device:</b> ${getPlatform(req.headers["user-agent"] ?? "")} (${getBrowser(req.headers["user-agent"] ?? "")})
+                                					<b style="font-weight: 600">IP:</b> ${getIPAddress(req)} <br />
+                                					If this was not you, contact us immediately at <a style="color: rgb(56,189, 248);" href="mailto:contact@restorecord.com">contact@restorecord.com</a> or <a style="color: rgb(56,189, 248);" href="https://t.me/restorecord">RestoreCord Telegram</a>.
+                                                    If you have any questions, please contact us at <a style="color: rgb(56,189, 248);" href="mailto:contact@restorecord.com">contact@restorecord.com</a>.
+                                                    <br />
+                                                    Sincerely,
+                                                    RestoreCord
+                                				</p>
+                                			</div>
+                                            <div style="text-align: center; margin-top: 1rem;">
+                                                <em style="color: rb(190, 198, 213)">
+                                                    Copyright © 2023 RestoreCord. All rights reserved.
+                                                </em>
+                                            </div>
+                                		</div>
+                                	</body>
+                                </html>
+                            `,
+                        }).then(() => {
+                            console.log(`[EMAIL] [${new Date().toLocaleString()}] Password changed for ${account.username} (${account.email})`);
+                        }).catch((err: any) => {
+                            console.error(err);
+                        })
+                    });
 
                     await prisma.accounts.update({
                         where: {
@@ -402,24 +405,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     if (!verified) return res.status(400).json({ success: false, message: "Invalid 2FA code." });
 
                     if (!account.twoFactor) {
-                        fetch(`https://ipinfo.io/${getIPAddress(req)}/json?token=${process.env.IPINFO_TOKEN}`)
-                            .then(res => res.json())
-                            .then(async (data) => {
-                                await Email.post("send", {'version': 'v3.1',}).request({
-                                    "Messages": [
-                                        {
-                                            "From": {
-                                                "Email": "noreply@restorecord.com",
-                                                "Name": "RestoreCord",
-                                            },
-                                            "To": [
-                                                {
-                                                    "Email": account.email,
-                                                    "Name": account.username,
-                                                },
-                                            ],
-                                            "Subject": "RestoreCord Two-Factor Authentication Enabled",
-                                            "HTMLPart": 
+                        await axios.get(`https://ipinfo.io/${getIPAddress(req)}/json?token=${process.env.IPINFO_TOKEN}`).then(async (res) => {
+                            await Email.send({
+                                to: account.email,
+                                from: "no-reply@restorecord.com",
+                                subject: "RestoreCord Two-Factor Authentication Enabled",
+                                html:
                                 `
                                     <!DOCTYPE html>
                                     <html>
@@ -439,7 +430,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                     					Hello ${account.username},
                                                         Two-Factor Authentication has been enabled on your account on ${new Date().toLocaleString()} (local time).
                                                         <br />
-                                    					<b style="font-weight: 600">Location:</b> Near ${data.city}, ${data.region}, ${data.country}
+                                    					<b style="font-weight: 600">Location:</b> Near ${res.data.city}, ${res.data.region}, ${res.data.country}
                                                         <b style="font-weight: 600">Device:</b> ${getPlatform(req.headers["user-agent"] ?? "")} (${getBrowser(req.headers["user-agent"] ?? "")})
                                     					<b style="font-weight: 600">IP:</b> ${getIPAddress(req)} <br />
                                     					If this was not you, contact us immediately at <a style="color: rgb(56,189, 248);" href="mailto:contact@restorecord.com">contact@restorecord.com</a> or <a style="color: rgb(56,189, 248);" href="https://t.me/restorecord">RestoreCord Telegram</a>.
@@ -451,21 +442,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                     			</div>
                                                 <div style="text-align: center; margin-top: 1rem;">
                                                     <em style="color: rb(190, 198, 213)">
-                                                        Copyright © 2022 RestoreCord. All rights reserved.
+                                                        Copyright © 2023 RestoreCord. All rights reserved.
                                                     </em>
                                                 </div>
                                     		</div>
                                     	</body>
                                     </html>
                                 `,
-                                        }
-                                    ]
-                                }).then(() => {
-                                    console.log(`[Email] Enabled 2FA for ${account.username} (${account.email})`);
-                                }).catch((err: any) => {
-                                    console.error(err);
-                                })
-                            });
+                            }).then(() => {
+                                console.log(`[EMAIL] [${new Date().toLocaleString()}] Sent 2FA enabled email to ${account.email}`);
+                            }).catch((err: any) => {
+                                console.error(err);
+                            })
+                        });
 
                         await prisma.accounts.update({
                             where: {

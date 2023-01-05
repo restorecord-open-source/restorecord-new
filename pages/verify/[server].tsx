@@ -194,7 +194,7 @@ export default function Verify({ server, status, err, errStack }: any) {
                                         },
                                     },
                                 }}>
-                                    Go back
+                                    &lt;- Go Back
                                 </Button>
                             )}
                         </Box>

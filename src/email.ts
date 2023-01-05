@@ -1,4 +1,4 @@
-import MJ from "node-mailjet";
-import Client from "node-mailjet/declarations/client/index"
+import Email from '@sendgrid/mail';
+Email.setApiKey(process.env.SENDGRID_API_KEY as string);
 
-export const Email: Client = new MJ({ apiKey: process.env.MAILJET_API_KEY, apiSecret: process.env.MAILJET_API_SECRET });
+export default Email;

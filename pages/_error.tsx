@@ -38,7 +38,8 @@ export default function ErrorPage<ErrorProps>({ statusCode, title: titleOrigin, 
                 <Stack spacing={2} sx={{ width: "50%" }}>
                     <Typography variant="h2" component="h2" sx={{ fontWeight: "bold" }}>{statusCode}</Typography>
                     <Typography variant="h4" component="h4">{title}</Typography>
-                    <Button variant="contained" onClick={() => { window.location.href = "/"; }}>Go Back to Homepage</Button>
+                    <Typography variant="body2" component="p"><small>No, the site is not down.</small></Typography>
+                    <Button variant="contained" onClick={() => { window.location.reload(); }}>Reload Page</Button>
 
                     {/* titleOrigion as code */}
                     <Typography variant="body2" component="code" sx={{ fontFamily: "monospace", backgroundColor: "rgba(0,0,0,0.05)", padding: "0.5rem" }}>

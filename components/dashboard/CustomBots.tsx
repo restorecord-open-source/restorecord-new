@@ -240,7 +240,7 @@ export default function DashCustomBot({ user }: any) {
                         {(createNewBot || (Array.isArray(user.bots) && user.bots.length === 0)) && (
                             <>
                                 <Button variant="contained" sx={{ mb: 2 }} onClick={() => setcreateNewBot(false)}>
-                                    Go Back
+                                    &lt;- Go Back
                                 </Button>
                                 <Paper variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
                                     <CardContent>

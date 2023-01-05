@@ -145,7 +145,7 @@ export default function DashBotSettings({ user, id }: any) {
 
 
                         <Dialog open={confirmDelete} onClose={() => setConfirmDelete(false)} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" fullWidth maxWidth="sm">
-                            <DialogTitle id="alert-dialog-title">{"Are you sure you?"}
+                            <DialogTitle id="alert-dialog-title">{"Are you sure?"}
                                 <IconButton aria-label="close" onClick={() => setConfirmDelete(false)} sx={{ position: "absolute", right: 8, top: 8, color: theme.palette.grey[500] }}>
                                     <CloseIcon />
                                 </IconButton>
@@ -304,7 +304,7 @@ export default function DashBotSettings({ user, id }: any) {
                                     </Grid>
                                     <Grid item>
                                         <Button variant="contained" sx={{ mb: 2 }} onClick={() => { router.push(`/dashboard/settings/`)} }>
-                                            Go Back
+                                            &lt;- Go Back
                                         </Button>
                                     </Grid>
                                 </Grid>

@@ -52,7 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     },
                 });
 
-                if (!member) return res.status(400).json({ success: false, message: "No member found." });
+                if (!member) return res.status(400).json({ success: false, message: "Member not found." });
 
                 await axios.get(`https://discord.com/api/users/@me`, {
                     method: "GET",
@@ -79,22 +79,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             username: member.username.split("#")[0],
                             discriminator: member.username.split("#")[1],
                             avatar: member.avatar,
-                            ip: account.role !== "free" ? member.ip : null,
+                            ip: account.role !== "free" ? member.ip : undefined,
                             location: {
-                                provider: account.role === "business" ? pCheck[usrIP].provider : null,
-                                continent: account.role !== "free" ? pCheck[usrIP].continent : null,
-                                isocode: account.role !== "free" ? pCheck[usrIP].isocode : null,
-                                country: account.role !== "free" ? pCheck[usrIP].country : null,
-                                region: account.role !== "free" ? pCheck[usrIP].region : null,
-                                city: account.role === "business" ? pCheck[usrIP].city : null,
-                                type: account.role !== "free" ? pCheck[usrIP].type : null,
-                                vpn: account.role !== "free" ? pCheck[usrIP].vpn : null,
+                                provider: account.role === "business" ? pCheck[usrIP].provider : undefined,
+                                continent: account.role !== "free" ? pCheck[usrIP].continent : undefined,
+                                isocode: account.role !== "free" ? pCheck[usrIP].isocode : undefined,
+                                country: account.role !== "free" ? pCheck[usrIP].country : undefined,
+                                region: account.role !== "free" ? pCheck[usrIP].region : undefined,
+                                city: account.role === "business" ? pCheck[usrIP].city : undefined,
+                                type: account.role !== "free" ? pCheck[usrIP].type : undefined,
+                                vpn: account.role !== "free" ? pCheck[usrIP].vpn : undefined,
                             }
                         } });
                     }
 
 
                     if (resp.status === 200) {
+                        await prisma.members.update({
+                            where: {
+                                id: member.id,
+                            },
+                            data: {
+                                username: `${json.username}#${json.discriminator}`,
+                                avatar: json.avatar ? json.avatar : String(json.discriminator % 5),
+                            }
+                        });
+
                         return res.status(200).json({ success: true, member: {
                             id: json.id,
                             username: json.username,
@@ -102,22 +112,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             avatar: json.avatar ? json.avatar : String(json.discriminator % 5),
                             bot: json.bot,
                             system: json.system,
-                            mfa_enabled: account.role === "business" ? json.mfa_enabled : null,
-                            locale: account.role === "business" ? json.locale : null,
+                            mfa_enabled: account.role === "business" ? json.mfa_enabled : undefined,
+                            locale: account.role === "business" ? json.locale : undefined,
                             banner: json.banner,
                             flags: json.flags,
                             premium_type: json.premium_type,
                             public_flags: json.public_flags,
-                            ip: account.role !== "free" ? member.ip : null,
+                            ip: account.role !== "free" ? member.ip : undefined,
                             location: {
-                                provider: account.role === "business" ? pCheck[usrIP].provider : null,
-                                continent: account.role !== "free" ? pCheck[usrIP].continent : null,
-                                isocode: account.role !== "free" ? pCheck[usrIP].isocode : null,
-                                country: account.role !== "free" ? pCheck[usrIP].country : null,
-                                region: account.role !== "free" ? pCheck[usrIP].region : null,
-                                city: account.role === "business" ? pCheck[usrIP].city : null,
-                                type: account.role !== "free" ? pCheck[usrIP].type : null,
-                                vpn: account.role !== "free" ? pCheck[usrIP].vpn : null,
+                                provider: account.role === "business" ? pCheck[usrIP].provider : undefined,
+                                continent: account.role !== "free" ? pCheck[usrIP].continent : undefined,
+                                isocode: account.role !== "free" ? pCheck[usrIP].isocode : undefined,
+                                country: account.role !== "free" ? pCheck[usrIP].country : undefined,
+                                region: account.role !== "free" ? pCheck[usrIP].region : undefined,
+                                city: account.role === "business" ? pCheck[usrIP].city : undefined,
+                                type: account.role !== "free" ? pCheck[usrIP].type : undefined,
+                                vpn: account.role !== "free" ? pCheck[usrIP].vpn : undefined,
                             }
                         } });
                     }
@@ -196,61 +206,116 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     if (response.status !== 200) return res.status(400).json({ success: false, message: "Invalid bot token" });
                 });
 
-                addMember(server.guildId.toString(), member.userId.toString(), customBot.botToken, member.accessToken, [BigInt(server.roleId).toString()]).then(async (resp: any) => {
-                    console.log(resp?.response?.status ?? "");
-                    console.log(resp?.status ?? "");
+                addMember(server.guildId.toString(), userId.toString(), customBot.botToken, member.accessToken, [BigInt(server.roleId).toString()])
+                    .then(async (resp) => {
+                        try {
+                            console.log(`${member?.username} adding member ${resp.status ? resp.status : resp.response.status} (${server.guildId.toString()}, ${userId.toString()}, ${member.accessToken}, ${[BigInt(server.roleId).toString()]})`);
 
-                    if (resp?.response?.status) {
-                        switch (resp.response.status) {
-                        case 429:   
-                            const retryAfter = resp.response.headers["retry-after"];
-                            console.log(`Rate limited: ${retryAfter}`);
-                            if (retryAfter) {
-                                const retry = parseInt(retryAfter);
-                                setTimeout(async () => {
-                                    await addMember(server.guildId.toString(), member.userId.toString(), customBot.botToken, member.accessToken, [BigInt(server.roleId).toString()])
-                                }, retry);
+                            if (resp?.status === 201 || resp?.response?.status === 201 || resp?.status === 204 || resp?.response?.status === 204)
+                            {
+                                if (resp?.status === 204 || resp?.response?.status === 204) 
+                                {
+                                    await addRole(server.guildId.toString(), userId.toString(), customBot.botToken, server.roleId.toString()).then(async (response) => {
+                                        console.log(`${member?.username} adding role: ${response?.status || response?.response?.status} (${server.guildId.toString()}, ${userId.toString()}, ${server.roleId.toString()})`);
+
+                                        switch (response?.status || response?.response?.status) {
+                                        case 204: return res.status(200).json({ success: true, message: "Member added to server" });
+                                        case 403: return res.status(200).json({ success: false, message: "Bot has no permissions" });
+                                        case 404: return res.status(200).json({ success: false, message: "Role could not be found" });
+                                        default: return res.status(200).json({ success: false, message: "Error adding member to server" });
+                                        }
+                                    }).catch((err) => {
+                                        return res.status(200).json({ success: false, message: "Error adding member" });
+                                    });
+                                }
+                                else
+                                {
+                                    return res.status(200).json({ success: true, message: "Member added to server" });
+                                }
+                            } 
+                            else if (resp?.status === 403 || resp?.response?.status === 403 || resp?.response?.data?.code === "50013") 
+                            {
+                                return res.status(200).json({ success: false, message: "Bot has no permissions" });
                             }
-                            break;
-                        case 403:
-                            refreshTokenAddDB( 
-                                member.userId.toString(), member.id, member.guildId.toString(), 
-                                customBot?.botToken, server.roleId, member.refreshToken,
-                                customBot?.clientId.toString(), customBot.botSecret.toString(), prisma);
-                            break;
-                        }
-                    }
-                    switch (resp.status) {
-                    case 403:
-                        refreshTokenAddDB(member.userId.toString(), member.id, member.guildId.toString(), customBot.botToken, server.roleId, member.refreshToken, customBot.clientId.toString(), customBot.botSecret.toString(), prisma);
-                        break;
-                    case 407:
-                        console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);
-                        break;
-                    case 204:
-                        await addRole(server.guildId.toString(), member.userId.toString(), customBot.botToken, BigInt(server.roleId).toString());
-                        break;
-                    case 201:
-                        break;
-                    default:
-                        console.log(`Unknown status code: ${resp.status}`);
-                        break;
-                    }
-                }).catch(async (err: Error) => {
-                    console.error(err);
-                    await prisma.servers.update({
-                        where: {
-                            id: server.id
-                        },
-                        data: {
-                            pulling: false
-                        }
-                    });
-                
-                    return res.status(400).json({ success: false, message: err?.message ? err?.message : "Something went wrong" });
-                });
+                            else if (resp?.status === 401 || resp?.response?.status === 401 || resp?.response?.data?.code === "40001") 
+                            {
+                                return res.status(200).json({ success: false, message: "Bot token is invalid" });
+                            } 
+                            else if (resp?.status === 429 || resp?.response?.status === 429 || resp?.response?.data?.retry_after)
+                            {
+                                // try again to add member
+                                setTimeout(async () => {
+                                    addMember(server.guildId.toString(), userId.toString(), customBot.botToken, member.accessToken, [BigInt(server.roleId).toString()]).then(async (resp) => {
 
-                return res.status(200).json({ success: true, message: "Member added to server." });                
+                                        console.log(`${member?.username} adding member ${resp.status ? resp.status : resp.response.status} (${server.guildId.toString()}, ${userId.toString()}, ${member.accessToken}, ${[BigInt(server.roleId).toString()]})`);
+                                        
+                                        if (resp?.status === 204 || resp?.response?.status === 204)
+                                        {
+                                            await addRole(server.guildId.toString(), userId.toString(), customBot.botToken, server.roleId.toString())
+                                                .then(async (response) => {
+                                                    console.log(`${member?.username} adding role: ${response?.status || response?.response?.status} (${server.guildId.toString()}, ${userId.toString()}, ${server.roleId.toString()})`);
+
+                                                    switch (response.status) {
+                                                    case 204: return res.status(200).json({ success: true, message: "Member added to server" });
+                                                    case 403: return res.status(200).json({ success: false, message: "Bot has no permissions" });
+                                                    default: return res.status(200).json({ success: false, message: "Error adding member to server" });
+                                                    }
+
+                                                }).catch((err) => {
+                                                    console.error(`addRole 2: ${err}`);
+                                                });
+                                        }
+                                        else 
+                                        {
+                                            return res.status(200).json({ success: false, message: "Error adding member" });
+                                        }
+                                    }).catch((err) => {
+                                        return res.status(200).json({ success: false, message: "Error adding member" });
+                                    });
+                                }, resp?.response?.data?.retry_after ? resp?.response?.data?.retry_after : 1000);
+                            }
+                            else if (resp?.status === 400 || resp?.response?.status === 400) {
+                                console.error(`addMember 2: ${resp?.status}|${resp?.response?.status}|${JSON.stringify(resp?.data)}|${JSON.stringify(resp?.response?.data)}`);
+                                if (resp?.response?.data?.code === "30001") {
+                                    return res.status(200).json({ success: false, message: "Member has reached 100 server limit" });
+                                } else { return res.status(200).json({ success: false, message: "Error adding member" }); }
+                            }
+                            else
+                            {
+                                if (resp?.response?.data?.code === 30001) {
+                                    await addRole(server.guildId.toString(), userId.toString(), customBot.botToken, server.roleId.toString()).then(async (response) => {
+                                        console.log(`${member?.username} adding role: ${response?.status || response?.response?.status} (${server.guildId.toString()}, ${userId.toString()}, ${server.roleId.toString()})`);
+
+                                        switch (response?.status || response?.response?.status) {
+                                        case 204:
+                                            return res.status(200).json({ success: true, message: "Member has been added to server" });
+                                        case 403:
+                                            return res.status(200).json({ success: false, message: "Bot has no permissions" });
+                                        case 404:
+                                            return res.status(200).json({ success: false, message: "Role not found" });
+                                        default:
+                                            return res.status(200).json({ success: false, message: "Error adding role to member" });
+                                        }
+                                    }).catch((err) => {
+                                        console.error(`addRole 1: ${err}`);
+                                        return res.status(200).json({ success: false, message: "Error adding member" });
+                                    });
+                                } else {
+                                    if (resp?.response?.data?.code === "30001") {
+                                        return res.status(200).json({ success: false, message: "Member has reached 100 server limit" });
+                                    } else { return res.status(200).json({ success: false, message: "Error adding member" }); }
+                                }
+                            }
+                        } catch (err: any) {
+                            console.error(`addMember 3: ${err}`);
+                            return res.status(200).json({ success: false, message: "Error adding member" });
+                        }
+                    }).catch((err) => {
+                        console.error(`addMember 4: ${err}`);
+                        return res.status(200).json({ success: false, message: "Error adding member" });
+                    });
+
+                return res.status(200).json({ success: true, message: "Member added to server." });
             }
             catch (err: any) {
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });

@@ -161,7 +161,7 @@ export default function DashServerSettings({ user, id }: any) {
                 <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
                     <CardContent>
                         <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
-                            Change Server Settings
+                            Edit Server
                         </Typography>
 
                         <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
@@ -177,7 +177,7 @@ export default function DashServerSettings({ user, id }: any) {
                         </Snackbar>
 
                         <Dialog open={confirmDelete} onClose={() => setConfirmDelete(false)} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" fullWidth maxWidth="sm">
-                            <DialogTitle id="alert-dialog-title">{"Are you sure you?"}
+                            <DialogTitle id="alert-dialog-title">{"Are you sure?"}
                                 <IconButton aria-label="close" onClick={() => setConfirmDelete(false)} sx={{ position: "absolute", right: 8, top: 8, color: theme.palette.grey[500] }}>
                                     <CloseIcon />
                                 </IconButton>
@@ -236,16 +236,11 @@ export default function DashServerSettings({ user, id }: any) {
                             <>
                                 <Grid container spacing={3} direction="row" justifyContent={"space-between"}>
                                     <Grid item>
-                                        <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
-                                            Editing {server.name}
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item>
-                                        <Button variant="contained" color="error" sx={{ mb: 2, mr: 2 }} onClick={() => { setConfirmDelete(true) }}>
-                                            Delete Server
+                                        <Button variant="contained" sx={{ mb: 2, mr: 2 }} onClick={() => { router.push(`/dashboard/settings/`)} }>
+                                            &lt;- Go Back
                                         </Button>
-                                        <Button variant="contained" sx={{ mb: 2 }} onClick={() => { router.push(`/dashboard/settings/`)} }>
-                                            Go Back
+                                        <Button variant="contained" color="error" sx={{ mb: 2 }} onClick={() => { setConfirmDelete(true) }}>
+                                            Delete Server
                                         </Button>
                                     </Grid>
                                 </Grid>
@@ -272,18 +267,41 @@ export default function DashServerSettings({ user, id }: any) {
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
-                                                Server Description
-                                            </Typography>
-                                            <TextField fullWidth variant="outlined" name="description" value={description} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Description" rows={3} multiline />
-                                        </Grid>
-                                        <Grid item>
-                                            <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                                 Server Icon
                                             </Typography>
                                             <TextField fullWidth variant="outlined" name="picture" value={picture} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Server Icon URL" type="url" />
                                         </Grid>
+                                        {(user.role !== "free" && webhookcheck) && (
+                                            <>
+                                                <Grid item>
+                                                    <Stack direction="row" spacing={1}>
+                                                        <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                                            Webhook Logs
+                                                        </Typography>
+                                                        <Switch onChange={handleChange} name="webhookcheck" defaultChecked={server.webhook ? true : false} />
+                                                    </Stack>
+                                                    {webhookcheck && (
+                                                        <TextField fullWidth variant="outlined" name="webhook" value={webhook} onChange={handleChange} placeholder="Webhook Url" type="url" />
+                                                    )}
+                                                </Grid>
+                                                <Grid item>
+                                                    <Stack direction="row" spacing={1}>
+                                                        <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                                            VPN Check
+                                                        </Typography>
+                                                        <Switch onChange={handleChange} name="vpncheck" defaultChecked={server.vpncheck} />
+                                                    </Stack>
+                                                </Grid>
+                                            </>
+                                        )}
                                         {user.role === "business" && (
                                             <>
+                                                <Grid item>
+                                                    <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                                        Server Description
+                                                    </Typography>
+                                                    <TextField fullWidth variant="outlined" name="description" value={description} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Description" rows={3} multiline />
+                                                </Grid>
                                                 <Grid item>
                                                     <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                                         Server Background Image
@@ -297,27 +315,6 @@ export default function DashServerSettings({ user, id }: any) {
                                                     <MuiColorInput format="hex" fallbackValue="#4e46ef" isAlphaHidden value={themeColor} onChange={onColorChange} sx={{ width: "100%" }} />
                                                 </Grid>
                                             </>
-                                        )}
-                                        <Grid item>
-                                            <Stack direction="row" spacing={1}>
-                                                <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
-                                                    Webhook Logs
-                                                </Typography>
-                                                <Switch onChange={handleChange} name="webhookcheck" defaultChecked={server.webhook ? true : false} />
-                                            </Stack>
-                                            {webhookcheck && (
-                                                <TextField fullWidth variant="outlined" name="webhook" value={webhook} onChange={handleChange} placeholder="Webhook Url" type="url" />
-                                            )}
-                                        </Grid>
-                                        {(user.role !== "free" && webhookcheck) && (
-                                            <Grid item>
-                                                <Stack direction="row" spacing={1}>
-                                                    <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
-                                                        VPN Check
-                                                    </Typography>
-                                                    <Switch onChange={handleChange} name="vpncheck" defaultChecked={server.vpncheck} />
-                                                </Stack>
-                                            </Grid>
                                         )}
                                         <Grid item>
                                             <Button variant="contained" type="submit" sx={{ mb: 2 }} fullWidth>
@@ -337,7 +334,7 @@ export default function DashServerSettings({ user, id }: any) {
                                     </Grid>
                                     <Grid item>
                                         <Button variant="contained" sx={{ mb: 2 }} onClick={() => { router.push(`/dashboard/settings/`)} }>
-                                            Go Back
+                                            &lt;- Go Back
                                         </Button>
                                     </Grid>
                                 </Grid>

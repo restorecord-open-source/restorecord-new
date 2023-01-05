@@ -162,7 +162,7 @@ export default function DashBoard({ user }: any) {
         ]
     };
 
-    if (!user.username) {
+    if (!user.username || !data2) {
         return <CircularProgress />
     }
 

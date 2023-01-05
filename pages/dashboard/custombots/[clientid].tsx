@@ -36,7 +36,7 @@ export default function CustomSettings() {
     return (
         <>
             <Box sx={{ display: "flex" }}>
-                <NavBar>
+                <NavBar user={data}>
                     <Toolbar />
                     <DashBotSettings user={data} id={clientid} />
                 </NavBar>
