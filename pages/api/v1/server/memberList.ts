@@ -23,43 +23,44 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 
                 if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
 
-                prisma.accounts.findUnique({
-                    where: {
-                        id: valid.id
-                    }
-                }).then((account: any) => {
-                    prisma.servers.findMany({
-                        where: {
-                            ownerId: account.id
-                        },
-                    }).then((servers: any) => {
-                        let guildIds: any = servers.map((server: any) => server.guildId);
+                const account = await prisma.accounts.findUnique({ where: { id: valid.id } });
+                if (!account) return res.status(400).json({ success: false, message: "Account not found." });
 
-                        prisma.members.findMany({
-                            where: {
-                                guildId: {
-                                    in: guildIds
-                                },
-                            },
-                            orderBy: {
-                                createdAt: "desc"
-                            },
-                        }).then((members: any) => {
-                            res.status(200).json({
-                                success: true,
-                                members: members.map((member: any) => {
-                                    return {
-                                        id: member.id,
-                                        userId: member.userId.toString(),
-                                        username: member.username,
-                                        avatar: member.avatar,
-                                        createdAt: member.createdAt,
-                                        guildName: servers.find((server: any) => server.guildId === member.guildId).name,
-                                    }
-                                })
-                            });
-                        });
-                    });
+                const servers = await prisma.servers.findMany({ where: { ownerId: account.id } });
+                if (!servers) return res.status(400).json({ success: false, message: "No servers found." });
+
+                const guildIds = servers.map((server: any) => server.guildId);
+
+                const members = await prisma.members.findMany({
+                    where: {
+                        guildId: {
+                            in: guildIds
+                        },
+                        createdAt: {
+                            gte: new Date(new Date().getTime() - (14 * 24 * 60 * 60 * 1000))
+                        }
+                    },
+                    orderBy: {
+                        createdAt: "desc"
+                    },
+                });
+
+                if (!members) return res.status(400).json({ success: false, message: "No members found." });
+
+                const memberList = members.map((member: any) => {
+                    return {
+                        id: member.id,
+                        userId: member.userId.toString(),
+                        username: member.username,
+                        avatar: member.avatar,
+                        createdAt: member.createdAt,
+                        guildName: servers.find((server: any) => server.guildId === member.guildId)?.name,
+                    }
+                });
+
+                return res.status(200).json({
+                    success: true,
+                    members: memberList
                 });
             }
             catch (err: any) {

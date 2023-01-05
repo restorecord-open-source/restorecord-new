@@ -92,3 +92,17 @@ body {
 		stroke: hsla(0, 0%, 100%, 0.2);
 	}
 }
+
+.apexcharts-tooltip.apexcharts-theme-dark {
+	background: #16161e !important;
+    border: 1px solid #28282f !important;
+}
+
+.apexcharts-tooltip {
+	box-shadow: unset !important;
+}
+
+.apexcharts-tooltip.apexcharts-theme-dark .apexcharts-tooltip-title {
+	background: rgb(0 0 0 / 25%) !important;
+	border-bottom: unset !important;
+}
