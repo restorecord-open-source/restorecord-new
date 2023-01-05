@@ -1,9 +1,11 @@
 import { useToken } from "../../src/token";
 import { useEffect, useState } from "react";
 import { useInfiniteQuery } from "react-query";
-import { Badge } from "@mui/icons-material";
 
-import getMembers, { BUG_HUNTER_LEVEL_1, CERTIFIED_MODERATOR, DELETED, DISABLED, DISCORD_EMPLOYEE, DISCORD_PARTNER, EARLY_SUPPORTER, HOUSE_BALANCE, HOUSE_BRAVERY, HOUSE_BRILLIANCE, HYPESQUAD_EVENTS, SELF_DELETED, SYSTEM, VERIFIED_BOT, VERIFIED_BOT_DEVELOPER } from "../../src/dashboard/getMembers";
+import axios from "axios";
+import React from "react";
+
+import getMembers, { BUG_HUNTER_LEVEL_1, CERTIFIED_MODERATOR, DISCORD_EMPLOYEE, DISCORD_PARTNER, EARLY_SUPPORTER, HOUSE_BALANCE, HOUSE_BRAVERY, HOUSE_BRILLIANCE, HYPESQUAD_EVENTS, VERIFIED_BOT_DEVELOPER } from "../../src/dashboard/getMembers";
 import Container from "@mui/material/Container";
 import Paper from "@mui/material/Paper";
 import CardContent from "@mui/material/CardContent";
@@ -17,9 +19,7 @@ import Select, { SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
 import Avatar from "@mui/material/Avatar";
-import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
-import axios from "axios";
 import LoadingButton from "@mui/lab/LoadingButton";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -29,9 +29,10 @@ import CloseIcon from "@mui/icons-material/Close";
 import Tooltip from "@mui/material/Tooltip";
 import Fade from "@mui/material/Fade";
 import Box from "@mui/material/Box";
-import React from "react";
 import TextField from "@mui/material/TextField";
 import DialogActions from "@mui/material/DialogActions";
+import CircularProgress from "@mui/material/CircularProgress";
+import Badge from "@mui/icons-material/Badge";
 
 export default function VerifiedMembers({ user }: any) {
     const [token]: any = useToken();
@@ -135,73 +136,50 @@ export default function VerifiedMembers({ user }: any) {
                             </Alert>
                         </Snackbar>
 
-                        <Dialog open={open} onClose={() => { setOpen(false); setLoadingInfo(true); setUserInfo({}); } } maxWidth="sm" fullWidth sx={{ borderRadius: "50%" }}>
+                        <Dialog open={open} onClose={() => { setOpen(false); setUserInfo({}); setLoadingInfo(true); } } maxWidth="sm" fullWidth sx={{ borderRadius: "50%" }}>
                             <DialogTitle sx={{ backgroundColor: "grey.900" }}>
                                 <Stack spacing={1} direction="row" alignItems="center" justifyContent="space-between">
                                     <Typography variant="h5" sx={{ fontWeight: "500" }}>
                                         More Info
                                     </Typography>
-                                    <IconButton onClick={() => { setOpen(false); setLoadingInfo(true); setUserInfo({}); } }>
+                                    <IconButton onClick={() => { setOpen(false); setUserInfo({}); setLoadingInfo(true); } }>
                                         <CloseIcon />
                                     </IconButton>
                                 </Stack>
                             </DialogTitle>
                             <DialogContent sx={{ marginTop: 2 }}>
-                                <Stack spacing={1} direction="row" alignItems="center" sx={{ borderRadius: "1rem", flexDirection: { xs: "column", md: "row" } }}>
-                                    {loadingInfo ? <Skeleton animation="wave" variant="circular" width={40} height={40}  /> : <Avatar alt={userInfo.username} src={userInfo.avatar.length < 5 ? `https://cdn.discordapp.com/embed/avatars/${userInfo.discriminator % 5}.png` : `https://cdn.discordapp.com/avatars/${userInfo.id}/${userInfo.avatar}?size=2048`} />}
-                                    {loadingInfo ? 
-                                        <>
-                                            <Skeleton animation="wave" variant="rectangular" width={135} height={28} sx={{ borderRadius: "14px" }} />
-                                        </> : <>
+                                {(!loadingInfo && userInfo) ? (
+                                    <>
+                                        <Stack spacing={1} direction="row" alignItems="center" sx={{ borderRadius: "1rem", flexDirection: { xs: "column", md: "row" } }}>
+                                            <Avatar alt={userInfo.username} src={userInfo.avatar.length < 5 ? `https://cdn.discordapp.com/embed/avatars/${userInfo.discriminator % 5}.png` : `https://cdn.discordapp.com/avatars/${userInfo.id}/${userInfo.avatar}?size=2048`} />
+                                            
                                             <Tooltip title={`${userInfo.username}#${userInfo.discriminator}`} placement="top">
                                                 <Typography variant="h5" sx={{ fontWeight: "600", zIndex: 9999  }}>
                                                     {userInfo.username}#{userInfo.discriminator}
                                                 </Typography>
                                             </Tooltip>
-                                        </>
-                                    }
-                                    
-                                    {(userInfo.public_flags || userInfo.premium_type) ? 
-                                        <Stack spacing={1} direction="row" alignItems="center" flexWrap="wrap" width="100%" sx={{ justifyContent: {xs: "center", md: "flex-start" } }}>
-                                            {(userInfo.premium_type > 0) &&                                                 <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Nitro"}                    placement="top"><Avatar alt="Nitro" src="https://cdn.discordapp.com/attachments/953322413393846393/1018637667900080218/24d05f3b46a110e538674edbac0db4cd.pnh.png" sx={{ width: 28, height: 28 }} /></Tooltip>}
-                                            {(userInfo.public_flags & DISCORD_EMPLOYEE) == DISCORD_EMPLOYEE &&              <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Discord Employee"}         placement="top"><Avatar alt="Discord Employee" src="https://discord.id/img/flags/0.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
-                                            {(userInfo.public_flags & DISCORD_PARTNER) == DISCORD_PARTNER &&                <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Discord Partner"}          placement="top"><Avatar alt="Discord Partner" src="https://discord.id/img/flags/1.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
-                                            {(userInfo.public_flags & HYPESQUAD_EVENTS) == HYPESQUAD_EVENTS &&              <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Discord Hypesquad"}        placement="top"><Avatar alt="Discord Hypesquad Boss" src="https://discord.id/img/flags/2.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
-                                            {(userInfo.public_flags & BUG_HUNTER_LEVEL_1) == BUG_HUNTER_LEVEL_1 &&          <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Discord Bug Hunter"}       placement="top"><Avatar alt="Discord Hypesquad" src="https://discord.id/img/flags/3.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
-                                            {(userInfo.public_flags & HOUSE_BRAVERY) == HOUSE_BRAVERY &&                    <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"House of Bravery"}         placement="top"><Avatar alt="House of Bravery" src="https://discord.id/img/flags/6.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
-                                            {(userInfo.public_flags & HOUSE_BRILLIANCE) == HOUSE_BRILLIANCE &&              <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"House of Brilliance"}      placement="top"><Avatar alt="House of Brilliance" src="https://discord.id/img/flags/7.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
-                                            {(userInfo.public_flags & HOUSE_BALANCE) == HOUSE_BALANCE &&                    <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"House of Balance"}         placement="top"><Avatar alt="House of Balance" src="https://discord.id/img/flags/8.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
-                                            {(userInfo.public_flags & EARLY_SUPPORTER) == EARLY_SUPPORTER &&                <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Early Supporter"}          placement="top"><Avatar alt="Early Supporter" src="https://discord.id/img/flags/9.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
-                                            {(userInfo.public_flags & SYSTEM) == SYSTEM &&                                  <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"System"}                   placement="top"><Avatar alt="System" src="https://discord.id/img/flags/12.png" sx={{ width: 28, height: 28, borderRadius: 0 }} /></Tooltip>}
-                                            {(userInfo.public_flags & VERIFIED_BOT) == VERIFIED_BOT &&                      <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Verified Bot"}             placement="top"><Avatar alt="Verified Bot" src="https://discord.id/img/flags/16.png" sx={{ width: 28, height: 28, borderRadius: 0 }}/></Tooltip>}
-                                            {(userInfo.public_flags & VERIFIED_BOT_DEVELOPER) == VERIFIED_BOT_DEVELOPER &&  <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Verified Bot Developer"}   placement="top"><Avatar alt="Verified Bot Developer" src="https://discord.id/img/flags/17.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
-                                            {(userInfo.public_flags & CERTIFIED_MODERATOR) == CERTIFIED_MODERATOR &&        <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Certified Moderator"}      placement="top"><Avatar alt="Certified Moderator" src="https://discord.id/img/flags/18.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
-                                            {(userInfo.public_flags & DELETED) == DELETED && <span>Deleted</span>}
-                                            {(userInfo.public_flags & SELF_DELETED) == SELF_DELETED && <span>Self Deleted</span>}
-                                            {(userInfo.public_flags & DISABLED) == DISABLED && <span>Disabled</span>}
-                                        </Stack> : <></>}
-                                </Stack>
 
-                                <Stack spacing={1} direction="row" alignItems="center" sx={{ mt: 2 }}>
-                                    {loadingInfo ? 
-                                        <>
-                                            <Skeleton animation="wave" variant="rectangular" width={30} height={16} sx={{ borderRadius: "14px" }} /> 
-                                            <Skeleton animation="wave" variant="rectangular" width={120} height={16} sx={{ borderRadius: "14px" }} /> 
-                                        </> : <>
+                                            {(userInfo.public_flags || userInfo.premium_type) ? 
+                                                <Stack spacing={1} direction="row" alignItems="center" flexWrap="wrap" width="100%" sx={{ justifyContent: {xs: "center", md: "flex-start" } }}>
+                                                    {(userInfo.premium_type > 0) &&                                                 <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Nitro"}                    placement="top"><Avatar alt="Nitro"                     src="https://cdn.discordapp.com/attachments/953322413393846393/1018637667900080218/24d05f3b46a110e538674edbac0db4cd.pnh.png" sx={{ width: 28, height: 28 }} /></Tooltip>}
+                                                    {(userInfo.public_flags & DISCORD_EMPLOYEE) == DISCORD_EMPLOYEE &&              <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Discord Employee"}         placement="top"><Avatar alt="Discord Employee"          src="https://raw.githubusercontent.com/Mattlau04/Discord-SVG-badges/master/PNG/Discord_Staff.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                                    {(userInfo.public_flags & DISCORD_PARTNER) == DISCORD_PARTNER &&                <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Discord Partner"}          placement="top"><Avatar alt="Discord Partner"           src="https://raw.githubusercontent.com/Mattlau04/Discord-SVG-badges/master/PNG/discord_partner.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                                    {(userInfo.public_flags & HYPESQUAD_EVENTS) == HYPESQUAD_EVENTS &&              <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Discord Hypesquad"}        placement="top"><Avatar alt="Discord Hypesquad"         src="https://raw.githubusercontent.com/Mattlau04/Discord-SVG-badges/master/PNG/HypeSquad_Event.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                                    {(userInfo.public_flags & BUG_HUNTER_LEVEL_1) == BUG_HUNTER_LEVEL_1 &&          <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Discord Bug Hunter"}       placement="top"><Avatar alt="Discord Bug Hunter"        src="https://raw.githubusercontent.com/Mattlau04/Discord-SVG-badges/master/PNG/Bug_Hunter.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                                    {(userInfo.public_flags & HOUSE_BRAVERY) == HOUSE_BRAVERY &&                    <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"House of Bravery"}         placement="top"><Avatar alt="House of Bravery"          src="https://raw.githubusercontent.com/Mattlau04/Discord-SVG-badges/master/PNG/HypeSquad_Bravery.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                                    {(userInfo.public_flags & HOUSE_BRILLIANCE) == HOUSE_BRILLIANCE &&              <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"House of Brilliance"}      placement="top"><Avatar alt="House of Brilliance"       src="https://raw.githubusercontent.com/Mattlau04/Discord-SVG-badges/master/PNG/HypeSquad_Brilliance.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                                    {(userInfo.public_flags & HOUSE_BALANCE) == HOUSE_BALANCE &&                    <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"House of Balance"}         placement="top"><Avatar alt="House of Balance"          src="https://raw.githubusercontent.com/Mattlau04/Discord-SVG-badges/master/PNG/HypeSquad_Balance.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                                    {(userInfo.public_flags & EARLY_SUPPORTER) == EARLY_SUPPORTER &&                <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Early Supporter"}          placement="top"><Avatar alt="Early Supporter"           src="https://raw.githubusercontent.com/Mattlau04/Discord-SVG-badges/master/PNG/early_supporter.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                                    {(userInfo.public_flags & VERIFIED_BOT_DEVELOPER) == VERIFIED_BOT_DEVELOPER &&  <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Verified Bot Developer"}   placement="top"><Avatar alt="Verified Bot Developer"    src="https://raw.githubusercontent.com/Mattlau04/Discord-SVG-badges/master/PNG/Verified_Bot_Developer.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                                    {(userInfo.public_flags & CERTIFIED_MODERATOR) == CERTIFIED_MODERATOR &&        <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title={"Certified Moderator"}      placement="top"><Avatar alt="Certified Moderator"       src="https://raw.githubusercontent.com/Mattlau04/Discord-SVG-badges/master/PNG/Discord_certified_moderator.png" sx={{ width: 28, height: 28 }}/></Tooltip>}
+                                                </Stack> : <></>}
+                                        </Stack>
+
+                                        <Stack spacing={1} direction="row" alignItems="center" sx={{ mt: 2 }}>
                                             {userInfo.location.isocode && <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200}} title={userInfo.location.country} placement="top"><Avatar alt="Bot" src={`https://cdn.ipregistry.co/flags/twemoji/${userInfo.location.isocode.toLowerCase()}.svg`} sx={{ width: 20, height: 20, borderRadius: 0 }} /></Tooltip>}
                                             {userInfo.ip && <Typography color="textSecondary" variant="body2">IP: <b>{userInfo.ip}</b></Typography>}
-                                        </>
-                                    }
+                                        </Stack>
 
-                                </Stack>
-                                {loadingInfo ? 
-                                    <>
-                                        <Skeleton animation="wave" variant="rectangular" width={225} height={16} sx={{ borderRadius: "14px", mt: 0.5 }} />
-                                        <Skeleton animation="wave" variant="rectangular" width={230} height={16} sx={{ borderRadius: "14px", mt: 0.5 }} />
-                                        <Skeleton animation="wave" variant="rectangular" width={200} height={16} sx={{ borderRadius: "14px", mt: 0.5 }} />
-                                        <Skeleton animation="wave" variant="rectangular" width={190} height={16} sx={{ borderRadius: "14px", mt: 0.5 }} />
-                                        <Skeleton animation="wave" variant="rectangular" width={170} height={16} sx={{ borderRadius: "14px", mt: 0.5 }} />
-                                    </> : <>
                                         {userInfo.location.country && <Typography color="textSecondary" variant="body2">Country: <b>{userInfo.location.country}</b></Typography>}
                                         {userInfo.location.region && <Typography color="textSecondary" variant="body2">Region: <b>{userInfo.location.region}</b></Typography>}
                                         {userInfo.location.city && <Typography color="textSecondary" variant="body2">City: <b>{userInfo.location.city}</b></Typography>}
@@ -210,7 +188,7 @@ export default function VerifiedMembers({ user }: any) {
                                         {userInfo.locale && <Typography color="textSecondary" variant="body2" sx={{ mt: 2 }}>Language: <b>{userInfo.locale.split("-")[1] ? userInfo.locale.split("-")[1] : userInfo.locale.toUpperCase()}</b></Typography>}
                                         {userInfo.mfa_enabled && <Typography color="textSecondary" variant="body2">2FA: <b>{userInfo.mfa_enabled ? "Enabled" : "Disabled"}</b></Typography>}
                                     </>
-                                }
+                                ) : <CircularProgress />}
                             </DialogContent>
                             <DialogActions sx={{ mx: 2, mb: 2, justifyContent: "flex-start" }}>
                                 <LoadingButton loading={loading} variant="contained" color="success" onClick={() => {
@@ -271,24 +249,17 @@ export default function VerifiedMembers({ user }: any) {
                                 }}>Delete</Button>
                             </DialogActions>
                         </Dialog>
+
+                        {isLoading ? ( <CircularProgress /> ) : (
+                            <>
                         
-                        <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
-                            {isLoading ? (
-                                <Skeleton animation="wave" variant="text" width={250} height={30} />
-                            ) : (
-                                <>
+                                <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                     {data?.pages ? ( 
                                         <>{data?.pages?.[0]?.max === 0 ? "No verified members" : `Showing ${data?.pages?.[0]?.max} verified members. (pullable ${data?.pages?.[0]?.pullable})`} </> 
                                     ) : (
                                         "Loading..."
                                     )}
-                                </>
-                            )}
-                        </Typography>
-                        {isLoading ? (
-                            <Skeleton animation="wave" variant="rectangular" width={"100%"} height={55} sx={{ borderRadius: "14px" }} />
-                        ) : (
-                            <>
+                                </Typography>
                                 <Stack direction="row" spacing={0} justifyContent="space-between" sx={{ flexDirection: { xs: "column", sm: "row" } }}>
                                     <TextField id="search" label="Search" variant="outlined" onChange={(e) => setSearch(e.target.value)} sx={{ width: { xs: "500", sm: "auto" } }} />
                                     <FormControl fullWidth sx={{ marginLeft: { xs: 0, sm: 1 }, mt: { xs: 1, sm: 0 } }}>
@@ -301,35 +272,6 @@ export default function VerifiedMembers({ user }: any) {
                                         </Select>
                                     </FormControl>
                                 </Stack>
-                            </>
-                        )}
-
-                        {isLoading ? (
-                            <Stack spacing={2}>
-                                {[...Array(15)].map((_, i) => (
-                                    <Paper key={i} variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
-                                        <CardContent>
-                                            <Grid container spacing={3} direction="row" justifyContent={"space-between"}>
-                                                <Grid item>
-                                                    <div style={{ display: "inline-flex", alignItems: "center" }}>
-                                                        <Skeleton animation="wave" variant="circular" width={40} height={40} sx={{ mr: "0.5rem" }} />
-                                                        <Skeleton animation="wave" variant="text" width={200} height={32} />
-                                                    </div>
-                                                    <Skeleton animation="wave" variant="text" width={200} height={20} />
-                                                </Grid>
-                                                <Grid item>
-                                                    <Stack spacing={1} direction="column" justifyContent={"space-between"}>
-                                                        <Skeleton animation="wave" variant="rectangular" width={100} height={35} sx={{ borderRadius: "14px" }} />
-                                                        <Skeleton animation="wave" variant="rectangular" width={100} height={35} sx={{ borderRadius: "14px" }} />
-                                                    </Stack>
-                                                </Grid>
-                                            </Grid>
-                                        </CardContent>
-                                    </Paper>
-                                ))}
-                            </Stack>
-                        ) : (
-                            <>
                                 {/* {data?.pages?.map((page) => page.members.map((item: any) => { */}
                                 {(data?.pages?.[0]?.members ?? []).map((item: any) => {
                                     return (
@@ -348,7 +290,7 @@ export default function VerifiedMembers({ user }: any) {
                                                                     {item.username}
                                                                 </Typography>
                                                             ) : (
-                                                                <Skeleton variant="text" width={150} />
+                                                                <CircularProgress />
                                                             )}
                                                             {item.unauthorized && (
                                                                 <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} placement="top" disableInteractive title="Unauthorized">
@@ -379,8 +321,7 @@ export default function VerifiedMembers({ user }: any) {
                                         </Paper>
                                     );
                                 })}
-                            </>
-                        )}
+                            </>)}
 
                         <Box sx={{ display: "flex", justifyContent: "center", mt: "1rem", alignItems: "center" }}>
                             {hasNextPage && (

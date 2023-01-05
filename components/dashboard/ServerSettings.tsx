@@ -47,6 +47,7 @@ export default function DashServerSettings({ user, id }: any) {
     const [notiTextE, setNotiTextE] = useState("X");
     
     const [confirmDelete, setConfirmDelete] = useState(false);
+    const [confirmDeleteTimer, setConfirmDeleteTimer] = useState(5);
 
     useEffect(() => {
         if (server) {
@@ -194,36 +195,43 @@ export default function DashServerSettings({ user, id }: any) {
                                         <li>All Verified Members</li>
                                         <li>All Customized Settings</li>
                                     </ul>
+
+                                    {confirmDeleteTimer > 0 && 
+                                        <Typography variant="body1" sx={{ fontWeight: "500", color: theme.palette.warning.main }}>
+                                            ⚠ You can delete this Server in {confirmDeleteTimer} second{confirmDeleteTimer > 1 && "s"}.
+                                        </Typography>
+                                    }
                                 </DialogContentText>
                             </DialogContent>
                             <DialogActions>
-                                <Button onClick={() => {
-                                    setConfirmDelete(false);
+                                <Button disabled={confirmDeleteTimer > 0}
+                                    onClick={() => {
+                                        setConfirmDelete(false);
 
-                                    axios.delete(`/api/v1/server/${guildId}`, { headers: {
-                                        "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
-                                    },
-                                    validateStatus: () => true
-                                    })
-                                        .then((res: any) => {
-                                            if (!res.data.success) {
-                                                setNotiTextE(res.data.message);
-                                                setOpenE(true);
-                                            }
-                                            else {
-                                                setNotiTextS(res.data.message);
-                                                setOpenS(true);
-                                                setTimeout(() => {
-                                                    router.push("/dashboard/settings");
-                                                }, 1250);
-                                            }
+                                        axios.delete(`/api/v1/server/${guildId}`, { headers: {
+                                            "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                        },
+                                        validateStatus: () => true
                                         })
-                                        .catch((err: any) => {
-                                            setNotiTextE(err.message);
-                                            setOpenE(true);
-                                            console.error(err);
-                                        });
-                                } } color="error">
+                                            .then((res: any) => {
+                                                if (!res.data.success) {
+                                                    setNotiTextE(res.data.message);
+                                                    setOpenE(true);
+                                                }
+                                                else {
+                                                    setNotiTextS(res.data.message);
+                                                    setOpenS(true);
+                                                    setTimeout(() => {
+                                                        router.push("/dashboard/settings");
+                                                    }, 1250);
+                                                }
+                                            })
+                                            .catch((err: any) => {
+                                                setNotiTextE(err.message);
+                                                setOpenE(true);
+                                                console.error(err);
+                                            });
+                                    } } color="error">
                                     Delete
                                 </Button>
                                 <Button onClick={() => setConfirmDelete(false)} color="primary" autoFocus>
@@ -239,7 +247,21 @@ export default function DashServerSettings({ user, id }: any) {
                                         <Button variant="contained" sx={{ mb: 2, mr: 2 }} onClick={() => { router.push(`/dashboard/settings/`)} }>
                                             &lt;- Go Back
                                         </Button>
-                                        <Button variant="contained" color="error" sx={{ mb: 2 }} onClick={() => { setConfirmDelete(true) }}>
+                                        <Button variant="contained" color="error" sx={{ mb: 2 }} onClick={() => { 
+                                            setConfirmDelete(true) 
+                                            new Promise((resolve, reject) => {
+                                                let timer = 3;
+                                                setConfirmDeleteTimer(timer--);
+                                                const interval = setInterval(() => {
+                                                    setConfirmDeleteTimer(timer);
+                                                    timer--;
+                                                    if (timer === -1) {
+                                                        clearInterval(interval);
+                                                        resolve(true);
+                                                    }
+                                                }, 1000);
+                                            });
+                                        }}>
                                             Delete Server
                                         </Button>
                                     </Grid>

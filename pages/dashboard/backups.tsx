@@ -44,6 +44,7 @@ export default function Backups() {
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [restoreDialog, setRestoreDialog] = useState(false);
     const [backupId, setBackupId] = useState("0");
+    const [confirmDeleteTimer, setConfirmDeleteTimer] = useState(5);
 
     const [restoreOptions, setRestoreOptions] = useState({
         clearGuild: false,
@@ -121,34 +122,41 @@ export default function Backups() {
                                             <li>Channels</li>
                                             <li>Roles</li>
                                             <li>Member Nicknames/Roles</li>
+
+                                            {confirmDeleteTimer > 0 && 
+                                                <Typography variant="body1" sx={{ fontWeight: "500", color: theme.palette.warning.main }}>
+                                                    ⚠ You can delete this Backup in {confirmDeleteTimer} second{confirmDeleteTimer > 1 && "s"}.
+                                                </Typography>
+                                            }
                                         </DialogContentText>
                                     </DialogContent>
                                     <DialogActions>
-                                        <Button onClick={() => {
-                                            setConfirmDelete(false);
+                                        <Button disabled={confirmDeleteTimer > 0}
+                                            onClick={() => {
+                                                setConfirmDelete(false);
 
-                                            axios.get(`/api/v1/server/backup/delete/${backupId}`, { headers: {
-                                                "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
-                                            },
-                                            validateStatus: () => true
-                                            })
-                                                .then((res: any) => {
-                                                    if (!res.data.success) {
-                                                        setNotiTextE(res.data.message);
-                                                        setOpenE(true);
-                                                    }
-                                                    else {
-                                                        setNotiTextS(res.data.message);
-                                                        setOpenS(true);
-                                                        userData.backups.splice(userData.backups.findIndex((backup: any) => backup.backupId === backupId), 1);
-                                                    }
+                                                axios.get(`/api/v1/server/backup/delete/${backupId}`, { headers: {
+                                                    "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                },
+                                                validateStatus: () => true
                                                 })
-                                                .catch((err: any) => {
-                                                    setNotiTextE(err.message);
-                                                    setOpenE(true);
-                                                    console.error(err);
-                                                });
-                                        } } color="error">
+                                                    .then((res: any) => {
+                                                        if (!res.data.success) {
+                                                            setNotiTextE(res.data.message);
+                                                            setOpenE(true);
+                                                        }
+                                                        else {
+                                                            setNotiTextS(res.data.message);
+                                                            setOpenS(true);
+                                                            userData.backups.splice(userData.backups.findIndex((backup: any) => backup.backupId === backupId), 1);
+                                                        }
+                                                    })
+                                                    .catch((err: any) => {
+                                                        setNotiTextE(err.message);
+                                                        setOpenE(true);
+                                                        console.error(err);
+                                                    });
+                                            } } color="error">
                                             Delete
                                         </Button>
                                         <Button onClick={() => setConfirmDelete(false)} color="primary" autoFocus>
@@ -255,6 +263,18 @@ export default function Backups() {
                                                     <Button variant="contained" color="error" onClick={(e) => { 
                                                         setBackupId(backup.backupId);
                                                         setConfirmDelete(true);
+                                                        new Promise((resolve, reject) => {
+                                                            let timer = 3;
+                                                            setConfirmDeleteTimer(timer--);
+                                                            const interval = setInterval(() => {
+                                                                setConfirmDeleteTimer(timer);
+                                                                timer--;
+                                                                if (timer === -1) {
+                                                                    clearInterval(interval);
+                                                                    resolve(true);
+                                                                }
+                                                            }, 1000);
+                                                        });
                                                     }}>Delete</Button>
                                                 </CardActions>
                                             </Paper>
