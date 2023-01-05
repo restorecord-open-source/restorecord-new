@@ -76,6 +76,9 @@ export default function DashBoard({ user }: any) {
                 toolbar: {
                     show: false
                 },
+                sparkline: {
+                    enabled: false
+                },
             },
             dataLabels: {
                 enabled: false
@@ -109,7 +112,7 @@ export default function DashBoard({ user }: any) {
                     show: false
                 },
                 onDatasetHover: {
-                    highlightDataSeries: false,
+                    highlightDataSeries: true,
                 },
             },
             noData: {
@@ -127,10 +130,16 @@ export default function DashBoard({ user }: any) {
             },
             xaxis: {
                 labels: {
-                    show: false
+                    show: true,
+                    rotate: 0,
+                    rotateAlways: false,
+                    hideOverlappingLabels: true,
                 },
                 tooltip: {
                     enabled: false
+                },
+                crosshairs: {
+                    show: false,
                 },
                 categories: timeArr
             },
@@ -162,7 +171,7 @@ export default function DashBoard({ user }: any) {
         ]
     };
 
-    if (!user.username || !data2) {
+    if (!user.username) {
         return <CircularProgress />
     }
 
