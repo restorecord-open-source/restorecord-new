@@ -43,7 +43,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
                             await Email.send({
                                 to: body.invoice.customer_information.email,
-                                from: "no-reply@restorecord.com",
+                                from: {
+                                    email: "no-reply@restorecord.com",
+                                    name: "RestoreCord"
+                                },
                                 subject: `Thank you for upgrading to ${body.listing.title}!`,
                                 html:
                                 `
@@ -100,7 +103,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                         } else {
                             await Email.send({
                                 to: body.invoice.customer_information.email,
-                                from: "no-reply@restorecord.com",
+                                from: {
+                                    email: "no-reply@restorecord.com",
+                                    name: "RestoreCord"
+                                },
                                 subject: `Purchase failed for: ${body.listing.title}!`,
                                 text: `Hello ${body.additional_information[0].value}, Thank you for your purchase of RestoreCord ${body.listing.title}, however, we were unable to process your payment. We couldn't find your account in our database, so we couldn't upgrade you. please contact support below. If you have any questions, please contact us at support@restorecord.com. Sincerely, RestoreCord`,
                                 html: `

@@ -161,22 +161,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     });
 
                     await Email.send({
-                        // "Messages": [
-                        //     {
-                        //         "From": {
-                        //             "Email": "noreply@restorecord.com",
-                        //             "Name": "RestoreCord",
-                        //         },
-                        //         "To": [
-                        //             {
-                        //                 "Email": account.email,
-                        //                 "Name": account.username,
-                        //             },
-                        //         ],
-                        //         "Subject": "Password Change Confirmation",
-                        //         "HTMLPart": 
                         to: account.email,
-                        from: "no-reply@restorecord.com",
+                        from: {
+                            email: "no-reply@restorecord.com",
+                            name: "RestoreCord"
+                        },
                         subject: "Password Change Confirmation",
                         html:
                         `
@@ -249,22 +238,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     
                     await axios.get(`https://ipinfo.io/${getIPAddress(req)}/json?token=${process.env.IPINFO_TOKEN}`).then(async (res) => {
                         await Email.send({
-                            // "Messages": [
-                            //     {
-                            //         "From": {
-                            //             "Email": "noreply@restorecord.com",
-                            //             "Name": "RestoreCord",
-                            //         },
-                            //         "To": [
-                            //             {
-                            //                 "Email": account.email,
-                            //                 "Name": account.username,
-                            //             },
-                            //         ],
-                            //         "Subject": "RestoreCord Password Changed",
-                            //         "HTMLPart": 
                             to: account.email,
-                            from: "no-reply@restorecord.com",
+                            from: {
+                                email: "no-reply@restorecord.com",
+                                name: "RestoreCord"
+                            },
                             subject: "RestoreCord Password Changed",
                             html:
                             `
@@ -408,7 +386,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         await axios.get(`https://ipinfo.io/${getIPAddress(req)}/json?token=${process.env.IPINFO_TOKEN}`).then(async (res) => {
                             await Email.send({
                                 to: account.email,
-                                from: "no-reply@restorecord.com",
+                                from: {
+                                    email: "no-reply@restorecord.com",
+                                    name: "RestoreCord"
+                                },
                                 subject: "RestoreCord Two-Factor Authentication Enabled",
                                 html:
                                 `

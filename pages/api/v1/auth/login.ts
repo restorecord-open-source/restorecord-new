@@ -90,7 +90,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             await axios.get(`https://ipinfo.io/${getIPAddress(req)}/json?token=${process.env.IPINFO_TOKEN}`).then(async (res) => {
                 await Email.send({
                     to: account.email,
-                    from: "no-reply@restorecord.com",
+                    from: {
+                        email: "no-reply@restorecord.com",
+                        name: "RestoreCord"
+                    },
                     subject: "New Login Detected",
                     text: `Hello ${account.username},\n\nA new login was detected from ${res.data.city ?? "Unknown City"}, ${res.data.region ?? "Unknown Region"}, ${res.data.country ?? "Unknown Country"}.\n\nIf this was not you, please change your password immediately.\n\nRegards,\nRestoreCord`,
                     html: 

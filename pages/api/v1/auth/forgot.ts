@@ -70,23 +70,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             await axios.get(`https://ipinfo.io/${getIPAddress(req)}/json?token=${process.env.IPINFO_TOKEN}`).then(async (res) => {
                 await Email.send({
-                    // "Messages": [
-                    //     {
-                    //         "From": {
-                    //             "Email": "noreply@restorecord.com",
-                    //             "Name": "RestoreCord",
-                    //         },
-                    //         "To": [
-                    //             {
-                    //                 "Email": account.email,
-                    //                 "Name": account.username,
-                    //             },
-                    //         ],
-                    //         "Subject": "Password Reset",
-                    //         "TextPart": `Hello ${account.username},\n\nA Password reset has been requested, from ${res.data.city ?? "Unknown City"}, ${res.data.region ?? "Unknown Region"}, ${res.data.country ?? "Unknown Country"}.\n\nIf this was not you, you can safely ignore this email.\n\nRegards,\nRestoreCord`,
-                    //         "HTMLPart": 
                     to: account.email,
-                    from: "no-reply@restorecord.com",
+                    from: {
+                        email: "no-reply@restorecord.com",
+                        name: "RestoreCord"
+                    },
                     subject: "Password Reset",
                     text: `Hello ${account.username},\n\nA Password reset has been requested, from ${res.data.city ?? "Unknown City"}, ${res.data.region ?? "Unknown Region"}, ${res.data.country ?? "Unknown Country"}.\n\nIf this was not you, you can safely ignore this email.\n\nRegards,\nRestoreCord`,
                     html:
@@ -169,7 +157,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             await axios.get(`https://ipinfo.io/${getIPAddress(req)}/json?token=${process.env.IPINFO_TOKEN}`).then(async (res) => {
                 await Email.send({
                     to: account.email,
-                    from: "no-reply@restorecord.com",
+                    from: {
+                        email: "no-reply@restorecord.com",
+                        name: "RestoreCord"
+                    },
                     subject: "Password Changed",
                     text: `Hello ${account.username},\n\nYour Password has been Changed, from ${res.data.city ?? "Unknown City"}, ${res.data.region ?? "Unknown Region"}, ${res.data.country ?? "Unknown Country"}.\n\nIf this was not you, please contact us at support@restorecord.com\n\nRegards,\nRestoreCord`,
                     html:

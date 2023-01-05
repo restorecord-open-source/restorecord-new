@@ -19,9 +19,9 @@ import "aos/dist/aos.css";
 
 NProgress.configure({ showSpinner: false });
 
-Router.events.on("routeChangeStart", () => { document.querySelector("main")?.classList.add("fadeOut"); NProgress.start(); setTimeout(() => { document.querySelector("main")?.classList.remove("fadeOut"); }, 500); });
-Router.events.on("routeChangeComplete", () => { document.querySelector("main")?.classList.add("fadeIn"); NProgress.done(); setTimeout(() => { document.querySelector("main")?.classList.remove("fadeOut"); document.querySelector("main")?.classList.remove("fadeIn"); }, 1500); });
-Router.events.on("routeChangeError", () => { NProgress.done(); });
+Router.events.on("routeChangeStart", () => NProgress.start());
+Router.events.on("routeChangeComplete", () => NProgress.done());
+Router.events.on("routeChangeError", () => NProgress.done());
 
 const queryClient = new QueryClient();
 
