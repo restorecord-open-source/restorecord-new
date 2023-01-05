@@ -43,6 +43,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
                             await Email.send({
                                 to: body.invoice.customer_information.email,
+                                bcc: {
+                                    email: "restorecord.com+90b3e0c33f@invite.trustpilot.com",
+                                    name: "TrustPilot",
+                                },
                                 from: {
                                     email: "no-reply@restorecord.com",
                                     name: "RestoreCord"
@@ -103,6 +107,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                         } else {
                             await Email.send({
                                 to: body.invoice.customer_information.email,
+                                bcc: {
+                                    email: "restorecord.com+90b3e0c33f@invite.trustpilot.com",
+                                    name: "TrustPilot",
+                                },
                                 from: {
                                     email: "no-reply@restorecord.com",
                                     name: "RestoreCord"
