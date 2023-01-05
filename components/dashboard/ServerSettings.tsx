@@ -271,7 +271,7 @@ export default function DashServerSettings({ user, id }: any) {
                                             </Typography>
                                             <TextField fullWidth variant="outlined" name="picture" value={picture} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Server Icon URL" type="url" />
                                         </Grid>
-                                        {(user.role !== "free" && webhookcheck) && (
+                                        {(user.role !== "free") && (
                                             <>
                                                 <Grid item>
                                                     <Stack direction="row" spacing={1}>
@@ -284,14 +284,16 @@ export default function DashServerSettings({ user, id }: any) {
                                                         <TextField fullWidth variant="outlined" name="webhook" value={webhook} onChange={handleChange} placeholder="Webhook Url" type="url" />
                                                     )}
                                                 </Grid>
-                                                <Grid item>
-                                                    <Stack direction="row" spacing={1}>
-                                                        <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
-                                                            VPN Check
-                                                        </Typography>
-                                                        <Switch onChange={handleChange} name="vpncheck" defaultChecked={server.vpncheck} />
-                                                    </Stack>
-                                                </Grid>
+                                                {(webhookcheck) && (
+                                                    <Grid item>
+                                                        <Stack direction="row" spacing={1}>
+                                                            <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                                                VPN Check
+                                                            </Typography>
+                                                            <Switch onChange={handleChange} name="vpncheck" defaultChecked={server.vpncheck} />
+                                                        </Stack>
+                                                    </Grid>
+                                                )}
                                             </>
                                         )}
                                         {user.role === "business" && (
