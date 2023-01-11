@@ -60,7 +60,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 if (blacklist.find((b) => b.type === 2 && b.value === proxCheck[IPAddr].asn.replace("AS", "") as string)) {
                                     let reason = blacklist.find((b) => b.type === 2 && b.value === proxCheck[IPAddr].asn.replace("AS", "") as string)?.reason;
 
-                                    // await sendWebhookMessage(serverInfo?.webhook, "Tried to verify while being blacklisted", serverOwner, proxCheck, IPAddr, account);
+                                    await sendWebhookMessage(serverInfo?.webhook, "Failed Blacklist Check", serverOwner, proxCheck, IPAddr, account, 0);
                                     
                                     res.setHeader("Set-Cookie", `RC_err=307 RC_errStack=ASN: ${String(proxCheck[IPAddr].asn.replace("AS", "")) as string} ${reason ? `Reason: ${reason}` : ""}; Path=/; Max-Age=5;`);
                                     return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
@@ -72,7 +72,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                             const pCheck = await ProxyCheck.check(IPAddr, { vpn: true, asn: true });
 
                             if (serverInfo.vpncheck && pCheck[IPAddr].proxy === "yes") {
-                                await sendWebhookMessage(serverInfo.webhook, "Failed VPN Check", serverOwner, pCheck, IPAddr, account);
+                                await sendWebhookMessage(serverInfo.webhook, "Failed VPN Check", serverOwner, pCheck, IPAddr, account, 0);
 
                                 res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=5;`);
                                 return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
