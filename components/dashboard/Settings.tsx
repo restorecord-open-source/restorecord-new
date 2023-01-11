@@ -1,7 +1,7 @@
-import { useRouter } from "next/router";
-import { useState } from "react";
 import { stringAvatar } from "../../src/functions";
 import { useToken } from "../../src/token";
+import { useRouter } from "next/router";
+import { useEffect, useState } from 'react'
 
 import axios from "axios";
 
@@ -22,15 +22,27 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
+import DialogActions from "@mui/material/DialogActions";
+import { CircularProgress } from "@mui/material";
 
 export default function DashSettings({ user }: any) {
     const [token]: any = useToken();
     const router = useRouter();
 
+    const [pullWindow, setPullWindow] = useState(false);
     const [serverName, setServerName] = useState("");
     const [guildId, setGuildId] = useState("");
     const [roleId, setRoleId] = useState("");
     const [customBot, setCustomBot] = useState("");
+    const [customBotToken, setCustomBotToken] = useState("");
+
+    const [allServers, setAllServers] = useState([]);
+    const [selectedServer, setSelectedServer] = useState("");
 
     const [openS, setOpenS] = useState(false);
     const [openE, setOpenE] = useState(false);
@@ -51,12 +63,6 @@ export default function DashSettings({ user }: any) {
                 "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
             },
             body: JSON.stringify(body),
-            // body: JSON.stringify({
-            //     serverName: serverName,
-            //     guildId: guildId,
-            //     roleId: roleId,
-            //     customBot: customBot,
-            // })
         })
             .then(res => res.json())
             .then(res => {
@@ -78,8 +84,30 @@ export default function DashSettings({ user }: any) {
                 setNotiTextE(err.message);
                 setOpenE(true);
             });
-
     }
+
+    function getAllGuilds() {
+        setAllServers([]);
+        axios.get("/api/v1/users/guilds", {
+            headers: {
+                "Authorization": `Bot ${customBotToken}`,
+            },
+        })
+            .then(res => {
+                if (res.data.code) { setAllServers([]); setNotiTextE(res.data.message); setOpenE(true); }
+                else setAllServers(res.data);
+            })
+            .catch(err => {
+                setAllServers([]);
+                console.error(err);
+            });
+    }
+
+
+    useEffect(() => {
+        if (customBotToken) getAllGuilds();
+    }, [customBotToken]);
+
 
     return (
         <>
@@ -103,7 +131,84 @@ export default function DashSettings({ user }: any) {
                                 {notiTextI}
                             </Alert>
                         </Snackbar>
-                        
+
+                        <Dialog open={pullWindow} onClose={() => setPullWindow(false)} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" fullWidth maxWidth="sm">
+                            <DialogTitle id="alert-dialog-title">
+                                <Typography variant="h6" sx={{ fontWeight: "500" }}>
+                                    Migration
+                                </Typography>
+                                <IconButton aria-label="close" onClick={() => setPullWindow(false)} sx={{ position: 'absolute', right: 8, top: 8, color: theme.palette.grey[500] }}>
+                                    <CloseIcon />
+                                </IconButton>
+                            </DialogTitle>
+                            <DialogContent>
+                                <Typography variant="body1" sx={{ fontWeight: "400", mb: "1rem" }}>
+                                    Select the server you want to pull your members into, make sure you invited the bot to the server.
+                                </Typography>
+                                <Typography variant="body1" sx={{ fontWeight: "400", mb: "1rem", color: theme.palette.warning.main }}>
+                                    ⚠ Warning: This will only pull members.
+                                </Typography>
+                                {allServers.length === 0 ? (
+                                    <>
+                                        <Typography variant="body1" sx={{ fontWeight: "400", mb: "1rem" }}>
+                                            No servers found, try refreshing.
+                                        </Typography>
+                                        <CircularProgress />
+                                    </>
+                                ) : (
+                                    <FormControl fullWidth variant="outlined" required>
+                                        <InputLabel id="server-select-label">Select Server</InputLabel>
+                                        <Select labelId="server-select-label" label="Select Server" value={selectedServer} onChange={(e) => setSelectedServer(e.target.value as string)} required>
+                                            {Array.isArray(allServers) && allServers.map((item: any) => {
+                                                if (allServers.filter((i: any) => i.name === item.name).length > 1) return <MenuItem key={item.id} value={item.id}>{item.name} ({item.id})</MenuItem>;
+                                                else return <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>;
+                                            })}
+                                        </Select>
+                                    </FormControl>
+                                )}
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={() => getAllGuilds()} color="primary" variant="contained" sx={{ mr: 1 }}>
+                                    Refresh Server List
+                                </Button>
+                                <Button onClick={() => (
+                                    axios.put(`/api/v1/server/${guildId}?server=${selectedServer}`, {}, {
+                                        headers: {
+                                            "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                        },
+                                        validateStatus: () => true
+                                    })
+                                        .then(res => {
+                                            setOpenI(false);
+                                            if (!res.data.success) {
+                                                if (res.data.pullTimeout) {
+                                                    const timeArr = new Date(new Date(res.data.pullTimeout).getTime() - new Date().getTime()).toISOString().substr(11, 8).split(":");
+                                                    const hours = parseInt(timeArr[0]);
+                                                    const minutes = parseInt(timeArr[1]);
+                                                    const seconds = parseInt(timeArr[2]);
+                                                    const timeString = `${hours > 0 ? `${hours} hour${hours > 1 ? "s" : ""} ` : ""}${minutes > 0 ? `${minutes} minute${minutes > 1 ? "s" : ""} ` : ""}${seconds > 0 ? `${seconds} second${seconds > 1 ? "s" : ""} ` : ""}`;
+                                                    setNotiTextE(`${res.data.message} ${timeString}`);
+                                                }
+                                                else {
+                                                    setNotiTextE(res.data.message);
+                                                }
+                                                setOpenE(true);
+                                            }
+                                            else {
+                                                setNotiTextS(res.data.message);
+                                                setOpenS(true);
+                                            }
+                                        })
+                                        .catch((err): any => {
+                                            setNotiTextE(err.message);
+                                            setOpenE(true);
+                                            console.error(err);
+                                        })
+                                )} color="success" variant="contained" sx={{ mr: 1 }}>
+                                    Pull Members
+                                </Button>
+                            </DialogActions>
+                        </Dialog>
 
                         {!createNewServer && (Array.isArray(user.servers) && user.servers.length >= 1) && (
                             <>
@@ -148,40 +253,43 @@ export default function DashSettings({ user }: any) {
                                                                 Edit
                                                             </Button>
                                                             <Button variant="contained" color="success" onClick={() => {
-                                                                setNotiTextI("Pulling members please wait...");
-                                                                setOpenI(true);
-                                                                axios.put(`/api/v1/server/${item.guildId}`, {}, { 
-                                                                    headers: {
-                                                                        "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
-                                                                    },
-                                                                    validateStatus: () => true
-                                                                })
-                                                                    .then(res => {
-                                                                        setOpenI(false);
-                                                                        if (!res.data.success) {
-                                                                            if (res.data.pullTimeout) {
-                                                                                const timeArr = new Date(new Date(res.data.pullTimeout).getTime() - new Date().getTime()).toISOString().substr(11, 8).split(":");
-                                                                                const hours = parseInt(timeArr[0]);
-                                                                                const minutes = parseInt(timeArr[1]);
-                                                                                const seconds = parseInt(timeArr[2]);
-                                                                                const timeString = `${hours > 0 ? `${hours} hour${hours > 1 ? "s" : ""} ` : ""}${minutes > 0 ? `${minutes} minute${minutes > 1 ? "s" : ""} ` : ""}${seconds > 0 ? `${seconds} second${seconds > 1 ? "s" : ""} ` : ""}`;
-                                                                                setNotiTextE(`${res.data.message} ${timeString}`);
-                                                                            }
-                                                                            else {
-                                                                                setNotiTextE(res.data.message);
-                                                                            }
-                                                                            setOpenE(true);
-                                                                        }
-                                                                        else {
-                                                                            setNotiTextS(res.data.message);
-                                                                            setOpenS(true);
-                                                                        }
-                                                                    })
-                                                                    .catch((err): any => {
-                                                                        setNotiTextE(err.message);
-                                                                        setOpenE(true);
-                                                                        console.error(err);
-                                                                    });
+                                                                setCustomBotToken(user.bots.find((bot: any) => bot.id === (user.servers.find((server: any) => server.guildId === item.guildId).customBotId)).botToken);
+                                                                setGuildId(item.id);
+                                                                setPullWindow(true);
+                                                                // setNotiTextI("Pulling members please wait...");
+                                                                // setOpenI(true);
+                                                                // axios.put(`/api/v1/server/${item.guildId}`, {}, { 
+                                                                //     headers: {
+                                                                //         "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                                //     },
+                                                                //     validateStatus: () => true
+                                                                // })
+                                                                //     .then(res => {
+                                                                //         setOpenI(false);
+                                                                //         if (!res.data.success) {
+                                                                //             if (res.data.pullTimeout) {
+                                                                //                 const timeArr = new Date(new Date(res.data.pullTimeout).getTime() - new Date().getTime()).toISOString().substr(11, 8).split(":");
+                                                                //                 const hours = parseInt(timeArr[0]);
+                                                                //                 const minutes = parseInt(timeArr[1]);
+                                                                //                 const seconds = parseInt(timeArr[2]);
+                                                                //                 const timeString = `${hours > 0 ? `${hours} hour${hours > 1 ? "s" : ""} ` : ""}${minutes > 0 ? `${minutes} minute${minutes > 1 ? "s" : ""} ` : ""}${seconds > 0 ? `${seconds} second${seconds > 1 ? "s" : ""} ` : ""}`;
+                                                                //                 setNotiTextE(`${res.data.message} ${timeString}`);
+                                                                //             }
+                                                                //             else {
+                                                                //                 setNotiTextE(res.data.message);
+                                                                //             }
+                                                                //             setOpenE(true);
+                                                                //         }
+                                                                //         else {
+                                                                //             setNotiTextS(res.data.message);
+                                                                //             setOpenS(true);
+                                                                //         }
+                                                                //     })
+                                                                //     .catch((err): any => {
+                                                                //         setNotiTextE(err.message);
+                                                                //         setOpenE(true);
+                                                                //         console.error(err);
+                                                                //     });
                                                             }}>Migrate</Button>
                                                             {user.role === "business" && (
                                                                 <Button variant="contained" color="yellow" onClick={() => {
@@ -225,7 +333,7 @@ export default function DashSettings({ user }: any) {
                         {(createNewServer || (Array.isArray(user.servers) && user.servers.length === 0)) && (
                             <>
                                 <Button variant="contained" sx={{ mb: 2 }} onClick={() => setCreateNewServer(false)}>
-                                    Go Back
+                                    &lt;- Go Back
                                 </Button>
                                 <Paper variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
                                     <CardContent>
@@ -266,4 +374,3 @@ export default function DashSettings({ user }: any) {
         </>
     )
 }
-
