@@ -39,7 +39,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 if (!account) return res.status(400).json({ success: false, message: "No account found." });
 
-                const allBackups = backups.map(async(backup) => {
+                const allBackups = backups.map(async(backup: backups) => {
                     const channelCount = await prisma.channels.count({ where: { backupId: backup.backupId } });
                     const roleCount = await prisma.roles.count({ where: { backupId: backup.backupId } });
                     const guildMemberCount = await prisma.guildMembers.count({ where: { backupId: backup.backupId } });
@@ -65,7 +65,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     createdAt: account.createdAt,
                     expiry: account.expiry,
                     tfa: account.twoFactor,
-                    servers: servers.map(server => ({
+                    servers: servers.map((server: servers) => ({
                         id: server.id,
                         name: server.name,
                         guildId: server.guildId.toString(),
@@ -76,7 +76,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         bgImage: server.bgImage,
                         themeColor: server.themeColor,
                         vpncheck: server.vpncheck,
-                        createdAt: server.createdAt
+                        createdAt: server.createdAt,
+                        customBotId: server.customBotId
                     })),
                     backups: await Promise.all(allBackups),
                     bots: customBots.map((bot: customBots) => ({

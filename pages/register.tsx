@@ -16,6 +16,7 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import { LoadingButton } from "@mui/lab";
 
 export default function Register() {
     const [username, setUsername] = useState("");
@@ -31,21 +32,26 @@ export default function Register() {
     const captchaRef: any = useRef();
     const router = useRouter();
     
+    const [loadingBtn, setLoadingBtn] = useState(false);
+    
 
     const onExpire = () => {
         setNotiTextE("Captcha expired");
         setOpenE(true);
+        setLoadingBtn(false);
         // functions.ToastAlert("Captcha expired", "error");
     }
 
     const onError = (err: any) => {
         setNotiTextE(err);
         setOpenE(true);
+        setLoadingBtn(false);
         // functions.ToastAlert(err, "error");
     }
 
     const onSubmit = (e: any) => {
         e.preventDefault();
+        setLoadingBtn(true);
         captchaRef.current.execute();
     }
 
@@ -83,6 +89,7 @@ export default function Register() {
                 })
                     .then(res => res.json())
                     .then(res => {
+                        setLoadingBtn(false);
                         setToken(null);
                         if (res.success) {
                             setNotiTextS("Account created");
@@ -186,15 +193,16 @@ export default function Register() {
                                     onExpire={onExpire}
                                     ref={captchaRef}
                                 />
-                                <Button
+                                <LoadingButton
                                     type="submit"
                                     fullWidth
                                     variant="contained"
                                     color="primary"
                                     sx={{ mt: "1rem", mb: "0.5rem" }}
+                                    loading={loadingBtn}
                                 >
                                     Register
-                                </Button>
+                                </LoadingButton>
                                 <Grid container>
                                     <Grid item xs>
                                         <Typography variant="body2" gutterBottom>

@@ -133,58 +133,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 const token = req.headers.authorization as string;
                 const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
 
-                const guildId: any = req.query.serverId;
+                const serverId: number = req.query.serverId as any;
+                if (!serverId) return res.status(400).json({ success: false, message: "Server ID not provided" });
+
+                // get ?server=123123 from url
+                const guildId = req.query.server as string;
+                if (!guildId) return res.status(400).json({ success: false, message: "Server not provided" });
                 
                 if (!valid) return res.status(400).json({ success: false });
 
                 const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
-                
                 if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
 
-                const account = await prisma.accounts.findFirst({
-                    where: {
-                        id: valid.id
-                    }
-                });
-
+                const account = await prisma.accounts.findFirst({ where: { id: valid.id } });
                 if (!account) return res.status(400).json({ success: false, message: "Account not found" });
 
-                const server = await prisma.servers.findFirst({
-                    where: {
-                        AND: [
-                            { ownerId: account.id },
-                            { guildId: BigInt(guildId) }
-                        ]
-                    }
-                });
-
+                const server = await prisma.servers.findFirst({ where: { AND: [ { id: Number(serverId) as number }, { ownerId: account.id } ] } });
                 if (!server) return res.status(400).json({ success: false, message: "Server not found" });
 
-                const bot = await prisma.customBots.findFirst({
-                    where: {
-                        AND: [
-                            { ownerId: account.id },
-                            { id: server.customBotId }
-                        ]
-                    }
-                });
-
+                const bot = await prisma.customBots.findFirst({ where: { AND: [ { ownerId: account.id }, { id: server.customBotId } ] } });
                 if (!bot) return res.status(400).json({ success: false, message: "Bot not found" });
 
-                const members = await prisma.members.findMany({
-                    where: {
-                        AND: [
-                            { guildId: BigInt(guildId), },
-                            { accessToken: { not: "unauthorized" } }
-                        ]
-                    }
-                });
-
+                const members = await prisma.members.findMany({ where: { AND: [ { guildId: BigInt(server.guildId) }, { accessToken: { not: "unauthorized" } } ] } });
                 if (members.length === 0) return res.status(400).json({ success: false, message: "No members found" });
-
-                if (server.pulling === true) return res.status(400).json({ success: false, message: "You are already pulling" });
-
-                if (server.pullTimeout !== null) if (server.pullTimeout > new Date()) return res.status(400).json({ success: false, message: "You're on cooldown, you can pull again in", pullTimeout: server.pullTimeout });
 
                 axios.get(`https://discord.com/api/v10/users/@me`, {
                     headers: {
@@ -199,6 +170,47 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 }).then(async (response) => {
                     if (response.status !== 200) return res.status(400).json({ success: false, message: "Invalid bot token" });
                 });
+
+                // check if the server exists on discord (guildId)
+                axios.get(`https://discord.com/api/v10/guilds/${server.guildId}`, {
+                    headers: {
+                        "Authorization": `Bot ${bot.botToken}`,
+                        "Content-Type": "application/json",
+                        "X-RateLimit-Precision": "millisecond",
+                        "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
+                    },
+                    proxy: false,
+                    httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
+                    validateStatus: () => true,
+                }).then(async (response) => {
+                    if (response.status !== 200) return res.status(400).json({ success: false, message: "Server doesn't exist on discord" });
+                }).catch(async (err) => {
+                    console.error(err);
+                    return res.status(400).json({ success: false, message: "Something went wrong" });
+                });
+
+                // try to give the bot the verified role
+                axios.put(`https://discord.com/api/v10/guilds/${server.guildId}/members/${bot.clientId}/roles/${server.roleId}`, {}, {
+                    headers: {
+                        "Authorization": `Bot ${bot.botToken}`,
+                        "Content-Type": "application/json",
+                        "X-RateLimit-Precision": "millisecond",
+                        "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
+                    },
+                    proxy: false,
+                    httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
+                    validateStatus: () => true,
+                }).then(async (response) => {
+                    if (response.status === 403) return res.status(400).json({ success: false, message: "Bot doesn't have permissions to give verified role" });
+                    if (response.status === 404) return res.status(400).json({ success: false, message: "Verified role not found" });
+                }).catch(async (err) => {
+                    console.error(err);
+                    return res.status(400).json({ success: false, message: "Something went wrong" });
+                });
+
+                if (server.pulling === true) return res.status(400).json({ success: false, message: "You are already pulling" });
+                if (server.pullTimeout !== null) if (server.pullTimeout > new Date()) return res.status(400).json({ success: false, message: "You're on cooldown, you can pull again in", pullTimeout: server.pullTimeout });
+
 
                 // let done;
                 const serverMemberList = await axios.get(`https://discord.com/api/v10/guilds/${server.guildId}/members?limit=1000`, {
@@ -276,10 +288,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         // if (!newServer.pulling) return reject("Pulling stopped");
 
                         console.log(`[${server.name}] Adding ${member.username}`);
-                        await addMember(server.guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, [BigInt(server.roleId).toString()]).then(async (resp: any) => {
-                            if (resp?.reponse?.status) console.log(`[${member.username}] ${resp?.response?.status}`);
-                            if (resp?.response?.data) console.log(`[${member.username}] ${JSON.stringify(resp?.response?.data)}`);
-                            if (resp?.status) console.log(`[${member.username}] ${resp?.status}`);
+                        await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, [BigInt(server.roleId).toString()]).then(async (resp: any) => {
+                            if (resp?.reponse?.status) console.log(`[${server.name}] [${member.username}] ${resp?.response?.status}`);
+                            if (resp?.response?.data) console.log(`[${server.name}] [${member.username}] ${JSON.stringify(resp?.response?.data)}`);
+                            if (resp?.status) console.log(`[${server.name}] [${member.username}] ${resp?.status}`);
                     
                             if (resp?.response?.status) {
                                 switch (resp.response.status) {
@@ -289,13 +301,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                     if (retryAfter) {
                                         const retry = parseInt(retryAfter);
                                         setTimeout(async () => {
-                                            await addMember(server.guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, [BigInt(server.roleId).toString()])
+                                            await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, [BigInt(server.roleId).toString()])
                                         }, retry);
                                         delay += retry;
                                     }
                                     break;
                                 case 403:
-                                    refreshTokenAddDB(member.userId.toString(), member.id, guildId.toString(), bot?.botToken, server.roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
+                                    refreshTokenAddDB(member.userId.toString(), member.id, server.guildId.toString(), bot?.botToken, server.roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
                                     break;
                                 case 407:
                                     console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);
@@ -316,7 +328,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             else {
                                 switch (resp.status) {
                                 case 403:
-                                    refreshTokenAddDB(member.userId.toString(), member.id, guildId.toString(), bot?.botToken, server.roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
+                                    refreshTokenAddDB(member.userId.toString(), member.id, server.guildId.toString(), bot?.botToken, server.roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
                                     break;
                                 case 407:
                                     console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);

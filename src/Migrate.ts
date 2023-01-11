@@ -1,6 +1,6 @@
-import { accounts, servers } from "@prisma/client";
-import axios from "axios";
+import { accounts } from "@prisma/client";
 import { HttpsProxyAgent } from "https-proxy-agent";
+import axios from "axios";
 
 export async function sendWebhook(webhookUrl: string, content: string, username: string, avatarUrl: string) {
     return await axios.post(webhookUrl, {
@@ -163,9 +163,12 @@ export async function resolveUser(token: string): Promise<User> {
 }
 
 
-export async function sendWebhookMessage(webhookUrl: string, title: string = "Successfully Verified", serverOwner: accounts, pCheck: any, IPAddr: string, account: User, type: number = 1) {
+export async function sendWebhookMessage(webhookUrl: string | null, title: string = "Successfully Verified", serverOwner: accounts, pCheck: any, IPAddr: string, account: User, type: number = 1) {
+    if (!webhookUrl) return;
+   
+   
     const createdAt: number = account.id / 4194304 + 1420070400000;
-    let operator;
+    let operator;    
     if (pCheck[IPAddr].proxy === "yes") operator = pCheck[IPAddr].operator ? `[\`${pCheck[IPAddr].operator.name}\`](${pCheck[IPAddr].operator.url})` : "Unknown";
 
     await axios.post(webhookUrl, {
