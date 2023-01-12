@@ -48,6 +48,7 @@ export default function Blacklist() {
     const { data: user, isError: userError, isLoading: userLoading } = useQuery("user", async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
     }), { retry: false,  refetchOnWindowFocus: false });
+    
 
    
     
@@ -86,14 +87,10 @@ export default function Blacklist() {
     }, [hasNextPage, fetchNextPage, refetch, search]);
 
     
-    if (userLoading || listsLoading) {
-        return <CircularProgress />
-    }
-
-    if (userError) {
-        return <div>Error</div>
-    }
-
+    if (listsLoading) return <CircularProgress />
+    if (userLoading) return <CircularProgress />
+    if (userError) return <div>Error</div>
+    
     if (!user.username) {
         router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
 
