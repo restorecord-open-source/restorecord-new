@@ -17,19 +17,14 @@ import TextField from "@mui/material/TextField";
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import Alert from "@mui/lab/Alert";
-import CircularProgress from "@mui/material/CircularProgress";
 import Badge from "@mui/material/Badge";
 import Snackbar from "@mui/material/Snackbar";
-import Grid from "@mui/material/Grid";
 import Skeleton from "@mui/material/Skeleton";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
-import Avatar from "@mui/material/Avatar";
-import Tooltip from "@mui/material/Tooltip";
-import Fade from "@mui/material/Fade";
-import getBlacklist from "../../../src/dashboard/getBlacklist";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
+import CircularProgress from "@mui/material/CircularProgress";
 
 
 export default function Blacklist() {
@@ -51,6 +46,9 @@ export default function Blacklist() {
     const { data: user, isError, isLoading: userLoading } = useQuery('user', async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
     }), { retry: false,  refetchOnWindowFocus: false });
+
+    if (isError) return <div>Error getting user, please refresh or try again later</div>;
+    if (userLoading) return <CircularProgress />;
 
     return (
         <Box sx={{ display: "flex" }}>
