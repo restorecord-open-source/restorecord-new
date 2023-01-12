@@ -252,13 +252,11 @@ export default function DashBoard({ user }: any) {
                                     <>
                                         <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
                                             Recent Activity
-                                        </
+                                        </Typography>
 
                                         <Typography variant="body1" color="grey.200">
                                             Last verified members
                                         </Typography>
-
-
                                     </>
                                 )}
 
@@ -282,8 +280,8 @@ export default function DashBoard({ user }: any) {
                                                         </ListItemAvatar>
                                                         <ListItemText primary={`${member.username}`} secondary={
                                                             <>
-                                                                    Id: {`${member.userId}`}<br/>
-                                                                    Server: {`${server.name}`}
+                                                                Id: {`${member.userId}`}<br/>
+                                                                Server: {`${server.name}`}
                                                             </>
                                                         } />
                                                     </ListItem>
