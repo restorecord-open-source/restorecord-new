@@ -151,7 +151,7 @@ export async function resolveUser(token: string): Promise<User> {
 
     // return response;
 
-    return await axios.get("https://discord.com/api/users/@me", {
+    return await axios.get("https://discord.com/api/v10/users/@me", {
         headers: {
             "Authorization": `Bearer ${token}`,
             "X-RateLimit-Precision": "millisecond",

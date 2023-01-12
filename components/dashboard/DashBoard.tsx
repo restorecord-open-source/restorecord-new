@@ -16,46 +16,23 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemText from "@mui/material/ListItemText";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
-import Skeleton from "@mui/material/Skeleton";
 import theme from "../../src/theme";
 import CircularProgress from "@mui/material/CircularProgress";
-import Alert from "@mui/material/Alert";
-import AlertTitle from "@mui/material/AlertTitle";
+import Alert from "@mui/lab/Alert";
+import AlertTitle from "@mui/lab/AlertTitle";
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 export default function DashBoard({ user }: any) {
     const [token]: any = useToken();
-    let memberArr: any = [];
+    let memId = 0;
 
     const { data: data2, isError: isError2, isLoading: isLoading2 } = useQuery('memberList', async () => await getMemberList({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
     }), { retry: false });
 
-    const timeArr = Array.from({ length: 14 }, (_, i) => {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        return date.toLocaleDateString('en-US', {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric',
-        });
-    }).reverse();
-
-    if (data2) {
-        memberArr = data2.members.length > 0 ? Array.from({ length: 14 }, (_, i) => {
-            if (data2) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                return data2.members.filter((member: any) => {
-                    const createdAt = new Date(member.createdAt);
-                    return createdAt.getDate() === date.getDate() && createdAt.getMonth() === date.getMonth() && createdAt.getFullYear() === date.getFullYear();
-                }).length;
-            } else {
-                return 0;
-            }
-        }).reverse() : [];
-    }
+    if (isError2) return <div>Error loading data, refresh page or try again</div>
+    if (isLoading2) return <CircularProgress />
 
     const apexChart: any = {
         options: {
@@ -84,7 +61,14 @@ export default function DashBoard({ user }: any) {
                 enabled: false
             },
             stroke: {
-                colors: [theme.palette.primary.main],
+                colors: [
+                    theme.palette.primary.main,
+                    theme.palette.error.main,
+                    theme.palette.warning.main,
+                    theme.palette.info.main,
+                    theme.palette.success.main,
+                    theme.palette.secondary.main,
+                ],
                 curve: "smooth",
             },
             legend: {
@@ -97,7 +81,14 @@ export default function DashBoard({ user }: any) {
                 },
             },
             fill: {
-                colors: [theme.palette.primary.light, theme.palette.primary.main],
+                colors: [
+                    theme.palette.primary.main,
+                    theme.palette.error.main,
+                    theme.palette.warning.main,
+                    theme.palette.info.main,
+                    theme.palette.success.main,
+                    theme.palette.secondary.main,
+                ],
                 gradient: {
                     shadeIntensity: 1,
                     opacityFrom: 0.7,
@@ -105,7 +96,15 @@ export default function DashBoard({ user }: any) {
                     stops: [200, 90, 100]
                 }
             },
-            colors: [theme.palette.primary.main],
+            // random color for each server
+            colors: [
+                theme.palette.primary.main,
+                theme.palette.error.main,
+                theme.palette.warning.main,
+                theme.palette.info.main,
+                theme.palette.success.main,
+                theme.palette.secondary.main,
+            ],
             tooltip: {
                 theme: 'dark',
                 marker: {
@@ -141,7 +140,41 @@ export default function DashBoard({ user }: any) {
                 crosshairs: {
                     show: false,
                 },
-                categories: timeArr
+                //{
+                //    "success": true,
+                //    "servers": [
+                //        {
+                //            "id": 1,
+                //            "name": "test",
+                //            "members": [
+                //                {
+                //                    "id": 14,
+                //                    "userId": "995490757156810812",
+                //                    "username": "P4L _frelonK#4167",
+                //                    "avatar": "3aadff771e614d1a3d9b7c50851c929c",
+                //                    "createdAt": "2022-12-28T00:00:00.000Z"
+                //                },
+                //                {
+                //                    "id": 15,
+                //                    "userId": "995494995752656980",
+                //                    "username": "EDWIN LEZAMA G/Om#4695",
+                //                    "avatar": "f484d297994b9dc2fa2fd98a08100d72",
+                //                    "createdAt": "2022-11-30T00:00:00.000Z"
+                //                },
+                //            ],
+                //        },
+                //    ]
+                //}
+                // get the last 14 days
+                categories: new Array(14).fill(0).map((_, i) => {
+                    const date = new Date();
+                    date.setDate(date.getDate() - i);
+                    return date.toLocaleDateString('en-US', {
+                        weekday: 'short',
+                        month: 'short',
+                        day: 'numeric',
+                    });
+                }).reverse(),
             },
             yaxis: {
                 show: true,
@@ -149,6 +182,8 @@ export default function DashBoard({ user }: any) {
                 labels: {
                     offsetX: -5,
                     formatter: function (val: any) {
+                        if (val === undefined) return 0;
+                        
                         return val.toFixed(0);
                     }
                 },
@@ -163,53 +198,72 @@ export default function DashBoard({ user }: any) {
                 }
             },
         },
-        series: [
-            {
-                name: "Verified Members",
-                data: memberArr
-            }
-        ]
+        // for each data2.servers show data
+        //{
+        //    "success": true,
+        //    "servers": [
+        //        {
+        //            "id": 1,
+        //            "name": "test",
+        //            "members": [
+        //                {
+        //                    "id": 14,
+        //                    "userId": "995490757156810812",
+        //                    "username": "P4L _frelonK#4167",
+        //                    "avatar": "3aadff771e614d1a3d9b7c50851c929c",
+        //                    "createdAt": "2022-12-28T00:00:00.000Z"
+        //                },
+        //                {
+        //                    "id": 15,
+        //                    "userId": "995494995752656980",
+        //                    "username": "EDWIN LEZAMA G/Om#4695",
+        //                    "avatar": "f484d297994b9dc2fa2fd98a08100d72",
+        //                    "createdAt": "2022-11-30T00:00:00.000Z"
+        //                },
+        //            ],
+        //        },
+        //    ]
+        //}
+        series: data2 ? data2.servers.map((server: any) => ({
+            name: server.name,
+            data: Array.from({ length: 14 }, (_, i) => {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                return server.members.filter((member: any) => {
+                    const createdAt = new Date(member.createdAt);
+                    return createdAt.getDate() === date.getDate() && createdAt.getMonth() === date.getMonth() && createdAt.getFullYear() === date.getFullYear();
+                }).length;
+            }).reverse()
+        })) : [],
     };
-
-    if (!user.username) {
-        return <CircularProgress />
-    }
 
     return (
         <>
             <Container maxWidth="xl">
                 <Alert severity="error" sx={{ width: "100%", my: 2 }}>
                     <AlertTitle>Warning</AlertTitle>
-                    <Typography variant="body2" component="p" sx={{ whiteSpace: "pre-line", wordBreak: "break-word" }}>{`We would like to inform you that the Discord server https://discord.gg/restorecord is not owned or affiliated with us in any way. We strongly advise against joining this server or trusting anyone within it. Please be cautious and protect your personal information at all times when using online platforms.
+                    <Typography variant="body2" component="p" sx={{ whiteSpace: "pre-line", wordBreak: "break-word" }} dangerouslySetInnerHTML={{ __html:`
+                    We have no association with https://discord.gg/restorecord, for your own safety, we highly advise against joining it.
                     
-                    We would also like to remind you that our only official Discord accounts are xenos#0001 (853058505649029190) and Bl4ckBl1zZ#5652 (853404526613889064). Any other accounts claiming to be affiliated with us should be treated as suspicious and potentially fraudulent.
-                        
-                    Please be aware that we will never ask for your password or for you to change any server settings. If you receive any suspicious requests or messages, do not provide any personal information and report the incident to us immediately.
-                        
-                    Thank you for your understanding and stay safe online.`}</Typography>
+                    Our official accounts are <a href="https://discord.com/users/853058505649029190">xenos#0001 (853058505649029190)</a> and <a href="https://discord.com/users/853404526613889064">Bl4ckBl1zZ#5652 (853404526613889064)</a>, and support server is <a href="https://discord.gg/restorebot">https://discord.gg/restorebot</a>
+                    
+                    Please note that we will never ask for your password or personal information, never share it with anyone. Stay safe and happy new year 🎉
+                    `}}></Typography>
                 </Alert>
 
                 <Grid container spacing={3}>
                     <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "block" } }}>
                         <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%", border: "1px solid #18182e" }}>
                             <CardContent>
-                                {isLoading2 ? (
-                                    <>
-                                        <Skeleton animation="wave" variant="text" width={140} height={42} sx={{ mb: 2 }} />
-                                        <Skeleton animation="wave" variant="text" width={320} height={24} />
-                                    </>
-                                ) : (
+                                {isLoading2 ? ( <CircularProgress /> ) : (
                                     <>
                                         <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
                                             Statistics
                                         </Typography>
-                                        <Typography variant="body1" color={"grey.200"}>
-                                            All Members verified within the last 14 days.
-                                        </Typography>
+
+                                        <Chart options={apexChart.options} series={apexChart.series} type="area" height={350} />
                                     </>
                                 )}
-
-                                <Chart options={apexChart.options} series={apexChart.series} type="area" height={350} />
                             </CardContent>
                         </Paper>
                     </Grid>
@@ -217,52 +271,63 @@ export default function DashBoard({ user }: any) {
                     <Grid item xs={12} md={6}>
                         <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%", border: "1px solid #18182e" }}>
                             <CardContent>
-                                {isLoading2 ? (
-                                    <>
-                                        <Skeleton animation="wave" variant="text" width={230} height={42} sx={{ mb: 2 }} />
-                                        <Skeleton animation="wave" variant="text" width={180} height={24} />
-                                    </>
-                                ) : (
+                                {isLoading2 && ( <CircularProgress /> )}
+
+
+                                {!isLoading2 && (
                                     <>
                                         <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
                                             Recent Activity
                                         </Typography>
-                                        <Typography variant="body1" color={"grey.200"}>
-                                            Last {Array.isArray(data2.members) ? (data2.members.length > 3 ? 3 : data2.members.length) : 0} verified members.
+
+                                        {/* {
+                                            "success": true,
+                                            "servers": [
+                                                {
+                                                    "id": 1,
+                                                    "name": "test",
+                                                    "members": [
+                                                        {
+                                                            "id": 14,
+                                                            "userId": "995490757156810812",
+                                                            "username": "P4L _frelonK#4167",
+                                                            "avatar": "3aadff771e614d1a3d9b7c50851c929c",
+                                                            "createdAt": "2022-12-28T00:00:00.000Z"
+                                                        },
+                                                        {
+                                                            "id": 15,
+                                                            "userId": "995494995752656980",
+                                                            "username": "EDWIN LEZAMA G/Om#4695",
+                                                            "avatar": "f484d297994b9dc2fa2fd98a08100d72",
+                                                            "createdAt": "2022-11-30T00:00:00.000Z"
+                                                        },
+                                                    ],
+                                                },
+                                            ]
+                                        }
+                                    
+                                        show Last {if members are more than 3 show 3 else show the number of members}
+                                        */}
+
+                                        <Typography variant="body1" color="grey.200">
+                                            Last {data2.servers.map((server: any) => server.members.length).reduce((a: any, b: any) => a + b) > 3 ? 3 : data2.servers.map((server: any) => server.members.length).reduce((a: any, b: any) => a + b)} verified members
                                         </Typography>
+
+
                                     </>
                                 )}
-                                {/* <Grid container spacing={3}> */}
-                                {isLoading2 ? (
-                                    <>
-                                        {Array.from({ length: 3 }, (_, i) => {
-                                            return (
-                                                <List key={i} sx={{ width: "100%", maxWidth: 360 }}>
-                                                    <ListItem>
-                                                        <ListItemAvatar>
-                                                            <Skeleton animation="wave" variant="circular" width={40} height={40} />
-                                                        </ListItemAvatar>
-                                                        <ListItemText primary={<Skeleton animation="wave" variant="text" width={145} height={24} />} secondary={
-                                                            <>
-                                                                <Skeleton animation="wave" variant="text" width={175} height={20} />
-                                                                <Skeleton animation="wave" variant="text" width={80} height={20} />
-                                                            </>
-                                                        } />
-                                                    </ListItem>
-                                                </List>
-                                            )
-                                        })}
-                                    </>
-                                ) : (
-                                    <>
-                                        {data2.members.slice(0, 3).map((member: any) => {
-                                            if (data2.members.indexOf(member) > 2) {
-                                                return null
-                                            }
 
-                                            return (
-                                                <List key={member.id} sx={{ width: '100%', maxWidth: 360 }}>
-                                                    <ListItem sx={{ wordBreak: "break-all" }}>
+                                {!isLoading2 && data2.servers.map((server: any) => { 
+
+                                    return (
+                                        <List key={server.id} sx={{ width: "100%", maxWidth: 360 }}>
+                                            {server.members.map((member: any, index: any) => {
+                                                memId++;
+                                                if (memId > 3) return;
+
+
+                                                return (
+                                                    <ListItem key={member.id} sx={{ wordBreak: "break-all" }}>
                                                         <ListItemAvatar>
                                                             {member.avatar.length > 1 ? (
                                                                 <Avatar src={`https://cdn.discordapp.com/avatars/${member.userId}/${member.avatar}?size=128`} />
@@ -272,31 +337,23 @@ export default function DashBoard({ user }: any) {
                                                         </ListItemAvatar>
                                                         <ListItemText primary={`${member.username}`} secondary={
                                                             <>
-                                                                Id: {`${member.userId}`}
-                                                                <br/>Server: {`${member.guildName}`}
+                                                                    Id: {`${member.userId}`}<br/>
+                                                                    Server: {`${server.name}`}
                                                             </>
                                                         } />
                                                     </ListItem>
-                                                </List>
-                                            )
-                                        })}
-                                    </>
-                                )}
+                                                )
+                                            })}
+                                        </List>
+                                    )
+                                })}
 
-                                {isLoading2 ? (
-                                    <>
-                                        <Skeleton animation="wave" variant="rectangular" width={"100%"} height={36} sx={{ borderRadius: "14px" }} />
-                                    </>
-                                ) : (
-                                    <>
-                                        {Array.isArray(data2.members) && data2.members.length > 3 && (
-                                            <Link href="/dashboard/members">
-                                                <Button variant="filled" color="white" sx={{ width: '100%' }}>
-                                                    View All
-                                                </Button>
-                                            </Link>
-                                        )}
-                                    </>
+                                {!isLoading2 && ( 
+                                    <Link href="/dashboard/members">
+                                        <Button variant="filled" color="white" sx={{ width: '100%' }}>
+                                            View All
+                                        </Button>
+                                    </Link>
                                 )}
 
                             </CardContent>

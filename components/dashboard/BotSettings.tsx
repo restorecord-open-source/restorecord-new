@@ -128,7 +128,7 @@ export default function DashBotSettings({ user, id }: any) {
                 <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
                     <CardContent>
                         <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
-                            Change Bot Settings
+                            Edit Bot
                         </Typography>
 
                         <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
@@ -200,10 +200,7 @@ export default function DashBotSettings({ user, id }: any) {
 
                         {(user.bots.find((bot: any) => bot.clientId === id)) ? (
                             <>
-                                <Stack spacing={2} direction="row" sx={{ mb: 2 }}>
-                                    <Button variant="contained" onClick={() => { router.push(`/dashboard/custombots/`)} }>
-                                        &lt;- Go Back
-                                    </Button>
+                                <Stack direction="row" spacing={2} sx={{ mb: 2, "@media screen and (max-width: 600px)": { flexDirection: "column", alignItems: "center", "& > *": { mb: 1 } } }}>
                                     <Button variant="contained" onClick={() => {
                                         axios.get(`/api/v1/bot/${bot.clientId}/refresh`, {
                                             headers: {
@@ -301,11 +298,6 @@ export default function DashBotSettings({ user, id }: any) {
                                         <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                             You do not have access to this bot
                                         </Typography>
-                                    </Grid>
-                                    <Grid item>
-                                        <Button variant="contained" sx={{ mb: 2 }} onClick={() => { router.push(`/dashboard/settings/`)} }>
-                                            &lt;- Go Back
-                                        </Button>
                                     </Grid>
                                 </Grid>
                             </>

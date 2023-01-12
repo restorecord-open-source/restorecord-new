@@ -244,9 +244,6 @@ export default function DashServerSettings({ user, id }: any) {
                             <>
                                 <Grid container spacing={3} direction="row" justifyContent={"space-between"}>
                                     <Grid item>
-                                        <Button variant="contained" sx={{ mb: 2, mr: 2 }} onClick={() => { router.push(`/dashboard/settings/`)} }>
-                                            &lt;- Go Back
-                                        </Button>
                                         <Button variant="contained" color="error" sx={{ mb: 2 }} onClick={() => { 
                                             setConfirmDelete(true) 
                                             new Promise((resolve, reject) => {
@@ -355,11 +352,6 @@ export default function DashServerSettings({ user, id }: any) {
                                         <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                             You do not have access to this server
                                         </Typography>
-                                    </Grid>
-                                    <Grid item>
-                                        <Button variant="contained" sx={{ mb: 2 }} onClick={() => { router.push(`/dashboard/settings/`)} }>
-                                            &lt;- Go Back
-                                        </Button>
                                     </Grid>
                                 </Grid>
                             </>

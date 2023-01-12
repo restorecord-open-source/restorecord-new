@@ -176,7 +176,7 @@ export default function DashCustomBot({ user }: any) {
 
                         {(Array.isArray(user.bots) && user.bots.length > 0) && !createNewBot && (
                             <>
-                                <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="center">
+                                <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between" sx={{ "@media screen and (max-width: 600px)": { flexDirection: "column" } }}>
                                     <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
                                         Custom Bots
                                     </Typography>
@@ -239,9 +239,6 @@ export default function DashCustomBot({ user }: any) {
 
                         {(createNewBot || (Array.isArray(user.bots) && user.bots.length === 0)) && (
                             <>
-                                <Button variant="contained" sx={{ mb: 2 }} onClick={() => setcreateNewBot(false)}>
-                                    &lt;- Go Back
-                                </Button>
                                 <Paper variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
                                     <CardContent>
                                         <Stack spacing={1} direction="column" justifyContent={"space-between"}>

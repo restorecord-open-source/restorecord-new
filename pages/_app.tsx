@@ -153,8 +153,8 @@ export default function MyApp(props: MyAppProps) {
                     {/* <meta property="og:title" content="RestoreCord - The Recovery Service" /> */}
                     {/* <meta property="og:url" content="https://restorecord.com" /> */}
                     <meta name="keywords" content="restorecord, discord, backup, restore, backup service, savecord, letoa, restorebot" />
-                    <meta name="theme-color" content="#13131f" />
-                    <meta name="apple-mobile-web-app-status-bar-style" content="#13131f" />
+                    <meta name="theme-color" content="#09090d" />
+                    <meta name="apple-mobile-web-app-status-bar-style" content="#09090d" />
                     <meta name="apple-mobile-web-app-capable" content="yes" />
                     <meta name="apple-mobile-web-app-title" content="RestoreCord" />
                     <meta name="application-name" content="RestoreCord" />

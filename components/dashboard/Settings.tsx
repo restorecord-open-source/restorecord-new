@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from 'react'
 
 import axios from "axios";
+import Link from "next/link"
 
 import Button from "@mui/material/Button";
 import CardContent from "@mui/material/CardContent";
@@ -212,9 +213,9 @@ export default function DashSettings({ user }: any) {
 
                         {!createNewServer && (Array.isArray(user.servers) && user.servers.length >= 1) && (
                             <>
-                                <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
+                                <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between" sx={{ "@media screen and (max-width: 600px)": { flexDirection: "column" } }}>
                                     <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
-                                        Settings
+                                        Servers
                                     </Typography>
                                     <Button variant="contained" sx={{ mb: 2 }} onClick={() => setCreateNewServer(true)}>
                                         + Create New Server
@@ -332,18 +333,15 @@ export default function DashSettings({ user }: any) {
 
                         {(createNewServer || (Array.isArray(user.servers) && user.servers.length === 0)) && (
                             <>
-                                <Button variant="contained" sx={{ mb: 2 }} onClick={() => setCreateNewServer(false)}>
-                                    &lt;- Go Back
-                                </Button>
                                 <Paper variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
                                     <CardContent>
                                         <Stack spacing={1} direction="column" justifyContent={"space-between"}>
                                             {user.bots.length === 0 && (
                                                 <Alert variant="filled" severity="error">
                                                     You don&apos;t have any bots to add to this server. You can add bots to your account{" "}
-                                                    <MuiLink color={theme.palette.primary.light} href="/dashboard/custombots" rel="noopener noreferrer" target="_blank">
+                                                    <Link color={theme.palette.primary.light} href="/dashboard/custombots" rel="noopener noreferrer" target="_blank">
                                                         here
-                                                    </MuiLink>.
+                                                    </Link>.
                                                 </Alert>
                                             )}
                                             <TextField label="Server Name" variant="outlined" value={serverName} onChange={(e) => setServerName(e.target.value)} required />
