@@ -198,32 +198,6 @@ export default function DashBoard({ user }: any) {
                 }
             },
         },
-        // for each data2.servers show data
-        //{
-        //    "success": true,
-        //    "servers": [
-        //        {
-        //            "id": 1,
-        //            "name": "test",
-        //            "members": [
-        //                {
-        //                    "id": 14,
-        //                    "userId": "995490757156810812",
-        //                    "username": "P4L _frelonK#4167",
-        //                    "avatar": "3aadff771e614d1a3d9b7c50851c929c",
-        //                    "createdAt": "2022-12-28T00:00:00.000Z"
-        //                },
-        //                {
-        //                    "id": 15,
-        //                    "userId": "995494995752656980",
-        //                    "username": "EDWIN LEZAMA G/Om#4695",
-        //                    "avatar": "f484d297994b9dc2fa2fd98a08100d72",
-        //                    "createdAt": "2022-11-30T00:00:00.000Z"
-        //                },
-        //            ],
-        //        },
-        //    ]
-        //}
         series: data2 ? data2.servers.map((server: any) => ({
             name: server.name,
             data: Array.from({ length: 14 }, (_, i) => {
@@ -278,39 +252,10 @@ export default function DashBoard({ user }: any) {
                                     <>
                                         <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
                                             Recent Activity
-                                        </Typography>
-
-                                        {/* {
-                                            "success": true,
-                                            "servers": [
-                                                {
-                                                    "id": 1,
-                                                    "name": "test",
-                                                    "members": [
-                                                        {
-                                                            "id": 14,
-                                                            "userId": "995490757156810812",
-                                                            "username": "P4L _frelonK#4167",
-                                                            "avatar": "3aadff771e614d1a3d9b7c50851c929c",
-                                                            "createdAt": "2022-12-28T00:00:00.000Z"
-                                                        },
-                                                        {
-                                                            "id": 15,
-                                                            "userId": "995494995752656980",
-                                                            "username": "EDWIN LEZAMA G/Om#4695",
-                                                            "avatar": "f484d297994b9dc2fa2fd98a08100d72",
-                                                            "createdAt": "2022-11-30T00:00:00.000Z"
-                                                        },
-                                                    ],
-                                                },
-                                            ]
-                                        }
-                                    
-                                        show Last {if members are more than 3 show 3 else show the number of members}
-                                        */}
+                                        </
 
                                         <Typography variant="body1" color="grey.200">
-                                            Last {data2.servers.map((server: any) => server.members.length).reduce((a: any, b: any) => a + b) > 3 ? 3 : data2.servers.map((server: any) => server.members.length).reduce((a: any, b: any) => a + b)} verified members
+                                            Last verified members
                                         </Typography>
 
 
