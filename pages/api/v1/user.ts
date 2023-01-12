@@ -61,6 +61,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     id: account.id,
                     username: account.username,
                     role: account.role,
+                    icon: account.pfp,
                     ...(account.admin === true && { admin: true }),
                     createdAt: account.createdAt,
                     expiry: account.expiry,

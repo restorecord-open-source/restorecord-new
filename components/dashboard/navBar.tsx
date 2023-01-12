@@ -91,8 +91,8 @@ export default function NavBar({ ...props }: any) {
                                     userDropdownRef?.current?.style?.display === "none" ? userDropdownRef.current.style.display = "flex" : userDropdownRef.current.style.display = "none";
                                     // userDropdownRef?.current?.style?.flexDirection === "column" ? userDropdownRef.current.style.flexDirection = "row" : userDropdownRef.current.style.flexDirection = "column";
                                 }}>
-                                    {/* <Avatar alt="Profile Picture" src={props.user.icon} sx={{ width: 32, height: 32, mr: 1 }} /> */}
-                                    <Avatar sx={{ width: 32, height: 32, mr: 1, bgcolor: stringToColor(props.user.username), color: theme.palette.getContrastText(stringToColor(props.user.username)) }}>{props.user.username[0].toUpperCase()}</Avatar>
+                                    <Avatar alt="Profile Picture" src={props.user.icon} sx={{ width: 32, height: 32, mr: 1 }} />
+                                    {/* <Avatar sx={{ width: 32, height: 32, mr: 1, bgcolor: stringToColor(props.user.username), color: theme.palette.getContrastText(stringToColor(props.user.username)) }}>{props.user.username[0].toUpperCase()}</Avatar> */}
                                     <Typography variant="body1" color={theme.palette.text.primary}>{props.user.username}</Typography>
                                     <ArrowDropDownRounded />
                                 </ButtonBase>
