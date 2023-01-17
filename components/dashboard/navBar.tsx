@@ -85,7 +85,8 @@ export default function NavBar({ ...props }: any) {
                             RestoreCord
                         </Typography>
 
-                        <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1, justifyContent: "flex-end", mr: 2 }}>
+                        {/* desktop only */}
+                        <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", flexGrow: 1, justifyContent: "flex-end", mr: 2 }}>
                             <Stack direction="row" spacing={2} alignItems="center">
                                 <ButtonBase disableRipple onClick={() => { 
                                     userDropdownRef?.current?.style?.display === "none" ? userDropdownRef.current.style.display = "flex" : userDropdownRef.current.style.display = "none";
@@ -99,7 +100,7 @@ export default function NavBar({ ...props }: any) {
                             </Stack>
                         </Box> 
 
-                     
+
                         <Box ref={userDropdownRef} sx={{ position: "absolute", background: theme.palette.background.paper, borderRadius: "0.5rem", top: "calc(100% + 0.5rem)", display: "none", right: "2rem", border: "1px solid rgb(40, 40, 47)", zIndex: 1000 }}>
                             <List>
                                 <ListItemButton sx={{ padding: "0.5rem 0.75rem" }}>

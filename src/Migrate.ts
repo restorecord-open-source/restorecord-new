@@ -243,11 +243,10 @@ interface User {
 }
 
 
-export async function  shuffle(array: any) {
-    let currentIndex = array.length,  randomIndex;
+export async function shuffle(array: any) {
+    let currentIndex = array.length, randomIndex;
 
     while (currentIndex != 0) {
-
         randomIndex = Math.floor(Math.random() * currentIndex);
         currentIndex--;
 

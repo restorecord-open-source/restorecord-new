@@ -183,7 +183,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
                     validateStatus: () => true,
                 }).then(async (response) => {
-                    if (response.status !== 200) return res.status(400).json({ success: false, message: "Server doesn't exist on discord" });
+                    if (response.status !== 200) return res.status(400).json({ success: false, message: "Discord server not found, invite bot or try again." });
                 }).catch(async (err) => {
                     console.error(err);
                     return res.status(400).json({ success: false, message: "Something went wrong" });

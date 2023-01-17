@@ -23,12 +23,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             return res.status(400).json({ success: false, message: `Missing ${errors}` });
         }
-
-        if (!/^[a-zA-Z0-9]{3,20}$/.test(data.username)) return res.status(400).json({ success: false, message: "Username must be between 3 and 20 characters and contain only letters and numbers" });
-        if (!/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z\d]{6,45}$/.test(data.password)) return res.status(400).json({ success: false, message: "Password must be between 6 and 45 characters, contain at least one uppercase letter, one lowercase letter, and one number" });
-        if (!/^[\w.%+-]{6,50}@[\w.-]+\.[a-zA-Z]{2,6}$/.test(data.email)) return res.status(400).json({ success: false, message: "Email must be between 6 and 50 characters and contain a valid email address" });
+        if (data.username.length < 3 || data.username.length > 20) return res.status(400).json({ success: false, message: "Username must be between 3 and 20 characters" });
+        if (data.password.length < 6 || data.password.length > 45) return res.status(400).json({ success: false, message: "Password must be between 6 and 45 characters" });
+        if (data.email.length < 6 || data.email.length > 50) return res.status(400).json({ success: false, message: "Email must be between 6 and 50 characters" });
         
-
         if (await isBreached(data.password)) return res.status(400).json({ success: false, message: "Your password has been found in a data breach. For more info: https://haveibeenpwned.com/Passwords" });
         
 
