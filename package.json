@@ -18,7 +18,7 @@
 		"@mui/icons-material": "^5.10.14",
 		"@mui/lab": "^5.0.0-alpha.98",
 		"@mui/material": "^5.10.17",
-		"@prisma/client": "^4.8.1",
+		"@prisma/client": "^4.9.0",
 		"@sendgrid/mail": "^7.7.0",
 		"@sentry/nextjs": "^7.20.0",
 		"@stripe/react-stripe-js": "^1.16.1",
@@ -27,6 +27,7 @@
 		"apexcharts": "^3.36.3",
 		"axios": "^0.27.2",
 		"bcrypt": "^5.0.1",
+		"coinbase-commerce-node": "^1.0.4",
 		"discord-api-types": "^0.37.18",
 		"discord-interactions": "^3.2.0",
 		"discord.js": "^13.12.0",
@@ -53,6 +54,7 @@
 		"@mui/types": "^7.2.3",
 		"@types/axios": "^0.14.0",
 		"@types/bcrypt": "^5.0.0",
+		"@types/coinbase-commerce-node": "^1.0.6",
 		"@types/jsonwebtoken": "^8.5.9",
 		"@types/lru-cache": "^7.10.10",
 		"@types/next": "^9.0.0",
@@ -68,7 +70,7 @@
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-prettier": "^4.0.0",
 		"prettier": "^2.7.0",
-		"prisma": "^4.7.1",
+		"prisma": "^4.9.0",
 		"typescript": "^4.9.4"
 	}
 }

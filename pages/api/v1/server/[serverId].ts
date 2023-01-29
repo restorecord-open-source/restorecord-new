@@ -251,6 +251,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 // }
 
                 for (const serverMemberData of serverMemberList.data) {
+                    if (serverMemberList.data.length === 0) return;
+
                     const member = members.find((m) => m.userId == serverMemberData.user.id);
                     if (member) {
                         members.splice(members.indexOf(member), 1)

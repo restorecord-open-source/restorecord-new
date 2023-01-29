@@ -18,20 +18,20 @@ export default function Footer() {
                 <Box style={{ display: "flex", flexDirection: "column", justifyContent: "center", flexWrap: "wrap", marginBottom: "auto" }}>
                     <Typography variant="h6" color="text.secondary" sx={{ fontWeight: "bold" }}>Social</Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ wordWrap: "break-all" }}>
-                        <Link href="https://twitter.com/restorecord"><MuiLink variant="body2" color="#a7a2ff" href="https://twitter.com/restorecord">Twitter</MuiLink></Link>
+                        <Link href="https://twitter.com/restorecord" target="_blank"><MuiLink variant="body2" color="#a7a2ff" href="https://twitter.com/restorecord" target="_blank">Twitter</MuiLink></Link>
                         <br />
-                        <Link href="https://youtube.com/channel/UCdO4LjbTjSJWxP9VQg7ZNXw"><MuiLink variant="body2" color="#a7a2ff" href="https://youtube.com/channel/UCdO4LjbTjSJWxP9VQg7ZNXw">YouTube</MuiLink></Link>
+                        <Link href="https://youtube.com/channel/UCdO4LjbTjSJWxP9VQg7ZNXw" target="_blank"><MuiLink variant="body2" color="#a7a2ff" href="https://youtube.com/channel/UCdO4LjbTjSJWxP9VQg7ZNXw" target="_blank">YouTube</MuiLink></Link>
                         <br />
-                        <Link href="https://github.com/restorecord"><MuiLink variant="body2" color="#a7a2ff" href="https://github.com/restorecord">GitHub</MuiLink></Link>
+                        <Link href="https://github.com/restorecord" target="_blank"><MuiLink variant="body2" color="#a7a2ff" href="https://github.com/restorecord" target="_blank">GitHub</MuiLink></Link>
                     </Typography>
                 </Box>
 
                 <Box style={{ display: "flex", flexDirection: "column", justifyContent: "center", flexWrap: "wrap", marginBottom: "auto" }}>
                     <Typography variant="h6" color="text.secondary" sx={{ fontWeight: "bold" }}>Resources</Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ wordWrap: "break-all" }}>
-                        <Link href="https://community.restorecord.com"><MuiLink variant="body2" color="#a7a2ff" href="https://community.restorecord.com">Support</MuiLink></Link>
+                        <Link href="https://community.restorecord.com" target="_blank"><MuiLink variant="body2" color="#a7a2ff" href="https://community.restorecord.com" target="_blank">Support</MuiLink></Link>
                         <br />
-                        <Link href="https://docs.restorecord.com"><MuiLink variant="body2" color="#a7a2ff" href="https://docs.restorecord.com">Documentation</MuiLink></Link>
+                        <Link href="https://docs.restorecord.com" target="_blank"><MuiLink variant="body2" color="#a7a2ff" href="https://docs.restorecord.com" target="_blank">Documentation</MuiLink></Link>
                     </Typography>
                 </Box>
 

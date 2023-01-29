@@ -232,6 +232,32 @@ const theme = createTheme({
                 }
             }
         },
+        MuiAccordion: {
+            styleOverrides: {
+                root: {
+                    backgroundColor: "unset !important",
+                    borderRadius: "1rem !important",
+                    "&.Mui-expanded": {
+                        borderRadius: "1rem !important",
+                    },
+                    "&:before": {
+                        display: "none",
+                    },
+                },
+            },
+        },
+        MuiAccordionSummary: {
+            styleOverrides: {
+                root: {
+                    backgroundColor: "unset !important",
+                    borderRadius: "1rem !important",
+                    "&.Mui-expanded": {
+                        borderRadius: "1rem !important",
+                        minHeight: "unset !important",
+                    },
+                },
+            },
+        },
     }
 });
 

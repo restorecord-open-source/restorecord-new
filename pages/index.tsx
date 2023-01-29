@@ -323,10 +323,10 @@ export default function Home() {
                                         <CardContent>
                                             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "baseline", mb: 2 }}>
                                                 <Typography component="h2" variant="h3" color="text.primary" sx={{ fontWeight: "600" }}>
-                                                    {tier.priceMonthly}
+                                                    ${tier.priceMonthly}
                                                 </Typography>
                                                 <Typography variant="h6" color="text.secondary" sx={{ fontWeight: "600" }}>
-                                                    /monthly <Typography variant="body2" color="grey.700" sx={{ fontWeight: "500", alignItems: "center", display: "flex", mb: 1 }}>{tier.priceYearly} billed annually</Typography>
+                                                    /monthly <Typography variant="body2" color="grey.700" sx={{ fontWeight: "500", alignItems: "center", display: "flex", mb: 1 }}>${tier.priceYearly} billed annually</Typography>
                                                 </Typography>
                                             </Box>
                                             {tier.features.map((feature: any) => (
@@ -337,7 +337,7 @@ export default function Home() {
                                         </CardContent>
                                         <CardActions>
                                             <Button href={tier.name === "Free" ? `/register` : `https://restorecord.com/dashboard/upgrade`} fullWidth variant="contained" sx={{ fontWeight: "600" }}>
-                                                {tier.priceYearly === "$0" ? "Sign Up" : "Purchase"}
+                                                {tier.priceYearly === "0" ? "Sign Up" : "Purchase"}
                                             </Button>
                                         </CardActions>
                                     </Card>

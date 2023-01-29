@@ -6,8 +6,8 @@ import theme from "./theme";
 const SubscriptionList: Subscription[] = [
     {
         name: "Free", 
-        priceMonthly: "$0",
-        priceYearly: "$0",
+        priceMonthly: "0",
+        priceYearly: "0",
         bestPlan: false,
         features: [
             {
@@ -86,8 +86,8 @@ const SubscriptionList: Subscription[] = [
     },
     {
         name: "Premium",
-        priceMonthly: "$2",
-        priceYearly: "$15",
+        priceMonthly: "2",
+        priceYearly: "15",
         bestPlan: true,
         features: [
             {
@@ -166,8 +166,8 @@ const SubscriptionList: Subscription[] = [
     },
     {
         name: "Business",
-        priceMonthly: "$5",
-        priceYearly: "$30",
+        priceMonthly: "5",
+        priceYearly: "30",
         bestPlan: false,
         features: [
             {
