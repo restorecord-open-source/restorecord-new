@@ -7,7 +7,6 @@ import { getIPAddress, getBrowser, getPlatform } from "../../../../src/getIPAddr
 import { isBreached } from "../../../../src/functions";
 dotenv.config({ path: "../../" });
 
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) { 
     if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
 
@@ -59,6 +58,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(400).json({ success: false, message: `${errors.join(" and ")} already exists` });
         }
 
+        let refUser = null;
+        if (data.ref) {
+            refUser = await prisma.accounts.findFirst({ where: { referralCode: data.ref } });
+        }
+
         const hashedPassword = await bcrypt.hash(data.password, await bcrypt.genSalt(10));
 
         const account = await prisma.accounts.create({
@@ -66,6 +70,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 username: data.username,
                 email: data.email,
                 password: hashedPassword,
+                referrer: refUser?.id,
             },
         });
 
@@ -89,9 +94,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             },
         });
     } catch (err: any) {
+        console.error(err);
         if (err.name === "ValidationError") return res.status(400).json({ success: false, message: "Please provide all fields" });
-
         return res.status(400).json({ success: false, message: "Something went wrong" });
     }
-
 }
