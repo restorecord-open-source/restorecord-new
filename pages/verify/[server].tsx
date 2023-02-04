@@ -16,14 +16,20 @@ import { useEffect, useState } from "react";
 
 export default function Verify({ server, status, err, errStack }: any) {
     const [rediUrl, setRediUrl] = useState("");
+    const [disabled, setDisabled] = useState(false);
 
     useEffect(() => {
         if (server.success) {
             document.title = `Verify in ${server.name}`;
 
             setRediUrl(`https://discord.com/oauth2/authorize?client_id=${server.clientId}&redirect_uri=${server.domain ? `https://${server.domain}` : window.location.origin}/api/callback&response_type=code&scope=identify+guilds.join&state=${server.guildId}`);
+
+            if (status === "finished") {
+                setDisabled(true);
+                setTimeout(() => { setDisabled(false); }, 3000);
+            }
         }
-    }, [server]);
+    }, [server, status]);
 
     function ErrorAlert(err: string) {
         switch (err) {
@@ -73,7 +79,7 @@ export default function Verify({ server, status, err, errStack }: any) {
             return (
                 <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
                     <AlertTitle>Error</AlertTitle>
-                    An unknown error has occured: {errStack}
+                    Discord API error: {errStack}
                 </Alert>
             );
         }
@@ -117,32 +123,29 @@ export default function Verify({ server, status, err, errStack }: any) {
                             </>
                         ) : ( <></> )}
 
-                        {server.success ? (
-                            <>{err ? ( <>{ErrorAlert(err)}</> ) : ( <></> )}</>
-                        ) : ( <></> )}
-                        
+                        <>{server.success && err ? ErrorAlert(err) : null}</>
 
-                        {server.success ? (
+                        {server.success && (
                             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                                 <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} placement="top" disableInteractive title={server.name}>
                                     <Typography variant="h1" component="h1" sx={{ fontWeight: "700", fontSize: { xs: "1.5rem", md: "3rem" }, pl: "1rem", mr: "1rem", textShadow: "0px 0px 15px rgba(0, 0, 0, 0.25)", textAlign: "center" }}>
                                         {server.name}
                                     </Typography>
                                 </Tooltip>
-
                                 {server.verified && (
                                     <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} placement="top" disableInteractive title={`Verified`}>
                                         <CheckCircle sx={{ color: theme.palette.grey[500], width: "2rem", height: "2rem" }} />
                                     </Tooltip>
                                 )}
                             </Box>
-                        ) : ( 
-                            <>
-                                <Typography variant="h1" component="h1" sx={{ textAlign: "center", fontWeight: "700", fontSize: { xs: "1.5rem", md: "3rem" } }}>
-                                    Server not found
-                                </Typography>
-                            </>
                         )}
+                        {!server.success && (
+                            <Typography variant="h1" component="h1" sx={{ textAlign: "center", fontWeight: "700", fontSize: { xs: "1.5rem", md: "3rem" } }}>
+                                Server not found
+                            </Typography>
+                        )}
+
+
 
                         {server.success ? (
                             <Typography variant="body1" component="p" sx={{ textAlign: "center", fontSize: { xs: "1rem", md: "1.75rem" }, whiteSpace: "pre-line", overflowWrap: "break-word" }}>
@@ -158,7 +161,7 @@ export default function Verify({ server, status, err, errStack }: any) {
 
                         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                             {server.success ? (
-                                <Button variant="contained" color="primary" href={rediUrl} target="_blank" rel="noreferrer"
+                                <Button variant="contained" color="primary" href={rediUrl} target="_blank"
                                     sx={{ 
                                         width: "100%",
                                         marginTop: "2rem",
@@ -177,7 +180,12 @@ export default function Verify({ server, status, err, errStack }: any) {
                                                 color: theme.palette.getContrastText(server.color),
                                             },
                                         },
-                                    }}>
+                                    }}
+                                    onClick={() => {
+                                        window.location.href = rediUrl;
+                                    }}
+                                    disabled={disabled}
+                                >
                                     Verify
                                 </Button>
                             ) : (
@@ -199,12 +207,6 @@ export default function Verify({ server, status, err, errStack }: any) {
                             )}
                         </Box>
                     </Paper>
-
-                    {server.success ? (
-                        <Typography variant="body1" component="p" sx={{ textAlign: "center", mt: 1, color: "rgba(255, 255, 255, 0.15)", bottom: 0, position: "absolute", marginBottom: { xs: "0.25rem", md: "2rem" }, display: { xs: "none", md: "block" } }}>
-                            Created on {new Date(server.createdAt).toDateString()} by {server.owner}
-                        </Typography>
-                    ) : ( <></> )}
                 </Box>
             </Container>
         </>
@@ -218,7 +220,7 @@ export async function getServerSideProps({ req }: any) {
         let serverName = req.url.split("/")[2];
         let type = 1;
 
-        let serverInfo: { success: boolean, name: string, guildId: string, icon: string, bg: string, description: string, color: string, clientId: string, owner: string, domain: string, createdAt: string } = {
+        let serverInfo: { success: boolean, name: string, guildId: string, icon: string, bg: string, description: string, color: string, clientId: string, domain: string } = {
             success: false,
             name: decodeURI(serverName),
             guildId: "",
@@ -227,9 +229,7 @@ export async function getServerSideProps({ req }: any) {
             description: "Verify to view the rest of the server.",
             color: "#4f46e5",
             clientId: "",
-            owner: "",
             domain: "",
-            createdAt: new Date().toISOString()
         }
 
         if (isNaN(Number.parseInt(serverName as any))) type = 0;
@@ -260,9 +260,7 @@ export async function getServerSideProps({ req }: any) {
                     description: res.description,
                     color: `#${res.themeColor}`,
                     clientId: customBot?.clientId.toString(),
-                    owner: ownerAccount?.username,
                     domain: customBot?.customDomain ? customBot.customDomain : "",
-                    createdAt: new Date().toISOString(),
                 }
             }
         })
