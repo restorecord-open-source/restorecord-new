@@ -157,7 +157,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 const members = await prisma.members.findMany({ where: { AND: [ { guildId: BigInt(server.guildId) }, { accessToken: { not: "unauthorized" } } ] } });
                 if (members.length === 0) return res.status(400).json({ success: false, message: "No members found" });
 
-                axios.get(`https://discord.com/api/v10/users/@me`, {
+                await axios.get(`https://discord.com/api/v10/users/@me`, {
                     headers: {
                         "Authorization": `Bot ${bot.botToken}`,
                         "Content-Type": "application/json",
@@ -172,7 +172,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 });
 
                 // check if the server exists on discord (guildId)
-                axios.get(`https://discord.com/api/v10/guilds/${server.guildId}`, {
+                await axios.get(`https://discord.com/api/v10/guilds/${server.guildId}`, {
                     headers: {
                         "Authorization": `Bot ${bot.botToken}`,
                         "Content-Type": "application/json",
@@ -190,7 +190,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 });
 
                 // try to give the bot the verified role
-                axios.put(`https://discord.com/api/v10/guilds/${server.guildId}/members/${bot.clientId}/roles/${server.roleId}`, {}, {
+                await axios.put(`https://discord.com/api/v10/guilds/${server.guildId}/members/${bot.clientId}/roles/${server.roleId}`, {}, {
                     headers: {
                         "Authorization": `Bot ${bot.botToken}`,
                         "Content-Type": "application/json",
@@ -245,7 +245,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 //         httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
                 //         validateStatus: () => true,
                 //     });
-
                 //     serverMemberList.data.push(...nextMemberList.data);
                 //     if (nextMemberList.data.length < 1000) done = true;
                 // }
@@ -256,6 +255,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     const member = members.find((m) => m.userId == serverMemberData.user.id);
                     if (member) {
                         members.splice(members.indexOf(member), 1)
+                        console.log(`Removed ${member.username} from pullable members`);
                     }
                 }
 
@@ -299,7 +299,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                 switch (resp.response.status) {
                                 case 429:   
                                     const retryAfter = resp.response.headers["retry-after"];
-                                    console.log(`Rate limited: ${retryAfter}`);
+                                    console.log(`[${server.name}] [${member.username}] 429 | retry-after: ${retryAfter} | delay: ${delay}ms`);
                                     if (retryAfter) {
                                         const retry = parseInt(retryAfter);
                                         setTimeout(async () => {

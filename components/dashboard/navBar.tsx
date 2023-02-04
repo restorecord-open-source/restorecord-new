@@ -81,7 +81,7 @@ export default function NavBar({ ...props }: any) {
                                 </IconButton>
                             </>
                         )}
-                        <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 0, cursor: "pointer"}} onClick={() => { router.push("/dashboard") }}>
+                        <Typography variant="h6" noWrap component="div" sx={{  flexGrow: 0, cursor: "pointer" }} onClick={() => { router.push("/dashboard") }}>
                             RestoreCord
                         </Typography>
 

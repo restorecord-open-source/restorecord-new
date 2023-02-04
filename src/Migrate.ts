@@ -1,6 +1,7 @@
 import { accounts } from "@prisma/client";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import axios from "axios";
+import { prisma } from "./db";
 
 export async function sendWebhook(webhookUrl: string, content: string, username: string, avatarUrl: string) {
     return await axios.post(webhookUrl, {
@@ -216,9 +217,25 @@ export async function sendWebhookMessage(webhookUrl: string | null, title: strin
     {
         proxy: false, 
         httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
-    }).catch((err) => {
+    }).catch(async (err) => {
         if (err.response.status === 404) {
-            console.error(`${webhookUrl.split("/")[5]} Webhook not found`);
+            console.error(`${webhookUrl.split("/")[5]} Webhook not found (webhook removed from config)`);
+            const servers = await prisma.servers.findMany({
+                where: {
+                    webhook: webhookUrl,
+                }
+            });
+
+            for (const server of servers) {
+                await prisma.servers.update({
+                    where: {
+                        id: server.id,
+                    },
+                    data: {
+                        webhook: null,
+                    },
+                });
+            }
         } else if (err.response.status === 429) {
             console.error(`${webhookUrl.split("/")[5]} Webhook ratelimited`);
         } else {
