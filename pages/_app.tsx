@@ -12,6 +12,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import createEmotionCache from "../src/createEmotionCache";
 import Head from "next/head";
 import NProgress from "nprogress";
+import Script from "next/script";
 
 import "nprogress/nprogress.css";
 import "../public/styles/globals.css";
@@ -163,6 +164,7 @@ export default function MyApp(props: MyAppProps) {
                     {/* <script dangerouslySetInnerHTML={ { __html: `var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();` } } /> */}
                 </Head>
                 {/* <Script async={true} crossOrigin="*" src="https://embed.tawk.to/6302414d37898912e96447c9/1gb0cu5vi" /> */}
+                <Script id="crisp" dangerouslySetInnerHTML={ {__html: `window.$crisp=[];window.CRISP_WEBSITE_ID="085306e5-8d52-432e-9425-2af20eb36d4d";(function(){d=document;s=d.createElement("script");s.src="https://client.crisp.chat/l.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})()` } } />
                 <TokenProvider>
                     <QueryClientProvider client={queryClient}>
                         <ThemeProvider theme={theme}>
