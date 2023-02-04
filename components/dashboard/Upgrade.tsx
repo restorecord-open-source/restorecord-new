@@ -220,7 +220,7 @@ export default function DashUpgrade({ user }: any) {
                     Expires on <b>{new Intl.DateTimeFormat(navigator.language, { year: "numeric", month: "long", day: "2-digit" }).format(new Date(user.expiry))}</b>.
                 </Typography>
                 <Typography component="span" variant="body2" sx={{ display: "block", mb: 2, }}>
-                    Click <MuiLink href="https://billing.stripe.com/p/login/test_8wM14c0N477seVa144">here</MuiLink> to manage and cancel your subscription. <small>(If paid via Stripe)</small>
+                    Click <MuiLink href="https://billing.stripe.com/p/login/eVa4jz31t0dHgsUfYY">here</MuiLink> to manage and cancel your subscription. <small>(If paid via Stripe)</small>
                 </Typography>
             </>
         )
