@@ -46,16 +46,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 let search: any = req.query.search ?? '';
                 let userIdSearch: any = search ? (isNaN(search) ? undefined : BigInt(search)) : undefined;
-                const count = await prisma.members.count({ where: { AND: [{ guildId: { in: guildIds } }, { username: { contains: search ? (userIdSearch ? '' : search) : '' } }, { userId: { equals: userIdSearch ? BigInt(userIdSearch) as bigint : undefined } }] } });
+                let ipSearch: any = search ? (search.match(/^(\d{1,3}\.){3}\d{1,3}$/) ? search : undefined) : undefined;
+                let conditions: any[] = [{ guildId: { in: guildIds } }];
+
+                if (ipSearch) conditions.push({ ip: { equals: ipSearch } }); else if (search) conditions.push({ username: { contains: search } });
+                if (userIdSearch) conditions.push({ userId: { equals: userIdSearch } });
+                // if (search) conditions.push({ username: { contains: search } });
+
+                const count = await prisma.members.count({ where: { AND: conditions } });
                 const countPullable = await prisma.members.count({ where: { AND: [{ accessToken: { not: "unauthorized" } }, { guildId: { in: guildIds } }, { username: { contains: search ? (userIdSearch ? '' : search) : '' } }, { userId: { equals: userIdSearch ? BigInt(userIdSearch) as bigint : undefined } }] } });
 
                 const memberList = await prisma.members.findMany({
                     where: {
-                        AND: [
-                            { guildId: { in: guildIds } },
-                            { username: { contains: search ? (userIdSearch ? '' : search) : '' } },
-                            { userId: { equals: userIdSearch ? BigInt(userIdSearch) as bigint : undefined } }
-                        ]
+                        AND: conditions
                     },
                     take: search ? undefined : (Number(page) * Number(limit)),
                 });
@@ -63,14 +66,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 // const highestId = memberList.find((member: any) => member.id === Math.max(...memberList.map((member: any) => member.id)))?.id;
                 const lowestId = memberList.find((member: any) => member.id === Math.min(...memberList.map((member: any) => member.id)))?.id ?? 1;
 
+                conditions.push({ id: { gt: search ? 0 : (lowestId - 1) } });
                 await prisma.members.findMany({
                     where: {
-                        AND: [
-                            { guildId: { in: guildIds } },
-                            { id: { gt: search ? 0 : (lowestId - 1) } },
-                            { username: { contains: search ? (userIdSearch ? '' : search) : '' } },
-                            { userId: { equals: userIdSearch ? BigInt(userIdSearch) as bigint : undefined } }
-                        ],
+                        AND: conditions
                     },
                     take: search ? undefined : (Number(page) * Number(limit)),
                 }).then((members: any) => {
