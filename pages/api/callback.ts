@@ -26,7 +26,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         if (!serverInfo) return res.status(400).json({ success: false, message: "No server info" });
 
         const customBotInfo = await prisma.customBots.findUnique({where: { id: serverInfo.customBotId } });
-        if (!customBotInfo)return res.status(400).json({ success: false, message: "No custom bot info" });
+        if (!customBotInfo) return res.status(400).json({ success: false, message: "No custom bot info" });
 
         // console.log(`Verify Attempt: ${serverInfo.name}, ${code}, ${req.headers.host}, ${customBotInfo.clientId}, ${customBotInfo.botSecret}`);
 
@@ -35,11 +35,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                 if (respon.status === 200) {
                     let account = respon.data.access_token ? await resolveUser(respon.data.access_token) : null;
 
-
                     if (!account || account === null) return res.status(400).json({ success: false, message: "Took too long to verify. (No account info)" });
                     if (account) {
                         const userId: any = BigInt(account.id as any);
-
                         const user = await prisma.members.findFirst({ where: { AND: [ { guildId: rGuildId }, { userId: userId } ] } });
 
                         const serverOwner = await prisma.accounts.findFirst({ where: { id: serverInfo.ownerId } });
@@ -61,7 +59,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                     let reason = blacklist.find((b) => b.type === 2 && b.value === proxCheck[IPAddr].asn.replace("AS", "") as string)?.reason;
 
                                     await sendWebhookMessage(serverInfo?.webhook, "Failed Blacklist Check", serverOwner, proxCheck, IPAddr, account, 0);
-                                    
+
                                     res.setHeader("Set-Cookie", `RC_err=307 RC_errStack=ASN: ${String(proxCheck[IPAddr].asn.replace("AS", "")) as string} ${reason ? `Reason: ${reason}` : ""}; Path=/; Max-Age=5;`);
                                     return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
                                 }
@@ -93,10 +91,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 try {
                                     console.log(`${account?.username} adding member ${resp.status ? resp.status : resp.response.status} (${rGuildId.toString()}, ${userId.toString()}, ${respon.data.access_token}, ${[BigInt(serverInfo.roleId).toString()]})`);
 
-                                    if (resp?.status === 201 || resp?.response?.status === 201 || resp?.status === 204 || resp?.response?.status === 204)
-                                    {
-                                        if (resp?.status === 204 || resp?.response?.status === 204) 
-                                        {
+                                    if (resp?.status === 201 || resp?.response?.status === 201 || resp?.status === 204 || resp?.response?.status === 204) {
+                                        if (resp?.status === 204 || resp?.response?.status === 204) {
                                             await addRole(rGuildId.toString(), userId.toString(), customBotInfo.botToken, serverInfo.roleId.toString()).then(async (response) => {
                                                 console.log(`${account?.username} adding role: ${response?.status || response?.response?.status} (${rGuildId.toString()}, ${userId.toString()}, ${serverInfo.roleId.toString()})`);
 

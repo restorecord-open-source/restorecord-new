@@ -34,7 +34,7 @@ model accounts {
     customBots     customBots[]
     sessions       sessions[]
     emails         emails[]
-    giveaways      giveaways[]
+    payments       payments[]
 }
 
 model servers {
@@ -214,17 +214,14 @@ model emails {
     createdAt DateTime @default(now())
     account   accounts @relation(fields: [accountId], references: [id])
 }
-model giveaways {
-    id Int @id @default(autoincrement())
-    accountId Int
-    discordId BigInt? @db.UnsignedBigInt
-    email String? @db.Text
-    winWhat String? @db.Text
-    whyWin String? @db.Text
-    howDidYouFindUs String? @db.Text
-    whatDoYouLike String? @db.Text
-    ip String?
-    tracking String? @db.Text
-    createdAt DateTime @default(now())
-    account accounts @relation(fields: [accountId], references: [id])
+
+model payments {
+    id             Int      @id @default(autoincrement())
+    accountId      Int
+    amount         Int
+    type           String
+    subscriptionId String   @unique @db.VarChar(999)
+    payment_status String
+    createdAt      DateTime @default(now())
+    account        accounts @relation(fields: [accountId], references: [id])
 }
