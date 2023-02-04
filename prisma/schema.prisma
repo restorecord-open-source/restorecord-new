@@ -28,6 +28,8 @@ model accounts {
     lastIp         String?
     createdAt      DateTime     @default(now())
     userId         BigInt?      @db.UnsignedBigInt
+    referrer       Int?
+    referralCode   String?      @unique
     servers        servers[]
     customBots     customBots[]
     sessions       sessions[]
