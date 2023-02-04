@@ -41,9 +41,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         icon: server.picture,
                         bg: server.bgImage ? server.bgImage : null,
                         description: server.description,
-                        createdAt: server.createdAt,
                         clientId: customBot?.clientId.toString(),
-                        owner: ownerAccount?.username,
                         domain: customBot?.customDomain,
                         // verified: members >= 1000,
                     } });
