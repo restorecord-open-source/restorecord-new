@@ -21,7 +21,6 @@ import theme from "../../src/theme";
 import DialogContent from "@mui/material/DialogContent";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
-import getStripe from "../../src/getStripe";    
 import axios from "axios";
 import StripeCheckout from "./Upgrade/StripeCheckout";
 import AlertTitle from "@mui/material/AlertTitle";
