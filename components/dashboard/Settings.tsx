@@ -29,21 +29,29 @@ import DialogContent from "@mui/material/DialogContent";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import DialogActions from "@mui/material/DialogActions";
-import { CircularProgress } from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
 
 export default function DashSettings({ user }: any) {
     const [token]: any = useToken();
     const router = useRouter();
 
     const [pullWindow, setPullWindow] = useState(false);
+    const [giveRoleOnJoin, setGiveRoleOnJoin] = useState(false);
+
     const [serverName, setServerName] = useState("");
     const [guildId, setGuildId] = useState("");
     const [roleId, setRoleId] = useState("");
     const [customBot, setCustomBot] = useState("");
     const [customBotToken, setCustomBotToken] = useState("");
+    const [selectedServer, setSelectedServer] = useState("");
 
     const [allServers, setAllServers] = useState([]);
-    const [selectedServer, setSelectedServer] = useState("");
 
     const [openS, setOpenS] = useState(false);
     const [openE, setOpenE] = useState(false);
@@ -150,12 +158,7 @@ export default function DashSettings({ user }: any) {
                                     ⚠ Warning: This will only pull members.
                                 </Typography>
                                 {allServers.length === 0 ? (
-                                    <>
-                                        <Typography variant="body1" sx={{ fontWeight: "400", mb: "1rem" }}>
-                                            No servers found, try refreshing.
-                                        </Typography>
-                                        <CircularProgress />
-                                    </>
+                                    <CircularProgress />
                                 ) : (
                                     <FormControl fullWidth variant="outlined" required>
                                         <InputLabel id="server-select-label">Select Server</InputLabel>
@@ -167,6 +170,18 @@ export default function DashSettings({ user }: any) {
                                         </Select>
                                     </FormControl>
                                 )}
+
+                                {/* small arrow down icon with the text "advanced options" */}
+                                <Accordion sx={{ mt: "1rem" }}>
+                                    <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
+                                        <Typography variant="body1" sx={{ fontWeight: "400" }}>Advanced Options</Typography>
+                                    </AccordionSummary>
+                                    <AccordionDetails>
+                                        <Typography variant="body1" sx={{ mb: "1rem" }}>Enter Server ID manually</Typography>
+                                        <TextField fullWidth label="Server ID" variant="outlined" value={selectedServer} onChange={(e) => setSelectedServer(e.target.value)} />
+                                    </AccordionDetails>
+                                </Accordion>
+
                             </DialogContent>
                             <DialogActions>
                                 <Button onClick={() => getAllGuilds()} color="primary" variant="contained" sx={{ mr: 1 }}>
