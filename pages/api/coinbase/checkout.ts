@@ -51,8 +51,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                 account_id: valid.id,
                 plan: plan,
             },
-            redirect_url: `https://beta.restorecord.com/dashboard/upgrade?s=2`,
-            cancel_url: `https://beta.restorecord.com/dashboard/upgrade?c=1`,
+            redirect_url: `https://restorecord.com/dashboard/upgrade?s=2`,
+            cancel_url: `https://restorecord.com/dashboard/upgrade?c=1`,
         });
 
         return res.status(200).json({

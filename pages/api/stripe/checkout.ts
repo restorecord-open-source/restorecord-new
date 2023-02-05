@@ -44,8 +44,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
             ],
             mode: "subscription",
             customer_email: account.email,
-            success_url: `https://beta.restorecord.com/api/stripe/payment?success=true&session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `https://beta.restorecord.com/api/stripe/payment?canceled=true`,
+            success_url: `https://restorecord.com/api/stripe/payment?success=true&session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `https://restorecord.com/api/stripe/payment?canceled=true`,
             client_reference_id: String(valid.id) as string,
             metadata: {
                 account_id: valid.id,
