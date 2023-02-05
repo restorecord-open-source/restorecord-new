@@ -33,6 +33,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         case "business":
             paymentid = await stripe.prices.retrieve("price_1MVilQIDsTail4YBuxkF8JRc");
             break;
+        default:
+            paymentid = await stripe.prices.retrieve("price_1MVilKIDsTail4YBdF2GvIUi");
         }
 
         const session = await stripe.checkout.sessions.create({

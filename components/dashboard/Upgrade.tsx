@@ -44,20 +44,6 @@ export default function DashUpgrade({ user }: any) {
 
     const alertRef: any = useRef();
 
-
-    // useEffect(() => {
-    //     if (paymentMethod === "stripe") {
-    //         // axios.post("/api/stripe", {
-    //         //     plan: selectedPlan.id,
-    //         //     currency: "usd",
-    //         //     id: user.id,
-    //         // }).then((res) => {
-    //         //     setStripeIntent(res.data);
-    //         // });
-    //     }
-    // }, [paymentMethod, selectedPlan]);
-
-
     function renderPaymentWindow() {
         return (
             <Dialog open={purchaseWindow} onClose={() => setPurchaseWindow(false)} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" fullWidth maxWidth="sm">
@@ -277,7 +263,7 @@ export default function DashUpgrade({ user }: any) {
                                 ))}
                             </CardContent>
                             <CardActions>
-                                <Button fullWidth variant="contained" sx={{ fontWeight: "600" }} disabled={user.role !== "free"} onClick={(e) => {
+                                <Button fullWidth variant="contained" sx={{ fontWeight: "600" }} disabled={(user.role !== "free" || tier.name.toLowerCase() === "free")} onClick={(e) => {
                                     setSelectedPlan({
                                         id: tier.name.toLowerCase(),
                                         name: tier.name,

@@ -35,6 +35,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         case "business":
             amount = "30.00";
             break;
+        default:
+            amount = "15.00";
+            break;
         }
 
         var Charge = coinbase.resources.Charge;
