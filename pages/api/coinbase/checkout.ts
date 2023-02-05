@@ -27,44 +27,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         const account = await prisma.accounts.findFirst({ where: { id: valid.id } });
         if (!account) return res.status(400).json({ success: false, message: "No account found." });
 
-        // let paymentid;
-        // switch (plan) {
-        // case "premium":
-        //     paymentid = await stripe.prices.retrieve("price_1MSks7IDsTail4YBgM8FFLTg");
-        //     break;
-        // case "business":
-        //     paymentid = await stripe.prices.retrieve("price_1MSt40IDsTail4YBGWYS6YvP");
-        //     break;
-        // }
-
-        // const session = await stripe.checkout.sessions.create({
-        //     line_items: [
-        //         {
-        //             price: paymentid?.id,
-        //             quantity: 1,
-        //         },
-        //     ],
-        //     mode: "subscription",
-        //     customer_email: account.email,
-        //     success_url: `https://beta.restorecord.com/api/stripe/payment?success=true&session_id={CHECKOUT_SESSION_ID}`,
-        //     cancel_url: `https://beta.restorecord.com/api/stripe/payment?canceled=true`,
-        //     client_reference_id: String(valid.id) as string,
-        //     metadata: {
-        //         account_id: valid.id,
-        //         plan: plan,
-        //     },
-        //     subscription_data: {
-        //         metadata: {
-        //             account_id: valid.id,
-        //             plan: plan,
-        //         },
-        //     },
-        // });
-    
-        // return res.status(200).json({
-        //     redirect: session.url
-        // });
-
         let amount = "15.00"
         switch (plan) {
         case "premium":
@@ -81,7 +43,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
             name: "Restorecord Subscription",
             description: "Restorecord Subscription",
             local_price: {
-                amount: "0.01",
+                amount: amount,
                 currency: "USD"
             },
             pricing_type: "fixed_price",
