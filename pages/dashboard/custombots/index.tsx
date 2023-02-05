@@ -19,13 +19,8 @@ export default function Custombots() {
     }), { retry: false, refetchOnWindowFocus: false });
 
 
-    if (isLoading) {
-        return <CircularProgress />
-    }
-
-    if (isError) {
-        return <div>Error</div>
-    }
+    if (isLoading) return <CircularProgress />
+    if (isError) return <div>Error</div>
 
     if (!data.username) {
         router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);

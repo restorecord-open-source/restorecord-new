@@ -1,11 +1,11 @@
 import { useRouter } from "next/router";
 import { useInfiniteQuery, useQuery } from "react-query";
-import { useToken } from "../../src/token";
+import { useToken } from "../../../src/token";
 import { useEffect, useState } from "react";
 
-import NavBar from "../../components/dashboard/navBar";
-import getUser from "../../src/dashboard/getUser";
-import getBlacklist from "../../src/dashboard/getBlacklist";
+import NavBar from "../../../components/dashboard/navBar";
+import getUser from "../../../src/dashboard/getUser";
+import getBlacklist from "../../../src/dashboard/getBlacklist";
 
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -29,11 +29,11 @@ import PersonIcon from "@mui/icons-material/Person";
 import HubIcon from "@mui/icons-material/Hub";
 import axios from "axios";
 import CircularProgress from "@mui/material/CircularProgress";
-import theme from "../../src/theme";
+import theme from "../../../src/theme";
 
 export default function Blacklist() {
+    const [ token ]: any = useToken()
     const router = useRouter();
-    const [token]: any = useToken()
     
     const [serverId, setServerId] = useState("");
     const [search, setSearch] = useState("");
@@ -50,8 +50,6 @@ export default function Blacklist() {
     }), { retry: false,  refetchOnWindowFocus: false });
     
 
-   
-    
     const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading: listsLoading, refetch } = useInfiniteQuery("members", async ({ pageParam = 1 }: any) => await getBlacklist({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
     }, serverId, search, pageParam), {
@@ -85,17 +83,18 @@ export default function Blacklist() {
             clearTimeout(delayDebounceFn);
         }       
     }, [hasNextPage, fetchNextPage, refetch, search]);
-
     
-    if (listsLoading) return <CircularProgress />
     if (userLoading) return <CircularProgress />
     if (userError) return <div>Error</div>
+    if (listsLoading) return <CircularProgress />
     
     if (!user.username) {
         router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
 
         return <CircularProgress />
     }
+
+
 
     function ShowType(type: number) {
         switch (type) {
@@ -123,7 +122,7 @@ export default function Blacklist() {
 
     return (
         <Box sx={{ display: "flex" }}>
-            <NavBar user={data}>
+            <NavBar user={user}>
                 <Toolbar />
 
                 <Container maxWidth="xl">

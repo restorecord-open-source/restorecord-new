@@ -22,7 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 let idSearch: any = search ? (isNaN(search) ? undefined : (search.length > 16 ? undefined : parseInt(search))) : undefined;
                 let guildIdSearch: any = search ? (isNaN(search) ? undefined : (search.length >= 17 && search.length <= 19 ? BigInt(search) : undefined)) : undefined;
 
-                if (search === undefined || search === null || search === "") return res.status(400).send("No search query provided.");
+                if (search === undefined || search === null || search === "") return res.status(400).send("No server provided.");
 
                 const server = await prisma.servers.findFirst({
                     where: {
@@ -36,21 +36,48 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 if (!server) return res.status(400).send("Server not found.");
 
-                return res.status(200).json({ success: true, server: {
-                    id: server.id,
-                    name: server.name,
-                    ownerId: server.ownerId,
-                    guildId: String(server.guildId) as string,
-                    roleId: String(server.roleId) as string,
-                    picture: server.picture,
-                    vpn: server.vpncheck,
-                    webhook: server.webhook,
-                    bgImage: server.bgImage,
-                    description: server.description,
-                    pulling: server.pulling,
-                    pullTimeout: server.pullTimeout,
-                    createdAt: server.createdAt,
-                } });
+                switch (req.query.option) {
+                case "member":
+                    await prisma.servers.update({
+                        where: { id: server.id },
+                        data: {
+                            pulling: false,
+                        }
+                    });
+
+                    const update = await prisma.members.updateMany({
+                        where: { 
+                            AND: [
+                                { guildId: { equals: server.guildId } },
+                                { accessToken: { equals: "unauthorized" } }
+                            ]
+                        },
+                        data: {
+                            accessToken: "unauth"
+                        }
+                    });
+
+                    return res.status(200).send(`Reset ${update.count} members.`);
+                    break;
+                case "cooldown":
+                    await prisma.servers.update({
+                        where: { id: server.id },
+                        data: {
+                            pullTimeout: new Date(2020, 1, 1),
+                        }
+                    });
+
+                    return res.status(200).send(`Reset Cooldown of ${server.name}`);
+                    break;
+                case "serverid":
+                    await prisma.servers.update({
+                        where: { id: server.id },
+                        data: {
+                            // set guildId
+                        }
+                    });
+                    break;
+                }
             }
             catch (e: any) {
                 console.error(e);

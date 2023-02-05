@@ -25,8 +25,8 @@ export default function Admin() {
     const [token]: any = useToken()
     const [searchQuery, setSearchQuery] = useState("");
     const [serverSearchQuery, setServerSearchQuery] = useState("");
-    const [errorMessages, setErrorMessages] = useState("");
-    const [successMessage, setSuccessMessage] = useState("");
+    const [errorMessages, setErrorMessages]: any = useState("");
+    const [successMessage, setSuccessMessage]: any = useState("");
 
     // create blank object for user data
     const [user, setUser] = useState({
@@ -93,7 +93,7 @@ export default function Admin() {
                                     Admin
                                 </Typography>
 
-                                <Stack direction="row" spacing={2}>
+                                {/* <Stack direction="row" spacing={2}>
                                     <Button variant="contained" sx={{ textTransform: "none" }} onClick={() => { 
                                         function a(e: any) {
                                             for (var t = "https://reactjs.org/docs/error-decoder.html?invariant=" + e, n = 1; n < arguments.length; n++)
@@ -107,61 +107,97 @@ export default function Admin() {
                                     <Button variant="contained" sx={{ textTransform: "none" }} onClick={() => { throw Error("help") }}>
                                         Trigger onClick error
                                     </Button>
-                                </Stack>
+                                </Stack> */}
 
                                 <Typography variant="h5" sx={{ mt: 2, fontWeight: "500" }}>
                                     Search User
                                 </Typography>
-                                <Stack direction="row" spacing={2}>
-                                    <form onSubmit={async (e) => {
-                                        e.preventDefault();
-                                        setUser({ id: "", username: "", email: "", role: "", twoFactor: false, expiry: new Date(0), admin: false, lastIp: "", createdAt: new Date(0) });
-                                        setErrorMessages("");
-                                        await axios.post("/api/admin/lookup", { query: searchQuery }, {
-                                            headers: {
-                                                Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
-                                            },
-                                        }).then((res: any) => {
-                                            console.log(res.data.user);
-                                            setUser(res.data.user);
-                                        }).catch((err) => {
-                                            console.error(err);
-                                            setErrorMessages(JSON.stringify(err.response.data));
-                                        });
-                                    }}>
+                                <form onSubmit={async (e) => {
+                                    e.preventDefault();
+                                    setUser({ id: "", username: "", email: "", role: "", twoFactor: false, expiry: new Date(0), admin: false, lastIp: "", createdAt: new Date(0) });
+                                    setErrorMessages("");
+                                    await axios.post("/api/admin/lookup", { query: searchQuery }, {
+                                        headers: {
+                                            Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
+                                        },
+                                    }).then((res: any) => {
+                                        console.log(res.data.user);
+                                        setUser(res.data.user);
+                                    }).catch((err) => {
+                                        console.error(err);
+                                        setErrorMessages(JSON.stringify(err.response.data));
+                                    });
+                                }}>
+                                    <Stack direction="column" spacing={2}>
                                         <TextField label="Search" variant="outlined" placeholder="User ID/Username/Email" onChange={(e) => setSearchQuery(e.target.value)} />
-                                        <Button variant="contained" type="submit" sx={{ textTransform: "none", marginLeft: "1rem", height: "100%" }}>
+                                        <Button variant="contained" type="submit">
                                             Get user info
                                         </Button>
-                                    </form>
-                                </Stack>
+                                    </Stack>
+                                </form>
 
                                 <Typography variant="h6" sx={{ fontWeight: "500", mt: 2 }}>
                                     Search Server
                                 </Typography>
-                                <Stack direction="row" spacing={2} >
-                                    <form onSubmit={async (e) => {
-                                        e.preventDefault();
-                                        setServer({ id: "", name: "", ownerId: "", guildId: "", roleId: "", picture: "", vpn: false, webhook: "", bgImage: "", description: "", pulling: false, pullTimeout: new Date(0), createdAt: new Date(0) });
-                                        setErrorMessages("");
-                                        await axios.post("/api/admin/server", { query: serverSearchQuery }, {
-                                            headers: {
-                                                Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
-                                            },
-                                        }).then((res: any) => {
-                                            console.log(res.data.user);
-                                            setServer(res.data.server);
-                                        }).catch((err) => {
-                                            console.error(err);
-                                            setErrorMessages(JSON.stringify(err.response.data));
-                                        });
-                                    }}>
+                                <form onSubmit={async (e) => {
+                                    e.preventDefault();
+                                    setServer({ id: "", name: "", ownerId: "", guildId: "", roleId: "", picture: "", vpn: false, webhook: "", bgImage: "", description: "", pulling: false, pullTimeout: new Date(0), createdAt: new Date(0) });
+                                    setErrorMessages("");
+                                    await axios.post("/api/admin/server", { query: serverSearchQuery }, {
+                                        headers: {
+                                            Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
+                                        },
+                                    }).then((res: any) => {
+                                        console.log(res.data.user);
+                                        setServer(res.data.server);
+                                    }).catch((err) => {
+                                        console.error(err);
+                                        setErrorMessages(JSON.stringify(err.response.data));
+                                    });
+                                }}>
+                                    <Stack direction="column" spacing={2} >
                                         <TextField label="Search" variant="outlined" placeholder="Id/Guild Id/Name" onChange={(e) => setServerSearchQuery(e.target.value)} />
-                                        <Button variant="contained" type="submit" sx={{ textTransform: "none", marginLeft: "1rem", height: "100%" }}>
+                                        <Button variant="contained" type="submit">
                                             Get Server Info
                                         </Button>
-                                    </form>
-                                </Stack>
+                                        <Button variant="contained" onClick={async (e) => {
+                                            e.preventDefault();
+                                            setErrorMessages("");
+
+                                            await axios.post("/api/admin/reset?option=member", { query: serverSearchQuery }, {
+                                                headers: {
+                                                    Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                },
+                                            }).then((res: any) => {
+                                                console.log(res.data);
+                                                setSuccessMessage(JSON.stringify(res.data));
+                                            }).catch((err) => {
+                                                console.error(err);
+                                                setErrorMessages(JSON.stringify(err.response.data));
+                                            });
+                                        }}>
+                                            Reset Members & Status
+                                        </Button>
+                                        <Button variant="contained" onClick={async (e) => {
+                                            e.preventDefault();
+                                            setErrorMessages("");
+
+                                            await axios.post("/api/admin/reset?option=cooldown", { query: serverSearchQuery }, {
+                                                headers: {
+                                                    Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                },
+                                            }).then((res: any) => {
+                                                console.log(res.data);
+                                                setSuccessMessage(JSON.stringify(res.data));
+                                            }).catch((err) => {
+                                                console.error(err);
+                                                setErrorMessages(JSON.stringify(err.response.data));
+                                            });
+                                        }}>
+                                            Reset Cooldown
+                                        </Button>
+                                    </Stack>
+                                </form>
 
                                 {user.id && (
                                     <Paper sx={{ background: "#000", mt: 2, p: 3, borderRadius: "1rem" }}>
@@ -207,10 +243,15 @@ export default function Admin() {
                                 )}
                             </CardContent>
                             
-                            {/* show error */}
                             {errorMessages && (
                                 <Alert severity="error" sx={{ mt: 2, bgcolor: "#000", color: "#fff" }}>
                                     {errorMessages}
+                                </Alert>
+                            )}
+
+                            {successMessage && (
+                                <Alert severity="success" sx={{ mt: 2, bgcolor: "#000", color: "#fff" }}>
+                                    {successMessage}
                                 </Alert>
                             )}
                         </Paper>

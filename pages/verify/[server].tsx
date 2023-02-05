@@ -161,7 +161,7 @@ export default function Verify({ server, status, err, errStack }: any) {
 
                         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                             {server.success ? (
-                                <Button variant="contained" color="primary" href={rediUrl} target="_blank"
+                                <Button variant="contained" color="primary" href={rediUrl}
                                     sx={{ 
                                         width: "100%",
                                         marginTop: "2rem",
