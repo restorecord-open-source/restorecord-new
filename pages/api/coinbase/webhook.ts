@@ -37,7 +37,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         CBEvent = JSON.parse(rawBody.toString()) as CBEvent;
         const event = CBEvent.event;
 
-        console.log(`[COINBASE] [${JSON.stringify(event)}`);
+        // console.log(`[COINBASE] [${JSON.stringify(event)}`);
 
         let amount: number = 1500;
         let expiry: Date = new Date(Date.now() + 2592000000);

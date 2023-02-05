@@ -44,7 +44,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
 
         // console.log(JSON.stringify(event.data.object));
-        console.log(`[${event.type}] ${JSON.stringify(event.data.object)}`);
+        // console.log(`[${event.type}] ${JSON.stringify(event.data.object)}`);
 
         switch (event.type) {
         case "customer.subscription.created":
