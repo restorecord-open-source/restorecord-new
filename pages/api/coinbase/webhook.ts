@@ -73,48 +73,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         case "charge:confirmed":
             console.log(`[✅] CONFIRMED [${event.type}] ${JSON.stringify(event.data)}`);
             if (event.data.payments[0]) {
-                // await axios.post(`https://discord.com/api/webhooks/1053705505899548692/9LRHelRG4dmnSNR2Ili3Ab2SiyS96zHSz0Gy4o9g0GDsmdA6ZLli2CLlid7b0hQNd7rL`, {
-                //     embeds: [
-                //         {
-                //             title: "Subscription Updated",
-                //             description: `Subscription status is ${status}. ${subscription.cancel_at_period_end ? `(Plan ends: __${new Date(subscription.cancel_at * 1000).toLocaleString()})__` : ""}`,
-                //             color: subscription.cancel_at_period_end ? 0xFFFF00 : status === "active" ? 0x00ff12 : 0xff0000,
-                //             fields: [
-                //                 {
-                //                     name: "Subscription ID",
-                //                     value: `||${subscription.id}||`,
-                //                     inline: true
-                //                 },
-                //                 {
-                //                     name: "Current Period End",
-                //                     value: `<t:${Math.floor(subscription.current_period_end)}:F>`,
-                //                     inline: true
-                //                 },
-                //                 {
-                //                     name: "Status",
-                //                     value: status === "active" ? `:white_check_mark: ${status}` : `:x: ${status}`,
-                //                     inline: true
-                //                 },
-                //                 {
-                //                     name: "Account ID",
-                //                     value: `**${subscription.metadata.account_id} ${account ? `(${account.username})` : ""}**`,
-                //                     inline: true
-                //                 },
-                //                 {
-                //                     name: "Plan",
-                //                     value: subscription.metadata.plan.slice(0, 1).toUpperCase() + subscription.metadata.plan.slice(1),
-                //                     inline: true
-                //                 },
-                //                 {
-                //                     name: "Amount",
-                //                     value: `$${subscription.plan.amount / 100}`,
-                //                     inline: true
-                //                 },
-                //             ]
-                //         },
-                //     ]
-                // }).catch(err => console.error(err));
-
                 const account = await prisma.accounts.findUnique({ where: { id: Number(event.data.metadata.account_id) as number ?? 1 } });
 
                 await axios.post(`https://discord.com/api/webhooks/1053705505899548692/9LRHelRG4dmnSNR2Ili3Ab2SiyS96zHSz0Gy4o9g0GDsmdA6ZLli2CLlid7b0hQNd7rL`, {
