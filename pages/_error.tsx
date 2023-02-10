@@ -2,7 +2,6 @@ import Box from "@mui/material/Box"
 import Button from "@mui/material/Button"
 import Stack from "@mui/material/Stack"
 import Typography from "@mui/material/Typography"
-import * as Sentry from '@sentry/nextjs';
 
 const statusTexts: { [code: number]: string} = {
     400: "Bad Request",
@@ -52,8 +51,6 @@ export default function ErrorPage<ErrorProps>({ statusCode, title: titleOrigin, 
 }
 
 ErrorPage.getInitialProps = async ({ res, err, }: any) => {
-    await Sentry.captureUnderscoreErrorException(err);
-
     const statusCode = res && res.statusCode ? res.statusCode : err ? err.statusCode! : 404
     return {
         statusCode,

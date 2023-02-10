@@ -1,5 +1,3 @@
-import axios from "axios";
-import { HttpsProxyAgent } from "https-proxy-agent";
 import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "../../src/db";
 import { getIPAddress } from "../../src/getIPAddress";
@@ -18,7 +16,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         }
 
         if (!Number.isInteger(Number(state))) return res.status(400).json({ success: false, message: "Invalid Guild Id" });
-       
+
         const IPAddr: any = getIPAddress(req);
         const rGuildId: any = BigInt(req.query.state as any);
 

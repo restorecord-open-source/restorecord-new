@@ -64,7 +64,7 @@ export default function Home() {
                         <Typography data-aos="fade-down" variant="h1" component="h1" sx={{ fontWeight: 900, textAlign: "center", fontSize: { xs: "1.5rem", md: "2.5rem", lg: "3.5rem" },  padding: 0, paddingLeft: { xs: "4px", sm: "40px" }, paddingRight: { xs: "4px", sm: "40px" } }}>
                             The <span style={{ color: theme.palette.secondary.main }} ref={typingElement}></span> way to<br/>backup your Discord servers.
                         </Typography>
-                        <Typography data-aos="fade-down" color={theme.palette.grey[200]} variant="h5" component="h2" sx={{ fontWeight: 300, textAlign: "center", padding: 4, paddingLeft: { xs: "4rem", md: "8rem", sm: "16rem" }, paddingRight: { xs: "4rem", md: "8rem", sm: "16rem" } }}>
+                        <Typography data-aos="fade-down" color={theme.palette.grey[200]} variant="h5" component="h2" sx={{ fontWeight: 300, textAlign: "center", padding: 4, paddingLeft: { xs: "2rem", sm: "4rem", md: "12rem",  }, paddingRight: { xs: "2rem", sm: "4rem", md: "12rem",  } }}>
                             RestoreCord is a service for restoring or backing up Discord servers
                         </Typography>
 

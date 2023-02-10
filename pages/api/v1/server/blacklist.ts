@@ -122,6 +122,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 const servers = await prisma.servers.findMany({ where: { ownerId: account.id } });
                 if (!servers) return res.status(400).json({ success: false, message: "No servers found." });
 
+                if (account.role === "free") return res.status(400).json({ success: false, message: "You are not allowed to use this feature." });
+
                 const blacklist = await prisma.blacklist.findMany({ where: { guildId: { in: servers.map((server: any) => server.guildId) } } });
                 
                 // add a new blacklist item 
@@ -169,7 +171,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     break;
                 case "asn":
                     // match asn
-                    if (account.role === "free") return res.status(400).json({ success: false, message: "You need to be at least a Premium user to blacklist ASN's." });
+                    if (account.role === "premium") return res.status(400).json({ success: false, message: "You need to have a Business subscription to blacklist ASN's." });
                     if (!value.match(/^[0-9]{1,10}$/)) return res.status(400).json({ success: false, message: "Invalid ASN." });
                     if (blacklist.find((item: any) => (item.asn === value && item.guildId === BigInt(guildId) as bigint))) return res.status(400).json({ success: false, message: "This ASN is already blacklisted in this server." });
 

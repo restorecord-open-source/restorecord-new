@@ -1,8 +1,9 @@
 import { SxProps } from "@mui/material";
 import { createHash, createHmac, randomBytes } from "crypto";
-import axios from 'axios';
+import axios from "axios";
+import crypto from "crypto";
 
-export function stringToColor(string: string) {
+export function stringToColor(string: string): string {
     let hash = 0;
     let i;
   
@@ -35,10 +36,7 @@ export function stringAvatar(name: string, props: { sx: SxProps }) {
 export function generateQRUrl(secret: string, username: string, issuer: string = "RestoreCord") {
     const otpauth = `otpauth://totp/${username}?secret=${secret}&issuer=${issuer}`;
     return otpauth;
-    // return `https://chart.googleapis.com/chart?chs=512x512&chld=L|0&cht=qr&chl=${encodeURIComponent(otpauth)}`;
 }
-
-
 
 export  async function isBreached(pw: string) {
     const hash = createHash('sha1').update(pw).digest('hex').toUpperCase();
@@ -59,4 +57,32 @@ export  async function isBreached(pw: string) {
         console.error(error);
         return false;
     }
+}
+
+export function generateFingerprint(): string {
+    const timestamp = Date.now().toString();
+    const hmac = crypto.createHmac("sha256", process.env.JWT_SECRET!);
+    hmac.update(timestamp);
+    const signature = hmac.digest("base64");
+    const alphanumericSignature = signature.replace(/\+/g, "a").replace(/\//g, "b").replace(/=/g, "c");
+    return `${timestamp}.${alphanumericSignature}`;
+}
+
+export function verifyFingerprint(fingerprint: string): boolean {
+    const parts = fingerprint.split(".");
+    if (parts.length !== 2) return false;
+
+    const timestamp = parts[0];
+    if (isNaN(parseInt(timestamp))) return false;
+
+    const signature = parts[1];
+    if (!/^[a-zA-Z0-9]+$/.test(signature)) return false;
+
+    const hmac = crypto.createHmac("sha256", process.env.JWT_SECRET!);
+    hmac.update(timestamp);
+    const expectedSignature = hmac.digest("base64");
+    const alphanumericExpectedSignature = expectedSignature.replace(/\+/g, "a").replace(/\//g, "b").replace(/=/g, "c");
+    if (signature !== alphanumericExpectedSignature) return false;
+
+    return true;
 }

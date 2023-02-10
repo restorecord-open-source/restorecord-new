@@ -167,7 +167,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     proxy: false,
                     httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
                     validateStatus: () => true,
-                }).then(async (response) => {
+                }).then((response) => {
                     if (response.status !== 200) return res.status(400).json({ success: false, message: "Invalid bot token" });
                 });
 
@@ -182,9 +182,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     proxy: false,
                     httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
                     validateStatus: () => true,
-                }).then(async (response) => {
-                    if (response.status !== 200) return res.status(400).json({ success: false, message: "Discord server not found, invite bot or try again." });
-                }).catch(async (err) => {
+                }).then((resp) => {
+                    if (resp?.status !== 200 || resp?.status != 200) return res.status(400).json({ success: false, message: "Discord server not found, invite bot or try again." });
+                }).catch((err) => {
                     console.error(err);
                     return res.status(400).json({ success: false, message: "Something went wrong" });
                 });
@@ -200,10 +200,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     proxy: false,
                     httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
                     validateStatus: () => true,
-                }).then(async (response) => {
-                    if (response.status === 403) return res.status(400).json({ success: false, message: "Bot doesn't have permissions to give verified role" });
-                    if (response.status === 404) return res.status(400).json({ success: false, message: "Verified role not found" });
-                }).catch(async (err) => {
+                }).then((resp) => {
+                    if (resp?.status === 403 || resp?.status == 403) return res.status(400).json({ success: false, message: "Bot doesn't have permissions to give verified role" });
+                    if (resp?.status === 404 || resp?.status == 404) return res.status(400).json({ success: false, message: "Verified role not found" });
+                }).catch((err) => {
                     console.error(err);
                     return res.status(400).json({ success: false, message: "Something went wrong" });
                 });
@@ -286,8 +286,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             }
                         });
 
-                        if (!newServer) return reject("Server not found");
-                        // if (!newServer.pulling) return reject("Pulling stopped");
+                        if (!newServer) return reject(`[${server.name}] Server not found`);
+                        if (!newServer.pulling) return reject(`[${server.name}] Pulling stopped`);
 
                         console.log(`[${server.name}] Adding ${member.username}`);
                         await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, [BigInt(server.roleId).toString()]).then(async (resp: any) => {
@@ -295,58 +295,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             if (resp?.response?.data) console.log(`[${server.name}] [${member.username}] ${JSON.stringify(resp?.response?.data)}`);
                             if (resp?.status) console.log(`[${server.name}] [${member.username}] ${resp?.status}`);
                     
-                            if (resp?.response?.status) {
-                                switch (resp.response.status) {
-                                case 429:   
-                                    const retryAfter = resp.response.headers["retry-after"];
-                                    console.log(`[${server.name}] [${member.username}] 429 | retry-after: ${retryAfter} | delay: ${delay}ms`);
-                                    if (retryAfter) {
-                                        const retry = parseInt(retryAfter);
-                                        setTimeout(async () => {
-                                            await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, [BigInt(server.roleId).toString()])
-                                        }, retry);
-                                        delay += retry;
-                                    }
-                                    break;
-                                case 403:
-                                    refreshTokenAddDB(member.userId.toString(), member.id, server.guildId.toString(), bot?.botToken, server.roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
-                                    break;
-                                case 407:
-                                    console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);
-                                    break;
-                                case 204:
-                                    succPulled++;
-                                    await addRole(server.guildId.toString(), member.userId.toString(), bot?.botToken, BigInt(server.roleId).toString());
-                                    break;
-                                case 201:
-                                    succPulled++;
-                                    if (delay > 500) delay -= delay / 1.5;
-                                    break;
-                                default:
-                                    reject("Unknown error");
-                                    break;
+                            switch (resp.response.status || resp.status) {
+                            case 429:   
+                                const retryAfter = resp.response.headers["retry-after"];
+                                console.log(`[${server.name}] [${member.username}] 429 | retry-after: ${retryAfter} | delay: ${delay}ms`);
+                                if (retryAfter) {
+                                    const retry = parseInt(retryAfter);
+                                    setTimeout(async () => {
+                                        await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, [BigInt(server.roleId).toString()])
+                                    }, retry);
+                                    delay += retry;
                                 }
-                            }
-                            else {
-                                switch (resp.status) {
-                                case 403:
-                                    refreshTokenAddDB(member.userId.toString(), member.id, server.guildId.toString(), bot?.botToken, server.roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
-                                    break;
-                                case 407:
-                                    console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);
-                                    break;
-                                case 204:
-                                    succPulled++;
-                                    await addRole(server.guildId.toString(), member.userId.toString(), bot?.botToken, BigInt(server.roleId).toString());
-                                    break;
-                                case 201:
-                                    succPulled++;
-                                    if (delay > 500) delay -= delay / 1.5;
-                                    break;
-                                default:
-                                    reject("Unknown error");
-                                    break;
-                                }
+                                break;
+                            case 403:
+                                refreshTokenAddDB(member.userId.toString(), member.id, server.guildId.toString(), bot?.botToken, server.roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
+                                break;
+                            case 407:
+                                console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);
+                                break;
+                            case 204:
+                                succPulled++;
+                                await addRole(server.guildId.toString(), member.userId.toString(), bot?.botToken, BigInt(server.roleId).toString());
+                                break;
+                            case 201:
+                                succPulled++;
+                                if (delay > 500) delay -= delay / 1.5;
+                                break;
+                            default:
+                                reject(`Unknown error: ${resp?.response?.status}|${resp?.status}`);
+                                break;
                             }
                         }).catch(async (err: Error) => {
                             console.log(err);
@@ -360,7 +337,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                     resolve();
                 }).catch(async (err: Error) => {
-                    console.log(`3 ${err}`);
+                    console.log(`[PULLING] 3 ${err}`);
                 });
 
                 let esimatedTime: any = members.length * 300 * 5;
@@ -373,6 +350,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     esimatedTime = esimatedTime / (3600 * 1000);
                     esimatedTime = Math.round(esimatedTime);
                     esimatedTime = esimatedTime + " hours";
+                } else if (esimatedTime > 86400000) {
+                    esimatedTime = esimatedTime / (86400 * 1000);
+                    esimatedTime = Math.round(esimatedTime);
+                    esimatedTime = esimatedTime + " days";
                 } else {
                     esimatedTime = esimatedTime / 1000;
                     esimatedTime = Math.round(esimatedTime);
@@ -391,7 +372,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         }
                     });
                 }).catch(async (err: Error) => {
-                    console.log(`4 ${err}`);
+                    console.log(`[PULLING] 4 ${err}`);
                 });
             
                 return res.status(200).json({ success: true, message: `Started Pull Process, this will take around ${esimatedTime}` });

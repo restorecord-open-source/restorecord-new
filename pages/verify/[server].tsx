@@ -26,8 +26,10 @@ export default function Verify({ server, status, err, errStack }: any) {
 
             if (status === "finished") {
                 setDisabled(true);
-                setTimeout(() => { setDisabled(false); }, 3000);
+                setTimeout(() => { setDisabled(false); }, 10000);
             }
+
+            fetch("/api/fingerprint");
         }
     }, [server, status]);
 
@@ -161,7 +163,7 @@ export default function Verify({ server, status, err, errStack }: any) {
 
                         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                             {server.success ? (
-                                <Button variant="contained" color="primary" href={rediUrl}
+                                <Button variant="contained" color="primary" href={rediUrl} rel="noopener noreferrer"
                                     sx={{ 
                                         width: "100%",
                                         marginTop: "2rem",
@@ -180,9 +182,6 @@ export default function Verify({ server, status, err, errStack }: any) {
                                                 color: theme.palette.getContrastText(server.color),
                                             },
                                         },
-                                    }}
-                                    onClick={() => {
-                                        window.location.href = rediUrl;
                                     }}
                                     disabled={disabled}
                                 >
