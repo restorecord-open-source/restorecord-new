@@ -67,7 +67,7 @@ export default function VerifiedMembers({ user }: any) {
         setServerId(event.target.value as string);
         setTimeout(() => {
             refetch();
-        }, 10);
+        }, 100);
     }
 
     function requestInfo(userId: string) {
@@ -273,7 +273,7 @@ export default function VerifiedMembers({ user }: any) {
                                     </FormControl>
                                 </Stack>
                                 {/* {data?.pages?.map((page) => page.members.map((item: any) => { */}
-                                {(data?.pages?.[0]?.members ?? []).map((item: any) => {
+                                {data?.pages?.map((page, index) => (data?.pages?.[index]?.members ?? []).map((item: any) => {
                                     return (
                                         <Paper key={item.id} variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
                                             <CardContent>
@@ -320,7 +320,7 @@ export default function VerifiedMembers({ user }: any) {
                                             </CardContent>
                                         </Paper>
                                     );
-                                })}
+                                }) ?? <></>)}
                             </>)}
 
                         <Box sx={{ display: "flex", justifyContent: "center", mt: "1rem", alignItems: "center" }}>

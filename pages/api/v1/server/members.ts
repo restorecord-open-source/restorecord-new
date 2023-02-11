@@ -72,6 +72,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         AND: conditions
                     },
                     take: search ? undefined : (Number(page) * Number(limit)),
+                    // 
                 }).then((members: any) => {
                     return res.status(200).json({
                         success: true,
@@ -96,9 +97,45 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
             catch (err: any) {
                 console.error(err);
-                if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
+                if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ 
+                    success: false,
+                    max: 1,
+                    pullable: 1,
+                    maxPages: 1,
+                    members: [
+                        {
+                            id: 0,
+                            userId: "0",
+                            username: "Rate Limited, try again in 1 minute",
+                            avatar: "https://cdn.discordapp.com/attachments/881202202202429450/881202222201733130/unknown.png",
+                            ip: "127.0.0.1",
+                            createdAt: new Date(),
+                            guildId: "0",
+                            guildName: "Rate Limited",
+                            unauthorized: false,
+                        }
+                    ]
+                });
                 if (err?.name === "" || err?.name === "JsonWebTokenError") return res.status(400).json({ success: false, message: "User not logged in" }); 
-                return res.status(400).json({ success: false, message: "Something went wrong" });
+                return res.status(400).json({ 
+                    success: false,
+                    max: 1,
+                    pullable: 1,
+                    maxPages: 1,
+                    members: [
+                        {
+                            id: 0,
+                            userId: "0",
+                            username: "Error",
+                            avatar: "https://cdn.discordapp.com/attachments/881202202202429450/881202222201733130/unknown.png",
+                            ip: "127.0.0.1",
+                            createdAt: new Date(),
+                            guildId: "0",
+                            guildName: "Error",
+                            unauthorized: false,
+                        }
+                    ]
+                });
             }
             break;
         default:
