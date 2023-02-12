@@ -27,6 +27,11 @@ import AlertTitle from "@mui/material/AlertTitle";
 import Alert from "@mui/material/Alert";
 import MuiLink from "next/link";
 import Card from "@mui/material/Card";
+import FormControl from "@mui/material/FormControl";
+import RadioGroup from "@mui/material/RadioGroup";
+import FormLabel from "@mui/material/FormLabel";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Radio from "@mui/material/Radio";
 
 export default function DashUpgrade({ user }: any) {
     const [token]: any = useToken();
@@ -113,6 +118,8 @@ export default function DashUpgrade({ user }: any) {
                     {(paymentMethod === "coinbase") && (
                         <>
                             <Grid container spacing={2} sx={{ mt: 2, mb: 2 }}>
+                                {/* radio box to select Monthly or Yearly, then set selected plan if yearly to the selectedPlan, if monthly to selectedPlan + "_monthly" */}
+                                
                                 <Button variant="contained" color="primary" fullWidth onClick={() => {
                                     axios.post("/api/coinbase/checkout", {
                                         plan: selectedPlan.id,
@@ -125,7 +132,7 @@ export default function DashUpgrade({ user }: any) {
                                     }).then((res) => {
                                         document.location.href = res.data.redirect;
                                     }).catch((err) => {
-                                        console.log(err);
+                                        console.error(err);
                                     });
                                 }}>Go to checkout</Button>
                             </Grid>
@@ -137,26 +144,7 @@ export default function DashUpgrade({ user }: any) {
                                 
                     {(paymentMethod === "stripe") && (
                         <>
-                            {/* <style>{`
-                                #card-element {
-                                    width: 100%;
-                                    background-color: #0a0a12;
-                                    padding: 0.75rem;
-                                    border-radius: 0.5rem;
-                                    caret-color: #fff;
-                                    border: 1px solid ${theme.palette.primary.main};
-                                }
-
-                                #payment-form {
-                                    margin-left: 0.75rem;
-                                    margin-right: 0.75rem;
-                                }
-                                `}</style> */}
                             <Grid container spacing={2} sx={{ mt: 2, mb: 2 }}>
-                                {/* <Elements stripe={getStripe()} options={{ clientSecret: stripeIntent.client_secret }}>
-                                        <StripeCheckout client_secret={stripeIntent.client_secret} price={selectedPlan.price} plan={selectedPlan.name} />
-                                    </Elements> */}
-
                                 <Button variant="contained" color="primary" fullWidth onClick={() => {
                                     axios.post("/api/stripe/checkout", {
                                         plan: selectedPlan.id,
@@ -169,7 +157,7 @@ export default function DashUpgrade({ user }: any) {
                                     }).then((res) => {
                                         document.location.href = res.data.redirect;
                                     }).catch((err) => {
-                                        console.log(err);
+                                        console.error(err);
                                     });
                                 }}>Go to checkout</Button>
                             </Grid>
@@ -263,7 +251,7 @@ export default function DashUpgrade({ user }: any) {
                                 ))}
                             </CardContent>
                             <CardActions>
-                                <Button fullWidth variant="contained" sx={{ fontWeight: "600" }} disabled={(user.role !== "free" || tier.name.toLowerCase() === "free")} onClick={(e) => {
+                                <Button fullWidth variant="contained" sx={{ fontWeight: "600" }} disabled={(tier.name.toLowerCase() === "free" || (tier.name.toLowerCase() === user.role))} onClick={() => {
                                     setSelectedPlan({
                                         id: tier.name.toLowerCase(),
                                         name: tier.name,
@@ -271,7 +259,7 @@ export default function DashUpgrade({ user }: any) {
                                     });
                                     setPurchaseWindow(true);
                                 }}>
-                                    Purchase
+                                    {tier.name.toLowerCase() === user.role ? "Current Plan" : "Upgrade"}
                                 </Button>
                             </CardActions>
                         </Paper>
