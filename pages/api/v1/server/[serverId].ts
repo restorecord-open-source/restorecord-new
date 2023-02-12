@@ -139,6 +139,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 // get ?server=123123 from url
                 const guildId = req.query.server as string;
                 if (!guildId) return res.status(400).json({ success: false, message: "Server not provided" });
+
+                const roleId = req.query.role as string;
                 
                 if (!valid) return res.status(400).json({ success: false });
 
@@ -172,7 +174,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 });
 
                 // check if the server exists on discord (guildId)
-                await axios.get(`https://discord.com/api/v10/guilds/${server.guildId}`, {
+                await axios.get(`https://discord.com/api/v10/guilds/${guildId}`, {
                     headers: {
                         "Authorization": `Bot ${bot.botToken}`,
                         "Content-Type": "application/json",
@@ -189,36 +191,39 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     return res.status(400).json({ success: false, message: "Something went wrong" });
                 });
 
-                // try to give the bot the verified role
-                await axios.put(`https://discord.com/api/v10/guilds/${server.guildId}/members/${bot.clientId}/roles/${server.roleId}`, {}, {
-                    headers: {
-                        "Authorization": `Bot ${bot.botToken}`,
-                        "Content-Type": "application/json",
-                        "X-RateLimit-Precision": "millisecond",
-                        "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
-                    },
-                    proxy: false,
-                    httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
-                    validateStatus: () => true,
-                }).then((resp) => {
-                    if (resp?.status === 403 || resp?.status == 403) return res.status(400).json({ success: false, message: "Bot doesn't have permissions to give verified role" });
-                    if (resp?.status === 404 || resp?.status == 404) return res.status(400).json({ success: false, message: "Verified role not found" });
-                }).catch((err) => {
-                    console.error(err);
-                    return res.status(400).json({ success: false, message: "Something went wrong" });
-                });
+                if (roleId) {
+                    await axios.put(`https://discord.com/api/v10/guilds/${guildId}/members/${bot.clientId}/roles/${roleId}`, {}, {
+                        headers: {
+                            "Authorization": `Bot ${bot.botToken}`,
+                            "Content-Type": "application/json",
+                            "X-RateLimit-Precision": "millisecond",
+                            "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
+                        },
+                        proxy: false,
+                        httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
+                        validateStatus: () => true,
+                    }).then((resp) => {
+                        if (resp?.status === 403 || resp?.status == 403) return res.status(400).json({ success: false, message: "Bot doesn't have permissions to give verified role" });
+                        if (resp?.status === 404 || resp?.status == 404) return res.status(400).json({ success: false, message: "Verified role not found" });
+                    }).catch((err) => {
+                        console.error(err);
+                        return res.status(400).json({ success: false, message: "Something went wrong" });
+                    });
+                }
 
                 if (server.pulling === true) return res.status(400).json({ success: false, message: "You are already pulling" });
                 if (server.pullTimeout !== null) if (server.pullTimeout > new Date()) return res.status(400).json({ success: false, message: "You're on cooldown, you can pull again in", pullTimeout: server.pullTimeout });
 
 
                 // let done;
-                const serverMemberList = await axios.get(`https://discord.com/api/v10/guilds/${server.guildId}/members?limit=1000`, {
+                const serverMemberList = await axios.get(`https://discord.com/api/v10/guilds/${guildId}/members?limit=1000`, {
                     headers: {
                         "Authorization": `Bot ${bot.botToken}`,
                         "Content-Type": "application/json",
                         "X-RateLimit-Precision": "millisecond",
                         "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
+                        "Cache-Control": "no-cache",
+                        "Pragma": "no-cache"
                     },
                     proxy: false,
                     httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
@@ -227,27 +232,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 
                 if (!serverMemberList.status.toString().startsWith("2")) {
                     serverMemberList.data = [];
-                    // done = true;
                 }
-
-                // if (serverMemberList.data.length < 1000) done = true;
-
-                // while (!done) {
-                //     const lastId = serverMemberList.data[serverMemberList.data.length - 1].user.id;
-                //     const nextMemberList = await axios.get(`https://discord.com/api/v10/guilds/${server.guildId}/members?limit=1000&after=${lastId}`, {
-                //         headers: {
-                //             "Authorization": `Bot ${bot.botToken}`,
-                //             "Content-Type": "application/json",
-                //             "X-RateLimit-Precision": "millisecond",
-                //             "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
-                //         },
-                //         proxy: false,
-                //         httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
-                //         validateStatus: () => true,
-                //     });
-                //     serverMemberList.data.push(...nextMemberList.data);
-                //     if (nextMemberList.data.length < 1000) done = true;
-                // }
 
                 for (const serverMemberData of serverMemberList.data) {
                     if (serverMemberList.data.length === 0) return;
@@ -255,7 +240,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     const member = members.find((m) => m.userId == serverMemberData.user.id);
                     if (member) {
                         members.splice(members.indexOf(member), 1)
-                        console.log(`Removed ${member.username} from pullable members`);
+                        console.log(`[${server.name}] Skipping ${member.username} (${member.userId})`);
                     }
                 }
 
@@ -270,7 +255,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 let succPulled: number = 0;
                 const pullingProcess = new Promise<void>(async (resolve, reject) => {
                     let membersNew = await shuffle(members);
-                    let delay: number = 350;
+                    let delay: number = 450;
 
                     await prisma.logs.create({
                         data: {
@@ -289,44 +274,50 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         if (!newServer) return reject(`[${server.name}] Server not found`);
                         if (!newServer.pulling) return reject(`[${server.name}] Pulling stopped`);
 
-                        console.log(`[${server.name}] Adding ${member.username}`);
-                        await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, [BigInt(server.roleId).toString()]).then(async (resp: any) => {
-                            if (resp?.reponse?.status) console.log(`[${server.name}] [${member.username}] ${resp?.response?.status}`);
-                            if (resp?.response?.data) console.log(`[${server.name}] [${member.username}] ${JSON.stringify(resp?.response?.data)}`);
-                            if (resp?.status) console.log(`[${server.name}] [${member.username}] ${resp?.status}`);
+                        console.log(`[${server.name}] [${member.username}] Adding...`);
+                        await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : []).then(async (resp: any) => {
+                            let status = resp?.response?.status || resp?.status;
+                            let response = ((resp?.response?.data?.message || resp?.response?.data?.code) || (resp?.data?.message || resp?.data?.code)) ? (resp?.response?.data || resp?.data) : "";
+                            
+                            // if (status) console.log(`[${server.name}] [${member.username}] ${status}`);
+                            console.log(`[${server.name}] [${member.username}] ${status} ${JSON.stringify(response).toString() ?? ""}`);
+
                     
-                            switch (resp.response.status || resp.status) {
+                            switch (status) {
                             case 429:   
                                 const retryAfter = resp.response.headers["retry-after"];
                                 console.log(`[${server.name}] [${member.username}] 429 | retry-after: ${retryAfter} | delay: ${delay}ms`);
                                 if (retryAfter) {
                                     const retry = parseInt(retryAfter);
                                     setTimeout(async () => {
-                                        await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, [BigInt(server.roleId).toString()])
+                                        await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : [])
                                     }, retry);
                                     delay += retry;
                                 }
                                 break;
                             case 403:
-                                refreshTokenAddDB(member.userId.toString(), member.id, server.guildId.toString(), bot?.botToken, server.roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
+                                refreshTokenAddDB(member.userId.toString(), member.id, guildId.toString(), bot?.botToken, roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
                                 break;
                             case 407:
                                 console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);
                                 break;
                             case 204:
+                                await addRole(guildId.toString(), member.userId.toString(), bot?.botToken, roleId ? BigInt(roleId).toString() : "");
                                 succPulled++;
-                                await addRole(server.guildId.toString(), member.userId.toString(), bot?.botToken, BigInt(server.roleId).toString());
                                 break;
                             case 201:
                                 succPulled++;
-                                if (delay > 500) delay -= delay / 1.5;
+                                if (delay > 500) delay = (delay / 1.5);
+                                break;
+                            case 400:
+                                console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 400 | ${JSON.stringify(response)}`);
                                 break;
                             default:
                                 reject(`Unknown error: ${resp?.response?.status}|${resp?.status}`);
                                 break;
                             }
                         }).catch(async (err: Error) => {
-                            console.log(err);
+                            console.log(`[${server.name}] [addMember.catch] [${member.username}] ${err}`);
                             return res.status(400).json({ success: false, message: err?.message ? err?.message : "Something went wrong" });
                         });
 
@@ -340,7 +331,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     console.log(`[PULLING] 3 ${err}`);
                 });
 
-                let esimatedTime: any = members.length * 300 * 5;
+                // let esimatedTime: any = members.length * 500 * 5;
+                let esimatedTime: any = members.length * 1500; // new calculation
 
                 if (esimatedTime > 60000) {
                     esimatedTime = esimatedTime / (60 * 1000);
