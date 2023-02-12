@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             limiter.check(res, 60, "CACHE_TOKEN");
 
-            await axios.get("https://discord.com/api/users/@me/guilds", {
+            await axios.get("https://discord.com/api/v10/users/@me/guilds", {
                 headers: {
                     Authorization: `${token}`,
                 },

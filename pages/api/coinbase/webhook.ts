@@ -47,9 +47,17 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
             amount = 1500;
             expiry = new Date(Date.now() + 31536000000);
             break;
+        case "premium_monthly":
+            amount = 200;
+            expiry = new Date(Date.now() + 2592000000);
+            break;
         case "business":
             amount = 3000;
             expiry = new Date(Date.now() + 31536000000);
+            break;
+        case "business_monthly":
+            amount = 500;
+            expiry = new Date(Date.now() + 2592000000);
             break;
         default:
             amount = 1500;

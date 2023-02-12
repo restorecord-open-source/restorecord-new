@@ -12,7 +12,6 @@ export default function StripeCheckout({ client_secret, price, plan, email }: an
     const [paymentProcessing, setPaymentProcessing] = useState(false);
 
     async function handleSubmitStripe(e: any) {
-        console.log("handleSubmitStripe");
         e.preventDefault();
         setPaymentProcessing(true);
     

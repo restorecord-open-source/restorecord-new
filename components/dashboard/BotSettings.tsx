@@ -98,7 +98,6 @@ export default function DashBotSettings({ user, id }: any) {
     }
 
     function handleChange(e: any) {
-        console.log(e.target.value);
         switch (e.target.name) {
         case "botSecret":
             setBotSecret(e.target.value);

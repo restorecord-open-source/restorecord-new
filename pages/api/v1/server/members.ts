@@ -63,16 +63,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     take: search ? undefined : (Number(page) * Number(limit)),
                 });
 
-                // const highestId = memberList.find((member: any) => member.id === Math.max(...memberList.map((member: any) => member.id)))?.id;
-                const lowestId = memberList.find((member: any) => member.id === Math.min(...memberList.map((member: any) => member.id)))?.id ?? 1;
+                const lastId = Number(page) === 1 ? 0 : memberList[memberList.length - 1].id;
 
-                conditions.push({ id: { gt: search ? 0 : (lowestId - 1) } });
+                conditions.push({ id: { gt: search ? 0 : lastId } });
                 await prisma.members.findMany({
                     where: {
                         AND: conditions
                     },
                     take: search ? undefined : (Number(page) * Number(limit)),
-                    // 
                 }).then((members: any) => {
                     return res.status(200).json({
                         success: true,

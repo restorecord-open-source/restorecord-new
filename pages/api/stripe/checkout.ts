@@ -28,13 +28,19 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         let paymentid;
         switch (plan) {
         case "premium":
-            paymentid = await stripe.prices.retrieve("price_1MVilKIDsTail4YBdF2GvIUi");
+            paymentid = await stripe.prices.retrieve("price_1MVilKIDsTail4YBdF2GvIUi"); // PREMIUM 1 YEAR (15 EUR)
+            break;
+        case "premium_monthly":
+            paymentid = await stripe.prices.retrieve("price_1MakYlIDsTail4YBvmoAoG37"); // PREMIUM 30 DAYS (2 EUR)
             break;
         case "business":
-            paymentid = await stripe.prices.retrieve("price_1MVilQIDsTail4YBuxkF8JRc");
+            paymentid = await stripe.prices.retrieve("price_1MVilQIDsTail4YBuxkF8JRc"); // BUSINESS 1 YEAR (30 EUR)
+            break;
+        case "business_monthly":
+            paymentid = await stripe.prices.retrieve("price_1MakYkIDsTail4YBS7RWBqQL"); // BUSINESS 30 DAYS (5 EUR)
             break;
         default:
-            paymentid = await stripe.prices.retrieve("price_1MVilKIDsTail4YBdF2GvIUi");
+            paymentid = await stripe.prices.retrieve("price_1MVilKIDsTail4YBdF2GvIUi"); // PREMIUM 1 YEAR (15 EUR)
         }
 
         const session = await stripe.checkout.sessions.create({

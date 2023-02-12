@@ -17,12 +17,13 @@ export async function sendWebhook(webhookUrl: string, content: string, username:
     });
 }
 
-export async function addMember(guildId: string, userId: string, botToken: any, access_token: string, roles: string[]) {
-    return await axios.put(`https://discordapp.com/api/guilds/${guildId}/members/${userId}`, {
-        access_token: access_token,
-        roles: roles,
-        ValidateStatus: () => true
-    }, {
+export async function addMember(guildId: string, userId: string, botToken: any, access_token: string, roles?: string[]) {
+    const payload: Partial<{ access_token: string; roles?: string[] }> = { access_token, };
+    if (roles && roles.length > 0) {
+        payload.roles = roles;
+    }
+
+    return await axios.put(`https://discordapp.com/api/guilds/${guildId}/members/${userId}`, payload, {
         headers: {
             "Authorization": `Bot ${botToken}`,
             "Content-Type": "application/json",
@@ -35,6 +36,7 @@ export async function addMember(guildId: string, userId: string, botToken: any, 
         .then(async (res: any) => { return res; })
         .catch(async (err: any) => { return err; });
 }
+  
 
 export async function addRole(guildId: string, userId: string, botToken: any, roleId: string) {
     return await axios.put(`https://discord.com/api/v10/guilds/${guildId}/members/${userId}/roles/${roleId}`, {
@@ -98,7 +100,7 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
                 console.log(`${err}`);
             });
             console.log(`[INFO] Refreshed token for ${userId} in ${guildId}`);
-            await addMember(guildId, userId, botToken, resp.data.access_token, [BigInt(roleId).toString()])
+            await addMember(guildId, userId, botToken, resp.data.access_token, roleId ? [BigInt(roleId).toString()] : undefined)
         }
     }).catch(async (err) => { 
         await prisma.members.update({

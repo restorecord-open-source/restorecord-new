@@ -35,6 +35,12 @@ const SubscriptionList: Subscription[] = [
                 icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
+                name: "cooldown",
+                value: "12h Pull Cooldown",
+                description: "You can only pull every 12h",
+                icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
+            },
+            {
                 name: "blacklist",
                 value: "Blacklist",
                 description: "Blacklist people from verifying with id, asn, ip and more",
@@ -115,6 +121,12 @@ const SubscriptionList: Subscription[] = [
                 icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
+                name: "cooldown",
+                value: "1h Pull Cooldown",
+                description: "You can only pull every 12h",
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />
+            },
+            {
                 name: "blacklist",
                 value: "Blacklist",
                 description: "Blacklist people from verifying with id, asn, ip and more",
@@ -192,6 +204,12 @@ const SubscriptionList: Subscription[] = [
                 name: "proxied",
                 value: "Proxied Requests",
                 description: "All requests sent to Discord are anonymous and proxied",
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
+            },
+            {
+                name: "cooldown",
+                value: "1h Pull Cooldown",
+                description: "You can only pull every 12h",
                 icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
