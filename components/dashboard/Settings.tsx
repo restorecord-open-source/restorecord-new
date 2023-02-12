@@ -50,8 +50,11 @@ export default function DashSettings({ user }: any) {
     const [customBot, setCustomBot] = useState("");
     const [customBotToken, setCustomBotToken] = useState("");
     const [selectedServer, setSelectedServer] = useState("");
+    const [selectedRole, setSelectedRole] = useState("");
 
     const [allServers, setAllServers] = useState([]);
+    const [allRoles, setAllRoles] = useState([]);
+    const [botClient, setBotClient]: any = useState({});
 
     const [openS, setOpenS] = useState(false);
     const [openE, setOpenE] = useState(false);
@@ -101,21 +104,54 @@ export default function DashSettings({ user }: any) {
             headers: {
                 "Authorization": `Bot ${customBotToken}`,
             },
-        })
-            .then(res => {
-                if (res.data.code) { setAllServers([]); setNotiTextE(res.data.message); setOpenE(true); }
-                else setAllServers(res.data);
-            })
-            .catch(err => {
-                setAllServers([]);
-                console.error(err);
-            });
+        }).then(res => {
+            if (res.data.code || res.data.message) { setAllServers([]); setNotiTextE(res.data.message); setOpenE(true); }
+            else setAllServers(res.data);
+        }).catch(err => {
+            setAllServers([]);
+            console.error(err);
+        });
     }
 
+    function getGuildRoles(guildId: string) {
+        setAllRoles([]);
+        axios.get(`/api/v1/users/guilds/${guildId}/roles`, {
+            headers: {
+                "Authorization": `Bot ${customBotToken}`,
+            },
+        }).then(res => {
+            if (res.data.code || res.data.message) { setAllRoles([]); setNotiTextE(res.data.message); setOpenE(true); }
+            else setAllRoles(res.data);
+        }).catch(err => {
+            setAllRoles([]);
+            console.error(err);
+        });
+    }
+
+    function getBotClient() {
+        axios.get(`/api/v1/users/@me`, {
+            headers: {
+                "Authorization": `Bot ${customBotToken}`,
+            },
+        }).then(res => {
+            if (res.data.code || res.data.message) { setBotClient({}); setNotiTextE(res.data.message); setOpenE(true); }
+            else setBotClient(res.data);
+        }).catch(err => {
+            setBotClient({});
+            console.error(err);
+        });
+    }
 
     useEffect(() => {
-        if (customBotToken) getAllGuilds();
-    }, [customBotToken]);
+        if (customBotToken) {
+            if (allServers.length === 0) getAllGuilds();
+
+            if (giveRoleOnJoin && selectedServer) {
+                if (!botClient.id) getBotClient();
+                if (allRoles.length === 0) getGuildRoles(selectedServer);
+            }
+        }
+    }, [customBotToken, giveRoleOnJoin, selectedServer]);
 
 
     return (
@@ -143,9 +179,7 @@ export default function DashSettings({ user }: any) {
 
                         <Dialog open={pullWindow} onClose={() => setPullWindow(false)} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" fullWidth maxWidth="sm">
                             <DialogTitle id="alert-dialog-title">
-                                <Typography variant="h6" sx={{ fontWeight: "500" }}>
-                                    Migration
-                                </Typography>
+                                Migration
                                 <IconButton aria-label="close" onClick={() => setPullWindow(false)} sx={{ position: 'absolute', right: 8, top: 8, color: theme.palette.grey[500] }}>
                                     <CloseIcon />
                                 </IconButton>
@@ -155,20 +189,47 @@ export default function DashSettings({ user }: any) {
                                     Select the server you want to pull your members into, make sure you invited the bot to the server.
                                 </Typography>
                                 <Typography variant="body1" sx={{ fontWeight: "400", mb: "1rem", color: theme.palette.warning.main }}>
-                                    ⚠ Warning: This will only pull members.
+                                    ⚠ Warning: This action can&apos;t be stopped or paused. 
                                 </Typography>
                                 {allServers.length === 0 ? (
                                     <CircularProgress />
                                 ) : (
                                     <FormControl fullWidth variant="outlined" required>
                                         <InputLabel id="server-select-label">Select Server</InputLabel>
-                                        <Select labelId="server-select-label" label="Select Server" value={selectedServer} onChange={(e) => setSelectedServer(e.target.value as string)} required>
+                                        <Select labelId="server-select-label" label="Select Server" value={selectedServer} onChange={(e) => { setAllRoles([]); setSelectedServer(e.target.value as string); }} required>
                                             {Array.isArray(allServers) && allServers.map((item: any) => {
                                                 if (allServers.filter((i: any) => i.name === item.name).length > 1) return <MenuItem key={item.id} value={item.id}>{item.name} ({item.id})</MenuItem>;
                                                 else return <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>;
                                             })}
                                         </Select>
                                     </FormControl>
+                                )}
+                                {/* give role on join checkbox */}
+                                {(allServers.length !== 0 && selectedServer) && (
+                                    <FormControlLabel control={<Checkbox checked={giveRoleOnJoin} onChange={(e) => setGiveRoleOnJoin(e.target.checked)} />} label="Give role on join" />
+                                )}
+                                {/* role select */}
+                                {(giveRoleOnJoin && selectedServer && botClient) && (
+                                    <>
+                                        <Typography variant="body1" sx={{ fontWeight: "400", mb: "1rem", mt: "1rem" }}>
+                                            Select the role you want to give to your members.
+                                        </Typography>
+                                        {allRoles.length === 0 ? (
+                                            <CircularProgress />
+                                        ) : (
+                                            <FormControl fullWidth variant="outlined" required>
+                                                <InputLabel id="role-select-label">Select Role</InputLabel>
+                                                <Select labelId="role-select-label" label="Select Role" value={selectedRole} onChange={(e) => setSelectedRole(e.target.value as string)} required>
+                                                    {Array.isArray(allRoles) && allRoles.filter((item: any) => item.name !== "@everyone").map((item: any) => {
+                                                        const botRole: any = allRoles.filter((i: any) => i.tags && i.tags.bot_id === botClient?.id);
+                                                        if (item.position < botRole[0]?.position && !item.tags) {
+                                                            return <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>;
+                                                        }
+                                                    })}
+                                                </Select>
+                                            </FormControl>
+                                        )}
+                                    </>
                                 )}
 
                                 {/* small arrow down icon with the text "advanced options" */}
@@ -179,47 +240,53 @@ export default function DashSettings({ user }: any) {
                                     <AccordionDetails>
                                         <Typography variant="body1" sx={{ mb: "1rem" }}>Enter Server ID manually</Typography>
                                         <TextField fullWidth label="Server ID" variant="outlined" value={selectedServer} onChange={(e) => setSelectedServer(e.target.value)} />
+                                        {(giveRoleOnJoin && selectedServer) && (
+                                            <>
+                                                <Typography variant="body1" sx={{ mb: "1rem", mt: "1rem" }}>Enter Role ID manually</Typography>
+                                                <TextField fullWidth label="Role ID" variant="outlined" value={selectedRole} onChange={(e) => setSelectedRole(e.target.value)} />
+                                            </>
+                                        )}
                                     </AccordionDetails>
                                 </Accordion>
 
                             </DialogContent>
                             <DialogActions>
                                 <Button onClick={() => getAllGuilds()} color="primary" variant="contained" sx={{ mr: 1 }}>
-                                    Refresh Server List
+                                    Refresh Server {giveRoleOnJoin ? "and Role" : ""} List
                                 </Button>
                                 <Button onClick={() => (
-                                    axios.put(`/api/v1/server/${guildId}?server=${selectedServer}`, {}, {
+                                    axios.put(`/api/v1/server/${guildId}?server=${selectedServer}${giveRoleOnJoin ? `&role=${selectedRole}` : ""}`, {}, {
                                         headers: {
                                             "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
                                         },
                                         validateStatus: () => true
-                                    })
-                                        .then(res => {
-                                            setOpenI(false);
-                                            if (!res.data.success) {
-                                                if (res.data.pullTimeout) {
-                                                    const timeArr = new Date(new Date(res.data.pullTimeout).getTime() - new Date().getTime()).toISOString().substr(11, 8).split(":");
-                                                    const hours = parseInt(timeArr[0]);
-                                                    const minutes = parseInt(timeArr[1]);
-                                                    const seconds = parseInt(timeArr[2]);
-                                                    const timeString = `${hours > 0 ? `${hours} hour${hours > 1 ? "s" : ""} ` : ""}${minutes > 0 ? `${minutes} minute${minutes > 1 ? "s" : ""} ` : ""}${seconds > 0 ? `${seconds} second${seconds > 1 ? "s" : ""} ` : ""}`;
-                                                    setNotiTextE(`${res.data.message} ${timeString}`);
-                                                }
-                                                else {
-                                                    setNotiTextE(res.data.message);
-                                                }
-                                                setOpenE(true);
+                                    }).then(res => {
+                                        setOpenI(false);
+                                        if (!res.data.success) {
+                                            if (res.data.pullTimeout) {
+                                                const timeArr = new Date(new Date(res.data.pullTimeout).getTime() - new Date().getTime()).toISOString().substr(11, 8).split(":");
+                                                const days = parseInt(timeArr[0]) / 24;
+                                                const hours = parseInt(timeArr[0]);
+                                                const minutes = parseInt(timeArr[1]);
+                                                const seconds = parseInt(timeArr[2]);
+                                                const timeString = `${days > 0 ? `${days} day${days > 1 ? "s" : ""} ` : ""}${hours > 0 ? `${hours} hour${hours > 1 ? "s" : ""} ` : ""}${minutes > 0 ? `${minutes} minute${minutes > 1 ? "s" : ""} ` : ""}${seconds > 0 ? `${seconds} second${seconds > 1 ? "s" : ""} ` : ""}`;
+                                                setNotiTextE(`${res.data.message} ${timeString}`);
                                             }
                                             else {
-                                                setNotiTextS(res.data.message);
-                                                setOpenS(true);
+                                                setNotiTextE(res.data.message);
                                             }
-                                        })
-                                        .catch((err): any => {
-                                            setNotiTextE(err.message);
                                             setOpenE(true);
-                                            console.error(err);
-                                        })
+                                        }
+                                        else {
+                                            setNotiTextS(res.data.message);
+                                            setOpenS(true);
+                                            setPullWindow(false);
+                                        }
+                                    }).catch((err): any => {
+                                        setNotiTextE(err.message);
+                                        setOpenE(true);
+                                        console.error(err);
+                                    })
                                 )} color="success" variant="contained" sx={{ mr: 1 }}>
                                     Pull Members
                                 </Button>
