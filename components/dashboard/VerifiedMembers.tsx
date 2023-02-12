@@ -199,26 +199,24 @@ export default function VerifiedMembers({ user }: any) {
                                             "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
                                         },
                                         validateStatus: () => true
-                                    })
-                                        .then((res: any) => {
-                                            if (!res.data.success) {
-                                                setNotiTextE(res.data.message);
-                                                setOpenE(true);
-                                            }
-                                            else {
-                                                setNotiTextS(res.data.message);
-                                                setOpenS(true);
-                                            }
-                                                                        
-                                            setTimeout(() => {
-                                                setLoading(false);
-                                            }, 200);
-                                        })
-                                        .catch((err): any => {
-                                            setNotiTextE(err.message);
+                                    }).then((res: any) => {
+                                        if (!res.data.success) {
+                                            setNotiTextE(res.data.message);
                                             setOpenE(true);
-                                            console.error(err);
-                                        });
+                                        }
+                                        else {
+                                            setNotiTextS(res.data.message);
+                                            setOpenS(true);
+                                        }
+                                                                        
+                                        setTimeout(() => {
+                                            setLoading(false);
+                                        }, 200);
+                                    }).catch((err): any => {
+                                        setNotiTextE(err.message);
+                                        setOpenE(true);
+                                        console.error(err);
+                                    });
                                 }}>Pull</LoadingButton>
                                 <Button variant="contained" color="error" onClick={() => {
                                     axios.delete(`/api/v1/member/${userInfo.id}?guild=${userInfoGuild}`, { 
@@ -226,26 +224,24 @@ export default function VerifiedMembers({ user }: any) {
                                             "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
                                         },
                                         validateStatus: () => true
-                                    })
-                                        .then((res: any) => {
-                                            if (!res.data.success) {
-                                                setNotiTextE(res.data.message);
-                                                setOpenE(true);
-                                            }
-                                            else {                                                
-                                                setNotiTextS(res.data.message);
-                                                setOpenS(true);
-                                                setOpen(false);
-                                                setLoadingInfo(true);
-                                                setTimeout(() => { refetch(); }, 100);
-                                                setUserInfo({});
-                                            }
-                                        })
-                                        .catch((err): any => {
-                                            setNotiTextE(err.message);
+                                    }).then((res: any) => {
+                                        if (!res.data.success) {
+                                            setNotiTextE(res.data.message);
                                             setOpenE(true);
-                                            console.error(err);
-                                        });
+                                        }
+                                        else {                                                
+                                            setNotiTextS(res.data.message);
+                                            setOpenS(true);
+                                            setOpen(false);
+                                            setLoadingInfo(true);
+                                            setTimeout(() => { refetch(); }, 100);
+                                            setUserInfo({});
+                                        }
+                                    }).catch((err): any => {
+                                        setNotiTextE(err.message);
+                                        setOpenE(true);
+                                        console.error(err);
+                                    });
                                 }}>Delete</Button>
                             </DialogActions>
                         </Dialog>

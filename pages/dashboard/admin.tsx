@@ -235,7 +235,7 @@ export default function Admin() {
                                             <Typography variant="body1" sx={{ mt: 1 }}>Webhook: <code>{server.webhook}</code></Typography>
                                             <Typography variant="body1" sx={{ mt: 1 }}>BgImage: <code>{server.bgImage}</code></Typography>
                                             <Typography variant="body1" sx={{ mt: 1 }}>Description: <code>{server.description}</code></Typography>
-                                            <Typography variant="body1" sx={{ mt: 1 }}>Pulling: <code>{server.pulling}</code></Typography>
+                                            <Typography variant="body1" sx={{ mt: 1 }}>Pulling: <code>{server.pulling ? "Yes" : "No"}</code></Typography>
                                             <Typography variant="body1" sx={{ mt: 1 }}>Pull timeout: <code>{new Date(server.pullTimeout).toLocaleString()}</code></Typography>
                                             <Typography variant="body1" sx={{ mt: 1 }}>Creation date: <code>{new Date(server.createdAt).toLocaleString()}</code></Typography>
                                         </CardContent>

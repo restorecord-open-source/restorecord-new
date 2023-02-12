@@ -133,7 +133,6 @@ export default function Blacklist() {
                                                     },
                                                     validateStatus: () => true
                                                 }).then((res) => {
-                                                    console.log(res.data);
                                                     if (!res.data.success) { 
                                                         setNotiTextE(res.data.message);
                                                         setOpenE(true);

@@ -96,7 +96,6 @@ export default function DashBoard({ user }: any) {
                     stops: [200, 90, 100]
                 }
             },
-            // random color for each server
             colors: [
                 theme.palette.primary.main,
                 theme.palette.error.main,
@@ -140,32 +139,6 @@ export default function DashBoard({ user }: any) {
                 crosshairs: {
                     show: false,
                 },
-                //{
-                //    "success": true,
-                //    "servers": [
-                //        {
-                //            "id": 1,
-                //            "name": "test",
-                //            "members": [
-                //                {
-                //                    "id": 14,
-                //                    "userId": "995490757156810812",
-                //                    "username": "P4L _frelonK#4167",
-                //                    "avatar": "3aadff771e614d1a3d9b7c50851c929c",
-                //                    "createdAt": "2022-12-28T00:00:00.000Z"
-                //                },
-                //                {
-                //                    "id": 15,
-                //                    "userId": "995494995752656980",
-                //                    "username": "EDWIN LEZAMA G/Om#4695",
-                //                    "avatar": "f484d297994b9dc2fa2fd98a08100d72",
-                //                    "createdAt": "2022-11-30T00:00:00.000Z"
-                //                },
-                //            ],
-                //        },
-                //    ]
-                //}
-                // get the last 14 days
                 categories: new Array(14).fill(0).map((_, i) => {
                     const date = new Date();
                     date.setDate(date.getDate() - i);
@@ -211,97 +184,107 @@ export default function DashBoard({ user }: any) {
         })) : [],
     };
 
+    function renderAlerts() {
+        return (
+            <Alert severity="error" sx={{ width: "100%", my: 2 }}>
+                <AlertTitle>Warning</AlertTitle>
+                <Typography variant="body2" component="p" sx={{ whiteSpace: "pre-line", wordBreak: "break-word" }} dangerouslySetInnerHTML={{ __html:`
+                We have no association with https://discord.gg/restorecord, for your own safety, we highly advise against joining it.
+                
+                Our official accounts are <a href="https://discord.com/users/853058505649029190">xenos#0001 (853058505649029190)</a> and <a href="https://discord.com/users/853404526613889064">Bl4ckBl1zZ#5652 (853404526613889064)</a>, and support server is <a href="https://discord.gg/restorebot">https://discord.gg/restorebot</a>
+                
+                Please note that we will never ask for your password or personal information, never share it with anyone. Stay safe and happy new year 🎉
+                `}}></Typography>
+            </Alert>
+        )
+    }
+    
+    function renderStatistics() {
+        return (
+            <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "block" } }}>
+                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%", border: "1px solid #18182e" }}>
+                    <CardContent>
+                        {isLoading2 ? ( <CircularProgress /> ) : (
+                            <>
+                                <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                                    Statistics
+                                </Typography>
+
+                                <Chart options={apexChart.options} series={apexChart.series} type="area" height={350} />
+                            </>
+                        )}
+                    </CardContent>
+                </Paper>
+            </Grid>
+        )
+    }
+
+    function renderLastVerified() {
+        return (
+            <Grid item xs={12} md={6}>
+                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%", border: "1px solid #18182e" }}>
+                    <CardContent>
+                        {isLoading2 && ( <CircularProgress /> )}
+
+                        {!isLoading2 && (
+                            <>
+                                <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>Recent Activity</Typography>
+                                <Typography variant="body1" color="grey.200">Last verified members</Typography>
+                            </>
+                        )}
+
+                        {!isLoading2 && data2.servers.map((server: any) => { 
+                            return (
+                                <List key={server.id} sx={{ width: "100%", maxWidth: 360 }}>
+                                    {server.members.map((member: any, index: any) => {
+                                        memId++;
+                                        if (memId > 3) return;
+
+                                        return (
+                                            <ListItem key={member.id} sx={{ wordBreak: "break-all" }}>
+                                                <ListItemAvatar>
+                                                    {member.avatar.length > 1 ? (
+                                                        <Avatar src={`https://cdn.discordapp.com/avatars/${member.userId}/${member.avatar}?size=128`} />
+                                                    ) : (
+                                                        <Avatar src={`https://cdn.discordapp.com/embed/avatars/${member.avatar}.png`} />
+                                                    )}
+                                                </ListItemAvatar>
+                                                <ListItemText primary={`${member.username}`} secondary={
+                                                    <>
+                                                        Id: {`${member.userId}`}<br/>
+                                                        Server: {`${server.name}`}
+                                                    </>
+                                                } />
+                                            </ListItem>
+                                        )
+                                    })}
+                                </List>
+                            )
+                        })}
+
+                        {!isLoading2 && ( 
+                            <Link href="/dashboard/members">
+                                <Button variant="filled" color="white" sx={{ width: '100%' }}>
+                                    View All
+                                </Button>
+                            </Link>
+                        )}
+
+                    </CardContent>
+                </Paper>
+            </Grid>
+        )
+    }
+
     return (
         <>
             <Container maxWidth="xl">
-                <Alert severity="error" sx={{ width: "100%", my: 2 }}>
-                    <AlertTitle>Warning</AlertTitle>
-                    <Typography variant="body2" component="p" sx={{ whiteSpace: "pre-line", wordBreak: "break-word" }} dangerouslySetInnerHTML={{ __html:`
-                    We have no association with https://discord.gg/restorecord, for your own safety, we highly advise against joining it.
-                    
-                    Our official accounts are <a href="https://discord.com/users/853058505649029190">xenos#0001 (853058505649029190)</a> and <a href="https://discord.com/users/853404526613889064">Bl4ckBl1zZ#5652 (853404526613889064)</a>, and support server is <a href="https://discord.gg/restorebot">https://discord.gg/restorebot</a>
-                    
-                    Please note that we will never ask for your password or personal information, never share it with anyone. Stay safe and happy new year 🎉
-                    `}}></Typography>
-                </Alert>
+                {renderAlerts()}
 
                 <Grid container spacing={3}>
-                    <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "block" } }}>
-                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%", border: "1px solid #18182e" }}>
-                            <CardContent>
-                                {isLoading2 ? ( <CircularProgress /> ) : (
-                                    <>
-                                        <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
-                                            Statistics
-                                        </Typography>
+                    {renderStatistics()}
 
-                                        <Chart options={apexChart.options} series={apexChart.series} type="area" height={350} />
-                                    </>
-                                )}
-                            </CardContent>
-                        </Paper>
-                    </Grid>
-
-                    <Grid item xs={12} md={6}>
-                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%", border: "1px solid #18182e" }}>
-                            <CardContent>
-                                {isLoading2 && ( <CircularProgress /> )}
-
-
-                                {!isLoading2 && (
-                                    <>
-                                        <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
-                                            Recent Activity
-                                        </Typography>
-
-                                        <Typography variant="body1" color="grey.200">
-                                            Last verified members
-                                        </Typography>
-                                    </>
-                                )}
-
-                                {!isLoading2 && data2.servers.map((server: any) => { 
-
-                                    return (
-                                        <List key={server.id} sx={{ width: "100%", maxWidth: 360 }}>
-                                            {server.members.map((member: any, index: any) => {
-                                                memId++;
-                                                if (memId > 3) return;
-
-
-                                                return (
-                                                    <ListItem key={member.id} sx={{ wordBreak: "break-all" }}>
-                                                        <ListItemAvatar>
-                                                            {member.avatar.length > 1 ? (
-                                                                <Avatar src={`https://cdn.discordapp.com/avatars/${member.userId}/${member.avatar}?size=128`} />
-                                                            ) : (
-                                                                <Avatar src={`https://cdn.discordapp.com/embed/avatars/${member.avatar}.png`} />
-                                                            )}
-                                                        </ListItemAvatar>
-                                                        <ListItemText primary={`${member.username}`} secondary={
-                                                            <>
-                                                                Id: {`${member.userId}`}<br/>
-                                                                Server: {`${server.name}`}
-                                                            </>
-                                                        } />
-                                                    </ListItem>
-                                                )
-                                            })}
-                                        </List>
-                                    )
-                                })}
-
-                                {!isLoading2 && ( 
-                                    <Link href="/dashboard/members">
-                                        <Button variant="filled" color="white" sx={{ width: '100%' }}>
-                                            View All
-                                        </Button>
-                                    </Link>
-                                )}
-
-                            </CardContent>
-                        </Paper>
-                    </Grid>
+                    {renderLastVerified()}
                 </Grid>
             </Container>
         </>

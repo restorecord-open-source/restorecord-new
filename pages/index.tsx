@@ -148,7 +148,7 @@ export default function Home() {
                             <Box sx={{ width: "100%", marginBottom: { xs: 5, md: 0 }, backgroundColor: theme.palette.primary.main, borderRadius: 8 }} data-aos="fade-right">
                                 <Box sx={{ py: 10, px: 6 }}>
                                     <Typography sx={{ fontStyle: "normal", fontWeight: 900, fontSize: { sm: 24, md: 48 }, color: theme.palette.text.primary }}>
-                                        Backup & Restore your<br />  Server Members
+                                        Backup & Restore your<br/>Server Members
                                     </Typography>
 
                                     <Typography sx={{ fontStyle: "normal", fontWeight: 500, fontSize: { sm: 10, md: 20 }, color: theme.palette.text.primary, marginTop: "5px" }}>
@@ -160,7 +160,7 @@ export default function Home() {
                             <Box sx={{ marginLeft: { sm: 0, md: 12 }, marginTop: { xs: 5, md: 0 }, width: "100%", backgroundColor: theme.palette.primary.main, borderRadius: 8 }} data-aos="fade-left">
                                 <Box sx={{ py: 10, px: 6 }}>
                                     <Typography sx={{ fontStyle: "normal", fontWeight: 900, fontSize: { sm: 24, md: 48 }, color: theme.palette.text.primary }}>
-                                        Customizable<br />  Verification Page
+                                        Customizable<br/>Verification Page
                                     </Typography>
 
                                     <Typography sx={{ fontStyle: "normal", fontWeight: 500, fontSize: { sm: 10, md: 20 }, color: theme.palette.text.primary, marginTop: "5px" }}>

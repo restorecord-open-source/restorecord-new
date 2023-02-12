@@ -156,120 +156,135 @@ export default function DashCustomBot({ user }: any) {
         }
     }
 
+    function renderNotifications() {
+        return (
+            <>
+                <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+                    <Alert elevation={6} variant="filled" severity="error">
+                        {notiTextE}
+                    </Alert>
+                </Snackbar>
+
+                <Snackbar open={openS} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenS(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+                    <Alert elevation={6} variant="filled" severity="success">
+                        {notiTextS}
+                    </Alert>
+                </Snackbar>
+            </>
+        )
+    }
+
+    function renderCreateBotUI() {
+        return (
+            <>
+                <Paper variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                    <CardContent>
+                        <Stack spacing={1} direction="column" justifyContent={"space-between"}>
+                            <Alert variant="filled" severity="error">Before you create a bot, make sure you have read the <Link href="https://docs.restorecord.com/guides/create-a-custom-bot/" target="_blank">documentation</Link> and added a redirect/interaction URL to your bot.</Alert>
+                            <TextField label="Bot Name" name="botName" value={botName} onChange={handleChange} required />
+                            <TextField label="Client ID" name="clientId" value={clientId} onChange={handleChange} required />
+                            <TextField label="Bot Token" name="botToken" value={botToken} onChange={handleChange} required />
+                            <TextField label="Client Secret" name="botSecret" value={botSecret} onChange={handleChange} required />
+                            {user.role === "business" && (
+                                <TextField label="Public Key" name="publicKey" value={publicKey} onChange={handleChange} required />
+                            )}
+                            <Button variant="contained" onClick={(e: any) => handleSubmit(e)}>
+                                Create Bot
+                            </Button>
+                        </Stack>
+
+                        <Typography variant="h6" sx={{ fontWeight: "500", marginBottom: "1rem", marginTop: "1rem" }}>
+                            How to add Redirect{user.role === "business" ? <> and Interaction URL</> : <></>}?
+                        </Typography>
+                        <Stack spacing={1} direction="row" justifyContent={"justify-between"} sx={{ marginTop: "1rem" }}>
+                            <Image src="https://docs.restorecord.com/static/botsetup/redirect_url.png" alt="Redirect URL" width={1920} height={1080} />
+                            {user.role === "business" && (
+                                <Image src="https://docs.restorecord.com/static/botsetup/interaction_url.png" alt="Interaction URL" width={1920} height={1080} />
+                            )}
+                        </Stack>
+                    </CardContent>
+                </Paper>
+            </>
+        )
+    }
+
+    function renderBotList(BotClient: any) {
+        return (
+            <Paper key={BotClient.id} variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                <CardContent>
+                    <Grid container spacing={3} direction="row" justifyContent={"space-between"}>
+                        <Grid item>
+                            <div style={{ display: "inline-flex", alignItems: "center" }}>
+                                <Avatar alt={BotClient.username} src={BotClient.avatar} sx={{ mr: "0.5rem" }} />
+                                {BotClient.username ? (
+                                    <Typography variant="h6" sx={{ fontWeight: "500" }}>
+                                        {BotClient.username}
+                                    </Typography>
+                                ) : (
+                                    <Skeleton variant="text" width={150} />
+                                )}
+                            </div>
+                            <Typography variant="body2" color="textSecondary">
+                                {BotClient.username ? (
+                                    <>{BotClient.name} - {BotClient.clientId}</>
+                                ) : (
+                                    <Skeleton variant="text" width={190} height={20} />
+                                )}
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={12} sm={12} md={3} lg={2} xl={1}>
+                            <Stack spacing={1} direction="column" justifyContent={"space-between"}>
+                                {BotClient.username ? (
+                                    <>
+                                        <Button variant="contained" color="primary" onClick={() => { router.push(`/dashboard/custombots/${BotClient.clientId}`) }}>
+                                            Edit
+                                        </Button>
+                                        <Button variant="contained" color="success" href={`https://discord.com/oauth2/authorize?client_id=${BotClient.clientId}&scope=bot&permissions=8`} target="_blank" rel="noreferrer">
+                                            Invite
+                                        </Button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Skeleton variant="rectangular" width={100} height={36} sx={{ borderRadius: "14px" }} />
+                                        <Skeleton variant="rectangular" width={100} height={36} sx={{ borderRadius: "14px" }} />
+                                    </>
+                                )}
+                            </Stack>
+                        </Grid>
+                    </Grid>
+                </CardContent>
+            </Paper>
+        )
+    }
+
+    function rendertitleBarUI() {
+        return (
+            <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between" sx={{ "@media screen and (max-width: 600px)": { flexDirection: "column" } }}>
+                <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                    Custom Bots
+                </Typography>
+                <Button variant="contained" sx={{ mb: 2 }} onClick={() => setcreateNewBot(true)}>
+                    + Create New Bot
+                </Button>
+            </Stack>
+        )
+    } 
+
     return (
         <>
             <Container maxWidth="xl">
                 <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
                     <CardContent>
-                        <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
-                            <Alert elevation={6} variant="filled" severity="error">
-                                {notiTextE}
-                            </Alert>
-                        </Snackbar>
+                        {renderNotifications()}
 
-                        <Snackbar open={openS} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenS(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
-                            <Alert elevation={6} variant="filled" severity="success">
-                                {notiTextS}
-                            </Alert>
-                        </Snackbar>
-
-
-                        {(Array.isArray(user.bots) && user.bots.length > 0) && !createNewBot && (
+                        {(user.bots.length > 0) && !createNewBot && (
                             <>
-                                <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between" sx={{ "@media screen and (max-width: 600px)": { flexDirection: "column" } }}>
-                                    <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
-                                        Custom Bots
-                                    </Typography>
-                                    <Button variant="contained" sx={{ mb: 2 }} onClick={() => setcreateNewBot(true)}>
-                                        + Create New Bot
-                                    </Button>
-                                </Stack>
-                                {user.bots.map((item: any) => {
-                                    return (
-                                        <Paper key={item.id} variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
-                                            <CardContent>
-                                                <Grid container spacing={3} direction="row" justifyContent={"space-between"}>
-                                                    <Grid item>
-                                                        <div style={{ display: "inline-flex", alignItems: "center" }}>
-                                                            <Avatar alt={item.username} src={item.avatar} sx={{ mr: "0.5rem" }} />
-                                                            {item.username ? (
-                                                                <Typography variant="h6" sx={{ fontWeight: "500" }}>
-                                                                    {item.username}
-                                                                </Typography>
-                                                            ) : (
-                                                                <Skeleton variant="text" width={150} />
-                                                            )}
-                                                        </div>
-                                                        <Typography variant="body2" color="textSecondary">
-                                                            {item.username ? (
-                                                                <>
-                                                                    {item.name} - {item.clientId}
-                                                                </>
-                                                            ) : (
-                                                                <Skeleton variant="text" width={190} height={20} />
-                                                            )}
-                                                        </Typography>
-                                                    </Grid>
-                                                    <Grid item xs={12} sm={12} md={3} lg={2} xl={1}>
-                                                        <Stack spacing={1} direction="column" justifyContent={"space-between"}>
-                                                            {item.username ? (
-                                                                <>
-                                                                    <Button variant="contained" color="primary" onClick={() => { router.push(`/dashboard/custombots/${item.clientId}`) }}>
-                                                                        Edit
-                                                                    </Button>
-                                                                    <Button variant="contained" color="success" href={`https://discord.com/oauth2/authorize?client_id=${item.clientId}&scope=bot&permissions=8`} target="_blank" rel="noreferrer">
-                                                                        Invite
-                                                                    </Button>
-                                                                </>
-                                                            ) : (
-                                                                <>
-                                                                    <Skeleton variant="rectangular" width={100} height={36} sx={{ borderRadius: "14px" }} />
-                                                                    <Skeleton variant="rectangular" width={100} height={36} sx={{ borderRadius: "14px" }} />
-                                                                </>
-                                                            )}
-                                                        </Stack>
-                                                    </Grid>
-                                                </Grid>
-                                            </CardContent>
-                                        </Paper>
-                                    );
-                                })}
+                                {rendertitleBarUI()}
+                                {user.bots.map((item: any) => renderBotList(item))}
                             </>
                         )}
 
-                        {(createNewBot || (Array.isArray(user.bots) && user.bots.length === 0)) && (
-                            <>
-                                <Paper variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
-                                    <CardContent>
-                                        <Stack spacing={1} direction="column" justifyContent={"space-between"}>
-                                            <Alert variant="filled" severity="error">Before you create a bot, make sure you have read the <Link href="https://docs.restorecord.com/guides/create-a-custom-bot/" target="_blank">documentation</Link> and added a redirect/interaction URL to your bot.</Alert>
-                                            <TextField label="Bot Name" name="botName" value={botName} onChange={handleChange} required />
-                                            <TextField label="Client ID" name="clientId" value={clientId} onChange={handleChange} required />
-                                            <TextField label="Bot Token" name="botToken" value={botToken} onChange={handleChange} required />
-                                            <TextField label="Client Secret" name="botSecret" value={botSecret} onChange={handleChange} required />
-                                            {user.role === "business" && (
-                                                <TextField label="Public Key" name="publicKey" value={publicKey} onChange={handleChange} required />
-                                            )}
-                                            <Button variant="contained" onClick={(e: any) => handleSubmit(e)}>
-                                                Create Bot
-                                            </Button>
-                                        </Stack>
-
-                                        <Typography variant="h6" sx={{ fontWeight: "500", marginBottom: "1rem", marginTop: "1rem" }}>
-                                            How to add Redirect{user.role === "business" ? <> and Interaction URL</> : <></>}?
-                                        </Typography>
-                                        <Stack spacing={1} direction="row" justifyContent={"justify-between"} sx={{ marginTop: "1rem" }}>
-                                            <Image src="https://docs.restorecord.com/static/botsetup/redirect_url.png" alt="Redirect URL" width={1920} height={1080} />
-                                            {user.role === "business" && (
-                                                <Image src="https://docs.restorecord.com/static/botsetup/interaction_url.png" alt="Interaction URL" width={1920} height={1080} />
-                                            )}
-                                        </Stack>
-                                    </CardContent>
-                                </Paper>
-                            </>
-                        )}
-
-
+                        {(createNewBot || (user.bots.length === 0)) && renderCreateBotUI()}
                     </CardContent>
                 </Paper>
             </Container>

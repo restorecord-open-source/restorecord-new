@@ -37,7 +37,7 @@ export default function ErrorPage<ErrorProps>({ statusCode, title: titleOrigin, 
                 <Stack spacing={2} sx={{ width: "50%" }}>
                     <Typography variant="h2" component="h2" sx={{ fontWeight: "bold" }}>{statusCode}</Typography>
                     <Typography variant="h4" component="h4">{title}</Typography>
-                    <Typography variant="body2" component="p"><small>No, the site is not down.</small></Typography>
+                    <Typography variant="body2" component="p"><small>No, the site is not down.<br/>You may be rate limited. Try again in about 5 minutes</small></Typography>
                     <Button variant="contained" onClick={() => { window.location.reload(); }}>Reload Page</Button>
 
                     {/* titleOrigion as code */}

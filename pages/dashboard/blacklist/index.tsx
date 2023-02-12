@@ -119,6 +119,141 @@ export default function Blacklist() {
         }
     }
 
+    function renderNotifications() {
+        return (
+            <>
+                <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+                    <Alert elevation={6} variant="filled" severity="error">
+                        {notiTextE}
+                    </Alert>
+                </Snackbar>
+
+                <Snackbar open={openS} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenS(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+                    <Alert elevation={6} variant="filled" severity="success">
+                        {notiTextS}
+                    </Alert>
+                </Snackbar>
+
+                <Snackbar open={openI} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenI(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+                    <Alert elevation={6} variant="filled" severity="info">
+                        {notiTextI}
+                    </Alert>
+                </Snackbar>
+            </>
+        )
+    }
+
+    function renderTitle() {
+        return (
+            <Badge badgeContent={<>BETA</>} color="primary" sx={{ [`& .MuiBadge-badge`]: { mt: "1.5rem", mr: "-2.5rem", color: "#fff", padding: "0.85rem", fontSize: "0.95rem", fontWeight: "bold" } }}>
+                <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                    Blacklist
+                </Typography>
+            </Badge>
+        )
+    }
+
+    function renderSubTitle() {
+        return (
+            <Grid justifyContent={"space-between"}>
+                <Grid item>
+                    <Stack direction="row" justifyContent={"space-between"} alignItems={"center"} sx={{ mb: 2 }}>
+                        <Typography variant="h6" sx={{ fontWeight: "500" }}>
+                            {listsLoading ? (
+                                <Skeleton animation="wave" variant="text" width={250} height={30} />
+                            ) : (
+                                <>
+                                    {data?.pages ? (
+                                        <>
+                                            {data?.pages?.[0]?.max === 0 ? "No Blacklisted Items" : `Showing ${data?.pages?.[0]?.max} Blacklisted Items.`}
+                                        </>
+                                    ) : (
+                                        "Loading..."
+                                    )}
+                                </>
+                            )}
+                        </Typography>
+                        <Button variant="contained" color="primary" onClick={() => router.push("/dashboard/blacklist/add")} sx={{ fontWeight: "500" }}>
+                            + Create Blacklist
+                        </Button>
+                    </Stack>
+                </Grid>
+                <Grid item>
+                    {listsLoading ? (
+                        <Skeleton animation="wave" variant="rectangular" width={"100%"} height={55} sx={{ borderRadius: "14px" }} />
+                    ) : (
+                        <TextField id="search" label="Search" variant="outlined" sx={{ width: "100%" }} onChange={(e) => setSearch(e.target.value)} />
+                    )}
+                </Grid>
+            </Grid>
+        )
+    }
+
+    function renderBlacklistItem(item: any) {
+        return (
+            <Paper key={item.id} variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                <CardContent>
+                    <Grid container spacing={3} direction="row" justifyContent={"space-between"}>
+                        <Grid item>
+                            <div style={{ display: "inline-flex", alignItems: "center" }}>
+                                {ShowType(item.type)}
+
+                                {item.value ? (
+                                    <Typography variant="h6" sx={{ fontWeight: "500", wordBreak: "break-word", ml: 1 }}>
+                                        {item.type === 2 ? `AS${item.value}` : item.value}
+                                    </Typography>
+                                ) : (
+                                    <Skeleton variant="text" width={50} />
+                                )}
+                            </div>
+                            {(item.guildId && !userLoading) ? (
+                                <Typography variant="body2" color="textSecondary" sx={{ wordBreak: "break-word" }}>
+                                    Server: {user.servers.find((g: any) => g.guildId === item.guildId)?.name}
+                                </Typography>
+                            ) : (
+                                <Skeleton variant="text" width={50} />
+                            )}
+                            {item.reason ? (
+                                <Typography variant="body2" color="textSecondary" sx={{ wordBreak: "break-word" }}>
+                                    Reason: {item.reason}
+                                </Typography>
+                            ) : (<> </>)}
+                            <Typography variant="body2" color="textSecondary" sx={{ wordBreak: "break-word" }}>
+                                Blacklisted: {new Date(item.createdAt).toLocaleString()}
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={12} sm={12} md={3} lg={2} xl={1}>
+                            <Stack spacing={2} direction="column" justifyContent={"space-between"}>
+                                <Button variant="contained" color="error" onClick={() => {                                                                
+                                    axios.delete(`/api/v1/server/blacklist?id=${item.id}`, { 
+                                        headers: {
+                                            "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                        },
+                                        validateStatus: () => true
+                                    }).then((res: any) => {
+                                        if (!res.data.success) {
+                                            setNotiTextE(res.data.message);
+                                            setOpenE(true);
+                                        }
+                                        else {
+                                            setNotiTextS(res.data.message);
+                                            setOpenS(true);
+
+                                            refetch();
+                                        }
+                                    }).catch((err): any => {
+                                        setNotiTextE(err.message);
+                                        setOpenE(true);
+                                        console.error(err);
+                                    });
+                                }}>Remove</Button>
+                            </Stack>
+                        </Grid>
+                    </Grid>
+                </CardContent>
+            </Paper>
+        )
+    }
 
     return (
         <Box sx={{ display: "flex" }}>
@@ -128,61 +263,10 @@ export default function Blacklist() {
                 <Container maxWidth="xl">
                     <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
                         <CardContent>
-                            <Badge badgeContent={<>BETA</>} color="primary" sx={{ [`& .MuiBadge-badge`]: { mt: "1.5rem", mr: "-2.5rem", color: "#fff", padding: "0.85rem", fontSize: "0.95rem", fontWeight: "bold" } }}>
-                                <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
-                                    Blacklist
-                                </Typography>
-                            </Badge>
 
-                            <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
-                                <Alert elevation={6} variant="filled" severity="error">
-                                    {notiTextE}
-                                </Alert>
-                            </Snackbar>
-
-                            <Snackbar open={openS} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenS(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
-                                <Alert elevation={6} variant="filled" severity="success">
-                                    {notiTextS}
-                                </Alert>
-                            </Snackbar>
-
-                            <Snackbar open={openI} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenI(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
-                                <Alert elevation={6} variant="filled" severity="info">
-                                    {notiTextI}
-                                </Alert>
-                            </Snackbar>
-
-                            <Grid justifyContent={"space-between"}>
-                                <Grid item>
-                                    <Stack direction="row" justifyContent={"space-between"} alignItems={"center"} sx={{ mb: 2 }}>
-                                        <Typography variant="h6" sx={{ fontWeight: "500" }}>
-                                            {listsLoading ? (
-                                                <Skeleton animation="wave" variant="text" width={250} height={30} />
-                                            ) : (
-                                                <>
-                                                    {data?.pages ? (
-                                                        <>
-                                                            {data?.pages?.[0]?.max === 0 ? "No Blacklisted Items" : `Showing ${data?.pages?.[0]?.max} Blacklisted Items.`}
-                                                        </>
-                                                    ) : (
-                                                        "Loading..."
-                                                    )}
-                                                </>
-                                            )}
-                                        </Typography>
-                                        <Button variant="contained" color="primary" onClick={() => router.push("/dashboard/blacklist/add")} sx={{ fontWeight: "500" }}>
-                                            + Create Blacklist
-                                        </Button>
-                                    </Stack>
-                                </Grid>
-                                <Grid item>
-                                    {listsLoading ? (
-                                        <Skeleton animation="wave" variant="rectangular" width={"100%"} height={55} sx={{ borderRadius: "14px" }} />
-                                    ) : (
-                                        <TextField id="search" label="Search" variant="outlined" sx={{ width: "100%" }} onChange={(e) => setSearch(e.target.value)} />
-                                    )}
-                                </Grid>
-                            </Grid>
+                            {renderTitle()}
+                            {renderNotifications()}
+                            {renderSubTitle()}
 
                             {listsLoading ? (
                                 <Stack spacing={2}>
@@ -210,81 +294,7 @@ export default function Blacklist() {
                                 </Stack>
                             ) : (
                                 <>
-                                    {(data?.pages?.[0]?.list ?? []).map((item: any) => {
-                                    // {data?.pages?.map((page) => page?.list?.map((item: any) => {
-                                        return (
-                                            <Paper key={item.id} variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
-                                                <CardContent>
-                                                    <Grid container spacing={3} direction="row" justifyContent={"space-between"}>
-                                                        <Grid item>
-                                                            <div style={{ display: "inline-flex", alignItems: "center" }}>
-                                                                {ShowType(item.type)}
-
-                                                                {item.value ? (
-                                                                    <Typography variant="h6" sx={{ fontWeight: "500", wordBreak: "break-word", ml: 1 }}>
-                                                                        {item.type === 2 ? `AS${item.value}` : item.value}
-                                                                    </Typography>
-                                                                ) : (
-                                                                    <Skeleton variant="text" width={50} />
-                                                                )}
-                                                            </div>
-                                                            {(item.guildId && !userLoading) ? (
-                                                                <Typography variant="body2" color="textSecondary" sx={{ wordBreak: "break-word" }}>
-                                                                    Server: {user.servers.find((g: any) => g.guildId === item.guildId)?.name}
-                                                                </Typography>
-                                                            ) : (
-                                                                <Skeleton variant="text" width={50} />
-                                                            )}
-                                                            {item.reason ? (
-                                                                <Typography variant="body2" color="textSecondary" sx={{ wordBreak: "break-word" }}>
-                                                                    Reason: {item.reason}
-                                                                </Typography>
-                                                            ) : (<> </>)}
-                                                            <Typography variant="body2" color="textSecondary" sx={{ wordBreak: "break-word" }}>
-                                                                Blacklisted: {new Date(item.createdAt).toLocaleString()}
-                                                            </Typography>
-                                                        </Grid>
-                                                        <Grid item xs={12} sm={12} md={3} lg={2} xl={1}>
-                                                            <Stack spacing={2} direction="column" justifyContent={"space-between"}>
-                                                                <Button variant="contained" color="error" onClick={() => {                                                                
-                                                                    axios.delete(`/api/v1/server/blacklist?id=${item.id}`, { 
-                                                                        headers: {
-                                                                            "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
-                                                                        },
-                                                                        validateStatus: () => true
-                                                                    })
-                                                                        .then((res: any) => {
-                                                                            if (!res.data.success) {
-                                                                                setNotiTextE(res.data.message);
-                                                                                setOpenE(true);
-                                                                            }
-                                                                            else {
-                                                                                setNotiTextS(res.data.message);
-                                                                                setOpenS(true);
-
-                                                                                refetch();
-                                                                            }
-                                                                        })
-                                                                        .catch((err): any => {
-                                                                            setNotiTextE(err.message);
-                                                                            setOpenE(true);
-                                                                            console.error(err);
-                                                                        });
-                                                                }}>Remove</Button>
-                                                                {/* <Button variant="contained" color="info" onClick={() => {
-                                                                    // setUserId(item.userId);
-                                                                    // setUserInfoGuild(item.guildId);
-                                                                    // requestInfo(item.userId);
-                                                                    // setLoadingInfo(true);
-                                                                    // setOpen(true);
-                                                                }}>Actions</Button> */}
-                                                            </Stack>
-                                                        </Grid>
-                                                    </Grid>
-                                                </CardContent>
-                                            </Paper>
-                                        );
-                                    })}
+                                    {(data?.pages?.[0]?.list ?? []).map((item: any) => renderBlacklistItem(item))}
                                 </>
                             )}
 
@@ -296,7 +306,7 @@ export default function Blacklist() {
                                 )}
                                 {isFetchingNextPage && (
                                     <Typography variant="body2" color="textSecondary" sx={{ ml: "0.5rem" }}>
-                                    Loading...
+                                        Loading...
                                     </Typography>
                                 )}
                             </Box>
