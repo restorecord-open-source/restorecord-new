@@ -163,7 +163,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 id: Number(event.data.metadata.account_id) as number ?? 1
                             },
                             data: {
-                                role: event.data.metadata.plan,
+                                role: event.data.metadata.plan.includes("_") ? event.data.metadata.plan.split("_")[0] : event.data.metadata.plan,
                                 expiry: new Date(expiry)
                             }
                         });
