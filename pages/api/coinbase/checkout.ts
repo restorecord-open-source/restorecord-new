@@ -35,6 +35,12 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         case "business":
             amount = "30.00";
             break;
+        case "premium_monthly":
+            amount = "2.00";
+            break;
+        case "business_monthly":
+            amount = "5.00";
+            break;
         default:
             amount = "15.00";
             break;
