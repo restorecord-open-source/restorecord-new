@@ -313,7 +313,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                 console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 400 | ${JSON.stringify(response)}`);
                                 break;
                             default:
-                                reject(`Unknown error: ${resp?.response?.status}|${resp?.status}`);
+                                console.error(`[FATAL ERROR] [UNDEFINED STATUS] [${server.name}] [${member.id}]-[${member.username}] ${status} | ${JSON.stringify(response)} | ${JSON.stringify(resp)}`);
                                 break;
                             }
                         }).catch(async (err: Error) => {
