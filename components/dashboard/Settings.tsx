@@ -265,11 +265,10 @@ export default function DashSettings({ user }: any) {
                                         if (!res.data.success) {
                                             if (res.data.pullTimeout) {
                                                 const timeArr = new Date(new Date(res.data.pullTimeout).getTime() - new Date().getTime()).toISOString().substr(11, 8).split(":");
-                                                const days = parseInt(timeArr[0]) / 24;
                                                 const hours = parseInt(timeArr[0]);
                                                 const minutes = parseInt(timeArr[1]);
                                                 const seconds = parseInt(timeArr[2]);
-                                                const timeString = `${days > 0 ? `${days} day${days > 1 ? "s" : ""} ` : ""}${hours > 0 ? `${hours} hour${hours > 1 ? "s" : ""} ` : ""}${minutes > 0 ? `${minutes} minute${minutes > 1 ? "s" : ""} ` : ""}${seconds > 0 ? `${seconds} second${seconds > 1 ? "s" : ""} ` : ""}`;
+                                                const timeString = `${hours > 0 ? `${hours} hour${hours > 1 ? "s" : ""} ` : ""}${minutes > 0 ? `${minutes} minute${minutes > 1 ? "s" : ""} ` : ""}${seconds > 0 ? `${seconds} second${seconds > 1 ? "s" : ""} ` : ""}`;
                                                 setNotiTextE(`${res.data.message} ${timeString}`);
                                             }
                                             else {
