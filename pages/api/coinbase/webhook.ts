@@ -141,7 +141,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 id: Number(payment.accountId) as number ?? 1
                             },
                             data: {
-                                role: payment.type,
+                                role: payment.type.includes("_") ? payment.type.split("_")[0] : payment.type,
                                 expiry: new Date(expiry)
                             }
                         });
