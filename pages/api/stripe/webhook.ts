@@ -162,7 +162,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                             id: Number(subscription.metadata.account_id) as number
                         },
                         data: {
-                            role: subscription.metadata.plan,
+                            role: subscription.metadata.plan.includes("_") ? subscription.metadata.plan.split("_")[0] : subscription.metadata.plan,
                             expiry: new Date(subscription.current_period_end * 1000)
                         }
                     });
