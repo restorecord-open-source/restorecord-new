@@ -2,9 +2,7 @@ git pull
 
 yarn
 
-BUILD_DIR=temp
-
-yarn build
+BUILD_DIR=temp yarn build || exit
 
 if [ ! -d "temp" ]; then
   echo '\033[31m temp Directory not exists!\033[0m'  
@@ -21,4 +19,4 @@ mv temp/* .next
 
 rm -rf temp
 
-pm2 reload app --update-env
+pm2 reload restorecord --update-env
