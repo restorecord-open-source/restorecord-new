@@ -87,7 +87,7 @@ export function verifyFingerprint(fingerprint: string): boolean {
     return true;
 }
 
-export function formatEstimatedTime(estimatedTime) {
+export function formatEstimatedTime(estimatedTime: any) {
     const minute = 60 * 1000;
     const hour = 60 * minute;
     const day = 24 * hour;
