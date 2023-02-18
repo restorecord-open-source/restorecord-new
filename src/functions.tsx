@@ -86,3 +86,20 @@ export function verifyFingerprint(fingerprint: string): boolean {
 
     return true;
 }
+
+export function formatEstimatedTime(estimatedTime) {
+    const minute = 60 * 1000;
+    const hour = 60 * minute;
+    const day = 24 * hour;
+  
+    if (estimatedTime > day) {
+        return `${Math.round(estimatedTime / day)} days`;
+    } else if (estimatedTime > hour) {
+        return `${Math.round(estimatedTime / hour)} hours`;
+    } else if (estimatedTime > minute) {
+        return `${Math.round(estimatedTime / minute)} minutes`;
+    } else {
+        return `${Math.round(estimatedTime / 1000)} seconds`;
+    }
+}
+  

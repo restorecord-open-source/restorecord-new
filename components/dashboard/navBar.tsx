@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/router";
 import { useTheme } from "@mui/material/styles";
+import { ArrowDropDownRounded } from "@mui/icons-material";
+import { stringToColor } from "../../src/functions";
 
 import Link from "next/link"
 import navItemWrappers from "../../src/dashboard/navBarItems"
@@ -23,10 +25,8 @@ import MuiLink from "@mui/material/Link";
 import styled from "@emotion/styled";
 import Stack from "@mui/material/Stack";
 import Avatar from "@mui/material/Avatar";
-import { ArrowDropDownRounded } from "@mui/icons-material";
 import ButtonBase from "@mui/material/ButtonBase";
 import Divider from "@mui/material/Divider";
-import { stringToColor } from "../../src/functions";
 
 
 const drawerWidth = 250;
@@ -137,71 +137,63 @@ export default function NavBar({ ...props }: any) {
                             {navItemWrappers.map((item, index) => {
                                 if (item.admin && !props.user.admin) return null;
                                 return (
-                                    <Link key={index} href={item.href} color="inherit">
-                                        <ListItemButton selected={pathName === item.href} disableRipple sx={{ 
-                                            margin: "0.3rem 0", ["&.Mui-selected"]: {
+                                    <ListItemButton key={index} selected={pathName === item.href} disableRipple onClick={() => { router.push(item.href) }} sx={{ 
+                                        margin: "0.3rem 0", ["&.Mui-selected"]: {
+                                            backgroundColor: "unset",
+                                            "&:hover": { 
+                                                borderRadius: "0 0.5rem 0.5rem 0",
                                                 backgroundColor: "unset",
-                                                "&:hover": { 
-                                                    borderRadius: "0 0.5rem 0.5rem 0",
-                                                    backgroundColor: "unset",
-                                                }, 
-                                                "&:before": { 
-                                                    backgroundColor: theme.palette.primary.main,
-                                                    content: "''", 
-                                                    height: "100%", 
-                                                    position: "absolute", 
-                                                    width: "0.125rem" ,
-                                                    left: 0
-                                                },
-                                                "&:after": {
-                                                    backgroundColor: "#12121a", 
-                                                    borderRadius: "0.5rem",
-                                                    content: '""',
-                                                    height: "100%",
-                                                    left: "0.5rem",
-                                                    position: "absolute",
-                                                    width: "90%",
-                                                    zIndex: -999,
-                                                }
                                             }, 
-                                            "&:before": {
+                                            "&:before": { 
+                                                backgroundColor: theme.palette.primary.main,
+                                                content: "''", 
+                                                height: "100%", 
+                                                position: "absolute", 
+                                                width: "0.125rem" ,
+                                                left: 0
+                                            },
+                                            "&:after": {
                                                 backgroundColor: "#12121a", 
-                                                borderRadius: "0 5px 5px 0",
+                                                borderRadius: "0.5rem",
                                                 content: '""',
                                                 height: "100%",
-                                                position: "absolute",
-                                                transition: ".25s",
-                                                width: "0",
-                                                zIndex: -998,
-                                            },
-                                            "&:hover:before": {
-                                                borderRadius: "0.5rem",
-                                                height: "100%",
                                                 left: "0.5rem",
+                                                position: "absolute",
                                                 width: "90%",
-                                            },
-                                            "&:hover": {
-                                                background: "none"
-                                            },
-                                            background: "none", 
-                                            borderRadius: "0.5rem", 
-                                            zIndex: 1000,
-                                            transition: "all 0.1s ease-in-out"
-                                        }}> 
-                                            {/* <ListItemButton sx={{ borderLeft: pathName === item.href ? "3px solid #4f46e5" : "none", background: "none",  padding: "0", ["&:hover"]: { background: "none" } }}> */}
-                                            {/* <Link href={item.href}> */}
-                                            {/* <ListItemButton sx={{ borderRadius: "0.5rem", background: "none", ["&:hover"]: { background: "none" }, fontSize: "0.75rem" }}> */}
-                                            {/* <ListItem button selected={pathName === item.href} disablePadding> */}
-                                            <ListItemIcon sx={{ "& .MuiSvgIcon-root": { fontSize: "1.25rem" }, minWidth: "2rem", marginRight: "0.75rem" }}>
-                                                {item.icon}
-                                            </ListItemIcon>
+                                                zIndex: -999,
+                                            }
+                                        }, 
+                                        "&:before": {
+                                            backgroundColor: "#12121a", 
+                                            borderRadius: "0 5px 5px 0",
+                                            content: '""',
+                                            height: "100%",
+                                            position: "absolute",
+                                            transition: ".25s",
+                                            width: "0",
+                                            zIndex: -998,
+                                        },
+                                        "&:hover:before": {
+                                            borderRadius: "0.5rem",
+                                            height: "100%",
+                                            left: "0.5rem",
+                                            width: "90%",
+                                        },
+                                        "&:hover": {
+                                            background: "none"
+                                        },
+                                        background: "none", 
+                                        borderRadius: "0.5rem", 
+                                        zIndex: 1000,
+                                        transition: "all 0.1s ease-in-out"
+                                    }}> 
+                                        <ListItemIcon sx={{ "& .MuiSvgIcon-root": { fontSize: "1.25rem" }, minWidth: "2rem", marginRight: "0.75rem" }}>
+                                            {item.icon}
+                                        </ListItemIcon>
+                                        <MuiLink href={item.href} color="text.primary" sx={{ textDecoration: "none" }}>
                                             <ListItemText primary={item.name} sx={{ "& .MuiTypography-root": { fontWeight: "300", fontSize: "0.9rem" } }} />
-                                            {/* </ListItem> */}
-                                            {/* </ListItemButton> */}
-                                            {/* </Link> */}
-                                            {/* </ListItemButton> */}
-                                        </ListItemButton>
-                                    </Link>
+                                        </MuiLink>
+                                    </ListItemButton>
                                 )
                             })}
                         </List>

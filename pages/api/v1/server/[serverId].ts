@@ -6,6 +6,7 @@ import { addMember, addRole, refreshTokenAddDB, shuffle, sleep } from "../../../
 import rateLimit from "../../../../src/rate-limit";
 import axios from "axios";
 import { HttpsProxyAgent } from "https-proxy-agent";
+import { formatEstimatedTime } from "../../../../src/functions";
 
 const limiter = rateLimit({
     uniqueTokenPerInterval: 500,
@@ -272,16 +273,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         });
 
                         if (!newServer) return reject(`[${server.name}] Server not found`);
-                        if (!newServer.pulling) return reject(`[${server.name}] Pulling stopped`);
+                        // if (!newServer.pulling) return reject(`[${server.name}] Pulling stopped`);
 
                         console.log(`[${server.name}] [${member.username}] Adding...`);
                         await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : []).then(async (resp: any) => {
                             let status = resp?.response?.status || resp?.status;
                             let response = ((resp?.response?.data?.message || resp?.response?.data?.code) || (resp?.data?.message || resp?.data?.code)) ? (resp?.response?.data || resp?.data) : "";
                             
-                            // if (status) console.log(`[${server.name}] [${member.username}] ${status}`);
                             console.log(`[${server.name}] [${member.username}] ${status} ${JSON.stringify(response).toString() ?? ""}`);
-
                     
                             switch (status) {
                             case 429:   
@@ -325,34 +324,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }
 
                     console.log(`[${server.name}] Finished pulling`);
+                    await prisma.servers.update({
+                        where: {
+                            id: server.id
+                        },
+                        data: {
+                            pulling: false,
+                        }
+                    }).catch(async (err: Error) => {
+                        console.error(`[${server.name}] [PULLING] 5 ${err}`);
+                    });
 
                     resolve();
                 }).catch(async (err: Error) => {
-                    console.log(`[PULLING] 3 ${err}`);
+                    console.error(`[PULLING] 3 ${err}`);
                 });
 
-                // let esimatedTime: any = members.length * 500 * 5;
-                let esimatedTime: any = members.length * 1500; // new calculation
+                let esimatedTime: any = members.length * 1500; 
 
-                if (esimatedTime > 60000) {
-                    esimatedTime = esimatedTime / (60 * 1000);
-                    esimatedTime = Math.round(esimatedTime);
-                    esimatedTime = esimatedTime + " minutes";
-                } else if (esimatedTime > 3600000) {
-                    esimatedTime = esimatedTime / (3600 * 1000);
-                    esimatedTime = Math.round(esimatedTime);
-                    esimatedTime = esimatedTime + " hours";
-                } else if (esimatedTime > 86400000) {
-                    esimatedTime = esimatedTime / (86400 * 1000);
-                    esimatedTime = Math.round(esimatedTime);
-                    esimatedTime = esimatedTime + " days";
-                } else {
-                    esimatedTime = esimatedTime / 1000;
-                    esimatedTime = Math.round(esimatedTime);
-                    esimatedTime = esimatedTime + " seconds";
-                }
+                esimatedTime = formatEstimatedTime(esimatedTime);
 
-                // when pulling is done update the db
                 pullingProcess.then(async () => {
                     console.log(`[${server.name}] Pulling done with ${succPulled} members pulled`);
                     await prisma.servers.update({
@@ -362,9 +353,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         data: {
                             pulling: false,
                         }
+                    }).catch(async (err: Error) => {
+                        console.error(`[${server.name}] [PULLING] 6 ${err}`);
                     });
                 }).catch(async (err: Error) => {
-                    console.log(`[PULLING] 4 ${err}`);
+                    console.error(`[${server.name}] [PULLING] 4 ${err}`);
                 });
             
                 return res.status(200).json({ success: true, message: `Started Pull Process, this will take around ${esimatedTime}` });

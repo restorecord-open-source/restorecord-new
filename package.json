@@ -36,7 +36,7 @@
 		"jsonwebtoken": "^8.5.1",
 		"lru-cache": "^7.14.1",
 		"mui-color-input": "^1.0.3",
-		"next": "^12.3.2",
+		"next": "^13.1.6",
 		"next-qrcode": "^2.2.2",
 		"nprogress": "^0.2.0",
 		"react": "^18.2.0",
