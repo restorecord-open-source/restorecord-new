@@ -262,13 +262,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             case 201:
                                 succPulled++;
                             case 400:
-                                console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 400 | ${JSON.stringify(response)}`);
+                                console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 400 | ${JSON.stringify(response).toString() ?? null}`);
                             default:
-                                console.error(`[FATAL ERROR] [UNDEFINED STATUS] [${server.name}] [${member.id}]-[${member.username}] ${status} | ${JSON.stringify(response)} | ${JSON.stringify(resp)}`);
+                                console.error(`[FATAL ERROR] [UNDEFINED STATUS] [${server.name}] [${member.id}]-[${member.username}] ${status} | ${JSON.stringify(response).toString() ?? null} | ${JSON.stringify(resp.data)}`);
                             }
                         }).catch(async (err: Error) => {
                             console.log(`[${server.name}] [addMember.catch] [${member.username}] ${err}`);
-                            return res.status(400).json({ success: false, message: err?.message ? err?.message : "Something went wrong" });
+                            // return res.status(400).json({ success: false, message: err?.message ? err?.message : "Something went wrong" });
                         });
 
                         if (delay > 1000) { 
