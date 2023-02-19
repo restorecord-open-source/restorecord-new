@@ -252,26 +252,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                     }, retry);
                                     delay += retry;
                                 }
-                                break;
                             case 403:
                                 refreshTokenAddDB(member.userId.toString(), member.id, guildId.toString(), bot?.botToken, roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
-                                break;
                             case 407:
                                 console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);
-                                break;
                             case 204:
                                 await addRole(guildId.toString(), member.userId.toString(), bot?.botToken, roleId ? BigInt(roleId).toString() : "");
                                 succPulled++;
-                                break;
                             case 201:
                                 succPulled++;
-                                break;
                             case 400:
                                 console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 400 | ${JSON.stringify(response)}`);
-                                break;
                             default:
                                 console.error(`[FATAL ERROR] [UNDEFINED STATUS] [${server.name}] [${member.id}]-[${member.username}] ${status} | ${JSON.stringify(response)} | ${JSON.stringify(resp)}`);
-                                break;
                             }
                         }).catch(async (err: Error) => {
                             console.log(`[${server.name}] [addMember.catch] [${member.username}] ${err}`);
