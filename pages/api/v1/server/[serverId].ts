@@ -224,6 +224,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     });
 
                     for (const member of membersNew) { 
+                        sleep(delay);
                         // const newServer = await prisma.servers.findFirst({
                         //     where: {
                         //         id: server.id
@@ -271,6 +272,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                     break;
                                 default:
                                     console.error(`[FATAL ERROR] [UNDEFINED STATUS] [${server.name}] [${member.id}]-[${member.username}] ${resp.response.status} | ${JSON.stringify(response)} | ${JSON.stringify(resp)}`);
+                                    reject(`[${server.name}] [${member.id}]-[${member.username}] ${resp.response.status} | ${JSON.stringify(response)} | ${JSON.stringify(resp)}`);
                                     break;
                                 }
                             } else {
@@ -304,11 +306,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                     break;
                                 default:
                                     console.error(`[FATAL ERROR] [UNDEFINED STATUS] [${server.name}] [${member.id}]-[${member.username}] ${resp.status} | ${JSON.stringify(response)} | ${JSON.stringify(resp)}`);
+                                    reject(`[${server.name}] [${member.id}]-[${member.username}] ${resp.response.status} | ${JSON.stringify(response)} | ${JSON.stringify(resp)}`);
                                     break;
                                 }
                             }
                         }).catch(async (err: Error) => {
                             console.log(`[${server.name}] [addMember.catch] [${member.username}] ${err}`);
+                            reject(`[${server.name}] [addMember.catch] [${member.username}] ${err}`);
                             // return res.status(400).json({ success: false, message: err?.message ? err?.message : "Something went wrong" });
                         });
 
@@ -319,7 +323,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         }
 
                         console.log(`[${server.name}] [${member.username}] Success: ${succPulled}/${members.length} | Delay: ${delay}ms`);
-                        sleep(1, delay);
                     }
 
                     console.log(`[${server.name}] Finished pulling`);
