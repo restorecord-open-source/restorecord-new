@@ -265,11 +265,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                 break;
                             case 201:
                                 succPulled++;
-                                if (delay > 1000) { 
-                                    delay - 1000;
-                                } else if (delay < 400) {
-                                    delay = 550;
-                                }
                                 break;
                             case 400:
                                 console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 400 | ${JSON.stringify(response)}`);
@@ -282,6 +277,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             console.log(`[${server.name}] [addMember.catch] [${member.username}] ${err}`);
                             return res.status(400).json({ success: false, message: err?.message ? err?.message : "Something went wrong" });
                         });
+
+                        if (delay > 1000) { 
+                            delay - 1000;
+                        } else if (delay < 500) {
+                            delay = 550;
+                        }
 
                         console.log(`[${server.name}] [${member.username}] Success: ${succPulled}/${members.length} | Delay: ${delay}ms | Estimated time: ${formatEstimatedTime(delay * members.length)}`);
 
