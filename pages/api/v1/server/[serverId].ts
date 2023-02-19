@@ -215,7 +215,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 let succPulled: number = 0;
                 const pullingProcess = new Promise<void>(async (resolve, reject) => {
                     let membersNew = await shuffle(members);
-                    let delay: number = 500;
+                    let delay: number = 350;
 
                     await prisma.logs.create({
                         data: {
@@ -236,14 +236,21 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
                         console.log(`[${server.name}] [${member.username}] Pulling...`);
                         await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : []).then(async (resp: any) => {
-                            let status: number = parseInt(resp?.response?.status || resp?.status);
-                            let response = ((resp?.response?.data?.message || resp?.response?.data?.code) || (resp?.data?.message || resp?.data?.code)) ? (resp?.response?.data || resp?.data) : "";
-                            let respCode = resp?.response?.data?.code || resp?.data?.code;
+                            // const status: number = parseInt(resp?.response?.status || resp?.status);
+                            let status: any = 0;
+                            const response: string = (resp?.data || resp?.response?.data);
 
                             console.log(`[${server.name}] [${member.username}] ${status} ${JSON.stringify(response).toString() ?? null}`);
                     
+                            if (resp?.response?.status) {
+                                status = resp.response.status;
+                            }
+                            else {
+                                status = resp.status;
+                            }
+
                             switch (status) {
-                            case 429:   
+                            case 429:
                                 const retryAfter = resp.response.headers["retry-after"];
                                 console.log(`[${server.name}] [${member.username}] 429 | retry-after: ${retryAfter} | delay: ${delay}ms`);
                                 if (retryAfter) {
@@ -262,21 +269,25 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                 succPulled++;
                             case 201:
                                 succPulled++;
-                            case 400:
-                                console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 400 | ${JSON.stringify(response).toString() ?? null}`);
                             default:
-                                console.error(`[FATAL ERROR] [UNDEFINED STATUS] [${server.name}] [${member.id}]-[${member.username}] ${status} | ${JSON.stringify(response).toString() ?? null} | ${JSON.stringify(resp.data)}`);
+                                console.error(`[${server.name}] [FATAL ERROR] [${member.id}]-[${member.username}] ${status} | ${JSON.stringify(response).toString()} | ${JSON.stringify(resp.data)}`);
                             }
+
+                            if (delay > 500) delay -= delay / 1.5;
+
                         }).catch(async (err: Error) => {
-                            console.log(`[${server.name}] [addMember.catch] [${member.username}] ${err}`);
+                            console.error(`[${server.name}] [addMember.catch] [${member.username}] ${err}`);
                             // return res.status(400).json({ success: false, message: err?.message ? err?.message : "Something went wrong" });
                         });
 
-                        if (delay > 1000) { 
-                            delay - 1000;
-                        } else if (delay < 500) {
-                            delay = 550;
-                        }
+                        // if (delay > 1000) { 
+                        //     delay - 1000;
+                        //     if (delay < 500) {
+                        //         delay = 500;
+                        //     }
+                        // } else if (delay < 500) {
+                        //     delay = 550;
+                        // }
 
                         console.log(`[${server.name}] [${member.username}] Success: ${succPulled}/${members.length} | Delay: ${delay}ms | Estimated time: ${formatEstimatedTime(delay * members.length)}`);
 
