@@ -236,11 +236,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
                         console.log(`[${server.name}] [${member.username}] Pulling...`);
                         await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : []).then(async (resp: any) => {
-                            let status = resp?.response?.status || resp?.status;
+                            let status: number = (resp?.response?.status || resp?.status || 0)
                             let response = ((resp?.response?.data?.message || resp?.response?.data?.code) || (resp?.data?.message || resp?.data?.code)) ? (resp?.response?.data || resp?.data) : "";
-                            
+
                             console.log(`[${server.name}] [${member.username}] ${status} ${JSON.stringify(response).toString() ?? null}`);
                     
+                            if (resp?.response?.status !== undefined) {
+                                status = resp.response.status;
+                            } else if (resp?.status !== undefined) {
+                                status = resp.status;
+                            } else {
+                                status = 0;
+                            }
+
                             switch (status) {
                             case 429:   
                                 const retryAfter = resp.response.headers["retry-after"];
