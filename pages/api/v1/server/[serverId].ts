@@ -216,6 +216,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 const pullingProcess = new Promise<void>(async (resolve, reject) => {
                     let membersNew = await shuffle(members);
                     let delay: number = 350;
+                    let status: any = 0;
 
                     await prisma.logs.create({
                         data: {
@@ -237,17 +238,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         console.log(`[${server.name}] [${member.username}] Pulling...`);
                         await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : []).then(async (resp: any) => {
                             // const status: number = parseInt(resp?.response?.status || resp?.status);
-                            let status: any = 0;
                             const response: string = (resp?.data || resp?.response?.data);
 
-                            console.log(`[${server.name}] [${member.username}] ${status} ${JSON.stringify(response).toString() ?? null}`);
+                            // console.log(`[${server.name}] [${member.username}] ${status} ${JSON.stringify(response).toString() ?? null}`);
+                            console.log(`[${server.name}] [${member.username}] ${status}`);
                     
-                            if (resp?.response?.status) {
-                                status = resp.response.status;
-                            }
-                            else {
-                                status = resp.status;
-                            }
+                            if (resp?.response?.status) status = resp.response.status;
+                            else status = resp.status;
 
                             switch (status) {
                             case 429:
