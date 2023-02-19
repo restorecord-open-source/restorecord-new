@@ -280,6 +280,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         console.log(`[${server.name}] [${member.username}] Success: ${succPulled}/${members.length} | Delay: ${delay}ms | Estimated time: ${formatEstimatedTime(delay * members.length)}`);
 
                         await sleep(delay);
+
+                        console.log(`[${server.name}] [${member.username}] Delay done | Success: ${succPulled}/${members.length} | Delay: ${delay}ms | Estimated time: ${formatEstimatedTime(delay * members.length)}`);
                     }
 
                     console.log(`[${server.name}] Finished pulling`);
