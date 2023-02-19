@@ -215,7 +215,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 let succPulled: number = 0;
                 const pullingProcess = new Promise<void>(async (resolve, reject) => {
                     let membersNew = await shuffle(members);
-                    let delay: number = 450;
+                    let delay: number = 500;
 
                     await prisma.logs.create({
                         data: {
@@ -234,7 +234,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         // if (!newServer) return reject(`[${server.name}] Server not found`);
                         // if (!newServer.pulling) return reject(`[${server.name}] Pulling stopped`);
 
-                        console.log(`[${server.name}] [${member.username}] Pulling... | serverId: ${guildId.toString()} | roleId: ${roleId ? roleId.toString() : "N/A"} | delay: ${delay}ms | succPulled: ${succPulled}`);
+                        console.log(`[${server.name}] [${member.username}] Pulling...`);
                         await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : []).then(async (resp: any) => {
                             let status = resp?.response?.status || resp?.status;
                             let response = ((resp?.response?.data?.message || resp?.response?.data?.code) || (resp?.data?.message || resp?.data?.code)) ? (resp?.response?.data || resp?.data) : "";
@@ -265,10 +265,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                 break;
                             case 201:
                                 succPulled++;
-                                if (delay > 500) { 
-                                    delay -= Math.round(delay / 1.5);
-                                } else if (delay < 450) {
-                                    delay = 450;
+                                if (delay > 1000) { 
+                                    delay - 1000;
+                                } else if (delay < 400) {
+                                    delay = 550;
                                 }
                                 break;
                             case 400:
@@ -282,6 +282,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             console.log(`[${server.name}] [addMember.catch] [${member.username}] ${err}`);
                             return res.status(400).json({ success: false, message: err?.message ? err?.message : "Something went wrong" });
                         });
+
+                        console.log(`[${server.name}] [${member.username}] Success: ${succPulled}/${members.length} | Delay: ${delay}ms | Estimated time: ${formatEstimatedTime(delay * members.length)}`);
 
                         await sleep(delay);
                     }
