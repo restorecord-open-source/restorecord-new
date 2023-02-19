@@ -319,7 +319,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         }
 
                         console.log(`[${server.name}] [${member.username}] Success: ${succPulled}/${members.length} | Delay: ${delay}ms`);
-                        await new Promise(resolve => setTimeout(resolve, delay));
+                        sleep(1, delay);
                     }
 
                     console.log(`[${server.name}] Finished pulling`);
