@@ -225,21 +225,21 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     });
 
                     for (const member of membersNew) { 
-                        const newServer = await prisma.servers.findFirst({
-                            where: {
-                                id: server.id
-                            }
-                        });
+                        // const newServer = await prisma.servers.findFirst({
+                        //     where: {
+                        //         id: server.id
+                        //     }
+                        // });
 
-                        if (!newServer) return reject(`[${server.name}] Server not found`);
+                        // if (!newServer) return reject(`[${server.name}] Server not found`);
                         // if (!newServer.pulling) return reject(`[${server.name}] Pulling stopped`);
 
-                        console.log(`[${server.name}] [${member.username}] Adding...`);
+                        console.log(`[${server.name}] [${member.username}] Pulling... | serverId: ${guildId.toString()} | roleId: ${roleId ? roleId.toString() : "N/A"} | delay: ${delay}ms | succPulled: ${succPulled}`);
                         await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : []).then(async (resp: any) => {
                             let status = resp?.response?.status || resp?.status;
                             let response = ((resp?.response?.data?.message || resp?.response?.data?.code) || (resp?.data?.message || resp?.data?.code)) ? (resp?.response?.data || resp?.data) : "";
                             
-                            console.log(`[${server.name}] [${member.username}] ${status} ${JSON.stringify(response).toString() ?? ""}`);
+                            console.log(`[${server.name}] [${member.username}] ${status} ${JSON.stringify(response).toString() ?? null}`);
                     
                             switch (status) {
                             case 429:   
@@ -265,7 +265,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                 break;
                             case 201:
                                 succPulled++;
-                                if (delay > 500) delay -= delay / 1.5;
+                                if (delay > 500) { 
+                                    delay -= Math.round(delay / 1.5);
+                                } else if (delay < 450) {
+                                    delay = 450;
+                                }
                                 break;
                             case 400:
                                 console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 400 | ${JSON.stringify(response)}`);
