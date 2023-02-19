@@ -240,16 +240,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             let response = ((resp?.response?.data?.message || resp?.response?.data?.code) || (resp?.data?.message || resp?.data?.code)) ? (resp?.response?.data || resp?.data) : "";
 
                             console.log(`[${server.name}] [${member.username}] ${status} ${JSON.stringify(response).toString() ?? null}`);
-                    
-                            if (resp?.response?.status !== undefined) {
-                                status = resp.response.status;
-                            } else if (resp?.status !== undefined) {
-                                status = resp.status;
-                            } else {
-                                status = 0;
-                            }
 
-                            switch (status) {
+                            switch (resp.response.status || resp.status) {
                             case 429:   
                                 const retryAfter = resp.response.headers["retry-after"];
                                 console.log(`[${server.name}] [${member.username}] 429 | retry-after: ${retryAfter} | delay: ${delay}ms`);
