@@ -215,8 +215,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 let succPulled: number = 0;
                 const pullingProcess = new Promise<void>(async (resolve, reject) => {
                     let membersNew = await shuffle(members);
-                    let delay: number = 350;
-                    let status: any = 0;
+                    let delay: number = 500;
 
                     await prisma.logs.create({
                         data: {
@@ -237,17 +236,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
                         console.log(`[${server.name}] [${member.username}] Pulling...`);
                         await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : []).then(async (resp: any) => {
-                            // const status: number = parseInt(resp?.response?.status || resp?.status);
-                            const response: string = (resp?.data || resp?.response?.data);
-
-                            // console.log(`[${server.name}] [${member.username}] ${status} ${JSON.stringify(response).toString() ?? null}`);
-                            console.log(`[${server.name}] [${member.username}] ${status}`);
+                            let status = resp?.response?.status || resp?.status;
+                            let response = ((resp?.response?.data?.message || resp?.response?.data?.code) || (resp?.data?.message || resp?.data?.code)) ? (resp?.response?.data || resp?.data) : "";
+                            
+                            console.log(`[${server.name}] [${member.username}] ${status} ${JSON.stringify(response).toString() ?? null}`);
                     
-                            if (resp?.response?.status) status = resp.response.status;
-                            else status = resp.status;
-
                             switch (status) {
-                            case 429:
+                            case 429:   
                                 const retryAfter = resp.response.headers["retry-after"];
                                 console.log(`[${server.name}] [${member.username}] 429 | retry-after: ${retryAfter} | delay: ${delay}ms`);
                                 if (retryAfter) {
@@ -257,40 +252,41 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                     }, retry);
                                     delay += retry;
                                 }
+                                break;
                             case 403:
                                 refreshTokenAddDB(member.userId.toString(), member.id, guildId.toString(), bot?.botToken, roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
+                                break;
                             case 407:
                                 console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);
+                                break;
                             case 204:
                                 await addRole(guildId.toString(), member.userId.toString(), bot?.botToken, roleId ? BigInt(roleId).toString() : "");
                                 succPulled++;
+                                break;
                             case 201:
                                 succPulled++;
+                                break;
+                            case 400:
+                                console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 400 | ${JSON.stringify(response)}`);
+                                break;
                             default:
-                                console.error(`[${server.name}] [FATAL ERROR] [${member.id}]-[${member.username}] ${status} | ${JSON.stringify(response).toString()} | ${JSON.stringify(resp.data)}`);
+                                console.error(`[FATAL ERROR] [UNDEFINED STATUS] [${server.name}] [${member.id}]-[${member.username}] ${status} | ${JSON.stringify(response)} | ${JSON.stringify(resp)}`);
+                                break;
                             }
-
-                            if (delay > 500) delay -= delay / 1.5;
-
                         }).catch(async (err: Error) => {
-                            console.error(`[${server.name}] [addMember.catch] [${member.username}] ${err}`);
-                            // return res.status(400).json({ success: false, message: err?.message ? err?.message : "Something went wrong" });
+                            console.log(`[${server.name}] [addMember.catch] [${member.username}] ${err}`);
+                            return res.status(400).json({ success: false, message: err?.message ? err?.message : "Something went wrong" });
                         });
 
-                        // if (delay > 1000) { 
-                        //     delay - 1000;
-                        //     if (delay < 500) {
-                        //         delay = 500;
-                        //     }
-                        // } else if (delay < 500) {
-                        //     delay = 550;
-                        // }
+                        if (delay > 1000) { 
+                            delay - 1000;
+                        } else if (delay < 500) {
+                            delay = 550;
+                        }
 
                         console.log(`[${server.name}] [${member.username}] Success: ${succPulled}/${members.length} | Delay: ${delay}ms | Estimated time: ${formatEstimatedTime(delay * members.length)}`);
 
                         await sleep(delay);
-
-                        console.log(`[${server.name}] [${member.username}] Delay done | Success: ${succPulled}/${members.length} | Delay: ${delay}ms | Estimated time: ${formatEstimatedTime(delay * members.length)}`);
                     }
 
                     console.log(`[${server.name}] Finished pulling`);
