@@ -236,59 +236,36 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
                         console.log(`[${server.name}] [${member.username}] Pulling...`);
                         await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : []).then(async (resp: any) => {
-                            let status: number = (resp?.response?.status || resp?.status || 0)
+                            let status: number = parseInt(resp?.response?.status || resp?.status);
                             let response = ((resp?.response?.data?.message || resp?.response?.data?.code) || (resp?.data?.message || resp?.data?.code)) ? (resp?.response?.data || resp?.data) : "";
+                            let respCode = resp?.response?.data?.code || resp?.data?.code;
 
                             console.log(`[${server.name}] [${member.username}] ${status} ${JSON.stringify(response).toString() ?? null}`);
                     
-                            if (resp?.response?.status) {
-                                switch (resp.response.status) {
-                                case 429:   
-                                    const retryAfter = resp.response.headers["retry-after"];
-                                    console.log(`[${server.name}] [${member.username}] 429 | retry-after: ${retryAfter} | delay: ${delay}ms`);
-                                    if (retryAfter) {
-                                        const retry = parseInt(retryAfter);
-                                        setTimeout(async () => {
-                                            await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : [])
-                                        }, retry);
-                                        delay += retry;
-                                    }
-                                case 403:
-                                    refreshTokenAddDB(member.userId.toString(), member.id, guildId.toString(), bot?.botToken, roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
-                                case 407:
-                                    console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);
-                                case 204:
-                                    await addRole(guildId.toString(), member.userId.toString(), bot?.botToken, roleId ? BigInt(roleId).toString() : "");
-                                    succPulled++;
-                                case 201:
-                                    succPulled++;
-                                default:
-                                    console.error(`[${server.name}] [FATAL ERROR] [${member.id}]-[${member.username}] ${status} | ${JSON.stringify(response).toString() ?? null} | ${JSON.stringify(resp.data)}`);
+                            switch (status) {
+                            case 429:   
+                                const retryAfter = resp.response.headers["retry-after"];
+                                console.log(`[${server.name}] [${member.username}] 429 | retry-after: ${retryAfter} | delay: ${delay}ms`);
+                                if (retryAfter) {
+                                    const retry = parseInt(retryAfter);
+                                    setTimeout(async () => {
+                                        await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : [])
+                                    }, retry);
+                                    delay += retry;
                                 }
-                            } else {
-                                switch (resp.status) {
-                                case 429:   
-                                    const retryAfter = resp.response.headers["retry-after"];
-                                    console.log(`[${server.name}] [${member.username}] 429 | retry-after: ${retryAfter} | delay: ${delay}ms`);
-                                    if (retryAfter) {
-                                        const retry = parseInt(retryAfter);
-                                        setTimeout(async () => {
-                                            await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : [])
-                                        }, retry);
-                                        delay += retry;
-                                    }
-                                case 403:
-                                    refreshTokenAddDB(member.userId.toString(), member.id, guildId.toString(), bot?.botToken, roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
-                                case 407:
-                                    console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);
-                                case 204:
-                                    await addRole(guildId.toString(), member.userId.toString(), bot?.botToken, roleId ? BigInt(roleId).toString() : "");
-                                    succPulled++;
-                                case 201:
-                                    succPulled++;
-                                default:
-                                    console.error(`[${server.name}] [FATAL ERROR] [${member.id}]-[${member.username}] ${status} | ${JSON.stringify(response).toString() ?? null} | ${JSON.stringify(resp.data)}`);
-                                }
+                            case 403:
+                                refreshTokenAddDB(member.userId.toString(), member.id, guildId.toString(), bot?.botToken, roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
+                            case 407:
+                                console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);
+                            case 204:
+                                await addRole(guildId.toString(), member.userId.toString(), bot?.botToken, roleId ? BigInt(roleId).toString() : "");
+                                succPulled++;
+                            case 201:
+                                succPulled++;
+                            case 400:
+                                console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 400 | ${JSON.stringify(response).toString() ?? null}`);
+                            default:
+                                console.error(`[FATAL ERROR] [UNDEFINED STATUS] [${server.name}] [${member.id}]-[${member.username}] ${status} | ${JSON.stringify(response).toString() ?? null} | ${JSON.stringify(resp.data)}`);
                             }
                         }).catch(async (err: Error) => {
                             console.log(`[${server.name}] [addMember.catch] [${member.username}] ${err}`);
