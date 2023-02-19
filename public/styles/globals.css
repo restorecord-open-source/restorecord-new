@@ -8,6 +8,10 @@ body {
 	background-color: transparent !important;
 }
 
+a.MuiButtonBase-root, a.MuiButton-root, a[href]:not(.MuiButtonBase-root):not(.MuiButton-root) {
+	text-decoration: none !important;
+}
+
 :root {
 	color-scheme: dark;
 }

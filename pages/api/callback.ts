@@ -229,11 +229,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 data: {
                                     userId: userId,
                                     guildId: rGuildId,
-                                    // guild: {
-                                    //     connect: {
-                                    //         guildId: rGuildId,
-                                    //     },
-                                    // },
                                     accessToken: respon.data.access_token,
                                     refreshToken: respon.data.refresh_token,
                                     ip: IPAddr ?? "127.0.0.1",

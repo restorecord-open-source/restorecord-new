@@ -1,13 +1,14 @@
-import { verify } from "jsonwebtoken";
 import { NextApiRequest, NextApiResponse } from "next";
 import rateLimit from "../../../../src/rate-limit";
 import { prisma } from "../../../../src/db";
+import withAuthentication from "../../../../src/withAuthentication";
+import { accounts } from "@prisma/client";
 
 const limiter = rateLimit({
     uniqueTokenPerInterval: 500,
 })
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts) {
     return new Promise(async resolve => {
         switch (req.method) {
         case "GET":
@@ -15,19 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 limiter.check(res, 120, "CACHE_TOKEN");
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 
-                const token = req.headers.authorization as string;
-                const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
-
-                if (!valid) return res.status(400).json({ success: false });
-
-                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
-
-                if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
-
-                const account = await prisma.accounts.findUnique({ where: { id: valid.id } });
-                if (!account) return res.status(400).json({ success: false, message: "Account not found." });
-
-                const servers = await prisma.servers.findMany({ where: { ownerId: account.id } });
+                const servers = await prisma.servers.findMany({ where: { ownerId: user.id } });
                 if (!servers) return res.status(400).json({ success: false, message: "No servers found." });
                 let guildIds: any = servers.map((server: any) => server.guildId);
 
@@ -102,27 +91,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             try {
                 limiter.check(res, 120, "CACHE_TOKEN");
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
-                
-                const token = req.headers.authorization as string;
-                const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
-
-                if (!valid) return res.status(400).json({ success: false });
 
                 const { reason, type, value, guildId }: any = req.body;
 
                 if (!type || !value || !guildId) return res.status(400).json({ success: false, message: `Missing ${!type ? "Blacklist Type" : !value ? "Blacklist Value" : "Server"}` });
 
-                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
-
-                if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
-
-                const account = await prisma.accounts.findUnique({ where: { id: valid.id } });
-                if (!account) return res.status(400).json({ success: false, message: "Account not found." });
-
-                const servers = await prisma.servers.findMany({ where: { ownerId: account.id } });
+                const servers = await prisma.servers.findMany({ where: { ownerId: user.id } });
                 if (!servers) return res.status(400).json({ success: false, message: "No servers found." });
 
-                if (account.role === "free") return res.status(400).json({ success: false, message: "You are not allowed to use this feature." });
+                if (user.role === "free") return res.status(400).json({ success: false, message: "You are not allowed to use this feature." });
 
                 const blacklist = await prisma.blacklist.findMany({ where: { guildId: { in: servers.map((server: any) => server.guildId) } } });
                 
@@ -170,8 +147,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     });
                     break;
                 case "asn":
-                    // match asn
-                    if (account.role === "premium") return res.status(400).json({ success: false, message: "You need to have a Business subscription to blacklist ASN's." });
+                    if (user.role === "premium") return res.status(400).json({ success: false, message: "You need to have a Business subscription to blacklist ASN's." });
                     if (!value.match(/^[0-9]{1,10}$/)) return res.status(400).json({ success: false, message: "Invalid ASN." });
                     if (blacklist.find((item: any) => (item.asn === value && item.guildId === BigInt(guildId) as bigint))) return res.status(400).json({ success: false, message: "This ASN is already blacklisted in this server." });
 
@@ -203,21 +179,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 limiter.check(res, 120, "CACHE_TOKEN");
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 
-                const token = req.headers.authorization as string;
-                const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
-
                 const { id }: any = req.query;
 
-                if (!valid) return res.status(400).json({ success: false });
-
-                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
-
-                if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
-
-                const account = await prisma.accounts.findUnique({ where: { id: valid.id } });
-                if (!account) return res.status(400).json({ success: false, message: "Account not found." });
-
-                const servers = await prisma.servers.findMany({ where: { ownerId: account.id } });
+                const servers = await prisma.servers.findMany({ where: { ownerId: user.id } });
                 if (!servers) return res.status(400).json({ success: false, message: "No servers found." });
 
                 const blacklist = await prisma.blacklist.findMany({ where: { guildId: { in: servers.map((server: any) => server.guildId) } } });
@@ -247,3 +211,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
     });
 }
+
+export default withAuthentication(handler);

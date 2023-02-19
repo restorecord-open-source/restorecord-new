@@ -2,30 +2,24 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { ApplicationCommandOptionType, ApplicationCommandType } from "discord-api-types/v10"
 import { createGlobalCommand } from "../../../../../src/withDiscordInteraction";
 import rateLimit from "../../../../../src/rate-limit";
-import { verify } from "jsonwebtoken";
 import { prisma } from "../../../../../src/db";
+import { accounts } from "@prisma/client";
+import withAuthentication from "../../../../../src/withAuthentication";
 
 const limiter = rateLimit({
     uniqueTokenPerInterval: 500,
 })
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+function handler(req: NextApiRequest, res: NextApiResponse, user: accounts) {
     return new Promise(async (resolve) => {
         switch (req.method) {
         case "GET":
             limiter.check(res, 60, "CACHE_TOKEN");
             if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
             
-            const token = req.headers.authorization as string;
-            const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
-            if (!valid) return res.status(400).json({ success: false });
-
             if (!req.query.botid) return res.status(400).json({ success: false, message: "No bot id provided." });
 
-            const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
-            if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
-
-            const cBot = await prisma.customBots.findFirst({ where: { clientId: BigInt(`${req.query.botid}`) as bigint, ownerId: valid.id } });
+            const cBot = await prisma.customBots.findFirst({ where: { clientId: BigInt(`${req.query.botid}`) as bigint, ownerId: user.id } });
             if (!cBot) return res.status(400).json({ success: false, message: "No bot found." });
 
             createGlobalCommand(cBot.botToken, cBot.clientId, {
@@ -72,7 +66,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                 default_member_permissions: "8224",
                 version: ""
             }).then(() => {
-                return res.status(200).json({ success: true, message: " Commands have been refreshed." });
+                return res.status(200).json({ success: true, message: "Commands have been refreshed." });
             }).catch((err) => {
                 console.error(err);
                 return res.status(500).json({ success: false, message: "An error occurred." });
@@ -80,3 +74,5 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         }
     });
 }
+
+export default withAuthentication(handler);

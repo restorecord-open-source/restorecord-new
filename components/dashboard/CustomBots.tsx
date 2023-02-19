@@ -186,7 +186,7 @@ export default function DashCustomBot({ user }: any) {
                             <TextField label="Bot Token" name="botToken" value={botToken} onChange={handleChange} required />
                             <TextField label="Client Secret" name="botSecret" value={botSecret} onChange={handleChange} required />
                             {user.role === "business" && (
-                                <TextField label="Public Key" name="publicKey" value={publicKey} onChange={handleChange} required />
+                                <TextField label="Public Key" name="publicKey" value={publicKey} onChange={handleChange} />
                             )}
                             <Button variant="contained" onClick={(e: any) => handleSubmit(e)}>
                                 Create Bot
@@ -239,7 +239,7 @@ export default function DashCustomBot({ user }: any) {
                                         <Button variant="contained" color="primary" onClick={() => { router.push(`/dashboard/custombots/${BotClient.clientId}`) }}>
                                             Edit
                                         </Button>
-                                        <Button variant="contained" color="success" href={`https://discord.com/oauth2/authorize?client_id=${BotClient.clientId}&scope=bot&permissions=8`} target="_blank" rel="noreferrer">
+                                        <Button variant="contained" color="success" href={`https://discord.com/oauth2/authorize?client_id=${BotClient.clientId}&scope=bot applications.commands&permissions=8`} target="_blank" rel="noreferrer">
                                             Invite
                                         </Button>
                                     </>

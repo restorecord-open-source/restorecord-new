@@ -5,6 +5,8 @@ import rateLimit from "../../../../src/rate-limit";
 import { prisma } from "../../../../src/db";
 import axios from "axios";
 import { HttpsProxyAgent } from "https-proxy-agent";
+import withAuthentication from "../../../../src/withAuthentication";
+import { accounts } from "@prisma/client";
 dotenv.config({ path: "../../" });
 
 const limiter = rateLimit({
@@ -12,7 +14,7 @@ const limiter = rateLimit({
     uniqueTokenPerInterval: 500,
 })
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) { 
+async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts) { 
     return new Promise(async resolve => {
         switch (req.method) {
         case "POST":
@@ -22,16 +24,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 const data = { ...req.body };
 
-                const token = req.headers.authorization as string;
-                const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
-                
-                if (!valid) return res.status(400).json({ success: false, message: "Invalid Token" });
-
-                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
-                const account = await prisma.accounts.findFirst({ where: { id: valid.id, } });
-
-                if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
-                if (!account) return res.status(400).json({ success: false, message: "Account not found" });
                 if (!data.botName || !data.botToken || !data.botSecret || !data.clientId) return res.status(400).json({ success: false, message: "Missing required fields." });
                 if (isNaN(Number(data.clientId))) return res.status(400).json({ success: false, message: "Invalid clientId." });
 
@@ -66,16 +58,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 const accountBot = await prisma.customBots.findMany({
                     where: {
-                        ownerId: valid.id,
+                        ownerId: user.id,
                     }
                 });
 
-                if (account.role === "free")
-                    if (accountBot.length >= 1) return res.status(400).json({ success: false, message: "You can't have more than 1 bot." });
-                if (account.role === "premium")
-                    if (accountBot.length >= 5) return res.status(400).json({ success: false, message: "You can't have more than 5 bots." });
-                if (data.publicKey && account.role !== "business")
-                    return res.status(400).json({ success: false, message: "This feature is only available to Business subscribers." });
+                if (user.role === "free") if (accountBot.length >= 1) return res.status(400).json({ success: false, message: "You can't have more than 1 bot." });
+                if (user.role === "premium") if (accountBot.length >= 5) return res.status(400).json({ success: false, message: "You can't have more than 5 bots." });
+                if (data.publicKey && user.role !== "business") return res.status(400).json({ success: false, message: "This feature is only available to Business subscribers." });
                 
 
                 const newBot = await prisma.customBots.create({
@@ -84,7 +73,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         clientId: BigInt(data.clientId),
                         botSecret: data.botSecret,
                         botToken: data.botToken,
-                        ownerId: valid.id,
+                        ownerId: user.id,
                         publicKey: data.publicKey,
                     }
                 });
@@ -126,15 +115,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     return res.status(400).json({ success: false, message: `Missing ${errors}` });
                 }
 
-                const token = req.headers.authorization as string;
-                const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
-                
-                if (!valid) return res.status(400).json({ success: false, message: "Invalid Token" });
-
-                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
-
-                if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
-
                 const multipleCheck = await prisma.customBots.findFirst({
                     where: {
                         OR: [
@@ -163,7 +143,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             { name: data.botName },
                             { botSecret: data.botSecret },
                             { botToken: data.botToken },
-                            { ownerId: valid.id },
+                            { ownerId: user.id },
                         ],
                     },
                 });
@@ -187,7 +167,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 const bot = await prisma.customBots.findFirst({
                     where: {
                         AND: [
-                            { ownerId: valid.id },
+                            { ownerId: user.id },
                             { name: data.botName },
                             { botSecret: data.botSecret },
                             { botToken: data.botToken },
@@ -233,23 +213,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 if (!data.id) return res.status(400).json({ success: false, message: "Missing Bot ID" });
 
-                const token = req.headers.authorization as string;
-                const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
-                
-                if (!valid) return res.status(400).json({ success: false, message: "Invalid Token" });
-
-                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
-                const account = await prisma.accounts.findFirst({ where: { id: valid.id, } });
-
-                if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
-                if (!account) return res.status(400).json({ success: false, message: "Account not found" });
-                       
                 const bot = await prisma.customBots.findFirst({
                     where: {
                         id: Number(data.id) as number,
-                        ownerId: valid.id,
+                        ownerId: user.id,
                     },
                 });
+                
                 if (!bot) return res.status(400).json({ success: false, message: "Bot not found" });
 
 
@@ -284,3 +254,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
     });
 }
+
+export default withAuthentication(handler);

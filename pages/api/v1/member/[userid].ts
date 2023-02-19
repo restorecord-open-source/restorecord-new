@@ -1,17 +1,18 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { verify } from "jsonwebtoken";
 import { prisma } from "../../../../src/db";
 import rateLimit from "../../../../src/rate-limit";
 import { addMember, addRole, refreshTokenAddDB } from "../../../../src/Migrate";
 import { ProxyCheck } from "../../../../src/proxycheck";
 import axios from "axios";
 import { HttpsProxyAgent } from "https-proxy-agent";
+import { accounts } from "@prisma/client";
+import withAuthentication from "../../../../src/withAuthentication";
 
 const limiter = rateLimit({
     uniqueTokenPerInterval: 500,
 })
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts) {
     return new Promise(async resolve => {
         switch (req.method) {
         case "GET":
@@ -19,26 +20,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 limiter.check(res, 30, "CACHE_TOKEN");
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 
-                const token = req.headers.authorization as string;
-                const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
-
-                if (!valid) return res.status(400).json({ success: false });
-
-                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
-
-                if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
-
-                const servers = await prisma.servers.findMany({
-                    where: {
-                        ownerId: valid.id,
-                    },
-                });
-
-                const account = await prisma.accounts.findFirst({ where: { id: valid.id } });
-                if (!account) return res.status(400).json({ success: false, message: "Account not found." });
-
                 const userId: any = req.query.userid as string;
                 if (!userId) return res.status(400).json({ success: false, message: "No userid provided." });
+
+                const servers = await prisma.servers.findMany({ where: { ownerId: user.id } });
 
                 let guildIds: any = [];
                 guildIds = servers.map((server: any) => server.guildId);
@@ -79,17 +64,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             username: member.username.split("#")[0],
                             discriminator: member.username.split("#")[1],
                             avatar: member.avatar,
-                            ip: account.role !== "free" ? member.ip : undefined,
-                            location: {
-                                provider: account.role === "business" ? pCheck[usrIP].provider : undefined,
-                                continent: account.role !== "free" ? pCheck[usrIP].continent : undefined,
-                                isocode: account.role !== "free" ? pCheck[usrIP].isocode : undefined,
-                                country: account.role !== "free" ? pCheck[usrIP].country : undefined,
-                                region: account.role !== "free" ? pCheck[usrIP].region : undefined,
-                                city: account.role === "business" ? pCheck[usrIP].city : undefined,
-                                type: account.role !== "free" ? pCheck[usrIP].type : undefined,
-                                vpn: account.role !== "free" ? pCheck[usrIP].vpn : undefined,
-                            }
+                            ip: user.role !== "free" ? member.ip : undefined,
+                            ...(user.role !== "free" && {
+                                location: {
+                                    ...(user.role === "business" && { provider: pCheck[usrIP].provider }),
+                                    continent: pCheck[usrIP].continent,
+                                    isocode: pCheck[usrIP].isocode,
+                                    country: pCheck[usrIP].country,
+                                    region: pCheck[usrIP].region,
+                                    ...(user.role === "business" && { city: pCheck[usrIP].city }),
+                                    type: pCheck[usrIP].type,
+                                    vpn: pCheck[usrIP].vpn,
+                                }
+                            })
                         } });
                     }
 
@@ -112,23 +99,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             avatar: json.avatar ? json.avatar : String(json.discriminator % 5),
                             bot: json.bot,
                             system: json.system,
-                            mfa_enabled: account.role === "business" ? json.mfa_enabled : undefined,
-                            locale: account.role === "business" ? json.locale : undefined,
+                            mfa_enabled: user.role === "business" ? json.mfa_enabled : undefined,
+                            locale: user.role === "business" ? json.locale : undefined,
                             banner: json.banner,
                             flags: json.flags,
                             premium_type: json.premium_type,
                             public_flags: json.public_flags,
-                            ip: account.role !== "free" ? member.ip : undefined,
-                            location: {
-                                provider: account.role === "business" ? pCheck[usrIP].provider : undefined,
-                                continent: account.role !== "free" ? pCheck[usrIP].continent : undefined,
-                                isocode: account.role !== "free" ? pCheck[usrIP].isocode : undefined,
-                                country: account.role !== "free" ? pCheck[usrIP].country : undefined,
-                                region: account.role !== "free" ? pCheck[usrIP].region : undefined,
-                                city: account.role === "business" ? pCheck[usrIP].city : undefined,
-                                type: account.role !== "free" ? pCheck[usrIP].type : undefined,
-                                vpn: account.role !== "free" ? pCheck[usrIP].vpn : undefined,
-                            }
+                            ip: user.role !== "free" ? member.ip : undefined,
+                            ...(user.role !== "free" && {
+                                location: {
+                                    ...(user.role === "business" && { provider: pCheck[usrIP].provider }),
+                                    continent: pCheck[usrIP].continent,
+                                    isocode: pCheck[usrIP].isocode,
+                                    country: pCheck[usrIP].country,
+                                    region: pCheck[usrIP].region,
+                                    ...(user.role === "business" && { city: pCheck[usrIP].city }),
+                                    type: pCheck[usrIP].type,
+                                    vpn: pCheck[usrIP].vpn,
+                                }
+                            })
                         } });
                     }
 
@@ -148,36 +137,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 limiter.check(res, 15, "CACHE_TOKEN");
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 
-                const token = req.headers.authorization as string;
-                const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
-
-                if (!valid) return res.status(400).json({ success: false });
-
-                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
-
-                if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
+             
 
                 const userId: any = req.query.userid as string;
-
-                const member = await prisma.members.findFirst({
-                    where: {
-                        userId: BigInt(userId),
-                    },
-                });
+                const member = await prisma.members.findFirst({ where: { userId: BigInt(userId), } });
                 
                 if (!member) return res.status(400).json({ success: false, message: "Member not found." });
 
-                const servers = await prisma.servers.findMany({
-                    where: {
-                        ownerId: valid.id,
-                    },
-                });
+                const servers = await prisma.servers.findMany({ where: { ownerId: user.id, } });
 
                 if (!servers) return res.status(400).json({ success: false, message: "No servers found on account." });
 
                 const server = await prisma.servers.findFirst({
                     where: {
-                        ownerId: valid.id,
+                        ownerId: user.id,
                         guildId: req.query.guild ? BigInt(req.query.guild as string) : BigInt(servers[0].guildId),
                     },
                 });
@@ -326,24 +299,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             try {
                 limiter.check(res, 15, "CACHE_TOKEN");
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
-                
-                const token = req.headers.authorization as string;
-                const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
-
-                if (!valid) return res.status(400).json({ success: false });
-
-                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
-
-                if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
-
-                const servers = await prisma.servers.findMany({
-                    where: {
-                        ownerId: valid.id,
-                    },
-                });
-
-                const account = await prisma.accounts.findFirst({ where: { id: valid.id } });
-                if (!account) return res.status(400).json({ success: false, message: "Account not found." });
 
                 const userId: any = req.query.userid as string;
                 if (!userId) return res.status(400).json({ success: false, message: "No userid provided." });
@@ -376,3 +331,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
     });
 }
+
+export default withAuthentication(handler);

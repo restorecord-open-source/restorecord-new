@@ -1,14 +1,15 @@
-import { verify } from "jsonwebtoken";
 import { NextApiRequest, NextApiResponse } from "next";
 import rateLimit from "../../../../src/rate-limit";
 import { prisma } from "../../../../src/db";
+import { accounts } from "@prisma/client";
+import withAuthentication from "../../../../src/withAuthentication";
 
 const limiter = rateLimit({
     interval: 300 * 1000,
     uniqueTokenPerInterval: 500,
 })
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts) {
     return new Promise(async resolve => {
         switch (req.method) {
         case "POST":
@@ -31,17 +32,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 if (isNaN(Number(data.guildId)) || isNaN(Number(data.roleId))) return res.status(400).json({ success: false, message: "Server ID or Role ID is not a number" });
                 if (BigInt(data.guildId) > 18446744073709551615 || BigInt(data.roleId) > 18446744073709551615) return res.status(400).json({ success: false, message: "Server ID or Role ID is not a discord ID" });
 
-                const token = req.headers.authorization as string;
-                const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
-                if (!valid) return res.status(400).json({ success: false, message: "Invalid Token" });
-
-                const account = await prisma.accounts.findFirst({ where: { id: valid.id, } });
-                if (!account) return res.status(400).json({ success: false, message: "Account not found." });
-
-                const sess = await prisma.sessions.findMany({ where: { accountId: account.id, } });
-                if (sess.length === 0) return res.status(400).json({ success: false, message: "Session not found." });
-
-
                 const server = await prisma.servers.findFirst({
                     where: {
                         OR: [
@@ -58,10 +48,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     if (server.roleId === BigInt(data.roleId) as bigint) return res.status(400).json({ success: false, message: "Role ID is already in use" });
                 }
 
-                const accountServers = await prisma.servers.findMany({ where: { ownerId: valid.id, } });
+                const accountServers = await prisma.servers.findMany({ where: { ownerId: user.id, } });
 
-                if (account.role === "free" && accountServers.length >= 1) return res.status(400).json({ success: false, message: "You can't have more than 1 server." });
-                if (account.role === "premium" && accountServers.length >= 5) return res.status(400).json({ success: false, message: "You can't have more than 5 servers." });
+                if (user.role === "free" && accountServers.length >= 1) return res.status(400).json({ success: false, message: "You can't have more than 1 server." });
+                if (user.role === "premium" && accountServers.length >= 5) return res.status(400).json({ success: false, message: "You can't have more than 5 servers." });
 
                 const newServer = await prisma.servers.create({
                     data: {
@@ -69,7 +59,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         guildId: BigInt(data.guildId),
                         roleId: BigInt(data.roleId),
                         customBotId: Number(data.customBot),
-                        ownerId: valid.id,
+                        ownerId: user.id,
                     }
                 });
 
@@ -96,18 +86,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 const data = { ...req.body };
 
-                const token = req.headers.authorization as string;
-                const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
-                
-                if (!valid) return res.status(400).json({ success: false, message: "Invalid Token" });
-
-                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, } }); 
-
-                if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
-
-                const account = await prisma.accounts.findFirst({ where: { id: valid.id } });
-                if (!account) return res.status(400).json({ success: false, message: "Account Not found." });
-
                 if (data.newServerName && data.newGuildId && data.newRoleId && data.serverName && data.guildId && data.roleId) {
                     const serverNameCheck = await prisma.servers.findFirst({ where: { name: data.newServerName, } });
                     const guildIdCheck = await prisma.servers.findFirst({ where: { guildId: BigInt(data.newGuildId), } });
@@ -121,7 +99,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         where: {
                             AND: [
                                 { name: data.serverName },
-                                { ownerId: valid.id },
+                                { ownerId: user.id },
                                 { guildId: BigInt(data.guildId as any) },
                                 { roleId: BigInt(data.roleId as any) },
                             ],
@@ -140,12 +118,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             name: data.newServerName,
                             guildId: BigInt(data.newGuildId as any),
                             roleId: BigInt(data.newRoleId as any),
-                            webhook: data.newWebhookCheck ? (account.role !== "free" ? data.newWebhook : null) : null,
+                            webhook: data.newWebhookCheck ? (user.role !== "free" ? data.newWebhook : null) : null,
                             picture: data.newPicture,
-                            bgImage: data.newBackground ? (account.role === "business" ? data.newBackground : null) : null,
+                            bgImage: data.newBackground ? (user.role === "business" ? data.newBackground : null) : null,
                             description: data.newDescription,
-                            vpncheck: data.newWebhookCheck ? (data.newVpnCheck ? (account.role !== "free" ? true : false) : false) : false,
-                            themeColor: data.newThemeColor ? (account.role === "business" ? data.newThemeColor.replace("#", "") : "4e46ef") : "4e46ef",
+                            vpncheck: data.newWebhookCheck ? (data.newVpnCheck ? (user.role !== "free" ? true : false) : false) : false,
+                            themeColor: data.newThemeColor ? (user.role === "business" ? data.newThemeColor.replace("#", "") : "4e46ef") : "4e46ef",
                         }
                     });
 
@@ -173,3 +151,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
     });
 }
+
+export default withAuthentication(handler);

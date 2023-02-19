@@ -1,29 +1,16 @@
-import { verify } from "jsonwebtoken";
 import { NextApiRequest, NextApiResponse } from "next/types";
-import { prisma } from "../../../src/db";
+import { accounts } from "@prisma/client";
+
 import Stripe from "stripe";
-import { ProxyCheck } from "../../../src/proxycheck";
-import { getIPAddress } from "../../../src/getIPAddress";
+import withAuthentication from "../../../src/withAuthentication";
+
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2022-11-15", typescript: true });
 //const stripe = new Stripe("sk_test_51LntpRIDsTail4YBlix309uMRctzdtJaNiTRMNgncRs6KPmeQJGIMeJKXSeCbosHRBTaGnaySMgbtfzJFqEUiUHL002RZTmipV", { apiVersion: "2022-11-15", typescript: true, });
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts) {
     return new Promise(async (resolve, reject) => {
         const { plan, id } = req.body;
         if (!id || !plan) return res.status(400).json({ success: false, message: "Missing parameters" });
-        
-        const token = req.headers.authorization as string;
-        if (!token) return res.status(400).json({ success: false, message: "Missing token" });
-
-        const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
-        if (!valid) return res.status(400).json({ success: false, message: "Invalid Token" });
-
-        const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
-
-        if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
-
-        const account = await prisma.accounts.findFirst({ where: { id: valid.id } });
-        if (!account) return res.status(400).json({ success: false, message: "No account found." });
 
         let paymentid;
         switch (plan) {
@@ -51,17 +38,17 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                 },
             ],
             mode: "subscription",
-            customer_email: account.email,
+            customer_email: user.email,
             success_url: `https://restorecord.com/api/stripe/payment?success=true&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `https://restorecord.com/api/stripe/payment?canceled=true`,
-            client_reference_id: String(valid.id) as string,
+            client_reference_id: String(user.id) as string,
             metadata: {
-                account_id: valid.id,
+                account_id: user.id,
                 plan: plan,
             },
             subscription_data: {
                 metadata: {
-                    account_id: valid.id,
+                    account_id: user.id,
                     plan: plan,
                 },
             },
@@ -72,3 +59,5 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         });
     });
 }
+
+export default withAuthentication(handler);

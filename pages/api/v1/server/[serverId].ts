@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { verify } from "jsonwebtoken";
 import { prisma } from "../../../../src/db";
 import { getBrowser, getIPAddress, getPlatform } from "../../../../src/getIPAddress";
 import { addMember, addRole, refreshTokenAddDB, shuffle, sleep } from "../../../../src/Migrate";
@@ -7,12 +6,14 @@ import rateLimit from "../../../../src/rate-limit";
 import axios from "axios";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { formatEstimatedTime } from "../../../../src/functions";
+import withAuthentication from "../../../../src/withAuthentication";
+import { accounts } from "@prisma/client";
 
 const limiter = rateLimit({
     uniqueTokenPerInterval: 500,
 })
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts) {
     return new Promise(async resolve => {
         switch (req.method) {
         case "GET":
@@ -20,21 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 limiter.check(res, 60, "CACHE_TOKEN");
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 
-                const token = req.headers.authorization as string;
-                const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
-
-                if (!valid) return res.status(400).json({ success: false });
-
-                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
-
-                if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
-
-                const server = await prisma.servers.findFirst({
-                    where: {
-                        guildId: BigInt(`${req.query.serverId}`),
-                    }
-                });
-
+                const server = await prisma.servers.findFirst({ where: { guildId: BigInt(`${req.query.serverId}`) } });
                 if (!server) return res.status(400).json({ success: false, message: "Server not found." });
 
                 const members = await prisma.members.findMany({
@@ -64,30 +51,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 limiter.check(res, 15, "CACHE_TOKEN");
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
 
-                const token = req.headers.authorization as string;
-                const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
-
                 const serverId: any = BigInt(req.query.serverId as any);
                 if (!serverId) return res.status(400).json({ success: false, message: "Server ID not provided" });
-
-                if (!valid) return res.status(400).json({ success: false });
-
-                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, } });
-
-                if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
-
-                const account = await prisma.accounts.findFirst({
-                    where: {
-                        id: valid.id
-                    }
-                });
-
-                if (!account) return res.status(400).json({ success: false, message: "Account not found" });
 
                 const server = await prisma.servers.findFirst({
                     where: {
                         AND: [
-                            { ownerId: account.id },
+                            { ownerId: user.id },
                             { guildId: serverId }
                         ]
                     }
@@ -131,9 +101,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 limiter.check(res, 15, "CACHE_TOKEN");
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 
-                const token = req.headers.authorization as string;
-                const valid = verify(token, process.env.JWT_SECRET!) as { id: number; }
-
                 const serverId: number = req.query.serverId as any;
                 if (!serverId) return res.status(400).json({ success: false, message: "Server ID not provided" });
 
@@ -142,19 +109,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 if (!guildId) return res.status(400).json({ success: false, message: "Server not provided" });
 
                 const roleId = req.query.role as string;
-                
-                if (!valid) return res.status(400).json({ success: false });
 
-                const sess = await prisma.sessions.findMany({ where: { accountId: valid.id, token: token } });
-                if (sess.length === 0) return res.status(400).json({ success: false, message: "No sessions found." });
-
-                const account = await prisma.accounts.findFirst({ where: { id: valid.id } });
-                if (!account) return res.status(400).json({ success: false, message: "Account not found" });
-
-                const server = await prisma.servers.findFirst({ where: { AND: [ { id: Number(serverId) as number }, { ownerId: account.id } ] } });
+                const server = await prisma.servers.findFirst({ where: { AND: [ { id: Number(serverId) as number }, { ownerId: user.id } ] } });
                 if (!server) return res.status(400).json({ success: false, message: "Server not found" });
 
-                const bot = await prisma.customBots.findFirst({ where: { AND: [ { ownerId: account.id }, { id: server.customBotId } ] } });
+                const bot = await prisma.customBots.findFirst({ where: { AND: [ { ownerId: user.id }, { id: server.customBotId } ] } });
                 if (!bot) return res.status(400).json({ success: false, message: "Bot not found" });
 
                 const members = await prisma.members.findMany({ where: { AND: [ { guildId: BigInt(server.guildId) }, { accessToken: { not: "unauthorized" } } ] } });
@@ -247,7 +206,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 if (members.length === 0) return res.status(400).json({ success: false, message: "No pullable members found" });
 
-                if (account.role !== "free") {
+                if (user.role !== "free") {
                     await prisma.servers.update({ where: { id: server.id }, data: { pulling: true, pullTimeout: new Date(Date.now() + 1000 * 60 * 60) } });
                 } else { 
                     await prisma.servers.update({ where: { id: server.id }, data: { pulling: true, pullTimeout: new Date(Date.now() + 1000 * 60 * 60 * 12) } });
@@ -261,7 +220,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     await prisma.logs.create({
                         data: {
                             title: "Started Pulling",
-                            body: `${account.username} started pulling to ${server.name}, ip: ${getIPAddress(req)}, device: ${getPlatform(req.headers["user-agent"] ?? "")} (${getBrowser(req.headers["user-agent"] ?? "")})`,
+                            body: `${user.username} started pulling to ${server.name}, ip: ${getIPAddress(req)}, device: ${getPlatform(req.headers["user-agent"] ?? "")} (${getBrowser(req.headers["user-agent"] ?? "")})`,
                         }
                     });
 
@@ -306,7 +265,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                 break;
                             case 201:
                                 succPulled++;
-                                if (delay > 500) delay = (delay / 1.5);
+                                if (delay > 500) delay -= delay / 1.5;
                                 break;
                             case 400:
                                 console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 400 | ${JSON.stringify(response)}`);
@@ -375,3 +334,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
     })
 }
+
+export default withAuthentication(handler);
