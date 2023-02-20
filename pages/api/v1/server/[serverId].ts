@@ -200,6 +200,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     const member = members.find((m) => m.userId == serverMemberData.user.id);
                     if (member) {
                         members.splice(members.indexOf(member), 1)
+                        console.log(`[${server.name}] Skipping ${member.username} (${member.userId})`);
                     }
                 }
 
@@ -309,7 +310,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             }
                         }).catch(async (err: Error) => {
                             console.log(`[${server.name}] [addMember.catch] [${member.username}] ${err}`);
-                            // return res.status(400).json({ success: false, message: err?.message ? err?.message : "Something went wrong" });
+                            return res.status(400).json({ success: false, message: err?.message ? err?.message : "Something went wrong" });
                         });
 
                         if (delay > 1000) { 
@@ -319,7 +320,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         }
 
                         console.log(`[${server.name}] [${member.username}] Success: ${succPulled}/${members.length} | Delay: ${delay}ms`);
-                        await new Promise(resolve => setTimeout(resolve, delay));
+
+                        await sleep(delay);
                     }
 
                     console.log(`[${server.name}] Finished pulling`);
