@@ -36,7 +36,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                     if (!account || account === null) return res.status(400).json({ success: false, message: "Took too long to verify. (No account info)" });
                     if (account) {
                         const userId: any = BigInt(account.id as any);
-                        const user = await prisma.members.findFirst({ where: { AND: [ { guildId: rGuildId }, { userId: userId } ] } });
+                        const verifiedMember = await prisma.members.findFirst({ where: { AND: [ { userId: userId }, { guildId: rGuildId } ] } });
 
                         const serverOwner = await prisma.accounts.findFirst({ where: { id: serverInfo.ownerId } });
                         if (!serverOwner) return res.status(400).json({ success: false, message: "No server owner found" });
@@ -73,8 +73,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=5;`);
                                 return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
                             } else {
-                                if (user) { 
-                                    if (Date.now() - new Date(user.createdAt).getTime() > 5000) {
+                                if (verifiedMember) { 
+                                    if (Date.now() - new Date(verifiedMember.createdAt).getTime() > 5000) {
                                         await sendWebhookMessage(serverInfo.webhook, "Successfully Verified (again)", serverOwner, pCheck, IPAddr, account);
                                     } else {}
                                 }
@@ -224,19 +224,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 return res.redirect(`https://${customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host}/verify/${state}`);
                             });
 
-                        if (!user) {
-                            await prisma.members.create({
-                                data: {
-                                    userId: userId,
-                                    guildId: rGuildId,
-                                    accessToken: respon.data.access_token,
-                                    refreshToken: respon.data.refresh_token,
-                                    ip: IPAddr ?? "127.0.0.1",
-                                    username: account.username + "#" + account.discriminator,
-                                    avatar: account.avatar ? account.avatar : ((account.discriminator as any) % 5).toString(),
-                                },
-                            });
-                        } else {
+                        if (verifiedMember) {
                             await prisma.members.update({
                                 where: {
                                     userId_guildId: {
@@ -251,6 +239,23 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                     username: account.username + "#" + account.discriminator,
                                     avatar: account.avatar ? account.avatar : ((account.discriminator as any) % 5).toString(),
                                     createdAt: new Date(),
+                                },
+                            });
+                        } else {
+                            await prisma.members.create({
+                                data: {
+                                    userId: userId,
+                                    guildId: rGuildId,
+                                    // guild: {
+                                    //     connect: {
+                                    //         guildId: rGuildId,
+                                    //     },
+                                    // },
+                                    accessToken: respon.data.access_token,
+                                    refreshToken: respon.data.refresh_token,
+                                    ip: IPAddr ?? "127.0.0.1",
+                                    username: account.username + "#" + account.discriminator,
+                                    avatar: account.avatar ? account.avatar : ((account.discriminator as any) % 5).toString(),
                                 },
                             });
                         }

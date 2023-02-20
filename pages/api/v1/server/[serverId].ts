@@ -200,7 +200,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     const member = members.find((m) => m.userId == serverMemberData.user.id);
                     if (member) {
                         members.splice(members.indexOf(member), 1)
-                        console.log(`[${server.name}] Skipping ${member.username} (${member.userId})`);
                     }
                 }
 
