@@ -225,14 +225,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     });
 
                     for (const member of membersNew) { 
-                        // const newServer = await prisma.servers.findFirst({
-                        //     where: {
-                        //         id: server.id
-                        //     }
-                        // });
+                        const newServer = await prisma.servers.findFirst({ where: { id: server.id } });
 
-                        // if (!newServer) return reject(`[${server.name}] Server not found`);
-                        // if (!newServer.pulling) return reject(`[${server.name}] Pulling stopped`);
+                        if (!newServer) return reject(`[${server.name}] Server not found`);
+                        //if (!newServer.pulling) return reject(`[${server.name}] Pulling stopped`);
 
                         console.log(`[${server.name}] [${member.username}] Pulling...`);
                         await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : []).then(async (resp: any) => {
@@ -254,7 +250,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                 }
                                 break;
                             case 403:
-                                refreshTokenAddDB(member.userId.toString(), member.id, guildId.toString(), bot?.botToken, roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
+                                refreshTokenAddDB(member.userId.toString(), member.id, server.guildId.toString(), bot?.botToken, roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
                                 break;
                             case 407:
                                 console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);
@@ -274,8 +270,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                 break;
                             }
                         }).catch(async (err: Error) => {
-                            console.log(`[${server.name}] [addMember.catch] [${member.username}] ${err}`);
-                            return res.status(400).json({ success: false, message: err?.message ? err?.message : "Something went wrong" });
+                            console.error(`[${server.name}] [addMember.catch] [${member.username}] ${err}`);
+                            // return res.status(400).json({ success: false, message: err?.message ? err?.message : "Something went wrong" });
                         });
 
                         if (delay > 1000) { 
@@ -284,7 +280,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             delay = 550;
                         }
 
-                        console.log(`[${server.name}] [${member.username}] Success: ${succPulled}/${members.length} | Delay: ${delay}ms | Estimated time: ${formatEstimatedTime(delay * members.length)}`);
+                        console.log(`[${server.name}] [${member.username}] Success: ${succPulled}/${members.length} | Delay: ${delay}ms`);
 
                         await sleep(delay);
                     }
