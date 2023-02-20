@@ -275,6 +275,18 @@ export async function shuffle(array: any) {
     return array;
 }
 
-export async function sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+
+// export async function sleep(ms: number) {
+//     return new Promise((resolve) => setTimeout(resolve, ms));
+// }
+
+
+export function sleep(interval: number, iterations: number): void {
+    let counter = 0;
+    const intervalId = setInterval(() => {
+        counter++;
+        if (counter === iterations) {
+            clearInterval(intervalId);
+        }
+    }, interval);
 }
