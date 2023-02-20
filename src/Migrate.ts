@@ -97,12 +97,12 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
                     refreshToken: resp.data.refresh_token
                 }
             }).catch(async (err: any) => {
-                console.log(`${err}`);
+                return err;
             });
             console.log(`[INFO] Refreshed token for ${userId} in ${guildId}`);
             await addMember(guildId, userId, botToken, resp.data.access_token, roleId ? [BigInt(roleId).toString()] : undefined)
         }
-    }).catch(async (err) => { 
+    }).catch(async (err) => {
         await prisma.members.update({
             where: {
                 id: memberId,
@@ -111,9 +111,10 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
                 accessToken: "unauthorized",
             }
         }).catch(async (err: any) => {
-            console.log(`${err}`);
+            return err;
         });
-        console.log(`[refreshTokenAddDB] unauth ${err}: (memid: ${memberId})`);
+        console.error(`[refreshTokenAddDB] unauth ${err}: (memid: ${memberId})`);
+        return err;
     });
 }
 

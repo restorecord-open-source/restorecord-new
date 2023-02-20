@@ -250,7 +250,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                 }
                                 break;
                             case 403:
-                                refreshTokenAddDB(member.userId.toString(), member.id, server.guildId.toString(), bot?.botToken, roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
+                                refreshTokenAddDB(member.userId.toString(), member.id, guildId.toString(), bot?.botToken, roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
                                 break;
                             case 407:
                                 console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);
