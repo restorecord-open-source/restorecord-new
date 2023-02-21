@@ -118,12 +118,12 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
     });
 }
 
-export async function exchange(excode: string, redirectUri: string, clientId: any, clientSecret: any) {
+export async function exchange(code: string, redirectUri: string, clientId: any, clientSecret: any) {
     return await axios.post("https://discord.com/api/oauth2/token", new URLSearchParams({
         client_id: clientId,
         client_secret: clientSecret,
         grant_type: "authorization_code",
-        code: excode,
+        code: code,
         redirect_uri: redirectUri,
         scope: "identify+guilds.join",
     }), {
@@ -221,7 +221,7 @@ export async function sendWebhookMessage(webhookUrl: string | null, title: strin
         proxy: false, 
         httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
     }).catch(async (err) => {
-        if (err.response.status === 404) {
+        if (err?.response?.status === 404) {
             console.error(`${webhookUrl.split("/")[5]} Webhook not found (webhook removed from config)`);
             const servers = await prisma.servers.findMany({
                 where: {
@@ -239,7 +239,7 @@ export async function sendWebhookMessage(webhookUrl: string | null, title: strin
                     },
                 });
             }
-        } else if (err.response.status === 429) {
+        } else if (err?.response?.status === 429) {
             console.error(`${webhookUrl.split("/")[5]} Webhook ratelimited`);
         } else {
             console.error(err);
