@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import { useQuery } from "react-query";
 import { useToken } from "../../src/token";
+import { useState } from "react";
 
 import NavBar from "../../components/dashboard/navBar";
 import getUser from "../../src/dashboard/getUser";
@@ -15,10 +16,10 @@ import CardContent from "@mui/material/CardContent";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
-import { useMemo, useState } from "react";
 import axios from "axios";
 import Alert from "@mui/lab/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
+import theme from "../../src/theme";
 
 export default function Admin() {
     const router = useRouter();
@@ -130,9 +131,80 @@ export default function Admin() {
                                 }}>
                                     <Stack direction="column" spacing={2}>
                                         <TextField label="Search" variant="outlined" placeholder="User ID/Username/Email" onChange={(e) => setSearchQuery(e.target.value)} />
-                                        <Button variant="contained" type="submit">
-                                            Get user info
-                                        </Button>
+                                        <Button variant="contained" type="submit">Get user info</Button>
+                                        <Stack direction="row" justifyContent="space-between" alignContent={"center"} spacing={2}>
+                                            <Button variant="contained" sx={{ width: "100%", backgroundColor: theme.palette.yellow.main, color: "#000000" }} onClick={async (e) => {
+                                                e.preventDefault();
+
+                                                await axios.post("/api/admin/plan", { user: searchQuery }, {
+                                                    headers: {
+                                                        Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                    }
+                                                }).then((res: any) => {
+                                                    console.log(res.data);
+                                                    setSuccessMessage(JSON.stringify(res.data));
+                                                }).catch((err) => {
+                                                    setErrorMessages(JSON.stringify(err.response.data));
+                                                });
+                                            }}>Add PREMIUM 1 MONTH</Button>
+                                            <Button variant="contained" sx={{ width: "100%", backgroundColor: theme.palette.yellow.main, color: "#000000" }} onClick={async (e) => {
+                                                e.preventDefault();
+
+                                                await axios.post("/api/admin/plan", { user: searchQuery }, {
+                                                    headers: {
+                                                        Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                    }
+                                                }).then((res: any) => {
+                                                    console.log(res.data);
+                                                    setSuccessMessage(JSON.stringify(res.data));
+                                                }).catch((err) => {
+                                                    setErrorMessages(JSON.stringify(err.response.data));
+                                                });
+                                            }}>Add PREMIUM 1 YEAR</Button>
+                                            <Button variant="contained" sx={{ width: "100%", backgroundColor: theme.palette.primary.main, color: "#ffffff" }} onClick={async (e) => {
+                                                e.preventDefault();
+
+                                                await axios.post("/api/admin/plan", { user: searchQuery }, {
+                                                    headers: {
+                                                        Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                    }
+                                                }).then((res: any) => {
+                                                    console.log(res.data);
+                                                    setSuccessMessage(JSON.stringify(res.data));
+                                                }).catch((err) => {
+                                                    setErrorMessages(JSON.stringify(err.response.data));
+                                                });
+                                            }}>Add BUSINESS 1 MONTH</Button>
+                                            <Button variant="contained" sx={{ width: "100%", backgroundColor: theme.palette.primary.main, color: "#ffffff" }} onClick={async (e) => {
+                                                e.preventDefault();
+
+                                                await axios.post("/api/admin/plan", { user: searchQuery }, {
+                                                    headers: {
+                                                        Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                    }
+                                                }).then((res: any) => {
+                                                    console.log(res.data);
+                                                    setSuccessMessage(JSON.stringify(res.data));
+                                                }).catch((err) => {
+                                                    setErrorMessages(JSON.stringify(err.response.data));
+                                                });
+                                            }}>Add BUSINESS 1 YEAR</Button>
+                                            <Button variant="contained" sx={{ width: "100%", backgroundColor: theme.palette.error.main, color: "#ffffff" }} onClick={async (e) => {
+                                                e.preventDefault();
+
+                                                await axios.post("/api/admin/plan", { user: searchQuery }, {
+                                                    headers: {
+                                                        Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                    }
+                                                }).then((res: any) => {
+                                                    console.log(res.data);
+                                                    setSuccessMessage(JSON.stringify(res.data));
+                                                }).catch((err) => {
+                                                    setErrorMessages(JSON.stringify(err.response.data));
+                                                });
+                                            }}>REMOVE ALL</Button>
+                                        </Stack>
+
                                     </Stack>
                                 </form>
 

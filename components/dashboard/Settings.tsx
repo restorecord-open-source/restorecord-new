@@ -233,7 +233,6 @@ export default function DashSettings({ user }: any) {
                                                                     backgroundColor: darken(`#${item.color.toString(16).padStart(6, '0')}`, 0.25),
                                                                 },
                                                                 "&.Mui-selected": {
-                                                                    // a bit darker color
                                                                     color: theme.palette.getContrastText(`#${item.color.toString(16).padStart(6, '0')}`),
                                                                     backgroundColor: darken(`#${item.color.toString(16).padStart(6, '0')}`, 0.5),
                                                                     "&:hover": {
@@ -241,7 +240,6 @@ export default function DashSettings({ user }: any) {
                                                                         backgroundColor: darken(`#${item.color.toString(16).padStart(6, '0')}`, 0.75),
                                                                     },
                                                                 },
-                                                                // if 2 roles have the same name, add the id to the end of the name
                                                             }}>{item.name} {allRoles.filter((i: any) => i.name === item.name).length > 1 ? `(${item.id})` : ""}</MenuItem>;
                                                         }
                                                     })}
