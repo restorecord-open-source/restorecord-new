@@ -188,6 +188,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                     }
                 });
 
+
                 if (verifiedMember) {
                     console.log(`[${guildId}] ${account.username + "#" + account.discriminator} Updating member`);
                     await prisma.members.update({
@@ -225,6 +226,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                         },
                     });
                 }
+
             }).catch((err: any) => {
                 err.message = parseInt(err.message);
 
