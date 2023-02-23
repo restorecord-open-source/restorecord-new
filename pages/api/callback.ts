@@ -7,6 +7,12 @@ import { ProxyCheck } from "../../src/proxycheck";
  
 
 function handler(req: NextApiRequest, res: NextApiResponse) {
+    let domain: any = null;
+    let code: any = null;
+    let state: any = null;
+    let userId: any = null;
+    let verifiedMember: any = null;
+
     return new Promise(async (resolve, reject) => {
         try {
 
