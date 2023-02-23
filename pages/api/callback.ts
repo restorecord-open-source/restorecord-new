@@ -10,11 +10,11 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
     return new Promise(async (resolve, reject) => {
         try {
 
-let domain: any = null;
-let code: any = null;
-let state: any = null;
-let userId: any = null;
-let verifiedMember: any = null;
+            let domain: any = null;
+            let code: any = null;
+            let state: any = null;
+            let userId: any = null;
+            let verifiedMember: any = null;
 
             code = req.query.code;
             state = req.query.state;
