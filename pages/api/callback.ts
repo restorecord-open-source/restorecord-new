@@ -187,6 +187,44 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                         return res.status(500).json({ code: err.message, message: "Internal Server Error" });
                     }
                 });
+
+                if (verifiedMember) {
+                    console.log(`[${guildId}] ${account.username + "#" + account.discriminator} Updating member`);
+                    await prisma.members.update({
+                        where: {
+                            userId_guildId: {
+                                userId: userId,
+                                guildId: guildId,
+                            },
+                        },
+                        data: {
+                            accessToken: respon.data.access_token,
+                            refreshToken: respon.data.refresh_token,
+                            ip: IPAddr ?? "127.0.0.1",
+                            username: account.username + "#" + account.discriminator,
+                            avatar: account.avatar ? account.avatar : ((account.discriminator as any) % 5).toString(),
+                            createdAt: new Date(),
+                        },
+                    });
+                } else {
+                    console.log(`[${guildId}] ${account.username + "#" + account.discriminator} Creating member`);
+                    await prisma.members.create({
+                        data: {
+                            userId: userId,
+                            guildId: guildId,
+                            // guild: {
+                            //     connect: {
+                            //         guildId: rGuildId,
+                            //     },
+                            // },
+                            accessToken: respon.data.access_token,
+                            refreshToken: respon.data.refresh_token,
+                            ip: IPAddr ?? "127.0.0.1",
+                            username: account.username + "#" + account.discriminator,
+                            avatar: account.avatar ? account.avatar : ((account.discriminator as any) % 5).toString(),
+                        },
+                    });
+                }
             }).catch((err: any) => {
                 err.message = parseInt(err.message);
 
