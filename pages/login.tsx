@@ -93,13 +93,12 @@ export default function Login() {
                 })
                     .then(res => res.json())
                     .then(res => {
-                        if (res.success) {
-                            // setNotiTextS("You are already logged in");
-                            // setOpenS(true);
-                            setTimeout(() => router.push("/dashboard"), 100);
+                        if (res.data.code === 50014) {
+                            localStorage.removeItem("token");
                         }
                         else {
-                            localStorage.removeItem("token");
+                            // setTimeout(() => router.push("/dashboard"), 100);
+                            router.push("/dashboard");
                         }
                     })
                     .catch(err => {

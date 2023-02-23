@@ -2,6 +2,7 @@ import { stringAvatar } from "../../src/functions";
 import { useToken } from "../../src/token";
 import { useRouter } from "next/router";
 import { useEffect, useState } from 'react'
+import { darken } from '@mui/material/styles';
 
 import axios from "axios";
 import Link from "next/link"
@@ -53,7 +54,7 @@ export default function DashSettings({ user }: any) {
     const [selectedRole, setSelectedRole] = useState("");
 
     const [allServers, setAllServers] = useState([]);
-    const [allRoles, setAllRoles] = useState([]);
+    const [allRoles, setAllRoles]: any = useState([]);
     const [botClient, setBotClient]: any = useState({});
 
     const [openS, setOpenS] = useState(false);
@@ -220,10 +221,28 @@ export default function DashSettings({ user }: any) {
                                             <FormControl fullWidth variant="outlined" required>
                                                 <InputLabel id="role-select-label">Select Role</InputLabel>
                                                 <Select labelId="role-select-label" label="Select Role" value={selectedRole} onChange={(e) => setSelectedRole(e.target.value as string)} required>
-                                                    {Array.isArray(allRoles) && allRoles.filter((item: any) => item.name !== "@everyone").map((item: any) => {
+                                                    {Array.isArray(allRoles) && allRoles.filter((item: any) => item.name !== "@everyone").map((item: any, id: number) => {
                                                         const botRole: any = allRoles.filter((i: any) => i.tags && i.tags.bot_id === botClient?.id);
                                                         if (item.position < botRole[0]?.position && !item.tags) {
-                                                            return <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>;
+                                                            return <MenuItem key={item.id} value={item.id} sx={{ 
+                                                                color: theme.palette.getContrastText(`#${item.color.toString(16).padStart(6, '0')}`), 
+                                                                backgroundColor: `#${item.color.toString(16).padStart(6, '0')}`,
+                                                                transition: "all 0.1s ease-in-out",
+                                                                "&:hover": {
+                                                                    color: theme.palette.getContrastText(`#${item.color.toString(16).padStart(6, '0')}`),
+                                                                    backgroundColor: darken(`#${item.color.toString(16).padStart(6, '0')}`, 0.25),
+                                                                },
+                                                                "&.Mui-selected": {
+                                                                    // a bit darker color
+                                                                    color: theme.palette.getContrastText(`#${item.color.toString(16).padStart(6, '0')}`),
+                                                                    backgroundColor: darken(`#${item.color.toString(16).padStart(6, '0')}`, 0.5),
+                                                                    "&:hover": {
+                                                                        color: theme.palette.getContrastText(`#${item.color.toString(16).padStart(6, '0')}`),
+                                                                        backgroundColor: darken(`#${item.color.toString(16).padStart(6, '0')}`, 0.75),
+                                                                    },
+                                                                },
+                                                                // if 2 roles have the same name, add the id to the end of the name
+                                                            }}>{item.name} {allRoles.filter((i: any) => i.name === item.name).length > 1 ? `(${item.id})` : ""}</MenuItem>;
                                                         }
                                                     })}
                                                 </Select>

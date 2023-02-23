@@ -103,7 +103,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 return res.redirect(`https://${domain}/verify/${state}`);
                             }
                         }).catch((err) => {
-                            console.error(`addRole 1: ${err}`);
+                            throw new Error(err);
                         });
                         break;
                     case 403:
@@ -140,9 +140,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                         return res.redirect(`https://${domain}/verify/${state}`);
                     }
                 }).catch((err) => {
-                    res.setHeader("Set-Cookie", `RC_err=${err?.status || err?.response?.status} RC_errStack=${JSON.stringify(err?.data?.message) || JSON.stringify(err?.response?.data?.message)}; Path=/; Max-Age=5;`);
-                    console.error(`addMember 4: ${err}`);
-                    return res.redirect(`https://${domain}/verify/${state}`);
+                    // res.setHeader("Set-Cookie", `RC_err=${err?.status || err?.response?.status} RC_errStack=${JSON.stringify(err?.data?.message) || JSON.stringify(err?.response?.data?.message)}; Path=/; Max-Age=5;`);
+                    // console.error(`addMember 4: ${err}`);
+                    // return res.redirect(`https://${domain}/verify/${state}`);
+                    throw new Error(err);
                 });
 
                 if (verifiedMember) {

@@ -5,7 +5,12 @@ export default async function getUser(options: any) {
         headers: options,
         validateStatus: () => true
     })
-        .then(res => { return res.data; })
+        .then(res => { 
+            if (res.data.code === 50014) {
+                localStorage.removeItem("token");
+            } else {
+                return res.data;
+            }
+        })
         .catch(err => { return err; });
-        
 }

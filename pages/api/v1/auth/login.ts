@@ -63,6 +63,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         const token = sign({ id: account.id }, `${process.env.JWT_SECRET}`, { expiresIn: tokenExpiry });
 
+        await prisma.sessions.findMany({ where: { accountId: account.id } }).then(async (sessions) => {
+            for (let i = 0; i < sessions.length; i++) {
+                await prisma.sessions.delete({ where: { id: sessions[i].id } });
+            }
+        });
+
         await prisma.sessions.create({
             data: {
                 accountId: account.id,

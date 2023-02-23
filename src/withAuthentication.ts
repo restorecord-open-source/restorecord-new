@@ -75,6 +75,8 @@ const withAuthentication = (next: any) => async (req: NextApiRequest, res: NextA
       
         return await next(req, res, user)
     } catch (err: any) {
+        if (err?.name === "" || err?.name === "TokenExpiredError" || err?.name === "JsonWebTokenError" || err?.name === "NotBeforeError") err.message = 50014;
+        
         err.message = parseInt(err.message);
 
         switch (err.message) {
