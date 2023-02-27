@@ -23,9 +23,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 const userId: any = req.query.userid as string;
                 if (!userId) return res.status(400).json({ success: false, message: "No userid provided." });
 
+                const servers = await prisma.servers.findMany({ where: { ownerId: user.id } });
+                if (!servers) return res.status(400).json({ success: false, message: "No servers found." });
+
+                let guildIds: any = [];
+                guildIds = servers.map((server: any) => server.guildId);
+
                 const member = await prisma.members.findFirst({
                     where: {
                         id: Number(userId) as number,
+                        guildId: {
+                            in: guildIds,
+                        }
                     },
                 });
 
