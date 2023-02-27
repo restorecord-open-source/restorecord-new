@@ -5,7 +5,7 @@ import withAuthentication from "../../../../src/withAuthentication";
 import { accounts } from "@prisma/client";
 
 const limiter = rateLimit({
-    uniqueTokenPerInterval: 500,
+    uniqueTokenPerInterval: 1000,
 })
 
 async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts) {
@@ -13,8 +13,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         switch (req.method) {
         case "GET":
             try {
-                limiter.check(res, 120, "CACHE_TOKEN");
-                if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
+                limiter.check(res, 30, "CACHE_TOKEN");
                 
                 const serverId: any = req.query.guild;
 
