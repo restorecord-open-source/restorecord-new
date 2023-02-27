@@ -132,7 +132,7 @@ export default function Admin() {
                                     <Stack direction="column" spacing={2}>
                                         <TextField label="Search" variant="outlined" placeholder="User ID/Username/Email" onChange={(e) => setSearchQuery(e.target.value)} />
                                         <Button variant="contained" type="submit">Get user info</Button>
-                                        <Stack direction="row" justifyContent="space-between" alignContent={"center"} spacing={2}>
+                                        <Stack direction="row" justifyContent="space-between" alignContent={"center"} sx={{ flexDirection: { xs: "column", sm: "row" } }}>
                                             <Button variant="contained" sx={{ width: "100%", backgroundColor: theme.palette.yellow.main, color: "#000000" }} onClick={async (e) => {
                                                 e.preventDefault();
 

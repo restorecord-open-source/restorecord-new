@@ -261,7 +261,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             case 201:
                                 succPulled++;
 
-                                if (delay > 1000) delay - 1000;
+                                if (delay > 1000) delay -= 1000;
                                 else if (delay < 500) delay = 550;
                                 
                                 break;

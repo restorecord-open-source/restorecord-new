@@ -23,17 +23,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 const userId: any = req.query.userid as string;
                 if (!userId) return res.status(400).json({ success: false, message: "No userid provided." });
 
-                const servers = await prisma.servers.findMany({ where: { ownerId: user.id } });
-
-                let guildIds: any = [];
-                guildIds = servers.map((server: any) => server.guildId);
-
                 const member = await prisma.members.findFirst({
                     where: {
-                        userId: BigInt(userId),
-                        guildId: {
-                            in: guildIds,
-                        }
+                        id: Number(userId) as number,
                     },
                 });
 
@@ -72,8 +64,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                     isocode: pCheck[usrIP].isocode,
                                     country: pCheck[usrIP].country,
                                     region: pCheck[usrIP].region,
-                                    ...(user.role === "business" && { city: pCheck[usrIP].city }),
-                                    type: pCheck[usrIP].type,
+                                    city: pCheck[usrIP].city,
+                                    ...(user.role === "business" && { type: pCheck[usrIP].type }),
                                     vpn: pCheck[usrIP].vpn,
                                 }
                             })
@@ -113,8 +105,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                     isocode: pCheck[usrIP].isocode,
                                     country: pCheck[usrIP].country,
                                     region: pCheck[usrIP].region,
-                                    ...(user.role === "business" && { city: pCheck[usrIP].city }),
-                                    type: pCheck[usrIP].type,
+                                    city: pCheck[usrIP].city,
+                                    ...(user.role === "business" && { type: pCheck[usrIP].type }),
                                     vpn: pCheck[usrIP].vpn,
                                 }
                             })
@@ -127,6 +119,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 });
             }
             catch (err: any) {
+                console.error(err);
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 if (err?.name === "" || err?.name === "JsonWebTokenError") return res.status(400).json({ success: false, message: "User not logged in" }); 
                 return res.status(400).json({ success: false, message: "Something went wrong" });
@@ -137,37 +130,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 limiter.check(res, 15, "CACHE_TOKEN");
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 
-             
-
                 const userId: any = req.query.userid as string;
-                const member = await prisma.members.findFirst({ where: { userId: BigInt(userId), } });
+                const member = await prisma.members.findFirst({ where: { id: Number(userId) as number, } });
                 
                 if (!member) return res.status(400).json({ success: false, message: "Member not found." });
 
-                const servers = await prisma.servers.findMany({ where: { ownerId: user.id, } });
-
-                if (!servers) return res.status(400).json({ success: false, message: "No servers found on account." });
-
-                const server = await prisma.servers.findFirst({
-                    where: {
-                        ownerId: user.id,
-                        guildId: req.query.guild ? BigInt(req.query.guild as string) : BigInt(servers[0].guildId),
-                    },
-                });
-
+                const server = await prisma.servers.findFirst({ where: { ownerId: user.id, guildId: member.guildId }});
                 if (!server) return res.status(400).json({ success: false, message: "Server of member not found." });
 
-                const customBot = await prisma.customBots.findFirst({
-                    where: {
-                        id: server.customBotId,
-                    },
-                });
-
-                if (!customBot) return res.status(400).json({ success: false, message: "No custom bot found." });
+                const bot = await prisma.customBots.findFirst({ where: { id: server.customBotId }});
+                if (!bot) return res.status(400).json({ success: false, message: "No custom bot found." });
 
                 await axios.get(`https://discord.com/api/v10/users/@me`, {
                     headers: {
-                        "Authorization": `Bot ${customBot.botToken}`,
+                        "Authorization": `Bot ${bot.botToken}`,
                         "Content-Type": "application/json",
                         "X-RateLimit-Precision": "millisecond",
                         "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
@@ -179,116 +155,50 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     if (response.status !== 200) return res.status(400).json({ success: false, message: "Invalid bot token" });
                 });
 
-                addMember(server.guildId.toString(), userId.toString(), customBot.botToken, member.accessToken, [BigInt(server.roleId).toString()])
-                    .then(async (resp) => {
-                        try {
-                            console.log(`${member?.username} adding member ${resp.status ? resp.status : resp.response.status} (${server.guildId.toString()}, ${userId.toString()}, ${member.accessToken}, ${[BigInt(server.roleId).toString()]})`);
-
-                            if (resp?.status === 201 || resp?.response?.status === 201 || resp?.status === 204 || resp?.response?.status === 204)
-                            {
-                                if (resp?.status === 204 || resp?.response?.status === 204) 
-                                {
-                                    await addRole(server.guildId.toString(), userId.toString(), customBot.botToken, server.roleId.toString()).then(async (response) => {
-                                        console.log(`${member?.username} adding role: ${response?.status || response?.response?.status} (${server.guildId.toString()}, ${userId.toString()}, ${server.roleId.toString()})`);
-
-                                        switch (response?.status || response?.response?.status) {
-                                        case 204: return res.status(200).json({ success: true, message: "Member added to server" });
-                                        case 403: return res.status(200).json({ success: false, message: "Bot has no permissions" });
-                                        case 404: return res.status(200).json({ success: false, message: "Role could not be found" });
-                                        default: return res.status(200).json({ success: false, message: "Error adding member to server" });
-                                        }
-                                    }).catch((err) => {
-                                        return res.status(200).json({ success: false, message: "Error adding member" });
-                                    });
-                                }
-                                else
-                                {
-                                    return res.status(200).json({ success: true, message: "Member added to server" });
-                                }
-                            } 
-                            else if (resp?.status === 403 || resp?.response?.status === 403 || resp?.response?.data?.code === "50013") 
-                            {
-                                return res.status(200).json({ success: false, message: "Bot has no permissions" });
-                            }
-                            else if (resp?.status === 401 || resp?.response?.status === 401 || resp?.response?.data?.code === "40001") 
-                            {
-                                return res.status(200).json({ success: false, message: "Bot token is invalid" });
-                            } 
-                            else if (resp?.status === 429 || resp?.response?.status === 429 || resp?.response?.data?.retry_after)
-                            {
-                                // try again to add member
-                                setTimeout(async () => {
-                                    addMember(server.guildId.toString(), userId.toString(), customBot.botToken, member.accessToken, [BigInt(server.roleId).toString()]).then(async (resp) => {
-
-                                        console.log(`${member?.username} adding member ${resp.status ? resp.status : resp.response.status} (${server.guildId.toString()}, ${userId.toString()}, ${member.accessToken}, ${[BigInt(server.roleId).toString()]})`);
-                                        
-                                        if (resp?.status === 204 || resp?.response?.status === 204)
-                                        {
-                                            await addRole(server.guildId.toString(), userId.toString(), customBot.botToken, server.roleId.toString())
-                                                .then(async (response) => {
-                                                    console.log(`${member?.username} adding role: ${response?.status || response?.response?.status} (${server.guildId.toString()}, ${userId.toString()}, ${server.roleId.toString()})`);
-
-                                                    switch (response.status) {
-                                                    case 204: return res.status(200).json({ success: true, message: "Member added to server" });
-                                                    case 403: return res.status(200).json({ success: false, message: "Bot has no permissions" });
-                                                    default: return res.status(200).json({ success: false, message: "Error adding member to server" });
-                                                    }
-
-                                                }).catch((err) => {
-                                                    console.error(`addRole 2: ${err}`);
-                                                });
-                                        }
-                                        else 
-                                        {
-                                            return res.status(200).json({ success: false, message: "Error adding member" });
-                                        }
-                                    }).catch((err) => {
-                                        return res.status(200).json({ success: false, message: "Error adding member" });
-                                    });
-                                }, resp?.response?.data?.retry_after ? resp?.response?.data?.retry_after : 1000);
-                            }
-                            else if (resp?.status === 400 || resp?.response?.status === 400) {
-                                console.error(`addMember 2: ${resp?.status}|${resp?.response?.status}|${JSON.stringify(resp?.data)}|${JSON.stringify(resp?.response?.data)}`);
-                                if (resp?.response?.data?.code === "30001") {
-                                    return res.status(200).json({ success: false, message: "Member has reached 100 server limit" });
-                                } else { return res.status(200).json({ success: false, message: "Error adding member" }); }
-                            }
-                            else
-                            {
-                                if (resp?.response?.data?.code === 30001) {
-                                    await addRole(server.guildId.toString(), userId.toString(), customBot.botToken, server.roleId.toString()).then(async (response) => {
-                                        console.log(`${member?.username} adding role: ${response?.status || response?.response?.status} (${server.guildId.toString()}, ${userId.toString()}, ${server.roleId.toString()})`);
-
-                                        switch (response?.status || response?.response?.status) {
-                                        case 204:
-                                            return res.status(200).json({ success: true, message: "Member has been added to server" });
-                                        case 403:
-                                            return res.status(200).json({ success: false, message: "Bot has no permissions" });
-                                        case 404:
-                                            return res.status(200).json({ success: false, message: "Role not found" });
-                                        default:
-                                            return res.status(200).json({ success: false, message: "Error adding role to member" });
-                                        }
-                                    }).catch((err) => {
-                                        console.error(`addRole 1: ${err}`);
-                                        return res.status(200).json({ success: false, message: "Error adding member" });
-                                    });
-                                } else {
-                                    if (resp?.response?.data?.code === "30001") {
-                                        return res.status(200).json({ success: false, message: "Member has reached 100 server limit" });
-                                    } else { return res.status(200).json({ success: false, message: "Error adding member" }); }
-                                }
-                            }
-                        } catch (err: any) {
-                            console.error(`addMember 3: ${err}`);
-                            return res.status(200).json({ success: false, message: "Error adding member" });
+                await addMember(server.guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, [BigInt(server.roleId).toString()]).then(async (resp: any) => {
+                    let status = resp?.response?.status || resp?.status;
+                    let response = ((resp?.response?.data?.message || resp?.response?.data?.code) || (resp?.data?.message || resp?.data?.code)) ? (resp?.response?.data || resp?.data) : "";
+                    
+                    console.log(`[${server.name}] [SM] [${member.username}] ${status} ${JSON.stringify(response).toString() ?? null}`);
+            
+                    switch (status) {
+                    case 429:   
+                        const retryAfter = resp.response.headers["retry-after"];
+                        console.log(`[${server.name}] [SM] [${member.username}] 429 | retry-after: ${retryAfter}`);
+                        if (retryAfter) {
+                            const retry = parseInt(retryAfter);
+                            setTimeout(async () => {
+                                await addMember(server.guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, [BigInt(server.roleId).toString()])
+                            }, retry);
                         }
-                    }).catch((err) => {
-                        console.error(`addMember 4: ${err}`);
-                        return res.status(200).json({ success: false, message: "Error adding member" });
-                    });
+                        break;
+                    case 403:
+                        refreshTokenAddDB(member.userId.toString(), member.id, server.guildId.toString(), bot?.botToken, server.roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
+                        break;
+                    case 407:
+                        console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);
+                        break;
+                    case 204:
+                        await addRole(server.roleId.toString(), member.userId.toString(), bot?.botToken, BigInt(server.roleId).toString());
+                        break;
+                    case 201:
+                        break;
+                    case 400:
+                        console.error(`[FATAL ERROR] [SM] [${server.name}] [${member.id}]-[${member.username}] 400 | ${JSON.stringify(response)}`);
+                        break;
+                    default:
+                        console.error(`[FATAL ERROR] [SM] [UNDEFINED STATUS] [${server.name}] [${member.id}]-[${member.username}] ${status} | ${JSON.stringify(response)} | ${JSON.stringify(resp)}`);
+                        break;
+                    }
+                }).catch(async (err: Error) => {
+                    console.error(`[${server.name}] [SM] [addMember.catch] [${member.username}] ${err}`);
+                    // return res.status(400).json({ success: false, message: err?.message ? err?.message : "Something went wrong" });
+                });
+                
 
-                return res.status(200).json({ success: true, message: "Member added to server." });
+                console.log(`[${server.name}] [SM] [${member.username}]`);
+
+                return res.status(200).json({ success: true, message: "Started Pulling..." });
             }
             catch (err: any) {
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
@@ -301,16 +211,32 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
 
                 const userId: any = req.query.userid as string;
-                if (!userId) return res.status(400).json({ success: false, message: "No userid provided." });
+                if (!userId) return res.status(400).json({ success: false, message: "userid not provided." });
 
-                const member = await prisma.members.findFirst({
-                    where: {
-                        userId: BigInt(userId),
-                        guildId: req.query.guild ? BigInt(req.query.guild as string) : 0,
+                const member = await prisma.members.findFirst({ where: { id: Number(userId) as number } });
+                if (!member) return res.status(400).json({ success: false, message: "Member not found." });
+
+                const server = await prisma.servers.findFirst({ where: { guildId: member.guildId, ownerId: user.id } });
+                if (!server) return res.status(400).json({ success: false, message: "Server of member not found." });
+
+                const bot = await prisma.customBots.findFirst({ where: { id: server.customBotId }});
+                if (!bot) return res.status(400).json({ success: false, message: "Custom bot not found." });
+
+                // try to remove role from user
+                await axios.delete(`https://discord.com/api/v10/guilds/${server.guildId}/members/${member.userId}/roles/${server.roleId}`, {
+                    headers: {
+                        "Authorization": `Bot ${bot.botToken}`,
+                        "Content-Type": "application/json",
+                        "X-RateLimit-Precision": "millisecond",
+                        "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
                     },
+                    validateStatus: () => true,
+                }).then(async (response) => {
+                    if (response.status !== 204) return res.status(400).json({ success: false, message: "Invalid bot token" });
+                }).catch(async (err: Error) => {
+                    console.error(err);
+                    return res.status(400).json({ success: false, message: "Something went wrong" });
                 });
-
-                if (!member) return res.status(400).json({ success: false, message: "No member found." });
                 
                 await prisma.members.delete({
                     where: {
