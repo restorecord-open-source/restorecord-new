@@ -22,7 +22,7 @@ export default function Custombots() {
     if (isLoading) return <CircularProgress />
     if (isError) return <div>Error</div>
 
-    if (!data.username) {
+    if (!data || !data.username) {
         router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
 
         return <CircularProgress />
