@@ -100,7 +100,17 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
                 return err;
             });
             console.log(`[INFO] Refreshed token for ${userId} in ${guildId}`);
-            await addMember(guildId, userId, botToken, resp.data.access_token, roleId ? [BigInt(roleId).toString()] : undefined)
+            await addMember(guildId, userId, botToken, resp.data.access_token, roleId ? [BigInt(roleId).toString()] : undefined).then(async (res: any) => {
+                if (res.status === 204) {
+                    console.log(`[INFO] Added ${userId} to ${guildId}`);
+                    return true;
+                } else {
+                    console.error(`[ERROR] Failed to add ${userId} to ${guildId} (status: ${res.status})`);
+                }
+            }).catch(async (err: any) => {
+                console.error(`[ERROR] Failed to add ${userId} to ${guildId} (error: ${err})`);
+                return false;
+            });
         }
     }).catch(async (err) => {
         await prisma.members.update({

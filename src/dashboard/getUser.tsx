@@ -1,4 +1,5 @@
 import axios from "axios";
+import router from "next/router";
 
 export default async function getUser(options: any) {
     return await axios.get(`/api/v1/user`, {
@@ -7,7 +8,8 @@ export default async function getUser(options: any) {
     })
         .then(res => { 
             if (res.data.code === 50014) {
-                localStorage.removeItem("token");
+                window.localStorage.removeItem("token");
+                document.location.href = `/login?redirect_to=${encodeURIComponent(router.pathname)}`;
             } else {
                 return res.data;
             }

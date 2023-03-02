@@ -33,7 +33,7 @@ export default function Login() {
     const username_query: any = router.query.username;
 
 
-    const onSubmit = (e: any) => {
+    function onSubmit(e: any) {
         e.preventDefault();
         fetch(`/api/v1/auth/login`, {
             method: "POST",
@@ -56,7 +56,8 @@ export default function Login() {
                     setNotiTextS(res.message);
                     setOpenS(true);
                     localStorage.setItem("token", res.token);
-                    setTimeout(() => router.push(redirect_to ? redirect_to : "/dashboard"), 500);
+                    // setTimeout(() => router.push(redirect_to ? redirect_to : "/dashboard"), 500);
+                    router.push(redirect_to ? redirect_to : "/dashboard");
                 }
             })
             .catch(err => {
@@ -65,7 +66,7 @@ export default function Login() {
             });
     }
     
-    const handleChange = (e: any) => {
+    function handleChange(e: any) {
         const { name, value } = e.target;
         switch (name) {
         case "username":
@@ -98,7 +99,8 @@ export default function Login() {
                         }
                         else {
                             // setTimeout(() => router.push("/dashboard"), 100);
-                            router.push("/dashboard");
+                            // router.push("/dashboard");
+                            router.push(redirect_to ? redirect_to : "/dashboard");
                         }
                     })
                     .catch(err => {

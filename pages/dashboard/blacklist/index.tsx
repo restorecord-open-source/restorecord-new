@@ -143,35 +143,13 @@ export default function Blacklist() {
         )
     }
 
-    function renderTitle() {
-        return (
-            <Badge badgeContent={<>BETA</>} color="primary" sx={{ [`& .MuiBadge-badge`]: { mt: "1.5rem", mr: "-2.5rem", color: "#fff", padding: "0.85rem", fontSize: "0.95rem", fontWeight: "bold" } }}>
-                <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
-                    Blacklist
-                </Typography>
-            </Badge>
-        )
-    }
-
     function renderSubTitle() {
         return (
             <Grid justifyContent={"space-between"}>
                 <Grid item>
-                    <Stack direction="row" justifyContent={"space-between"} alignItems={"center"} sx={{ mb: 2 }}>
-                        <Typography variant="h6" sx={{ fontWeight: "500" }}>
-                            {listsLoading ? (
-                                <Skeleton animation="wave" variant="text" width={250} height={30} />
-                            ) : (
-                                <>
-                                    {data?.pages ? (
-                                        <>
-                                            {data?.pages?.[0]?.max === 0 ? "No Blacklisted Items" : `Showing ${data?.pages?.[0]?.max} Blacklisted Items.`}
-                                        </>
-                                    ) : (
-                                        "Loading..."
-                                    )}
-                                </>
-                            )}
+                    <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between" sx={{ mb: 2, "@media screen and (max-width: 600px)": { flexDirection: "column" } }}>
+                        <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                            Blacklist
                         </Typography>
                         <Button variant="contained" color="primary" onClick={() => router.push("/dashboard/blacklist/add")} sx={{ fontWeight: "500" }}>
                             + Create Blacklist
@@ -264,7 +242,6 @@ export default function Blacklist() {
                     <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
                         <CardContent>
 
-                            {renderTitle()}
                             {renderNotifications()}
                             {renderSubTitle()}
 

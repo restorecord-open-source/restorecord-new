@@ -42,16 +42,20 @@ export default function DashSettings({ user }: any) {
     const [token]: any = useToken();
     const router = useRouter();
 
-    const [pullWindow, setPullWindow] = useState(false);
-    const [giveRoleOnJoin, setGiveRoleOnJoin] = useState(false);
+    const [pullSettings, setPullSettings] = useState({
+        pullWindow: false,
+        giveRoleOnJoin: false,
+        customPullCountCheck: false,
+        customPullCount: 0,
+        selectedServer: "",
+        selectedRole: "",
+    });
 
     const [serverName, setServerName] = useState("");
     const [guildId, setGuildId] = useState("");
     const [roleId, setRoleId] = useState("");
     const [customBot, setCustomBot] = useState("");
     const [customBotToken, setCustomBotToken] = useState("");
-    const [selectedServer, setSelectedServer] = useState("");
-    const [selectedRole, setSelectedRole] = useState("");
 
     const [allServers, setAllServers] = useState([]);
     const [allRoles, setAllRoles]: any = useState([]);
@@ -147,12 +151,12 @@ export default function DashSettings({ user }: any) {
         if (customBotToken) {
             if (allServers.length === 0) getAllGuilds();
 
-            if (giveRoleOnJoin && selectedServer) {
+            if (pullSettings.giveRoleOnJoin && pullSettings.selectedServer) {
                 if (!botClient.id) getBotClient();
-                if (allRoles.length === 0) getGuildRoles(selectedServer);
+                if (allRoles.length === 0) getGuildRoles(pullSettings.selectedServer);
             }
         }
-    }, [customBotToken, giveRoleOnJoin, selectedServer]);
+    }, [customBotToken, pullSettings.giveRoleOnJoin, pullSettings.selectedServer]);
 
 
     return (
@@ -178,10 +182,10 @@ export default function DashSettings({ user }: any) {
                             </Alert>
                         </Snackbar>
 
-                        <Dialog open={pullWindow} onClose={() => setPullWindow(false)} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" fullWidth maxWidth="sm">
+                        <Dialog open={pullSettings.pullWindow} onClose={() => setPullSettings({ ...pullSettings, pullWindow: false })} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" fullWidth maxWidth="sm">
                             <DialogTitle id="alert-dialog-title">
                                 Migration
-                                <IconButton aria-label="close" onClick={() => setPullWindow(false)} sx={{ position: 'absolute', right: 8, top: 8, color: theme.palette.grey[500] }}>
+                                <IconButton aria-label="close" onClick={() => setPullSettings({ ...pullSettings, pullWindow: false })} sx={{ position: 'absolute', right: 8, top: 8, color: theme.palette.grey[500] }}>
                                     <CloseIcon />
                                 </IconButton>
                             </DialogTitle>
@@ -197,7 +201,7 @@ export default function DashSettings({ user }: any) {
                                 ) : (
                                     <FormControl fullWidth variant="outlined" required>
                                         <InputLabel id="server-select-label">Select Server</InputLabel>
-                                        <Select labelId="server-select-label" label="Select Server" value={selectedServer} onChange={(e) => { setAllRoles([]); setSelectedServer(e.target.value as string); }} required>
+                                        <Select labelId="server-select-label" label="Select Server" value={pullSettings.selectedServer} onChange={(e) => { setAllRoles([]); setPullSettings({ ...pullSettings, selectedServer: e.target.value as string }); }} required>
                                             {Array.isArray(allServers) && allServers.map((item: any) => {
                                                 if (allServers.filter((i: any) => i.name === item.name).length > 1) return <MenuItem key={item.id} value={item.id}>{item.name} ({item.id})</MenuItem>;
                                                 else return <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>;
@@ -206,11 +210,14 @@ export default function DashSettings({ user }: any) {
                                     </FormControl>
                                 )}
                                 {/* give role on join checkbox */}
-                                {(allServers.length !== 0 && selectedServer) && (
-                                    <FormControlLabel control={<Checkbox checked={giveRoleOnJoin} onChange={(e) => setGiveRoleOnJoin(e.target.checked)} />} label="Give role on join" />
+                                {(allServers.length !== 0 && pullSettings.selectedServer) && (
+                                    <>
+                                        <FormControlLabel control={<Checkbox checked={pullSettings.giveRoleOnJoin} onChange={(e) => setPullSettings({ ...pullSettings, giveRoleOnJoin: e.target.checked })} />} label="Give role on join" />
+                                        <FormControlLabel control={<Checkbox checked={pullSettings.customPullCountCheck} onChange={(e) => setPullSettings({ ...pullSettings, customPullCountCheck: e.target.checked })} />} label="Custom Pull amount" />
+                                    </>
                                 )}
                                 {/* role select */}
-                                {(giveRoleOnJoin && selectedServer && botClient) && (
+                                {(pullSettings.giveRoleOnJoin && pullSettings.selectedServer && botClient) && (
                                     <>
                                         <Typography variant="body1" sx={{ fontWeight: "400", mb: "1rem", mt: "1rem" }}>
                                             Select the role you want to give to your members.
@@ -220,7 +227,7 @@ export default function DashSettings({ user }: any) {
                                         ) : (
                                             <FormControl fullWidth variant="outlined" required>
                                                 <InputLabel id="role-select-label">Select Role</InputLabel>
-                                                <Select labelId="role-select-label" label="Select Role" value={selectedRole} onChange={(e) => setSelectedRole(e.target.value as string)} required>
+                                                <Select labelId="role-select-label" label="Select Role" value={pullSettings.selectedRole} onChange={(e) => setPullSettings({ ...pullSettings, selectedRole: e.target.value as string }) } required>
                                                     {Array.isArray(allRoles) && allRoles.filter((item: any) => item.name !== "@everyone").map((item: any, id: number) => {
                                                         const botRole: any = allRoles.filter((i: any) => i.tags && i.tags.bot_id === botClient?.id);
                                                         if (item.position < botRole[0]?.position && !item.tags) {
@@ -248,6 +255,14 @@ export default function DashSettings({ user }: any) {
                                         )}
                                     </>
                                 )}
+                                {/* custom pull count */}
+                                {(pullSettings.customPullCountCheck && pullSettings.selectedServer) && (
+                                    <>
+                                        <Typography variant="body1" sx={{ fontWeight: "400", mb: "0.5rem", mt: "1rem" }}>Enter the amount of members you want to pull.</Typography>
+                                        <Typography variant="body2" sx={{ fontWeight: "300", mb: "1rem" }}>Note: This will only count &quot;sucessfully&quot; pulled members, erros will not be counted.</Typography>
+                                        <TextField fullWidth label="Pull Amount" variant="outlined" type={"number"} value={pullSettings.customPullCount} onChange={(e) => setPullSettings({ ...pullSettings, customPullCount: Number(e.target.value) as number }) } />
+                                    </>
+                                )}
 
                                 {/* small arrow down icon with the text "advanced options" */}
                                 <Accordion sx={{ mt: "1rem" }}>
@@ -256,11 +271,11 @@ export default function DashSettings({ user }: any) {
                                     </AccordionSummary>
                                     <AccordionDetails>
                                         <Typography variant="body1" sx={{ mb: "1rem" }}>Enter Server ID manually</Typography>
-                                        <TextField fullWidth label="Server ID" variant="outlined" value={selectedServer} onChange={(e) => setSelectedServer(e.target.value)} />
-                                        {(giveRoleOnJoin && selectedServer) && (
+                                        <TextField fullWidth label="Server ID" variant="outlined" value={pullSettings.selectedServer} onChange={(e) => setPullSettings({ ...pullSettings, selectedServer: e.target.value }) } />
+                                        {(pullSettings.giveRoleOnJoin && pullSettings.selectedServer) && (
                                             <>
                                                 <Typography variant="body1" sx={{ mb: "1rem", mt: "1rem" }}>Enter Role ID manually</Typography>
-                                                <TextField fullWidth label="Role ID" variant="outlined" value={selectedRole} onChange={(e) => setSelectedRole(e.target.value)} />
+                                                <TextField fullWidth label="Role ID" variant="outlined" value={pullSettings.selectedRole} onChange={(e) => setPullSettings({ ...pullSettings, selectedRole: e.target.value }) } />
                                             </>
                                         )}
                                     </AccordionDetails>
@@ -269,10 +284,10 @@ export default function DashSettings({ user }: any) {
                             </DialogContent>
                             <DialogActions>
                                 <Button onClick={() => getAllGuilds()} color="primary" variant="contained" sx={{ mr: 1 }}>
-                                    Refresh Server {giveRoleOnJoin ? "and Role" : ""} List
+                                    Refresh Server {pullSettings.giveRoleOnJoin ? "and Role" : ""} List
                                 </Button>
                                 <Button onClick={() => (
-                                    axios.put(`/api/v1/server/${guildId}?server=${selectedServer}${giveRoleOnJoin ? `&role=${selectedRole}` : ""}`, {}, {
+                                    axios.put(`/api/v1/server/${guildId}?server=${pullSettings.selectedServer}${pullSettings.giveRoleOnJoin ? `&role=${pullSettings.selectedRole}` : ""}${pullSettings.customPullCountCheck ? `&pullCount=${pullSettings.customPullCount}` : ""}`, {}, {
                                         headers: {
                                             "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
                                         },
@@ -296,7 +311,8 @@ export default function DashSettings({ user }: any) {
                                         else {
                                             setNotiTextS(res.data.message);
                                             setOpenS(true);
-                                            setPullWindow(false);
+                                            // setPullWindow(false);
+                                            setPullSettings({ ...pullSettings, pullWindow: false });
                                         }
                                     }).catch((err): any => {
                                         setNotiTextE(err.message);
@@ -354,7 +370,8 @@ export default function DashSettings({ user }: any) {
                                                             <Button variant="contained" color="success" onClick={() => {
                                                                 setCustomBotToken(user.bots.find((bot: any) => bot.id === (user.servers.find((server: any) => server.guildId === item.guildId).customBotId)).botToken);
                                                                 setGuildId(item.id);
-                                                                setPullWindow(true);
+                                                                setPullSettings({ ...pullSettings, pullWindow: true });
+                                                                // setPullWindow(true);
                                                                 // setNotiTextI("Pulling members please wait...");
                                                                 // setOpenI(true);
                                                                 // axios.put(`/api/v1/server/${item.guildId}`, {}, { 

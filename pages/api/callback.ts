@@ -84,7 +84,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                 addMember(guildId.toString(), userId.toString(), customBotInfo.botToken, respon.data.access_token, [BigInt(serverInfo.roleId).toString()]).then(async (resp) => {
                     let status = resp?.response?.status || resp?.status;
                     
-                    console.log(`[${guildId}] [${account.username}] ${status} ${JSON.stringify(resp?.data ? resp?.data : resp?.response?.data) ?? null}`);
+                    console.log(`[${guildId}] [${account.username}#${account.discriminator}] ${status} ${JSON.stringify(resp?.data ? resp?.data : resp?.response?.data) ?? null}`);
 
                     switch (status) {
                     case 201:
@@ -103,7 +103,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                             case 404:
                                 throw new Error(990404 as any);
                             default:
-                                res.setHeader("Set-Cookie", `RC_err=${response?.status || response?.response?.status} RC_errStack=${JSON.stringify(response?.data?.message)}; Path=/; Max-Age=5;`);
+                                res.setHeader("Set-Cookie", `RC_err=${response?.status || response?.response?.status} RC_errStack=${JSON.stringify(response?.data?.message || response?.response?.data?.message)}; Path=/; Max-Age=5;`);
                                 console.error(`addRole 0/1: ${response?.status}|${response?.response?.status}|${JSON.stringify(response?.data)}|${JSON.stringify(response?.response?.data)}`);
                                 return res.redirect(`https://${domain}/verify/${state}`);
                             }
@@ -128,7 +128,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                                     case 404:
                                         throw new Error(990404 as any);
                                     default:
-                                        res.setHeader("Set-Cookie", `RC_err=${response?.status || response?.response?.status} RC_errStack=${JSON.stringify(response?.data?.message)}; Path=/; Max-Age=5;`);
+                                        res.setHeader("Set-Cookie", `RC_err=${response?.status || response?.response?.status} RC_errStack=${JSON.stringify(response?.data?.message || response?.response?.data?.message)}; Path=/; Max-Age=5;`);
                                         console.error(`addRole 0/1: ${response?.status}|${response?.response?.status}|${JSON.stringify(response?.data)}|${JSON.stringify(response?.response?.data)}`);
                                         return res.redirect(`https://${domain}/verify/${state}`);
                                     }
@@ -140,11 +140,10 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                         });
                         break;
                     case 400:
-                        res.setHeader("Set-Cookie", `RC_err=${resp?.status || resp?.response?.status} RC_errStack=${JSON.stringify(resp?.data?.message)}; Path=/; Max-Age=5;`);
-                        console.error(`addMember 0: ${resp?.status}|${resp?.response?.status}|${JSON.stringify(resp?.data)}|${JSON.stringify(resp?.response?.data)}`);
+                        res.setHeader("Set-Cookie", `RC_err=${resp?.status || resp?.response?.status} RC_errStack=${JSON.stringify(resp?.data?.message || resp?.response?.data?.message)}; Path=/; Max-Age=5;`);
                         return res.redirect(`https://${domain}/verify/${state}`);
                     default:
-                        res.setHeader("Set-Cookie", `RC_err=${resp?.status || resp?.response?.status} RC_errStack=${JSON.stringify(resp?.data?.message)}; Path=/; Max-Age=5;`);
+                        res.setHeader("Set-Cookie", `RC_err=${resp?.status || resp?.response?.status} RC_errStack=${JSON.stringify(resp?.data?.message || resp?.response?.data?.message)}; Path=/; Max-Age=5;`);
                         console.error(`addRole 0/1: ${resp?.status}|${resp?.response?.status}|${JSON.stringify(resp?.data)}|${JSON.stringify(resp?.response?.data)}`);
                         return res.redirect(`https://${domain}/verify/${state}`);
                     }

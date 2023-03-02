@@ -230,7 +230,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 });
 
                 if (servers.length > 0) {
-                    return res.status(400).json({ success: false, message: "Please remove the bot from the following servers before deleting it", servers: servers.map((s) => s.id) });
+                    return res.status(400).json({ success: false, message: "Please Delete the following servers on RestoreCord dashboard, then try again", servers: servers.map((s) => s.id) });
                 }
 
                 await prisma.customBots.delete({

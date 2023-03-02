@@ -26,7 +26,7 @@ export default function Logout() {
             })
                 .then(res => res.json())
                 .then(res => {
-                    if (!res.success) {
+                    if (!res.success || res.code === 50014) {
                         setNotiTextE(res.message);
                         setOpenE(true);
                     }

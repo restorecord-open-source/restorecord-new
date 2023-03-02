@@ -109,6 +109,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 if (!guildId) return res.status(400).json({ success: false, message: "Server not provided" });
 
                 const roleId = req.query.role as string;
+                const pullCount = req.query.pullCount as string;
 
                 const server = await prisma.servers.findFirst({ where: { AND: [ { id: Number(serverId) as number }, { ownerId: user.id } ] } });
                 if (!server) return res.status(400).json({ success: false, message: "Server not found" });
@@ -206,12 +207,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 if (members.length === 0) return res.status(400).json({ success: false, message: "No pullable members found" });
 
                 if (user.role !== "free") {
-                    await prisma.servers.update({ where: { id: server.id }, data: { pulling: true, pullTimeout: new Date(Date.now() + 1000 * 60 * 60) } });
+                    await prisma.servers.update({ where: { id: server.id }, data: { pulling: true, pullTimeout: new Date(Date.now() + 1000 * 60 * 30) } });
                 } else { 
                     await prisma.servers.update({ where: { id: server.id }, data: { pulling: true, pullTimeout: new Date(Date.now() + 1000 * 60 * 60 * 12) } });
                 }
 
                 let succPulled: number = 0;
+                let erroPulled: number = 0;
                 const pullingProcess = new Promise<void>(async (resolve, reject) => {
                     let membersNew = await shuffle(members);
                     let delay: number = 500;
@@ -249,7 +251,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                 }
                                 break;
                             case 403:
-                                refreshTokenAddDB(member.userId.toString(), member.id, guildId.toString(), bot?.botToken, roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
+                                if (await refreshTokenAddDB(member.userId.toString(), member.id, guildId.toString(), bot?.botToken, roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma)) {
+                                    console.log(`[${server.name}] [${member.username}] 403 | Refreshed token`);
+                                    succPulled++;
+                                } else {
+                                    console.log(`[${server.name}] [${member.username}] 403 | Refreshed token failed`);
+                                    erroPulled++;
+                                }
                                 break;
                             case 407:
                                 console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);
@@ -267,6 +275,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                 break;
                             case 400:
                                 console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 400 | ${JSON.stringify(response)}`);
+                                erroPulled++;
                                 break;
                             default:
                                 console.error(`[FATAL ERROR] [UNDEFINED STATUS] [${server.name}] [${member.id}]-[${member.username}] ${status} | ${JSON.stringify(response)} | ${JSON.stringify(resp)}`);
@@ -274,11 +283,47 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             }
                         }).catch(async (err: Error) => {
                             console.error(`[${server.name}] [addMember.catch] [${member.username}] ${err}`);
+                            erroPulled++;
                             // return res.status(400).json({ success: false, message: err?.message ? err?.message : "Something went wrong" });
                         });
-                        
 
-                        console.log(`[${server.name}] [${member.username}] Success: ${succPulled}/${members.length} | Delay: ${delay}ms`);
+                        if (erroPulled >= 200) {
+                            console.log(`[${server.name}] [${member.username}] 200 errors reached`);
+                            console.log(`[${server.name}] Finished pulling`);
+                            await prisma.servers.update({
+                                where: {
+                                    id: server.id
+                                },
+                                data: {
+                                    pulling: false,
+                                }
+                            }).catch(async (err: Error) => {
+                                console.error(`[${server.name}] [PULLING] 5 ${err}`);
+                            });
+        
+                            resolve();
+                            return;
+                        }
+
+                        if (succPulled >= Number(pullCount)) {
+                            console.log(`[${server.name}] [${member.username}] ${pullCount} members have been pulled`);
+                            console.log(`[${server.name}] Finished pulling`);
+                            await prisma.servers.update({
+                                where: {
+                                    id: server.id
+                                },
+                                data: {
+                                    pulling: false,
+                                }
+                            }).catch(async (err: Error) => {
+                                console.error(`[${server.name}] [PULLING] 5 ${err}`);
+                            });
+
+                            resolve();
+                            return;
+                        }
+
+                        console.log(`[${server.name}] [${member.username}] Success: ${succPulled}/${pullCount ? pullCount : "∞"} (${members.length}) | Errors: ${erroPulled}/200 | Delay: ${delay}ms`);
 
                         await sleep(delay);
                     }
@@ -301,7 +346,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 });
 
                 let esimatedTime: any = members.length * 1500; 
-
                 esimatedTime = formatEstimatedTime(esimatedTime);
 
                 pullingProcess.then(async () => {

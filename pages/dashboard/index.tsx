@@ -46,7 +46,7 @@ export default function Dashboard() {
     if (isLoading || isLoading2) return <CircularProgress />
     if (isError || isError2) return <div>Error</div>
 
-    if (!data.username || !data2) {
+    if (!data || !data.username || !data2) {
         router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
 
         return <CircularProgress />
