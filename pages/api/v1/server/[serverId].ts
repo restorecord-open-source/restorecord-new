@@ -287,24 +287,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             // return res.status(400).json({ success: false, message: err?.message ? err?.message : "Something went wrong" });
                         });
 
-                        if (erroPulled >= 200) {
-                            console.log(`[${server.name}] [${member.username}] 200 errors reached`);
-                            console.log(`[${server.name}] Finished pulling`);
-                            await prisma.servers.update({
-                                where: {
-                                    id: server.id
-                                },
-                                data: {
-                                    pulling: false,
-                                }
-                            }).catch(async (err: Error) => {
-                                console.error(`[${server.name}] [PULLING] 5 ${err}`);
-                            });
-        
-                            resolve();
-                            return;
-                        }
-
                         if (succPulled >= Number(pullCount)) {
                             console.log(`[${server.name}] [${member.username}] ${pullCount} members have been pulled`);
                             console.log(`[${server.name}] Finished pulling`);
