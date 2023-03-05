@@ -36,7 +36,7 @@ const SubscriptionList: Subscription[] = [
             },
             {
                 name: "cooldown",
-                value: "12h Pull Cooldown",
+                value: "18h Pull Cooldown",
                 description: "You can only pull every 12h",
                 icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
             },
@@ -122,7 +122,7 @@ const SubscriptionList: Subscription[] = [
             },
             {
                 name: "cooldown",
-                value: "1h Pull Cooldown",
+                value: "2h Pull Cooldown",
                 description: "You can only pull every 12h",
                 icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />
             },
@@ -208,7 +208,7 @@ const SubscriptionList: Subscription[] = [
             },
             {
                 name: "cooldown",
-                value: "1h Pull Cooldown",
+                value: "30min Pull Cooldown",
                 description: "You can only pull every 12h",
                 icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },

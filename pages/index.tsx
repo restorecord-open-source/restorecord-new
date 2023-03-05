@@ -115,7 +115,7 @@ export default function Home() {
 
                         <Box id="features" sx={{ marginTop: 4 }} />
 
-                        <Card sx={{ width: "100%", height: "auto", display: "block", borderRadius: 12,  marginTop: 10 }} data-aos="fade-up">
+                        <Card sx={{ width: "100%", height: "auto", display: "block", borderRadius: 12,  marginTop: 10 }} data-aos="zoom-in-down">
                             <Box sx={{ display: "flex", justifyContent: "flex-start", padding: "36px 50px", alignItems: "center" }}>
                                 <Box>
                                     <Typography sx={{ fontStyle: "normal", fontWeight: 500, fontSize: { sm: 10, md: 20, }, textTransform: "uppercase", color: theme.palette.text.primary, marginTop: 2 }}>
@@ -145,7 +145,7 @@ export default function Home() {
                         </Card>
 
                         <Box sx={{ marginTop: { xs: 5, md: 10 }, display: { sm: "block", md: "flex" }, flexDirection: { sm: "column", md: "row" }, justifyContent: "center", alignItems: "center" }}>
-                            <Box sx={{ width: "100%", marginBottom: { xs: 5, md: 0 }, backgroundColor: theme.palette.primary.main, borderRadius: 8 }} data-aos="fade-right">
+                            <Box sx={{ width: "100%", marginBottom: { xs: 5, md: 0 }, backgroundColor: theme.palette.primary.main, borderRadius: 8 }} data-aos="zoom-in-right">
                                 <Box sx={{ py: 10, px: 6 }}>
                                     <Typography sx={{ fontStyle: "normal", fontWeight: 900, fontSize: { sm: 24, md: 48 }, color: theme.palette.text.primary }}>
                                         Backup & Restore your<br/>Server Members
@@ -157,7 +157,7 @@ export default function Home() {
                                 </Box>
                             </Box>
 
-                            <Box sx={{ marginLeft: { sm: 0, md: 12 }, marginTop: { xs: 5, md: 0 }, width: "100%", backgroundColor: theme.palette.primary.main, borderRadius: 8 }} data-aos="fade-left">
+                            <Box sx={{ marginLeft: { sm: 0, md: 12 }, marginTop: { xs: 5, md: 0 }, width: "100%", backgroundColor: theme.palette.primary.main, borderRadius: 8 }} data-aos="zoom-in-left">
                                 <Box sx={{ py: 10, px: 6 }}>
                                     <Typography sx={{ fontStyle: "normal", fontWeight: 900, fontSize: { sm: 24, md: 48 }, color: theme.palette.text.primary }}>
                                         Customizable<br/>Verification Page
@@ -170,7 +170,7 @@ export default function Home() {
                             </Box>
                         </Box>
 
-                        <Card sx={{ width: "100%", height: "auto", display: "block", borderRadius: 12,  marginTop: 5 }} data-aos="fade-left">
+                        <Card sx={{ width: "100%", height: "auto", display: "block", borderRadius: 12,  marginTop: 5 }} data-aos="zoom-in-up">
                             <Box sx={{ display: "flex", justifyContent: "flex-start", padding: "36px 50px", alignItems: "center" }}>
                                 <Box>
                                     <Typography sx={{ fontStyle: "normal", fontWeight: 500, fontSize: { sm: 10, md: 20 }, textTransform: "uppercase", color: theme.palette.text.primary, marginTop: 2 }}>

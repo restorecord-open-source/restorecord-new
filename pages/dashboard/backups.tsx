@@ -180,7 +180,7 @@ export default function Backups() {
                                             <Typography variant="body1">
                                                 Options:
                                             </Typography>
-                                            <FormControlLabel control={<Checkbox onChange={(e) => setRestoreOptions({ ...restoreOptions, clearGuild: e.target.checked })} color={"error"} sx={{ color: theme.palette.error.main }} />} label="Clear Guild before restoring?" /><br/><br/>
+                                            <FormControlLabel control={<Checkbox onChange={(e) => setRestoreOptions({ ...restoreOptions, clearGuild: e.target.checked })} color={"error"} sx={{ color: theme.palette.error.main }} />} label="Delete all channels, roles, before restoring from backup?" /><br/><br/>
                                     
                                             <Typography variant="body1" sx={{ fontWeight: "500" }}>
                                                 What do you want to restore?

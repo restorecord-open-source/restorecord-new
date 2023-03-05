@@ -15,6 +15,6 @@
 		"moduleResolution": "Node",
 		"resolveJsonModule": true
 	},
-	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "components/crisp.js"],
+	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
 	"exclude": ["node_modules"]
 }

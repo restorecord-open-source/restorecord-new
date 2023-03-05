@@ -19,11 +19,6 @@ import "../public/styles/globals.css";
 import "aos/dist/aos.css";
 
 
-const CrispWithNoSSR = dynamic(
-    () => import("../components/crisp"),
-    { ssr: false }
-)
-
 NProgress.configure({ showSpinner: false });
 
 Router.events.on("routeChangeStart", () => NProgress.start());
@@ -152,34 +147,27 @@ export default function MyApp(props: MyAppProps) {
 
     return (
         <>
-            <CacheProvider value={emotionCache}>
-                <Head>
-                    <title>RestoreCord</title>
-                    {/* <meta name="description" content="RestoreCord is a Recovery Service, it can Backup and Restore your Servers Members, Channels, Categories, Roles and much more" /> */}
-                    {/* <meta property="og:description" content="RestoreCord is a Recovery Service, it can Backup and Restore your Servers Members, Channels, Categories, Roles and do much more" /> */}
-                    {/* <meta property="og:title" content="RestoreCord - The Recovery Service" /> */}
-                    {/* <meta property="og:url" content="https://restorecord.com" /> */}
-                    <meta name="keywords" content="restorecord, discord, backup, restore, backup service, savecord, letoa, restorebot" />
-                    <meta name="theme-color" content="#09090d" />
-                    <meta name="apple-mobile-web-app-status-bar-style" content="#09090d" />
-                    <meta name="apple-mobile-web-app-capable" content="yes" />
-                    <meta name="apple-mobile-web-app-title" content="RestoreCord" />
-                    <meta name="application-name" content="RestoreCord" />
-                    <link rel="canonical" href="https://restorecord.com" />
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-                    {/* <script dangerouslySetInnerHTML={ { __html: `var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();` } } /> */}
-                </Head>
-                {/* <Script async={true} crossOrigin="*" src="https://embed.tawk.to/6302414d37898912e96447c9/1gb0cu5vi" /> */}
-                <CrispWithNoSSR />
-                <TokenProvider>
+            <Head>
+                <title>RestoreCord</title>
+                <meta name="keywords" content="restorecord, discord, backup, restore, backup service, savecord, letoa, restorebot" />
+                <meta name="theme-color" content="#09090d" />
+                <meta name="apple-mobile-web-app-status-bar-style" content="#09090d" />
+                <meta name="apple-mobile-web-app-capable" content="yes" />
+                <meta name="apple-mobile-web-app-title" content="RestoreCord" />
+                <meta name="application-name" content="RestoreCord" />
+                <link rel="canonical" href="https://restorecord.com" />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            </Head>
+            <TokenProvider>
+                <CacheProvider value={emotionCache}>
                     <QueryClientProvider client={queryClient}>
                         <ThemeProvider theme={theme}>
                             <CssBaseline />
                             <Component {...pageProps} />
                         </ThemeProvider>
                     </QueryClientProvider>
-                </TokenProvider>
-            </CacheProvider>
+                </CacheProvider>
+            </TokenProvider>
         </>
     );
 }

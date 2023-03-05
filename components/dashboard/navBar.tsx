@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/router";
 import { useTheme } from "@mui/material/styles";
 import { ArrowDropDownRounded } from "@mui/icons-material";
-import { stringToColor } from "../../src/functions";
 
 import Link from "next/link"
 import navItemWrappers from "../../src/dashboard/navBarItems"
@@ -71,7 +70,6 @@ export default function NavBar({ ...props }: any) {
     return (
         <>
             <Box sx={{ display: "flex" }}>
-                <CssBaseline />
                 <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, background: "#09090d", borderBottomLeftRadius: "1rem", borderBottomRightRadius: "1rem", boxShadow: "none", borderBottom: "1px solid rgb(38, 38, 42)" }}>
                     <Toolbar>
                         {isMobile && (

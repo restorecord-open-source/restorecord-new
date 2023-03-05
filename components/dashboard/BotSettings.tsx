@@ -21,6 +21,7 @@ import DialogActions from "@mui/material/DialogActions";
 import CloseIcon from "@mui/icons-material/Close";
 import theme from "../../src/theme";
 import AlertTitle from "@mui/material/AlertTitle";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 
 export default function DashBotSettings({ user, id }: any) {
     const [token]: any = useToken();
@@ -119,6 +120,63 @@ export default function DashBotSettings({ user, id }: any) {
         }
     }
 
+    function deleteDialog() {
+        return (
+            <Dialog open={confirmDelete} onClose={() => setConfirmDelete(false)} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" fullWidth maxWidth="sm">
+                <DialogTitle id="alert-dialog-title">{"Are you sure?"}
+                    <IconButton aria-label="close" onClick={() => setConfirmDelete(false)} sx={{ position: "absolute", right: 8, top: 8, color: theme.palette.grey[500] }}>
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        <Typography variant="body1" sx={{ fontWeight: "500", color: theme.palette.error.main }}>
+                            This action cannot be undone.
+                        </Typography>
+                            Deleting this Bot will:
+                        <ul>
+                            <li>Remove all data associated with this bot.</li>
+                            <li><b>Delete ALL members & servers associated with this bot.</b></li>
+                        </ul>
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => {
+                        setConfirmDelete(false);
+
+                        axios.delete(`/api/v1/settings/bot?id=${botId}`, { headers: {
+                            "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                        },
+                        validateStatus: () => true
+                        })
+                            .then((res: any) => {
+                                if (!res.data.success) {
+                                    setErrorText(res.data.message);
+                                    setServerList(res.data.servers);
+                                }
+                                else {
+                                    setNotiTextS(res.data.message);
+                                    setOpenS(true);
+                                    setTimeout(() => {
+                                        router.push("/dashboard/custombots");
+                                    }, 1250);
+                                }
+                            })
+                            .catch((err: any) => {
+                                setErrorText(err.message);
+                                console.error(err);
+                            });
+                    } } color="error">
+                        Delete
+                    </Button>
+                    <Button onClick={() => setConfirmDelete(false)} color="primary" autoFocus>
+                        Cancel
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        )
+    }
+
 
 
     return (
@@ -142,60 +200,7 @@ export default function DashBotSettings({ user, id }: any) {
                             </Alert>
                         </Snackbar>
 
-
-                        <Dialog open={confirmDelete} onClose={() => setConfirmDelete(false)} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" fullWidth maxWidth="sm">
-                            <DialogTitle id="alert-dialog-title">{"Are you sure?"}
-                                <IconButton aria-label="close" onClick={() => setConfirmDelete(false)} sx={{ position: "absolute", right: 8, top: 8, color: theme.palette.grey[500] }}>
-                                    <CloseIcon />
-                                </IconButton>
-                            </DialogTitle>
-                            <DialogContent>
-                                <DialogContentText id="alert-dialog-description">
-                                    <Typography variant="body1" sx={{ fontWeight: "500", color: theme.palette.error.main }}>
-                                        This action cannot be undone.
-                                    </Typography>
-
-                                    Deleting this Bot will:
-                                    <ul>
-                                        <li>Remove all data associated with this bot.</li>
-                                        <li><b>Delete ALL members & servers associated with this bot.</b></li>
-                                    </ul>
-                                </DialogContentText>
-                            </DialogContent>
-                            <DialogActions>
-                                <Button onClick={() => {
-                                    setConfirmDelete(false);
-
-                                    axios.delete(`/api/v1/settings/bot?id=${botId}`, { headers: {
-                                        "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
-                                    },
-                                    validateStatus: () => true
-                                    })
-                                        .then((res: any) => {
-                                            if (!res.data.success) {
-                                                setErrorText(res.data.message);
-                                                setServerList(res.data.servers);
-                                            }
-                                            else {
-                                                setNotiTextS(res.data.message);
-                                                setOpenS(true);
-                                                setTimeout(() => {
-                                                    router.push("/dashboard/custombots");
-                                                }, 1250);
-                                            }
-                                        })
-                                        .catch((err: any) => {
-                                            setErrorText(err.message);
-                                            console.error(err);
-                                        });
-                                } } color="error">
-                                    Delete
-                                </Button>
-                                <Button onClick={() => setConfirmDelete(false)} color="primary" autoFocus>
-                                    Cancel
-                                </Button>
-                            </DialogActions>
-                        </Dialog>
+                        {deleteDialog()}
 
                         {(user.bots.find((bot: any) => bot.clientId === id)) ? (
                             <>
@@ -278,7 +283,7 @@ export default function DashBotSettings({ user, id }: any) {
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
-                                                Custom Domain <small>(optional)</small>
+                                                Custom Domain <small><small>(optional)</small> <a href="https://docs.restorecord.com/guides/custom-domain/" target="_blank" rel="noreferrer">[Learn More]</a></small>
                                             </Typography>
                                             <TextField fullWidth variant="outlined" name="customDomain" value={customDomain} onChange={handleChange} placeholder="example.com" />
                                         </Grid>

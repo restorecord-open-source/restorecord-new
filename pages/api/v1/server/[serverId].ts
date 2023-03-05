@@ -206,10 +206,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
                 if (members.length === 0) return res.status(400).json({ success: false, message: "No pullable members found" });
 
-                if (user.role !== "free") {
+                switch (user.role) {
+                case "free":
+                    await prisma.servers.update({ where: { id: server.id }, data: { pulling: true, pullTimeout: new Date(Date.now() + 1000 * 60 * 60 * 18) } });
+                    break;
+                case "premium":
+                    await prisma.servers.update({ where: { id: server.id }, data: { pulling: true, pullTimeout: new Date(Date.now() + 1000 * 60 * 60 * 2) } });
+                    break;
+                case "business":
                     await prisma.servers.update({ where: { id: server.id }, data: { pulling: true, pullTimeout: new Date(Date.now() + 1000 * 60 * 30) } });
-                } else { 
-                    await prisma.servers.update({ where: { id: server.id }, data: { pulling: true, pullTimeout: new Date(Date.now() + 1000 * 60 * 60 * 12) } });
                 }
 
                 let succPulled: number = 0;
@@ -274,8 +279,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                 
                                 break;
                             case 400:
-                                console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 400 | ${JSON.stringify(response)}`);
-                                erroPulled++;
+                                if (response?.code !== 30001) {
+                                    // console.log(`[${server.name}] [${member.username}] 30001 | ${JSON.stringify(response?.message)}`);
+                                // } else {
+                                    console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 400 | ${JSON.stringify(response)}`);
+                                    erroPulled++;
+                                }
                                 break;
                             default:
                                 console.error(`[FATAL ERROR] [UNDEFINED STATUS] [${server.name}] [${member.id}]-[${member.username}] ${status} | ${JSON.stringify(response)} | ${JSON.stringify(resp)}`);
