@@ -1,11 +1,11 @@
 import { useRouter } from "next/router";
 import { useQuery } from "react-query";
-import { useToken } from "../../src/token";
+import { useToken } from "../../../src/token";
 import { useState } from "react";
 
-import NavBar from "../../components/dashboard/navBar";
-import getUser from "../../src/dashboard/getUser";
-import ErrorPage from "../_error";
+import NavBar from "../../../components/dashboard/navBar";
+import getUser from "../../../src/dashboard/getUser";
+import ErrorPage from "../../_error";
 
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -19,9 +19,9 @@ import TextField from "@mui/material/TextField";
 import axios from "axios";
 import Alert from "@mui/lab/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
-import theme from "../../src/theme";
+import theme from "../../../src/theme";
 
-export default function Admin() {
+export default function AdminUser() {
     const router = useRouter();
     const [token]: any = useToken()
     const [searchQuery, setSearchQuery] = useState("");
@@ -208,68 +208,6 @@ export default function Admin() {
                                     </Stack>
                                 </form>
 
-                                <Typography variant="h6" sx={{ fontWeight: "500", mt: 2 }}>
-                                    Search Server
-                                </Typography>
-                                <form onSubmit={async (e) => {
-                                    e.preventDefault();
-                                    setServer({ id: "", name: "", ownerId: "", guildId: "", roleId: "", picture: "", vpn: false, webhook: "", bgImage: "", description: "", pulling: false, pullTimeout: new Date(0), createdAt: new Date(0) });
-                                    setErrorMessages("");
-                                    await axios.post("/api/admin/server", { query: serverSearchQuery }, {
-                                        headers: {
-                                            Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
-                                        },
-                                    }).then((res: any) => {
-                                        console.log(res.data.user);
-                                        setServer(res.data.server);
-                                    }).catch((err) => {
-                                        console.error(err);
-                                        setErrorMessages(JSON.stringify(err.response.data));
-                                    });
-                                }}>
-                                    <Stack direction="column" spacing={2} >
-                                        <TextField label="Search" variant="outlined" placeholder="Id/Guild Id/Name" onChange={(e) => setServerSearchQuery(e.target.value)} />
-                                        <Button variant="contained" type="submit">
-                                            Get Server Info
-                                        </Button>
-                                        <Button variant="contained" onClick={async (e) => {
-                                            e.preventDefault();
-                                            setErrorMessages("");
-
-                                            await axios.post("/api/admin/reset?option=member", { query: serverSearchQuery }, {
-                                                headers: {
-                                                    Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
-                                                },
-                                            }).then((res: any) => {
-                                                console.log(res.data);
-                                                setSuccessMessage(JSON.stringify(res.data));
-                                            }).catch((err) => {
-                                                console.error(err);
-                                                setErrorMessages(JSON.stringify(err.response.data));
-                                            });
-                                        }}>
-                                            Reset Members & Status
-                                        </Button>
-                                        <Button variant="contained" onClick={async (e) => {
-                                            e.preventDefault();
-                                            setErrorMessages("");
-
-                                            await axios.post("/api/admin/reset?option=cooldown", { query: serverSearchQuery }, {
-                                                headers: {
-                                                    Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
-                                                },
-                                            }).then((res: any) => {
-                                                console.log(res.data);
-                                                setSuccessMessage(JSON.stringify(res.data));
-                                            }).catch((err) => {
-                                                console.error(err);
-                                                setErrorMessages(JSON.stringify(err.response.data));
-                                            });
-                                        }}>
-                                            Reset Cooldown
-                                        </Button>
-                                    </Stack>
-                                </form>
 
                                 {user.id && (
                                     <Paper sx={{ background: "#000", mt: 2, p: 3, borderRadius: "1rem" }}>
@@ -287,29 +225,6 @@ export default function Admin() {
                                             <Typography variant="body1" sx={{ mt: 1 }}>Admin: <code>{user.admin ? "Yes" : "No"}</code></Typography>
                                             <Typography variant="body1" sx={{ mt: 1 }}>Last IP: <code>{user.lastIp}</code></Typography>
                                             <Typography variant="body1" sx={{ mt: 1 }}>Creation date: <code>{new Date(user.createdAt).toLocaleString()}</code></Typography>
-                                        </CardContent>
-                                    </Paper>
-                                )}
-
-                                {server.id && (
-                                    <Paper sx={{ background: "#000", mt: 2, p: 3, borderRadius: "1rem" }}>
-                                        <CardContent>
-                                            <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
-                                                Server Info
-                                            </Typography>
-                                            
-                                            <Typography variant="body1" sx={{ mt: 1 }}>ID: <code>{server.id}</code></Typography>
-                                            <Typography variant="body1" sx={{ mt: 1 }}>Name: <code>{server.name}</code></Typography>
-                                            <Typography variant="body1" sx={{ mt: 1 }}>OwnerId: <code>{server.ownerId}</code></Typography>
-                                            <Typography variant="body1" sx={{ mt: 1 }}>GuildId: <code>{server.guildId}</code></Typography>
-                                            <Typography variant="body1" sx={{ mt: 1 }}>RoleId: <code>{server.roleId}</code></Typography>
-                                            <Typography variant="body1" sx={{ mt: 1 }}>VPN Check <code>{server.vpn ? "Enabled" : "Disabled"}</code></Typography>
-                                            <Typography variant="body1" sx={{ mt: 1 }}>Webhook: <code>{server.webhook}</code></Typography>
-                                            <Typography variant="body1" sx={{ mt: 1 }}>BgImage: <code>{server.bgImage}</code></Typography>
-                                            <Typography variant="body1" sx={{ mt: 1 }}>Description: <code>{server.description}</code></Typography>
-                                            <Typography variant="body1" sx={{ mt: 1 }}>Pulling: <code>{server.pulling ? "Yes" : "No"}</code></Typography>
-                                            <Typography variant="body1" sx={{ mt: 1 }}>Pull timeout: <code>{new Date(server.pullTimeout).toLocaleString()}</code></Typography>
-                                            <Typography variant="body1" sx={{ mt: 1 }}>Creation date: <code>{new Date(server.createdAt).toLocaleString()}</code></Typography>
                                         </CardContent>
                                     </Paper>
                                 )}

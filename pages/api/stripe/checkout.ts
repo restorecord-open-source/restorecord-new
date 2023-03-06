@@ -30,6 +30,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             paymentid = await stripe.prices.retrieve("price_1MVilKIDsTail4YBdF2GvIUi"); // PREMIUM 1 YEAR (15 EUR)
         }
 
+        const planFormatted = (plan.charAt(0).toUpperCase() + plan.slice(1)).replace("_", " ");
+
         const session = await stripe.checkout.sessions.create({
             line_items: [
                 {
@@ -47,6 +49,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 plan: plan,
             },
             subscription_data: {
+                description: `RestoreCord ${planFormatted} Subscription`,
                 metadata: {
                     account_id: user.id,
                     plan: plan,

@@ -280,8 +280,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                 break;
                             case 400:
                                 if (response?.code !== 30001) {
-                                    // console.log(`[${server.name}] [${member.username}] 30001 | ${JSON.stringify(response?.message)}`);
-                                // } else {
                                     console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 400 | ${JSON.stringify(response)}`);
                                     erroPulled++;
                                 }
