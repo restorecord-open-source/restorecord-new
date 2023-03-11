@@ -29,34 +29,7 @@ export default function AdminUser() {
     const [errorMessages, setErrorMessages]: any = useState("");
     const [successMessage, setSuccessMessage]: any = useState("");
 
-    // create blank object for user data
-    const [user, setUser] = useState({
-        id: "",
-        username: "",
-        email: "",
-        role: "",
-        twoFactor: false,
-        expiry: new Date(0),
-        admin: false,
-        lastIp: "",
-        createdAt: new Date(0),
-    });
-
-    const [server, setServer] = useState({
-        id: "",
-        name: "",
-        ownerId: "",
-        guildId: "",
-        roleId: "",
-        picture: "",
-        vpn: false,
-        webhook: "",
-        bgImage: "",
-        description: "",
-        pulling: false,
-        pullTimeout: new Date(0),
-        createdAt: new Date(0),
-    });
+    const [users, setUsers]: any = useState({});
 
     const { data, isError, isLoading } = useQuery('user', async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
@@ -90,32 +63,13 @@ export default function AdminUser() {
                     <Container maxWidth="xl">
                         <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
                             <CardContent>
-                                <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                                <Typography variant="h5" sx={{ mb: 2, fontWeight: "500" }}>
                                     Admin
                                 </Typography>
 
-                                {/* <Stack direction="row" spacing={2}>
-                                    <Button variant="contained" sx={{ textTransform: "none" }} onClick={() => { 
-                                        function a(e: any) {
-                                            for (var t = "https://reactjs.org/docs/error-decoder.html?invariant=" + e, n = 1; n < arguments.length; n++)
-                                                t += "&args[]=" + encodeURIComponent(arguments[n]);
-                                            return "Minified React error #" + e + "; visit " + t + " for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
-                                        }
-                                        throw Error(a("[object Object]" === Object.prototype.toString.call({}) ? "object with keys {" + Object.keys({}).join(", ") + "}" : {}))
-                                    }}>
-                                        Trigger react error
-                                    </Button>
-                                    <Button variant="contained" sx={{ textTransform: "none" }} onClick={() => { throw Error("help") }}>
-                                        Trigger onClick error
-                                    </Button>
-                                </Stack> */}
-
-                                <Typography variant="h5" sx={{ mt: 2, fontWeight: "500" }}>
-                                    Search User
-                                </Typography>
                                 <form onSubmit={async (e) => {
                                     e.preventDefault();
-                                    setUser({ id: "", username: "", email: "", role: "", twoFactor: false, expiry: new Date(0), admin: false, lastIp: "", createdAt: new Date(0) });
+                                    setUsers({});
                                     setErrorMessages("");
                                     await axios.post("/api/admin/lookup", { query: searchQuery }, {
                                         headers: {
@@ -123,7 +77,7 @@ export default function AdminUser() {
                                         },
                                     }).then((res: any) => {
                                         console.log(res.data.user);
-                                        setUser(res.data.user);
+                                        setUsers(res.data.users);
                                     }).catch((err) => {
                                         console.error(err);
                                         setErrorMessages(JSON.stringify(err.response.data));
@@ -132,102 +86,50 @@ export default function AdminUser() {
                                     <Stack direction="column" spacing={2}>
                                         <TextField label="Search" variant="outlined" placeholder="User ID/Username/Email" onChange={(e) => setSearchQuery(e.target.value)} />
                                         <Button variant="contained" type="submit">Get user info</Button>
-                                        <Stack direction="row" justifyContent="space-between" alignContent={"center"} sx={{ flexDirection: { xs: "column", sm: "row" } }}>
-                                            <Button variant="contained" sx={{ width: "100%", backgroundColor: theme.palette.yellow.main, color: "#000000" }} onClick={async (e) => {
-                                                e.preventDefault();
-
-                                                await axios.post("/api/admin/plan", { user: searchQuery }, {
-                                                    headers: {
-                                                        Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
-                                                    }
-                                                }).then((res: any) => {
-                                                    console.log(res.data);
-                                                    setSuccessMessage(JSON.stringify(res.data));
-                                                }).catch((err) => {
-                                                    setErrorMessages(JSON.stringify(err.response.data));
-                                                });
-                                            }}>Add PREMIUM 1 MONTH</Button>
-                                            <Button variant="contained" sx={{ width: "100%", backgroundColor: theme.palette.yellow.main, color: "#000000" }} onClick={async (e) => {
-                                                e.preventDefault();
-
-                                                await axios.post("/api/admin/plan", { user: searchQuery }, {
-                                                    headers: {
-                                                        Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
-                                                    }
-                                                }).then((res: any) => {
-                                                    console.log(res.data);
-                                                    setSuccessMessage(JSON.stringify(res.data));
-                                                }).catch((err) => {
-                                                    setErrorMessages(JSON.stringify(err.response.data));
-                                                });
-                                            }}>Add PREMIUM 1 YEAR</Button>
-                                            <Button variant="contained" sx={{ width: "100%", backgroundColor: theme.palette.primary.main, color: "#ffffff" }} onClick={async (e) => {
-                                                e.preventDefault();
-
-                                                await axios.post("/api/admin/plan", { user: searchQuery }, {
-                                                    headers: {
-                                                        Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
-                                                    }
-                                                }).then((res: any) => {
-                                                    console.log(res.data);
-                                                    setSuccessMessage(JSON.stringify(res.data));
-                                                }).catch((err) => {
-                                                    setErrorMessages(JSON.stringify(err.response.data));
-                                                });
-                                            }}>Add BUSINESS 1 MONTH</Button>
-                                            <Button variant="contained" sx={{ width: "100%", backgroundColor: theme.palette.primary.main, color: "#ffffff" }} onClick={async (e) => {
-                                                e.preventDefault();
-
-                                                await axios.post("/api/admin/plan", { user: searchQuery }, {
-                                                    headers: {
-                                                        Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
-                                                    }
-                                                }).then((res: any) => {
-                                                    console.log(res.data);
-                                                    setSuccessMessage(JSON.stringify(res.data));
-                                                }).catch((err) => {
-                                                    setErrorMessages(JSON.stringify(err.response.data));
-                                                });
-                                            }}>Add BUSINESS 1 YEAR</Button>
-                                            <Button variant="contained" sx={{ width: "100%", backgroundColor: theme.palette.error.main, color: "#ffffff" }} onClick={async (e) => {
-                                                e.preventDefault();
-
-                                                await axios.post("/api/admin/plan", { user: searchQuery }, {
-                                                    headers: {
-                                                        Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
-                                                    }
-                                                }).then((res: any) => {
-                                                    console.log(res.data);
-                                                    setSuccessMessage(JSON.stringify(res.data));
-                                                }).catch((err) => {
-                                                    setErrorMessages(JSON.stringify(err.response.data));
-                                                });
-                                            }}>REMOVE ALL</Button>
-                                        </Stack>
-
                                     </Stack>
                                 </form>
-
-
-                                {user.id && (
-                                    <Paper sx={{ background: "#000", mt: 2, p: 3, borderRadius: "1rem" }}>
-                                        <CardContent>
-                                            <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
-                                                User info
-                                            </Typography>
-
-                                            <Typography variant="body1" sx={{ mt: 1 }}>ID: <code>{user.id}</code></Typography>
-                                            <Typography variant="body1" sx={{ mt: 1 }}>Username: <code>{user.username}</code></Typography>
-                                            <Typography variant="body1" sx={{ mt: 1 }}>Email: <code>{user.email}</code></Typography>
-                                            <Typography variant="body1" sx={{ mt: 1 }}>Subscription: <code>{user.role}</code></Typography>
-                                            <Typography variant="body1" sx={{ mt: 1 }}>Expires: <code>{new Date(user.expiry).toLocaleString()}</code></Typography>
-                                            <Typography variant="body1" sx={{ mt: 1 }}>2FA: <code>{user.twoFactor ? "Enabled" : "Disabled"}</code></Typography>
-                                            <Typography variant="body1" sx={{ mt: 1 }}>Admin: <code>{user.admin ? "Yes" : "No"}</code></Typography>
-                                            <Typography variant="body1" sx={{ mt: 1 }}>Last IP: <code>{user.lastIp}</code></Typography>
-                                            <Typography variant="body1" sx={{ mt: 1 }}>Creation date: <code>{new Date(user.createdAt).toLocaleString()}</code></Typography>
-                                        </CardContent>
-                                    </Paper>
-                                )}
+                                
+                                {users.length > 0 && ( <>
+                                    {users.map((user: any) => (
+                                        <Paper sx={{ background: "#000", mt: 2, p: 3, borderRadius: "1rem" }} key={user.id}>
+                                            <Stack direction={{ xs: "column", md: "row" }} spacing={2} justifyContent="space-between">
+                                                <CardContent>
+                                                    {Object.entries(user).map(([key, value]) => {
+                                                        if (typeof value === "string") {
+                                                            return (<Typography variant="body1" sx={{ mb: 1 }} key={key}>{key}: <code>{value}</code></Typography>);
+                                                        } else if (value instanceof Date || key === "createdAt" || key === "updatedAt") {
+                                                            return (<Typography variant="body1" sx={{ mb: 1 }} key={key}>{key}: <code>{new Date(value as any).toLocaleDateString()}</code></Typography>);
+                                                        } else if (typeof value === "boolean") {
+                                                            return (<Typography variant="body1" sx={{ mb: 1 }} key={key}>{key}: <code>{value ? "Yes" : "No"}</code></Typography>);
+                                                        } else {
+                                                            return (<Typography variant="body1" sx={{ mb: 1 }} key={key}>{key}: <code>{JSON.stringify(value)}</code></Typography>);
+                                                        }
+                                                    })}
+                                                </CardContent>
+                                                <CardContent>
+                                                    {/* Upgrade, Update Email, Disable 2FA, Ban */}
+                                                    <Stack direction="column" spacing={2}>
+                                                        <Button variant="contained" color="info" onClick={() => {
+                                                            console.log("more info");
+                                                        }}>More info</Button>
+                                                        <Button variant="contained" color="yellow" onClick={() => {
+                                                            console.log("upgrade");
+                                                        }}>Upgrade</Button>
+                                                        <Button variant="contained" color="primary" onClick={() => {
+                                                            console.log("update email");
+                                                        }}>Update Email</Button>
+                                                        <Button variant="contained" color="error" onClick={() => {
+                                                            console.log("disable 2fa");
+                                                        }}>Disable 2FA</Button>
+                                                        <Button variant="contained" color="error" onClick={() => {
+                                                            console.log("ban");
+                                                        }}>Ban</Button>
+                                                    </Stack>
+                                                </CardContent>
+                                            </Stack>
+                                        </Paper>
+                                    ))}
+                                </> )}
                             </CardContent>
                             
                             {errorMessages && (

@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import { useQuery } from "react-query";
 import { useToken } from "../../../src/token";
 import { useEffect, useState } from "react";
+import { useTheme } from "@mui/material/styles";
 
 import NavBar from "../../../components/dashboard/navBar";
 import getUser from "../../../src/dashboard/getUser";
@@ -31,33 +32,30 @@ import SavingsIcon from "@mui/icons-material/Savings";
 import PaymentIcon from "@mui/icons-material/Payment";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import PaymentsIcon from "@mui/icons-material/Payments";
+import TableHead from "@mui/material/TableHead";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import theme from "../../../src/theme";
 
 export default function Admin() {
     const router = useRouter();
+    const isMobile = useMediaQuery(useTheme().breakpoints.down("md"));
     const [token]: any = useToken();
-    const [stats, setStats]: any = useState({});
 
     const { data, isError, isLoading } = useQuery("user", async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
-    }), { retry: false,  refetchOnWindowFocus: false });
+    }), { retry: true, refetchOnWindowFocus: false });
 
-    useEffect(() => {
-        fetch("/api/admin/stats", {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
-            },
-        }).then(res => res.json()).then(data => {
-            setStats(data);
-        }).catch(err => {
-            console.log(err);
-        });
-    }, []);
+
+    const { data: stats, isError: statsError, isLoading: statsLoading } = useQuery("stats", async () => await fetch("/api/admin/stats", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+        }
+    }).then(res => res.json()), { retry: true, refetchOnWindowFocus: true, refetchInterval: 1000, refetchIntervalInBackground: true, refetchOnMount: true, refetchOnReconnect: true });
 
     if (isLoading) return <CircularProgress />
-    if (isError) return <div>Error</div>
+    if (isError || statsError) return <div>Error</div>
 
     if (!data || !data.username) {
         router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
@@ -66,6 +64,22 @@ export default function Admin() {
     }
 
     if (!data.admin) return <ErrorPage statusCode={404} /> 
+
+
+    function relativeTime(date: Date): string {
+        const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+        return seconds < 0 ? `in ${-seconds / 3600} hours` : seconds < 60 ? 'just now' : seconds < 3600 ? `${Math.floor(seconds / 60)} minutes ago` : seconds < 86400 ? `${Math.floor(seconds / 3600)} hours ago` : seconds < 2592000 ? `${Math.floor(seconds / 86400)} days ago` : `in ${Math.floor(seconds / 2592000)} months`;
+    }
+            
+
+    function tableElement(name: string, value: string, icon?: any) {
+        return (
+            <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                <TableCell component="th" scope="row"><Typography variant="body1" sx={{ fontWeight: "600" }}>{icon}{name}</Typography></TableCell>
+                <TableCell><Typography variant="body1">{value}</Typography></TableCell>
+            </TableRow>
+        )
+    }
 
 
 
@@ -78,11 +92,11 @@ export default function Admin() {
                     <Container maxWidth="xl">
                         <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
                             <CardContent>
-                                <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                                <Typography variant="h5" sx={{ mb: 2, fontWeight: "500" }}>
                                     Admin Panel
                                 </Typography>
 
-                                <Stack direction="row" justifyContent="flex-start" alignItems="center" spacing={2} divider={<Divider orientation="vertical" flexItem />}>
+                                <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="flex-start" alignItems="center" spacing={{ xs: 1, sm: 2 }}>
                                     <Button variant="contained" href="/dashboard/admin/user"><GroupIcon sx={{ mr: 1 }} />User</Button>
                                     <Button variant="contained" href="/dashboard/admin/servers"><StorageIcon sx={{ mr: 1 }} />Servers</Button>
                                     <Button variant="contained" href="/dashboard/admin/bots"><SmartToyIcon sx={{ mr: 1 }} />Bots</Button>
@@ -92,70 +106,71 @@ export default function Admin() {
                         </Paper>
                         
                         {/* 2 split with stats and last purchases */}
-                        <Stack direction="row" justifyContent="space-between" spacing={2} sx={{ mt: 2 }}>
+                        <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={{ xs: 1, sm: 2 }} sx={{ mt: 1 }}>
+                            
                             <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", width: "100%" }}>
                                 <CardContent>
                                     <Typography variant="h5" sx={{ mb: 2, fontWeight: "500" }}>
                                         Stats
                                     </Typography>
 
-                                    {stats.accounts ? (
+                                    {statsLoading ? <CircularProgress /> : (
                                         <TableContainer component={Paper} sx={{ borderRadius: "1rem", boxShadow: "0 0 0 0", border: `1px solid ${theme.palette.divider}` }}>
                                             <Table>
                                                 <TableBody>
-                                                    <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                                                        <TableCell component="th" scope="row"><Typography variant="body1" sx={{ fontWeight: "600" }}><PeopleIcon sx={{ mr: 1, mb: -0.75 }} />Accounts</Typography></TableCell>
-                                                        <TableCell><Typography variant="body1">{stats.accounts}</Typography></TableCell>
-                                                    </TableRow>
-                                                    <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                                                        <TableCell component="th" scope="row"><Typography variant="body1" sx={{ fontWeight: "600" }}><SavingsIcon sx={{ mr: 1, mb: -0.75 }} />Premium Accounts</Typography></TableCell>
-                                                        <TableCell><Typography variant="body1">{stats.accountsPremium}</Typography></TableCell>
-                                                    </TableRow>
-                                                    <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                                                        <TableCell component="th" scope="row"><Typography variant="body1" sx={{ fontWeight: "600" }}><PaymentIcon sx={{ mr: 1, mb: -0.75 }} />Business Accounts</Typography></TableCell>
-                                                        <TableCell><Typography variant="body1">{stats.accountsBusiness}</Typography></TableCell>
-                                                    </TableRow>
-                                                    <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                                                        <TableCell component="th" scope="row"><Typography variant="body1" sx={{ fontWeight: "600" }}><StorageIcon sx={{ mr: 1, mb: -0.75 }} />Servers</Typography></TableCell>
-                                                        <TableCell><Typography variant="body1">{stats.servers}</Typography></TableCell>
-                                                    </TableRow>
-                                                    <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                                                        <TableCell component="th" scope="row"><Typography variant="body1" sx={{ fontWeight: "600" }}><SmartToyIcon sx={{ mr: 1, mb: -0.75 }} />Bots</Typography></TableCell>
-                                                        <TableCell><Typography variant="body1">{stats.customBots}</Typography></TableCell>
-                                                    </TableRow>
-                                                    <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                                                        <TableCell component="th" scope="row"><Typography variant="body1" sx={{ fontWeight: "600" }}><PaymentsIcon sx={{ mr: 1, mb: -0.75 }} />Payments</Typography></TableCell>
-                                                        <TableCell><Typography variant="body1">{stats.paymentsCompleted}</Typography></TableCell>
-                                                    </TableRow>
-                                                    <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                                                        <TableCell component="th" scope="row"><Typography variant="body1" sx={{ fontWeight: "600" }}><AccountBalanceIcon sx={{ mr: 1, mb: -0.75 }} />Total Revenue</Typography></TableCell>
-                                                        <TableCell><Typography variant="body1">${stats.totalRevenue} (Today: ${stats.totalRevenueToday})</Typography></TableCell>
-                                                    </TableRow>
+                                                    {tableElement("Accounts", stats.accounts, <PeopleIcon sx={{ mr: 1, mb: -0.75 }} />)}
+                                                    {tableElement("Premium", stats.accountsPremium, <SavingsIcon sx={{ mr: 1, mb: -0.75 }} />)}
+                                                    {tableElement("Business", stats.accountsBusiness, <PaymentsIcon sx={{ mr: 1, mb: -0.75 }} />)}
+                                                    {tableElement("Servers", stats.servers, <StorageIcon sx={{ mr: 1, mb: -0.75 }} />)}
+                                                    {tableElement("Bots", stats.customBots, <SmartToyIcon sx={{ mr: 1, mb: -0.75 }} />)}
+                                                    {tableElement("Payments", stats.payments, <PaymentIcon sx={{ mr: 1, mb: -0.75 }} />)}
+                                                    {tableElement("Revenue", `$${stats.totalRevenue}`, <AccountBalanceIcon sx={{ mr: 1, mb: -0.75 }} />)}
                                                 </TableBody>
                                             </Table>
                                         </TableContainer>
-                                    ) : ( <CircularProgress /> )}
-
+                                    )}
                                 </CardContent>
                             </Paper>
-
 
                             <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", width: "100%" }}>
                                 <CardContent>
                                     <Typography variant="h5" sx={{ mb: 2, fontWeight: "500" }}>
                                         Last Purchases
                                     </Typography>
+                                    <Typography variant="body1" sx={{ mb: 2, fontWeight: "500" }}>
+                                        {statsLoading ? <CircularProgress /> : (<>
+                                            Revenue Last 24h: ${stats.totalRevenueToday}<br />
+                                            Revenue Last 7d: ${stats.totalRevenue7d}<br />
+                                            Revenue Last 30d: ${stats.totalRevenue30d}<br />
+                                        </>)}
+                                    </Typography>
 
-                                    <TableContainer component={Paper} sx={{ borderRadius: "1rem", boxShadow: "0 0 0 0", border: `1px solid ${theme.palette.divider}` }}>
-                                        <Table>
-                                            <TableBody>
-                                                <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                                                    <TableCell component="th" scope="row"><Typography variant="body1" sx={{ fontWeight: "600" }}>x</Typography></TableCell>
-                                                    <TableCell><Typography variant="body1">uncomplete</Typography></TableCell>
-                                                </TableRow>
-                                            </TableBody>
-                                        </Table>
-                                    </TableContainer>
+                                    {statsLoading ? <CircularProgress /> : (
+                                        <TableContainer component={Paper} sx={{ borderRadius: "1rem", boxShadow: "0 0 0 0", border: `1px solid ${theme.palette.divider}` }}>
+                                            <Table>
+                                                <TableHead>
+                                                    <TableRow>
+                                                        {isMobile ? ( <></> ) : ( <TableCell><Typography variant="body1" sx={{ fontWeight: "600" }}>ID</Typography></TableCell> )}
+                                                        <TableCell><Typography variant="body1" sx={{ fontWeight: "600" }}>Plan</Typography></TableCell>
+                                                        <TableCell><Typography variant="body1" sx={{ fontWeight: "600" }}>Username</Typography></TableCell>
+                                                        <TableCell><Typography variant="body1" sx={{ fontWeight: "600" }}>Date</Typography></TableCell>
+                                                    </TableRow>
+                                                </TableHead>
+                                                <TableBody>
+                                                    {stats.lastPurchases.map((purchase: any, index: any) => (
+                                                        <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }} key={index}>
+                                                            {isMobile ? ( <></> ) : ( <TableCell component="th" scope="row"><Typography variant="body1">{purchase.id}</Typography></TableCell> )}
+                                                            <TableCell><Typography variant="body1">{purchase.plan}</Typography></TableCell>
+                                                            <TableCell><Typography variant="body1">{purchase.username}</Typography></TableCell>
+                                                            {/* <TableCell><Typography variant="body1">{purchase.date}</Typography></TableCell> */}
+                                                            {/* convert date to relative time like 7s ago etc */}
+                                                            <TableCell><Typography variant="body1">{relativeTime(new Date(purchase.date))}</Typography></TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
+                                        </TableContainer>
+                                    )}
 
                                 </CardContent>
                             </Paper>
