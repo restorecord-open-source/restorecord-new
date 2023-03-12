@@ -33,14 +33,8 @@ export async function addMember(guildId: string, userId: string, botToken: any, 
         proxy: false,
         httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
     })
-        .then(async (res: any) => { 
-            console.log(res);
-            return res;
-        })
-        .catch(async (err: any) => { 
-            console.error(err);
-            return err;
-        });
+        .then(async (res: any) => {  return res; })
+        .catch(async (err: any) => { return err; });
 }
   
 

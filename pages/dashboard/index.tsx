@@ -254,7 +254,7 @@ export default function Dashboard() {
                         {!isLoading2 && data2.servers.map((server: any) => { 
                             return (
                                 <List key={server.id} sx={{ width: "100%", maxWidth: 360 }}>
-                                    {server.members.map((member: any, index: any) => {
+                                    {server.members.map((member: any) => {
                                         memId++;
                                         if (memId > 3) return;
 

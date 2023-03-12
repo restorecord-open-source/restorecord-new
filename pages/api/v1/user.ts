@@ -1,14 +1,15 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import rateLimit from "../../../src/rate-limit";
-import { prisma } from "../../../src/db";
-import { compare, hash } from "bcrypt";
 import { getBrowser, getIPAddress, getPlatform } from "../../../src/getIPAddress";
-import Email from "../../../src/email";
 import { accounts, backups, customBots, servers } from "@prisma/client";
-import * as speakeasy from "speakeasy";
+import { NextApiRequest, NextApiResponse } from "next";
+import { createRedisInstance } from "../../../src/Redis";
 import { generateQRUrl } from "../../../src/functions";
-import axios from "axios";
+import { compare, hash } from "bcrypt";
+import { prisma } from "../../../src/db";
 import withAuthentication from "../../../src/withAuthentication";
+import rateLimit from "../../../src/rate-limit";
+import Email from "../../../src/email";
+import * as speakeasy from "speakeasy";
+import axios from "axios";
 
 const limiter = rateLimit({
     interval: 60 * 1000,
@@ -22,7 +23,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             try {
                 limiter.check(res, 500, "CACHE_TOKEN");
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
-                
+
                 const servers = await prisma.servers.findMany({ where: { ownerId: user.id } });
                 const backups = await prisma.backups.findMany({ where: { guildId: { in: servers.map(s => s.guildId) } } });
                 const customBots = await prisma.customBots.findMany({ where: { ownerId: user.id } });
@@ -46,7 +47,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     }
                 })
 
-                return res.status(200).json({ 
+                const response = {
                     success: true,
                     id: user.id,
                     username: user.username,
@@ -80,7 +81,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         botSecret: bot.botSecret,
                         customDomain: bot.customDomain ? bot.customDomain : null,
                     })),
-                });
+                };
+
+                return res.status(200).json(response);
             }
             catch (err: any) {
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });

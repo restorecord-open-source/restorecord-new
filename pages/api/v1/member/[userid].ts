@@ -1,12 +1,16 @@
+import { addMember, addRole, refreshTokenAddDB } from "../../../../src/Migrate";
 import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "../../../../src/db";
-import rateLimit from "../../../../src/rate-limit";
-import { addMember, addRole, refreshTokenAddDB } from "../../../../src/Migrate";
 import { ProxyCheck } from "../../../../src/proxycheck";
-import axios from "axios";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { accounts } from "@prisma/client";
+import { createRedisInstance } from "../../../../src/Redis";
 import withAuthentication from "../../../../src/withAuthentication";
+import rateLimit from "../../../../src/rate-limit";
+import axios from "axios";
+
+const redis = createRedisInstance();
+
 
 const limiter = rateLimit({
     uniqueTokenPerInterval: 500,
@@ -25,6 +29,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
                 const servers = await prisma.servers.findMany({ where: { ownerId: user.id } });
                 if (!servers) return res.status(400).json({ success: false, message: "No servers found." });
+
+                const cached = await redis.get(`member:${userId}`);
+                if (cached) return res.status(200).json(JSON.parse(cached));
 
                 let guildIds: any = [];
                 guildIds = servers.map((server: any) => server.guildId);
@@ -59,8 +66,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
                     console.log(`${member.username} ${resp.status}`);
 
-                    if (resp.status !== 200) {
-                        return res.status(200).json({ success: true, member: {
+                    let response: any = { 
+                        success: true,
+                        member: {
                             id: String(member.userId),
                             username: member.username.split("#")[0],
                             discriminator: member.username.split("#")[1],
@@ -78,11 +86,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                     vpn: pCheck[usrIP].vpn,
                                 }
                             })
-                        } });
+                        } 
+                    };
+
+                    if (resp.status !== 200) {
+                        await redis.set(`member:${userId}`, JSON.stringify(response), "EX", 3600);
+                        return res.status(200).json(response);
                     }
-
-
-                    if (resp.status === 200) {
+                    else if (resp.status === 200) {
                         await prisma.members.update({
                             where: {
                                 id: member.id,
@@ -93,33 +104,39 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             }
                         });
 
-                        return res.status(200).json({ success: true, member: {
-                            id: json.id,
-                            username: json.username,
-                            discriminator: json.discriminator,
-                            avatar: json.avatar ? json.avatar : String(json.discriminator % 5),
-                            bot: json.bot,
-                            system: json.system,
-                            mfa_enabled: user.role === "business" ? json.mfa_enabled : undefined,
-                            locale: user.role === "business" ? json.locale : undefined,
-                            banner: json.banner,
-                            flags: json.flags,
-                            premium_type: json.premium_type,
-                            public_flags: json.public_flags,
-                            ip: user.role !== "free" ? member.ip : undefined,
-                            ...(user.role !== "free" && {
-                                location: {
-                                    ...(user.role === "business" && { provider: pCheck[usrIP].provider }),
-                                    continent: pCheck[usrIP].continent,
-                                    isocode: pCheck[usrIP].isocode,
-                                    country: pCheck[usrIP].country,
-                                    region: pCheck[usrIP].region,
-                                    city: pCheck[usrIP].city,
-                                    ...(user.role === "business" && { type: pCheck[usrIP].type }),
-                                    vpn: pCheck[usrIP].vpn,
-                                }
-                            })
-                        } });
+                        response = {
+                            success: true, 
+                            member: {
+                                id: json.id,
+                                username: json.username,
+                                discriminator: json.discriminator,
+                                avatar: json.avatar ? json.avatar : String(json.discriminator % 5),
+                                bot: json.bot,
+                                system: json.system,
+                                mfa_enabled: user.role === "business" ? json.mfa_enabled : undefined,
+                                locale: user.role === "business" ? json.locale : undefined,
+                                banner: json.banner,
+                                flags: json.flags,
+                                premium_type: json.premium_type,
+                                public_flags: json.public_flags,
+                                ip: user.role !== "free" ? member.ip : undefined,
+                                ...(user.role !== "free" && {
+                                    location: {
+                                        ...(user.role === "business" && { provider: pCheck[usrIP].provider }),
+                                        continent: pCheck[usrIP].continent,
+                                        isocode: pCheck[usrIP].isocode,
+                                        country: pCheck[usrIP].country,
+                                        region: pCheck[usrIP].region,
+                                        city: pCheck[usrIP].city,
+                                        ...(user.role === "business" && { type: pCheck[usrIP].type }),
+                                        vpn: pCheck[usrIP].vpn,
+                                    }
+                                })
+                            }
+                        };
+
+                        await redis.set(`member:${userId}`, JSON.stringify(response), "EX", 3600);
+                        return res.status(200).json(response);
                     }
 
                 }).catch(err => {

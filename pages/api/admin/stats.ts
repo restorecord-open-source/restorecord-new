@@ -1,9 +1,9 @@
 import { accounts } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "../../../src/db";
+import { createRedisInstance } from "../../../src/Redis";
 import withAuthentication from "../../../src/withAuthentication";
-import Redis from "ioredis"
-let redis = new Redis("redis://127.0.0.1:6379");
+const redis = createRedisInstance();
 
 async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts) {
     return new Promise(async resolve => {
@@ -12,11 +12,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             try {
                 if (!user.admin) return res.status(400).json({ success: false, message: "Account is not an admin." });
 
+
+                const cached = await redis.get("adminStats");
+                if (cached) return res.status(200).json(JSON.parse(cached));
+
                 const accounts = await prisma.accounts.count();
                 const accountsBusiness = await prisma.accounts.count({ where: { role: "business" } });
                 const accountsPremium = await prisma.accounts.count({ where: { role: "premium" } });
                 const servers = await prisma.servers.count();
                 const serversPulling = await prisma.servers.count({ where: { pulling: true } });
+                const members = await prisma.members.count();
                 const customBots = await prisma.customBots.count();
                 const payments = await prisma.payments.count();
                 const paymentsCompleted = await prisma.payments.findMany({ where: { OR: [{ payment_status: "CONFIRMED" }, { payment_status: "active" }] } });
@@ -41,6 +46,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     accountsPremium: accountsPremium,
                     servers: servers,
                     serversPulling: serversPulling,
+                    members: members,
                     customBots: customBots,
                     payments: payments,
                     paymentsCompleted: paymentsCompleted.length,
@@ -51,14 +57,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     lastPurchases: lastPurchases
                 };
 
-                await redis.get("adminStats", async (err, result) => {
-                    if (result) {
-                        return res.status(200).json(JSON.parse(result));
-                    } else if (err || !result) {
-                        await redis.set("adminStats", JSON.stringify(response), "EX", 15);
-                        return res.status(200).json(response);
-                    }
-                });
+                await redis.set("adminStats", JSON.stringify(response), "EX", 15);
+                return res.status(200).json(response);
             }
             catch (e: any) {
                 console.error(e);

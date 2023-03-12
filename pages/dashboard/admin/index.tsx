@@ -28,7 +28,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableRow from "@mui/material/TableRow";
 import PeopleIcon from "@mui/icons-material/People";
 import SavingsIcon from "@mui/icons-material/Savings";
-import PaymentIcon from "@mui/icons-material/Payment";
+import GroupsIcon from "@mui/icons-material/Groups";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import PaymentsIcon from "@mui/icons-material/Payments";
 import TableHead from "@mui/material/TableHead";
@@ -64,12 +64,10 @@ export default function Admin() {
 
     if (!data.admin) return <ErrorPage statusCode={404} /> 
 
-
     function relativeTime(date: Date): string {
         const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
         return seconds < 0 ? `in ${-seconds / 3600} hours` : seconds < 60 ? "just now" : seconds < 3600 ? `${Math.floor(seconds / 60)} minutes ago` : seconds < 86400 ? `${Math.floor(seconds / 3600)} hours ago` : seconds < 2592000 ? `${Math.floor(seconds / 86400)} days ago` : `in ${Math.floor(seconds / 2592000)} months`;
     }
-            
 
     function tableElement(name: string, value: string, icon?: any) {
         return (
@@ -79,8 +77,6 @@ export default function Admin() {
             </TableRow>
         )
     }
-
-
 
     return (
         <>
@@ -106,7 +102,6 @@ export default function Admin() {
                         
                         {/* 2 split with stats and last purchases */}
                         <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={{ xs: 1, sm: 2 }} sx={{ mt: 1 }}>
-                            
                             <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", width: "100%" }}>
                                 <CardContent>
                                     <Typography variant="h5" sx={{ mb: 2, fontWeight: "500" }}>
@@ -121,9 +116,9 @@ export default function Admin() {
                                                     {tableElement("Premium", stats.accountsPremium, <SavingsIcon sx={{ mr: 1, mb: -0.75 }} />)}
                                                     {tableElement("Business", stats.accountsBusiness, <PaymentsIcon sx={{ mr: 1, mb: -0.75 }} />)}
                                                     {tableElement("Servers", stats.servers, <StorageIcon sx={{ mr: 1, mb: -0.75 }} />)}
+                                                    {tableElement("Members", stats.members.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), <GroupsIcon sx={{ mr: 1, mb: -0.75 }} />)}
                                                     {tableElement("Bots", stats.customBots, <SmartToyIcon sx={{ mr: 1, mb: -0.75 }} />)}
-                                                    {tableElement("Payments", stats.payments, <PaymentIcon sx={{ mr: 1, mb: -0.75 }} />)}
-                                                    {tableElement("Revenue", `$${stats.totalRevenue}`, <AccountBalanceIcon sx={{ mr: 1, mb: -0.75 }} />)}
+                                                    {tableElement("Revenue", `$${stats.totalRevenue} (${stats.payments})`, <AccountBalanceIcon sx={{ mr: 1, mb: -0.75 }} />)}
                                                 </TableBody>
                                             </Table>
                                         </TableContainer>
