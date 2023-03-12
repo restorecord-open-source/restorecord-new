@@ -35,7 +35,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 const server = await prisma.servers.findFirst({
                     where: {
                         OR: [
-                            { name: data.serverName },
+                            { name: data.serverName.toLowerCase() },
                             { guildId: BigInt(data.guildId) },
                             { roleId: BigInt(data.roleId) },
                         ],

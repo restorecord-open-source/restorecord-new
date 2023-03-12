@@ -101,7 +101,7 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
             });
             console.log(`[INFO] Refreshed token for ${userId} in ${guildId}`);
             await addMember(guildId, userId, botToken, resp.data.access_token, roleId ? [BigInt(roleId).toString()] : undefined).then(async (res: any) => {
-                if (res.status === 204) {
+                if (res.status === 204 || res.status === 201) {
                     console.log(`[INFO] Added ${userId} to ${guildId}`);
                     return true;
                 } else {
