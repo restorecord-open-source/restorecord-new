@@ -6,12 +6,13 @@ export default async function getUser(options: any) {
         headers: options,
         validateStatus: () => true
     })
-        .then(res => { 
-            if (res.data.code === 50014) {
+        .then(res => {
+            if (res.data.id) {
+                return res.data
+            }
+            else {
                 window.localStorage.removeItem("token");
                 document.location.href = `/login?redirect_to=${encodeURIComponent(router.pathname)}`;
-            } else {
-                return res.data;
             }
         })
         .catch(err => { return err; });

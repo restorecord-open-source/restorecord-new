@@ -94,13 +94,11 @@ export default function Login() {
                 })
                     .then(res => res.json())
                     .then(res => {
-                        if (res.data.code === 50014) {
-                            localStorage.removeItem("token");
-                        }
-                        else {
-                            // setTimeout(() => router.push("/dashboard"), 100);
-                            // router.push("/dashboard");
+                        if (res.id) {
                             router.push(redirect_to ? redirect_to : "/dashboard");
+                        } else {
+                            window.localStorage.removeItem("token");
+                            window.location.href = "/";
                         }
                     })
                     .catch(err => {
@@ -110,10 +108,8 @@ export default function Login() {
                     });
             }
         }
-        catch (err) {
-            console.error(err);
-        }
-    }, [router]);
+        catch (err: any) {}
+    }, [router, redirect_to]);
 
     return (
         <>

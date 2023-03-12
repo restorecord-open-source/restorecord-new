@@ -1,8 +1,8 @@
 import { stringAvatar } from "../../src/functions";
 import { useToken } from "../../src/token";
 import { useRouter } from "next/router";
-import { useEffect, useState } from 'react'
-import { darken } from '@mui/material/styles';
+import { useEffect, useState } from "react"
+import { darken } from "@mui/material/styles";
 
 import axios from "axios";
 import Link from "next/link"
@@ -185,7 +185,7 @@ export default function DashSettings({ user }: any) {
                         <Dialog open={pullSettings.pullWindow} onClose={() => setPullSettings({ ...pullSettings, pullWindow: false })} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" fullWidth maxWidth="sm">
                             <DialogTitle id="alert-dialog-title">
                                 Migration
-                                <IconButton aria-label="close" onClick={() => setPullSettings({ ...pullSettings, pullWindow: false })} sx={{ position: 'absolute', right: 8, top: 8, color: theme.palette.grey[500] }}>
+                                <IconButton aria-label="close" onClick={() => setPullSettings({ ...pullSettings, pullWindow: false })} sx={{ position: "absolute", right: 8, top: 8, color: theme.palette.grey[500] }}>
                                     <CloseIcon />
                                 </IconButton>
                             </DialogTitle>
@@ -232,19 +232,19 @@ export default function DashSettings({ user }: any) {
                                                         const botRole: any = allRoles.filter((i: any) => i.tags && i.tags.bot_id === botClient?.id);
                                                         if (item.position < botRole[0]?.position && !item.tags) {
                                                             return <MenuItem key={item.id} value={item.id} sx={{ 
-                                                                color: theme.palette.getContrastText(`#${item.color.toString(16).padStart(6, '0')}`), 
-                                                                backgroundColor: `#${item.color.toString(16).padStart(6, '0')}`,
+                                                                color: theme.palette.getContrastText(`#${item.color.toString(16).padStart(6, "0")}`), 
+                                                                backgroundColor: `#${item.color.toString(16).padStart(6, "0")}`,
                                                                 transition: "all 0.1s ease-in-out",
                                                                 "&:hover": {
-                                                                    color: theme.palette.getContrastText(`#${item.color.toString(16).padStart(6, '0')}`),
-                                                                    backgroundColor: darken(`#${item.color.toString(16).padStart(6, '0')}`, 0.25),
+                                                                    color: theme.palette.getContrastText(`#${item.color.toString(16).padStart(6, "0")}`),
+                                                                    backgroundColor: darken(`#${item.color.toString(16).padStart(6, "0")}`, 0.25),
                                                                 },
                                                                 "&.Mui-selected": {
-                                                                    color: theme.palette.getContrastText(`#${item.color.toString(16).padStart(6, '0')}`),
-                                                                    backgroundColor: darken(`#${item.color.toString(16).padStart(6, '0')}`, 0.5),
+                                                                    color: theme.palette.getContrastText(`#${item.color.toString(16).padStart(6, "0")}`),
+                                                                    backgroundColor: darken(`#${item.color.toString(16).padStart(6, "0")}`, 0.5),
                                                                     "&:hover": {
-                                                                        color: theme.palette.getContrastText(`#${item.color.toString(16).padStart(6, '0')}`),
-                                                                        backgroundColor: darken(`#${item.color.toString(16).padStart(6, '0')}`, 0.75),
+                                                                        color: theme.palette.getContrastText(`#${item.color.toString(16).padStart(6, "0")}`),
+                                                                        backgroundColor: darken(`#${item.color.toString(16).padStart(6, "0")}`, 0.75),
                                                                     },
                                                                 },
                                                             }}>{item.name} {allRoles.filter((i: any) => i.name === item.name).length > 1 ? `(${item.id})` : ""}</MenuItem>;

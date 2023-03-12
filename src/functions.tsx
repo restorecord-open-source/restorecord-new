@@ -38,7 +38,7 @@ export function generateQRUrl(secret: string, username: string, issuer: string =
     return otpauth;
 }
 
-export  async function isBreached(pw: string) {
+export async function isBreached(pw: string) {
     const hash = createHash('sha1').update(pw).digest('hex').toUpperCase();
     const prefix = hash.slice(0, 5);
     const suffix = hash.slice(5);
@@ -102,4 +102,3 @@ export function formatEstimatedTime(estimatedTime: any) {
         return `${Math.round(estimatedTime / 1000)} seconds`;
     }
 }
-  

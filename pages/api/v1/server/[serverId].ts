@@ -240,7 +240,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : []).then(async (resp: any) => {
                             let status = resp?.response?.status || resp?.status;
                             let response = ((resp?.response?.data?.message || resp?.response?.data?.code) || (resp?.data?.message || resp?.data?.code)) ? (resp?.response?.data || resp?.data) : "";
-                            
+
                             console.log(`[${server.name}] [${member.username}] ${status} ${JSON.stringify(response).toString() ?? null}`);
                     
                             switch (status) {
@@ -285,7 +285,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                 }
                                 break;
                             default:
-                                console.error(`[FATAL ERROR] [UNDEFINED STATUS] [${server.name}] [${member.id}]-[${member.username}] ${status} | ${JSON.stringify(response)} | ${JSON.stringify(resp)}`);
+                                console.error(`[FATAL ERROR] [UNDEFINED STATUS] [${server.name}] [${member.id}]-[${member.username}] ${status} | ${JSON.stringify(response.message)} | ${JSON.stringify(resp.message)}`);
                                 break;
                             }
                         }).catch(async (err: Error) => {
