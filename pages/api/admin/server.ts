@@ -29,7 +29,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     take: 10,
                 });
 
-                if (!server) return res.status(400).send("Server not found.");
+                if (!server[0]) return res.status(400).send("Server not found.");
 
                 // return res.status(200).json({ success: true,
                 //     users: accSearchResult.map((acc: accounts) => {
@@ -71,19 +71,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             return {
                                 id: server.id,
                                 name: server.name,
-                                guildId: server.guildId,
+                                ownerId: server.ownerId,
+                                guildId: String(server.guildId) as string,
+                                roleId: String(server.roleId) as string,
+                                picture: server.picture,
+                                vpn: server.vpncheck,
+                                webhook: server.webhook,
+                                bgImage: server.bgImage,
+                                description: server.description,
+                                pulling: server.pulling,
+                                pullTimeout: server.pullTimeout,
+                                themeColor: server.themeColor,
                                 createdAt: server.createdAt,
-                                updatedAt: server.updatedAt,
-                                deletedAt: server.deletedAt,
                             }
                         } else {
                             return {
                                 id: server.id,
                                 name: server.name,
-                                guildId: server.guildId,
+                                ownerId: server.ownerId,
+                                guildId: String(server.guildId) as string,
+                                roleId: String(server.roleId) as string,
+                                pulling: server.pulling,
+                                pullTimeout: server.pullTimeout,
                                 createdAt: server.createdAt,
-                                updatedAt: server.updatedAt,
-                                deletedAt: server.deletedAt,
                             }
                         }
                     })

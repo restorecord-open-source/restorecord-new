@@ -1,13 +1,13 @@
 import { useRouter } from "next/router";
 import { useQuery } from "react-query";
 import { useToken } from "../../../src/token";
-import { useEffect, useState } from "react";
 import { useTheme } from "@mui/material/styles";
 
 import NavBar from "../../../components/dashboard/navBar";
 import getUser from "../../../src/dashboard/getUser";
 import ErrorPage from "../../_error";
 
+import Link from "next/link";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
@@ -19,7 +19,6 @@ import Stack from "@mui/material/Stack";
 import CircularProgress from "@mui/material/CircularProgress";
 import GroupIcon from "@mui/icons-material/Group";
 import StorageIcon from "@mui/icons-material/Storage";
-import Divider from "@mui/material/Divider";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import TimelineIcon from "@mui/icons-material/Timeline";
 import Table from "@mui/material/Table";
@@ -68,7 +67,7 @@ export default function Admin() {
 
     function relativeTime(date: Date): string {
         const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
-        return seconds < 0 ? `in ${-seconds / 3600} hours` : seconds < 60 ? 'just now' : seconds < 3600 ? `${Math.floor(seconds / 60)} minutes ago` : seconds < 86400 ? `${Math.floor(seconds / 3600)} hours ago` : seconds < 2592000 ? `${Math.floor(seconds / 86400)} days ago` : `in ${Math.floor(seconds / 2592000)} months`;
+        return seconds < 0 ? `in ${-seconds / 3600} hours` : seconds < 60 ? "just now" : seconds < 3600 ? `${Math.floor(seconds / 60)} minutes ago` : seconds < 86400 ? `${Math.floor(seconds / 3600)} hours ago` : seconds < 2592000 ? `${Math.floor(seconds / 86400)} days ago` : `in ${Math.floor(seconds / 2592000)} months`;
     }
             
 
@@ -96,17 +95,17 @@ export default function Admin() {
                                     Admin Panel
                                 </Typography>
 
-                                <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="flex-start" alignItems="center" spacing={{ xs: 1, sm: 2 }}>
-                                    <Button variant="contained" href="/dashboard/admin/user"><GroupIcon sx={{ mr: 1 }} />User</Button>
-                                    <Button variant="contained" href="/dashboard/admin/servers"><StorageIcon sx={{ mr: 1 }} />Servers</Button>
-                                    <Button variant="contained" href="/dashboard/admin/bots"><SmartToyIcon sx={{ mr: 1 }} />Bots</Button>
-                                    <Button variant="contained" href="/dashboard/admin/stats"><TimelineIcon sx={{ mr: 1 }} />Graphs</Button>
+                                <Stack direction={{ xs: "column", sm: "row" }} justifyContent="flex-start" alignItems="center" spacing={{ xs: 1, sm: 2 }}>
+                                    <Link href="/dashboard/admin/users"><Button variant="contained" href="/dashboard/admin/user"><GroupIcon sx={{ mr: 1 }} />User</Button></Link>
+                                    <Link href="/dashboard/admin/servers"><Button variant="contained" href="/dashboard/admin/servers"><StorageIcon sx={{ mr: 1 }} />Servers</Button></Link>
+                                    <Link href="/dashboard/admin/bots"><Button variant="contained" href="/dashboard/admin/bots"><SmartToyIcon sx={{ mr: 1 }} />Bots</Button></Link>
+                                    <Link href="/dashboard/admin/stats"><Button variant="contained" href="/dashboard/admin/stats"><TimelineIcon sx={{ mr: 1 }} />Graphs</Button></Link>
                                 </Stack>
                             </CardContent>
                         </Paper>
                         
                         {/* 2 split with stats and last purchases */}
-                        <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={{ xs: 1, sm: 2 }} sx={{ mt: 1 }}>
+                        <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={{ xs: 1, sm: 2 }} sx={{ mt: 1 }}>
                             
                             <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", width: "100%" }}>
                                 <CardContent>

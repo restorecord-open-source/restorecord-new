@@ -353,7 +353,7 @@ export default function AdminUser() {
                         <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
                             <CardContent>
                                 <Typography variant="h5" sx={{ mb: 2, fontWeight: "500" }}>
-                                    Admin
+                                    Admin Users
                                 </Typography>
 
                                 {Modals.info && renderInfoModal()}
@@ -363,14 +363,14 @@ export default function AdminUser() {
                                 {Modals.ban && renderBanModal()}
 
                                 {renderSearch()}
+
+                                {errorMessages && ( <Alert severity="error" sx={{ mt: 2, bgcolor: "#000", color: "#fff" }}>{errorMessages}</Alert> )}
+                                {successMessage && ( <Alert severity="success" sx={{ mt: 2, bgcolor: "#000", color: "#fff" }}>{successMessage}</Alert> )}
+
                                 {users.length > 0 && renderSearchResult()}
                             </CardContent>
-                            
-                            {errorMessages && ( <Alert severity="error" sx={{ mt: 2, bgcolor: "#000", color: "#fff" }}>{errorMessages}</Alert> )}
-                            {successMessage && ( <Alert severity="success" sx={{ mt: 2, bgcolor: "#000", color: "#fff" }}>{successMessage}</Alert> )}
                         </Paper>
                     </Container>
-                    
                 </NavBar>
             </Box>
         </>
