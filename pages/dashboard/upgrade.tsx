@@ -291,7 +291,7 @@ export default function Upgrade() {
                                 ))}
                             </CardContent>
                             <CardActions>
-                                <Button fullWidth variant="contained" sx={{ fontWeight: "600" }} disabled={(tier.name.toLowerCase() === "free" || (tier.name.toLowerCase() === user.role) || (user.role === "business"))} onClick={() => {
+                                <Button fullWidth variant="contained" sx={{ fontWeight: "600" }} disabled={(tier.name.toLowerCase() === "free" || (tier.name.toLowerCase() === user.role) || ((user.role === "business" || user.role === "enterprise")))} onClick={() => {
                                     setSelectedPlan({
                                         id: tier.name.toLowerCase(),
                                         name: tier.name,

@@ -264,7 +264,7 @@ export default function DashBotSettings({ user, id }: any) {
                                             </Typography>
                                             <TextField fullWidth variant="outlined" name="botSecret" value={botSecret} onChange={handleChange} />
                                         </Grid>
-                                        {user.role === "business" && (
+                                        {(user.role === "business" || user.role === "enterprise") && (
                                             <Grid item>
                                                 <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                                     Public Key

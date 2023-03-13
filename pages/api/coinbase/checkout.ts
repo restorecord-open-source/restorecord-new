@@ -20,11 +20,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         case "business":
             amount = "30.00";
             break;
+        case "enterprise":
+            amount = "200.00";
+            break;
         case "premium_monthly":
             amount = "2.00";
             break;
         case "business_monthly":
             amount = "5.00";
+            break;
+        case "enterprise_monthly":
+            amount = "20.00";
             break;
         default:
             amount = "15.00";

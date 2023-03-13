@@ -315,7 +315,7 @@ export default function DashServerSettings({ user, id }: any) {
                                                 )}
                                             </>
                                         )}
-                                        {user.role === "business" && (
+                                        {(user.role === "business" || user.role === "enterprise") && (
                                             <>
                                                 <Grid item>
                                                     <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>

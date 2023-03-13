@@ -407,7 +407,7 @@ export default function DashSettings({ user }: any) {
                                                                 //         console.error(err);
                                                                 //     });
                                                             }}>Migrate</Button>
-                                                            {user.role === "business" && (
+                                                            {(user.role === "business" || user.role === "enterprise") && (
                                                                 <Button variant="contained" color="yellow" onClick={() => {
                                                                     setNotiTextI("Creating a backup...");
                                                                     setOpenI(true);

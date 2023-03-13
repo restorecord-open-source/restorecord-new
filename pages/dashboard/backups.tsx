@@ -283,7 +283,7 @@ export default function Backups() {
                                 ) : (
                                     <Paper variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
                                         <CardContent>
-                                            {userData.role === "business" ? (
+                                            {(userData.role === "business" || userData.role === "enterprise") ? (
                                                 <Typography variant="h5" sx={{ mb: 2, fontWeight: "500" }}>
                                                     Please create a backup first, you can do that by clicking the &quot;Backup&quot; button next to your server.
                                                 </Typography>

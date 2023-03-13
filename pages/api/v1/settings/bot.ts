@@ -64,7 +64,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
                 if (user.role === "free") if (accountBot.length >= 1) return res.status(400).json({ success: false, message: "You can't have more than 1 bot." });
                 if (user.role === "premium") if (accountBot.length >= 5) return res.status(400).json({ success: false, message: "You can't have more than 5 bots." });
-                if (data.publicKey && user.role !== "business") return res.status(400).json({ success: false, message: "This feature is only available to Business subscribers." });
+                if (data.publicKey && (user.role !== "business" && user.role !== "enterprise")) return res.status(400).json({ success: false, message: "This feature is only available to Business subscribers." });
                 
 
                 const newBot = await prisma.customBots.create({

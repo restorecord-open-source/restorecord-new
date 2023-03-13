@@ -185,7 +185,7 @@ export default function DashCustomBot({ user }: any) {
                             <TextField label="Client ID" name="clientId" value={clientId} onChange={handleChange} required />
                             <TextField label="Bot Token" name="botToken" value={botToken} onChange={handleChange} required />
                             <TextField label="Client Secret" name="botSecret" value={botSecret} onChange={handleChange} required />
-                            {user.role === "business" && (
+                            {(user.role === "business" || user.role === "enterprise") && (
                                 <TextField label="Public Key" name="publicKey" value={publicKey} onChange={handleChange} />
                             )}
                             <Button variant="contained" onClick={(e: any) => handleSubmit(e)}>
@@ -198,7 +198,7 @@ export default function DashCustomBot({ user }: any) {
                         </Typography>
                         <Stack spacing={1} direction="row" justifyContent={"justify-between"} sx={{ marginTop: "1rem" }}>
                             <Image src="https://docs.restorecord.com/static/botsetup/redirect_url.png" alt="Redirect URL" width={1920} height={1080} />
-                            {user.role === "business" && (
+                            {(user.role === "business" || user.role === "enterprise") && (
                                 <Image src="https://docs.restorecord.com/static/botsetup/interaction_url.png" alt="Interaction URL" width={1920} height={1080} />
                             )}
                         </Stack>

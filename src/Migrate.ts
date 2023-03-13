@@ -97,15 +97,17 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
                     refreshToken: resp.data.refresh_token
                 }
             }).catch(async (err: any) => {
-                return err;
+                console.error(`[ERROR] Failed to update ${userId} in ${guildId} (error: ${err})`);
+                return false;
             });
             console.log(`[INFO] Refreshed token for ${userId} in ${guildId}`);
             await addMember(guildId, userId, botToken, resp.data.access_token, roleId ? [BigInt(roleId).toString()] : undefined).then(async (res: any) => {
-                if (res.status === 204 || res.status === 201) {
+                if ((res.status === 204 || res.status === 201) || (res?.response?.status === 204 || res?.response?.status === 201)) {
                     console.log(`[INFO] Added ${userId} to ${guildId}`);
                     return true;
                 } else {
                     console.error(`[ERROR] Failed to add ${userId} to ${guildId} (status: ${res.status})`);
+                    return false;
                 }
             }).catch(async (err: any) => {
                 console.error(`[ERROR] Failed to add ${userId} to ${guildId} (error: ${err})`);
@@ -121,10 +123,11 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
                 accessToken: "unauthorized",
             }
         }).catch(async (err: any) => {
-            return err;
+            console.error(`[refreshTokenAddDB] unauth ${err}: (memid: ${memberId})`);
+            return false;
         });
         console.error(`[refreshTokenAddDB] unauth ${err}: (memid: ${memberId})`);
-        return err;
+        return false;
     });
 }
 

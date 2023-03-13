@@ -205,23 +205,32 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 }
 
                 if (members.length === 0) return res.status(400).json({ success: false, message: "No pullable members found" });
+                let delay: number = 500;
+
 
                 switch (user.role) {
                 case "free":
                     await prisma.servers.update({ where: { id: server.id }, data: { pulling: true, pullTimeout: new Date(Date.now() + 1000 * 60 * 60 * 18) } });
+                    delay = 1250;
                     break;
                 case "premium":
                     await prisma.servers.update({ where: { id: server.id }, data: { pulling: true, pullTimeout: new Date(Date.now() + 1000 * 60 * 60 * 2) } });
+                    delay = 750;
                     break;
                 case "business":
                     await prisma.servers.update({ where: { id: server.id }, data: { pulling: true, pullTimeout: new Date(Date.now() + 1000 * 60 * 30) } });
+                    delay = 500;
+                    break;
+                case "enterprise":
+                    await prisma.servers.update({ where: { id: server.id }, data: { pulling: true, pullTimeout: new Date(Date.now() + 1000 * 60 * 5) } });
+                    delay = 350;
+                    break;
                 }
 
                 let succPulled: number = 0;
                 let erroPulled: number = 0;
                 const pullingProcess = new Promise<void>(async (resolve, reject) => {
                     let membersNew = await shuffle(members);
-                    let delay: number = 500;
 
                     await prisma.logs.create({
                         data: {
@@ -257,11 +266,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                 break;
                             case 403:
                                 if (await refreshTokenAddDB(member.userId.toString(), member.id, guildId.toString(), bot?.botToken, roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma)) {
-                                    console.log(`[${server.name}] [${member.username}] 403 | Refreshed token`);
+                                    console.log(`[${server.name}] [${member.username}] 201 | Refreshed token`);
                                     succPulled++;
                                 } else {
                                     console.log(`[${server.name}] [${member.username}] 403 | Refreshed token failed`);
-                                    erroPulled++;
                                 }
                                 break;
                             case 407:
@@ -274,7 +282,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             case 201:
                                 succPulled++;
 
-                                if (delay > 1000) delay -= 1000;
+                                if (delay > 2000) delay -= 1000;
                                 else if (delay < 500) delay = 550;
                                 
                                 break;
@@ -334,7 +342,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     console.error(`[PULLING] 3 ${err}`);
                 });
 
-                let esimatedTime: any = members.length * 1500; 
+                let esimatedTime: any = members.length * 1000 + delay; 
                 esimatedTime = formatEstimatedTime(esimatedTime);
 
                 pullingProcess.then(async () => {

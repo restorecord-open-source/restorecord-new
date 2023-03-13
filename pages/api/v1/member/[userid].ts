@@ -76,13 +76,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             ip: user.role !== "free" ? member.ip : undefined,
                             ...(user.role !== "free" && {
                                 location: {
-                                    ...(user.role === "business" && { provider: pCheck[usrIP].provider }),
+                                    ...((user.role === "business" || user.role === "enterprise") && { provider: pCheck[usrIP].provider }),
                                     continent: pCheck[usrIP].continent,
                                     isocode: pCheck[usrIP].isocode,
                                     country: pCheck[usrIP].country,
                                     region: pCheck[usrIP].region,
                                     city: pCheck[usrIP].city,
-                                    ...(user.role === "business" && { type: pCheck[usrIP].type }),
+                                    ...((user.role === "business" || user.role === "enterprise") && { type: pCheck[usrIP].type }),
                                     vpn: pCheck[usrIP].vpn,
                                 }
                             })
@@ -113,8 +113,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                 avatar: json.avatar ? json.avatar : String(json.discriminator % 5),
                                 bot: json.bot,
                                 system: json.system,
-                                mfa_enabled: user.role === "business" ? json.mfa_enabled : undefined,
-                                locale: user.role === "business" ? json.locale : undefined,
+                                mfa_enabled: (user.role === "business" || user.role === "enterprise") ? json.mfa_enabled : undefined,
+                                locale: (user.role === "business" || user.role === "enterprise") ? json.locale : undefined,
                                 banner: json.banner,
                                 flags: json.flags,
                                 premium_type: json.premium_type,
@@ -122,13 +122,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                 ip: user.role !== "free" ? member.ip : undefined,
                                 ...(user.role !== "free" && {
                                     location: {
-                                        ...(user.role === "business" && { provider: pCheck[usrIP].provider }),
+                                        ...((user.role === "business" || user.role === "enterprise") && { provider: pCheck[usrIP].provider }),
                                         continent: pCheck[usrIP].continent,
                                         isocode: pCheck[usrIP].isocode,
                                         country: pCheck[usrIP].country,
                                         region: pCheck[usrIP].region,
                                         city: pCheck[usrIP].city,
-                                        ...(user.role === "business" && { type: pCheck[usrIP].type }),
+                                        ...((user.role === "business" || user.role === "enterprise") && { type: pCheck[usrIP].type }),
                                         vpn: pCheck[usrIP].vpn,
                                     }
                                 })

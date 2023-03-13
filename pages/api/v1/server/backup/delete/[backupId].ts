@@ -18,7 +18,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 limiter.check(res, 15, "CACHE_TOKEN");
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 
-                if (user.role !== "business") return res.status(400).json({ success: false, message: "You need to be a Business subscriber to use this feature." });
+                if (user.role !== "business" && user.role !== "enterprise") return res.status(400).json({ success: false, message: "You need to be a Business subscriber to use this feature." });
 
                 const backup = await prisma.backups.findFirst({ where: { backupId: `${req.query.backupId}` } });
                 if (!backup) return res.status(404).json({ success: false, message: "Backup not found" });
