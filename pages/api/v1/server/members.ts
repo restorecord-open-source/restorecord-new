@@ -51,6 +51,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     take: search ? undefined : (Number(page) * Number(limit)),
                 });
 
+                if (memberList.length === 0) return res.status(200).json({
+                    success: true,
+                    max: count,
+                    pullable: countPullable,
+                    maxPages: Math.ceil(count / limit) === 0 ? 1 : Math.ceil(count / limit),
+                    members: []
+                });
+
                 const lastId = Number(page) === 1 ? 0 : memberList[memberList.length - 1].id;
 
                 conditions.push({ id: { gt: search ? 0 : lastId } });
