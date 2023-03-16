@@ -148,6 +148,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                         return res.redirect(`https://${domain}/verify/${state}`);
                     }
                 }).catch((err: any) => {
+                    console.error(`[ERROR] [VERIFY4] ${err}]`)
                     err.message = parseInt(err.message);
 
                     switch (err.message) {
@@ -183,7 +184,6 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                         res.setHeader("Set-Cookie", `RC_err=404; Path=/; Max-Age=5;`);
                         return res.redirect(`https://${domain}/verify/${state}`);
                     default:
-                        console.error(`[ERROR] [VERIFY4] ${err}]`)
                         return res.status(500).json({ code: err.message, message: "Internal Server Error" });
                     }
                 });
@@ -228,6 +228,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                 }
 
             }).catch((err: any) => {
+                console.error(`[ERROR] [VERIFY3] ${err}]`)
                 err.message = parseInt(err.message);
 
                 switch (err.message) {
@@ -263,11 +264,11 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                     res.setHeader("Set-Cookie", `RC_err=404; Path=/; Max-Age=5;`);
                     return res.redirect(`https://${domain}/verify/${state}`);
                 default:
-                    console.error(`[ERROR] [VERIFY3] ${err}]`)
                     return res.status(500).json({ code: err.message, message: "Internal Server Error" });
                 }
             });
         } catch (err: any) {
+            console.error(`[ERROR] [VERIFY2] ${err}]`)
             err.message = parseInt(err.message);
 
             switch (err.message) {
@@ -303,11 +304,11 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                 res.setHeader("Set-Cookie", `RC_err=404; Path=/; Max-Age=5;`);
                 return res.redirect(`https://${domain}/verify/${state}`);
             default:
-                console.error(`[ERROR] [VERIFY2] ${err}]`)
                 return res.status(500).json({ code: err.message, message: "Internal Server Error" });
             }
         }
     }).catch((err: any) => {
+        console.error(`[ERROR] [VERIFY1] ${err}]`)
         err.message = parseInt(err.message);
 
         switch (err.message) {
@@ -343,7 +344,6 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
             res.setHeader("Set-Cookie", `RC_err=404; Path=/; Max-Age=5;`);
             return res.redirect(`https://${domain}/verify/${state}`);
         default:
-            console.error(`[ERROR] [VERIFY1] ${err}]`)
             return res.status(500).json({ code: err.message, message: "Internal Server Error" });
         }
     });
