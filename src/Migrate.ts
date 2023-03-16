@@ -106,7 +106,7 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
                     console.log(`[INFO] Added ${userId} to ${guildId}`);
                     return true;
                 } else {
-                    console.error(`[ERROR] Failed to add ${userId} to ${guildId} (status: ${res.status})`);
+                    console.error(`[ERROR] Failed to add ${userId} to ${guildId} (status: ${res?.status || res?.response?.status})`);
                     return false;
                 }
             }).catch(async (err: any) => {

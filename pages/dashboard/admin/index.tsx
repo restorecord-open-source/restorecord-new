@@ -118,7 +118,7 @@ export default function Admin() {
                                                     {tableElement("Servers", stats.servers, <StorageIcon sx={{ mr: 1, mb: -0.75 }} />)}
                                                     {tableElement("Members", stats.members.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), <GroupsIcon sx={{ mr: 1, mb: -0.75 }} />)}
                                                     {tableElement("Bots", stats.customBots, <SmartToyIcon sx={{ mr: 1, mb: -0.75 }} />)}
-                                                    {tableElement("Revenue", `$${stats.totalRevenue} (${stats.payments})`, <AccountBalanceIcon sx={{ mr: 1, mb: -0.75 }} />)}
+                                                    {tableElement("Revenue", `$${stats.totalRevenue + (6289 + 16133 + 3731)} (${stats.payments})`, <AccountBalanceIcon sx={{ mr: 1, mb: -0.75 }} />)}
                                                 </TableBody>
                                             </Table>
                                         </TableContainer>

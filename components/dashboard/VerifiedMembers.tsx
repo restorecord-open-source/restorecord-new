@@ -159,8 +159,6 @@ export default function VerifiedMembers({ user }: any) {
                                     </Stack> : <></>}
                             </Stack>
 
-
-
                             {(userInfo.location && userInfo.location !== undefined && userInfo.location !== null && Object.keys(userInfo.location).length > 0) && (
                                 <>
                                     <Stack spacing={1} direction="row" alignItems="center" sx={{ mt: 2 }}>
@@ -274,8 +272,8 @@ export default function VerifiedMembers({ user }: any) {
                                         "Loading..."
                                     )}
                                 </Typography>
-                                <Stack direction="row" spacing={0} justifyContent="space-between" sx={{ flexDirection: { xs: "column", sm: "row" } }}>
-                                    <TextField id="search" label="Search" variant="outlined" onChange={(e) => setSearch(e.target.value)} sx={{ width: { xs: "500", sm: "auto" } }} />
+                                <Stack direction={{ xs: "column", sm: "row" }} spacing={0} justifyContent="space-between">
+                                    <TextField id="search" label="Search" variant="outlined" onChange={(e) => setSearch(e.target.value)} sx={{ width: { xs: "100%", sm: "30%" } }} />
                                     <FormControl fullWidth sx={{ marginLeft: { xs: 0, sm: 1 }, mt: { xs: 1, sm: 0 } }}>
                                         <InputLabel id="server-select-label">Server</InputLabel>
                                         <Select labelId="server-select-label" id="server-select" label="Server" value={serverId} onChange={handleSelect}>

@@ -39,7 +39,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (!data) return res.status(400).json({ message: "Please provide all fields" });
 
         const account = await prisma.accounts.findFirst({ where: { username: data.username.toLowerCase() } });
-
         if (!account) return res.status(400).json({ message: "Account not found" });
 
         const isValid = await bcrypt.compare(data.password, account.password);

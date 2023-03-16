@@ -183,6 +183,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                         res.setHeader("Set-Cookie", `RC_err=404; Path=/; Max-Age=5;`);
                         return res.redirect(`https://${domain}/verify/${state}`);
                     default:
+                        console.error(`[ERROR] [VERIFY4] ${err}]`)
                         return res.status(500).json({ code: err.message, message: "Internal Server Error" });
                     }
                 });
@@ -262,6 +263,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                     res.setHeader("Set-Cookie", `RC_err=404; Path=/; Max-Age=5;`);
                     return res.redirect(`https://${domain}/verify/${state}`);
                 default:
+                    console.error(`[ERROR] [VERIFY3] ${err}]`)
                     return res.status(500).json({ code: err.message, message: "Internal Server Error" });
                 }
             });
@@ -301,6 +303,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                 res.setHeader("Set-Cookie", `RC_err=404; Path=/; Max-Age=5;`);
                 return res.redirect(`https://${domain}/verify/${state}`);
             default:
+                console.error(`[ERROR] [VERIFY2] ${err}]`)
                 return res.status(500).json({ code: err.message, message: "Internal Server Error" });
             }
         }
@@ -340,6 +343,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
             res.setHeader("Set-Cookie", `RC_err=404; Path=/; Max-Age=5;`);
             return res.redirect(`https://${domain}/verify/${state}`);
         default:
+            console.error(`[ERROR] [VERIFY1] ${err}]`)
             return res.status(500).json({ code: err.message, message: "Internal Server Error" });
         }
     });

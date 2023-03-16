@@ -260,7 +260,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                     const retry = parseInt(retryAfter);
                                     setTimeout(async () => {
                                         await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : [])
-                                    }, retry);
+                                    }, retry + 100);
                                     delay += retry;
                                 }
                                 break;
@@ -292,6 +292,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                     erroPulled++;
                                 }
                                 break;
+                            case 404:
+                                console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 404 | ${JSON.stringify(response)}`);
+                                break;
                             default:
                                 console.error(`[FATAL ERROR] [UNDEFINED STATUS] [${server.name}] [${member.id}]-[${member.username}] ${status} | ${JSON.stringify(response.message)} | ${JSON.stringify(resp.message)}`);
                                 break;
@@ -320,7 +323,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             return;
                         }
 
-                        console.log(`[${server.name}] [${member.username}] Success: ${succPulled}/${pullCount ? pullCount : "∞"} (${members.length}) | Errors: ${erroPulled}/200 | Delay: ${delay}ms`);
+                        console.log(`[${server.name}] [${member.username}] Success: ${succPulled}/${pullCount ? pullCount : "∞"} (${membersNew.length}) | Errors: ${erroPulled} | Delay: ${delay}ms`);
 
                         await sleep(delay);
                     }
@@ -338,14 +341,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     });
 
                     resolve();
-                }).catch(async (err: Error) => {
-                    console.error(`[PULLING] 3 ${err}`);
-                });
-
-                let esimatedTime: any = members.length * 1000 + delay; 
-                esimatedTime = formatEstimatedTime(esimatedTime);
-
-                pullingProcess.then(async () => {
+                    return;
+                }).then(async () => {
                     console.log(`[${server.name}] Pulling done with ${succPulled} members pulled`);
                     await prisma.servers.update({
                         where: {
@@ -358,8 +355,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         console.error(`[${server.name}] [PULLING] 6 ${err}`);
                     });
                 }).catch(async (err: Error) => {
-                    console.error(`[${server.name}] [PULLING] 4 ${err}`);
+                    console.error(`[PULLING] 3 ${err}`);
                 });
+
+                let esimatedTime: any = members.length * 1000 + delay; 
+                esimatedTime = formatEstimatedTime(esimatedTime);
             
                 return res.status(200).json({ success: true, message: `Started Pull Process, this will take around ${esimatedTime}` });
             }

@@ -31,7 +31,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 const bot = await prisma.customBots.findFirst({
                     where: {
                         OR: [
-                            { name: data.botName },
                             { clientId: BigInt(data.clientId) as bigint },
                             { botSecret: data.botSecret },
                             { botToken: data.botToken },
@@ -39,10 +38,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     },
                 });
 
-                if (bot?.clientId === BigInt(data.clientId)) return res.status(400).json({ success: false, message: "Client Id is already in use" });
-                if (bot?.botSecret.toLowerCase() === data.botSecret.toLowerCase()) return res.status(400).json({ success: false, message: "Client Secret is already in use" });
-                if (bot?.botToken.toLowerCase() === data.botToken.toLowerCase()) return res.status(400).json({ success: false, message: "Bot Token is already in use" });
-
+                if (bot) {
+                    if (bot.clientId === BigInt(data.clientId)) return res.status(400).json({ success: false, message: "Client Id is already in use" });
+                    if (bot.botSecret.toLowerCase() === data.botSecret.toLowerCase()) return res.status(400).json({ success: false, message: "Client Secret is already in use" });
+                    if (bot.botToken.toLowerCase() === data.botToken.toLowerCase()) return res.status(400).json({ success: false, message: "Bot Token is already in use" });
+                }
+                
                 const botData = await axios.get(`https://discord.com/api/users/@me`, {
                     headers: {
                         Authorization: `Bot ${data.botToken}`,
@@ -161,7 +162,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 });
 
                 if (botData.status != 200) return res.status(400).json({ success: false, message: "Invalid Bot Token" });
-
                 if (botData.data.id != oldBot.clientId.toString()) return res.status(400).json({ success: false, message: "Token does not match the Bots Client Id" });
 
                 const bot = await prisma.customBots.findFirst({
@@ -176,6 +176,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 });
 
                 if (!bot) return res.status(400).json({ success: false, message: "Server not found" });
+
+                // check if newCustomDomain is valid
+                if (data.newCustomDomain) {
+                    if (!data.newCustomDomain.startsWith("https://") && !data.newCustomDomain.startsWith("http://")) return res.status(400).json({ success: false, message: "Custom Domain must start with http:// or https://" });
+                    if (data.newCustomDomain.endsWith("/")) return res.status(400).json({ success: false, message: "Custom Domain must not end with a /" });
+                    if (data.newCustomDomain.includes(" ")) return res.status(400).json({ success: false, message: "Custom Domain must not contain any spaces" });
+                    if (data.newCustomDomain.length > 191) return res.status(400).json({ success: false, message: "Custom Domain must be below 191 characters" });
+                }
 
                 const newBot = await prisma.customBots.update({
                     where: {

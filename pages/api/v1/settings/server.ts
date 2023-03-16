@@ -32,6 +32,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 if (isNaN(Number(data.guildId)) || isNaN(Number(data.roleId))) return res.status(400).json({ success: false, message: "Server ID or Role ID is not a number" });
                 if (BigInt(data.guildId) > 18446744073709551615 || BigInt(data.roleId) > 18446744073709551615) return res.status(400).json({ success: false, message: "Server ID or Role ID is not a discord ID" });
 
+
+                const customBot = await prisma.customBots.findUnique({ where: { id: Number(data.customBot) } });
+                if (!customBot) return res.status(400).json({ success: false, message: "Custom Bot not found" });
+
                 const server = await prisma.servers.findFirst({
                     where: {
                         OR: [
