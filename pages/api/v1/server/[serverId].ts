@@ -229,7 +229,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
                 let succPulled: number = 0;
                 let erroPulled: number = 0;
-                const pullingProcess = new Promise<void>(async (resolve, reject) => {
+                new Promise<void>(async (resolve, reject) => {
                     let membersNew = await shuffle(members);
 
                     await prisma.logs.create({

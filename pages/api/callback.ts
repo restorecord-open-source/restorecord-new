@@ -46,7 +46,6 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                 const account = await resolveUser(respon.data.access_token);
                 if (!account || account === null) throw new Error(10001 as any);
 
-
                 const serverOwner = await prisma.accounts.findUnique({ where: { id: serverInfo.ownerId } });
                 if (!serverOwner) return res.status(400).json({ success: false, message: "No server owner found" });
 

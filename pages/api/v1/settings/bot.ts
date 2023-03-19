@@ -179,7 +179,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
                 // check if newCustomDomain is valid
                 if (data.newCustomDomain) {
-                    if (!data.newCustomDomain.startsWith("https://") && !data.newCustomDomain.startsWith("http://")) return res.status(400).json({ success: false, message: "Custom Domain must start with http:// or https://" });
+                    if (data.newCustomDomain.startsWith("https://") && data.newCustomDomain.startsWith("http://")) return res.status(400).json({ success: false, message: "Custom Domain can not start with http://" });
                     if (data.newCustomDomain.endsWith("/")) return res.status(400).json({ success: false, message: "Custom Domain must not end with a /" });
                     if (data.newCustomDomain.includes(" ")) return res.status(400).json({ success: false, message: "Custom Domain must not contain any spaces" });
                     if (data.newCustomDomain.length > 191) return res.status(400).json({ success: false, message: "Custom Domain must be below 191 characters" });
