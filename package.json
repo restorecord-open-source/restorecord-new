@@ -45,7 +45,7 @@
 		"react-query": "^3.39.2",
 		"sharp": "^0.31.2",
 		"speakeasy": "^2.0.0",
-		"stripe": "^11.4.0",
+		"stripe": "^11.15.0",
 		"tweetnacl": "^1.0.3",
 		"typed.js": "^2.0.12"
 	},
