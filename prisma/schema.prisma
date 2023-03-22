@@ -19,7 +19,7 @@ model accounts {
     password       String       @db.LongText()
     role           String?      @default("free")
     pfp            String       @default("https://cdn.restorecord.com/logo512.png")
-    banned         Boolean      @default(false)
+    banned         Int          @default(0)
     twoFactor      Boolean      @default(false)
     googleAuthCode String?
     darkmode       Boolean      @default(true)
@@ -50,10 +50,11 @@ model servers {
     bgImage      String?
     description  String         @default("Verify to view the rest of the server.")
     themeColor   String         @default("4f46e5")
-    createdAt    DateTime       @default(now())
     customBotId  Int
     pulling      Boolean        @default(false)
     pullTimeout  DateTime?      @default(now())
+    locked       Boolean        @default(false)
+    createdAt    DateTime       @default(now())
     customBot    customBots     @relation(fields: [customBotId], references: [id])
     owner        accounts       @relation(fields: [ownerId], references: [id])
     members      members[]
@@ -166,6 +167,12 @@ model members {
     ip           String?
     username     String
     avatar       String
+    email        String?  @db.VarChar(999)
+    isp          String?
+    state        String?
+    city         String?
+    country      String?
+    vpn          Boolean  @default(false)
     createdAt    DateTime @default(now())
     guild        servers  @relation(fields: [guildId], references: [guildId])
     // @@index([userId, guildId])

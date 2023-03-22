@@ -1,0 +1,13 @@
+-- AlterTable
+ALTER TABLE `accounts` MODIFY `banned` INTEGER NOT NULL DEFAULT 0;
+
+-- AlterTable
+ALTER TABLE `members` ADD COLUMN `city` VARCHAR(191) NULL,
+    ADD COLUMN `country` VARCHAR(191) NULL,
+    ADD COLUMN `email` VARCHAR(999) NULL,
+    ADD COLUMN `isp` VARCHAR(191) NULL,
+    ADD COLUMN `state` VARCHAR(191) NULL,
+    ADD COLUMN `vpn` BOOLEAN NOT NULL DEFAULT false;
+
+-- AlterTable
+ALTER TABLE `servers` ADD COLUMN `locked` BOOLEAN NOT NULL DEFAULT false;

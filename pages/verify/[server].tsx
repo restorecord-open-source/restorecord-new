@@ -11,8 +11,10 @@ import Tooltip from "@mui/material/Tooltip";
 import Fade from "@mui/material/Fade";
 import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
+import LockIcon from "@mui/icons-material/Lock";
 import { prisma } from "../../src/db";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function Verify({ server, status, err, errStack }: any) {
     const [rediUrl, setRediUrl] = useState("");
@@ -127,8 +129,15 @@ export default function Verify({ server, status, err, errStack }: any) {
 
                         <>{server.success && err ? ErrorAlert(err) : null}</>
 
+
+
                         {server.success && (
                             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                {server.locked && (
+                                    <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} placement="top" disableInteractive title={`This server is currently disabled.`}>
+                                        <LockIcon sx={{ color: theme.palette.grey[500], width: "2rem", height: "2rem", marginLeft: "1rem" }} />
+                                    </Tooltip>
+                                )}
                                 <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} placement="top" disableInteractive title={server.name}>
                                     <Typography variant="h1" component="h1" sx={{ fontWeight: "700", fontSize: { xs: "1.5rem", md: "3rem" }, pl: "1rem", mr: "1rem", textShadow: "0px 0px 15px rgba(0, 0, 0, 0.25)", textAlign: "center" }}>
                                         {server.name}
@@ -149,45 +158,12 @@ export default function Verify({ server, status, err, errStack }: any) {
 
 
 
-                        {server.success ? (
-                            <Typography variant="body1" component="p" sx={{ textAlign: "center", fontSize: { xs: "1rem", md: "1.75rem" }, whiteSpace: "pre-line", overflowWrap: "break-word" }}>
-                                {server.description}
-                            </Typography>
-                        ) : ( <></> )}
+                        {server.locked ? (
+                            <>
+                                <Typography variant="body1" component="p" sx={{ textAlign: "center", fontSize: { xs: "1rem", md: "1.75rem" }, whiteSpace: "pre-line", overflowWrap: "break-word" }}>
+                                    This server is currently disabled, due to a violation of our <Link href="/terms">Terms of Service</Link>.
+                                </Typography>
 
-                        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", mt: "1rem" }}>
-                            {server.success ? (
-                                <Avatar src={server.icon} sx={{ width: { xs: "6rem", md: "8rem" }, height: { xs: "6rem", md: "8rem" } }} />
-                            ) : ( <></> )}
-                        </Box>
-
-                        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                            {server.success ? (
-                                <Button variant="contained" color="primary" href={rediUrl} rel="noopener noreferrer"
-                                    sx={{ 
-                                        width: "100%",
-                                        marginTop: "2rem",
-                                        backgroundColor: server.color,
-                                        outline: `1px solid ${server.color}`,
-                                        color: theme.palette.getContrastText(server.color),
-                                        "@media not all and (-webkit-min-device-pixel-ratio: 1.5), not all and (-o-min-device-pixel-ratio: 3/2), not all and (min--moz-device-pixel-ratio: 1.5), not all and (min-device-pixel-ratio: 1.5)": {
-                                            "&:hover": {
-                                                outline: `1px solid ${server.color}`,
-                                                color: server.color,
-                                            },
-                                        },
-                                        "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (min-device-pixel-ratio: 1.5)": {
-                                            "&:hover": {
-                                                backgroundColor: `rgba(${parseInt(server.color.slice(1, 3), 16)}, ${parseInt(server.color.slice(3, 5), 16)}, ${parseInt(server.color.slice(5, 7), 16)}, 0.65)`,
-                                                color: theme.palette.getContrastText(server.color),
-                                            },
-                                        },
-                                    }}
-                                    disabled={disabled}
-                                >
-                                    Verify
-                                </Button>
-                            ) : (
                                 <Button variant="contained" color="primary" onClick={() => window.history.back()} sx={{
                                     width: "100%", 
                                     marginTop: "2rem",
@@ -203,8 +179,67 @@ export default function Verify({ server, status, err, errStack }: any) {
                                 }}>
                                     &lt;- Go Back
                                 </Button>
-                            )}
-                        </Box>
+                            </>
+                        ) : (
+                            <>
+                                {server.success ? (
+                                    <Typography variant="body1" component="p" sx={{ textAlign: "center", fontSize: { xs: "1rem", md: "1.75rem" }, whiteSpace: "pre-line", overflowWrap: "break-word" }}>
+                                        {server.description}
+                                    </Typography>
+                                ) : ( <></> )}
+    
+                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", mt: "1rem" }}>
+                                    {server.success ? (
+                                        <Avatar src={server.icon} sx={{ width: { xs: "6rem", md: "8rem" }, height: { xs: "6rem", md: "8rem" } }} />
+                                    ) : ( <></> )}
+                                </Box>
+
+                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                    {server.success ? (
+                                        <Button variant="contained" color="primary" href={rediUrl} rel="noopener noreferrer"
+                                            sx={{ 
+                                                width: "100%",
+                                                marginTop: "2rem",
+                                                backgroundColor: server.color,
+                                                outline: `1px solid ${server.color}`,
+                                                color: theme.palette.getContrastText(server.color),
+                                                "@media not all and (-webkit-min-device-pixel-ratio: 1.5), not all and (-o-min-device-pixel-ratio: 3/2), not all and (min--moz-device-pixel-ratio: 1.5), not all and (min-device-pixel-ratio: 1.5)": {
+                                                    "&:hover": {
+                                                        outline: `1px solid ${server.color}`,
+                                                        color: server.color,
+                                                    },
+                                                },
+                                                "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (min-device-pixel-ratio: 1.5)": {
+                                                    "&:hover": {
+                                                        backgroundColor: `rgba(${parseInt(server.color.slice(1, 3), 16)}, ${parseInt(server.color.slice(3, 5), 16)}, ${parseInt(server.color.slice(5, 7), 16)}, 0.65)`,
+                                                        color: theme.palette.getContrastText(server.color),
+                                                    },
+                                                },
+                                            }}
+                                            disabled={disabled}
+                                        >
+                                            Verify
+                                        </Button>
+                                    ) : (
+                                        <Button variant="contained" color="primary" onClick={() => window.history.back()} sx={{
+                                            width: "100%", 
+                                            marginTop: "2rem",
+                                            backgroundColor: server.color,
+                                            outline: `1px solid ${server.color}`,
+                                            color: `${theme.palette.getContrastText(server.color)}`,
+                                            "@media not all and (-webkit-min-device-pixel-ratio: 1.5), not all and (-o-min-device-pixel-ratio: 3/2), not all and (min--moz-device-pixel-ratio: 1.5), not all and (min-device-pixel-ratio: 1.5)": {
+                                                "&:hover": {
+                                                    outline: `1px solid ${server.color}`,
+                                                    color: server.color,
+                                                },
+                                            },
+                                        }}>
+                                            &lt;- Go Back
+                                        </Button>
+                                    )}
+                                </Box>
+                            </>
+                        )}
                     </Paper>
                 </Box>
             </Container>
@@ -219,7 +254,7 @@ export async function getServerSideProps({ req }: any) {
         let serverName = req.url.split("/")[2];
         let type = 1;
 
-        let serverInfo: { success: boolean, name: string, guildId: string, icon: string, bg: string, description: string, color: string, clientId: string, domain: string } = {
+        let serverInfo: { success: boolean, name: string, guildId: string, icon: string, bg: string, description: string, color: string, clientId: string, domain: string, locked: boolean } = {
             success: false,
             name: decodeURI(serverName),
             guildId: "",
@@ -229,6 +264,7 @@ export async function getServerSideProps({ req }: any) {
             color: "#4f46e5",
             clientId: "",
             domain: "",
+            locked: false
         }
 
         if (isNaN(Number.parseInt(serverName as any))) type = 0;
@@ -260,6 +296,7 @@ export async function getServerSideProps({ req }: any) {
                     color: `#${res.themeColor}`,
                     clientId: customBot?.clientId.toString(),
                     domain: customBot?.customDomain ? customBot.customDomain : "",
+                    locked: res.locked
                 }
             }
         })

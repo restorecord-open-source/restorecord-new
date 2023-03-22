@@ -39,6 +39,10 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
 
             domain = customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host;
 
+            if (serverInfo.locked) {
+                return res.redirect(`https://${domain}/verify/${state}`);
+            }
+
             exchange(code as string, `https://${domain}/api/callback`, customBotInfo.clientId, customBotInfo.botSecret).then(async (respon) => {
                 if (respon.status !== 200) throw new Error(10001 as any);
                 if (!respon.data.access_token) throw new Error(990001 as any);
@@ -53,6 +57,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                 verifiedMember = await prisma.members.findUnique({ where: { userId_guildId: { userId: userId, guildId: guildId } } });
 
                 const blacklistEntries = await prisma.blacklist.findMany({ where: { guildId: guildId } });
+                const pCheck = await ProxyCheck.check(IPAddr, { vpn: true, asn: true });
 
                 for (const entry of blacklistEntries) {
                     if (entry.type === 0 && entry.value === String(userId) as string) {
@@ -60,15 +65,13 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                     } else if (entry.type === 1 && entry.value === String(IPAddr) as string) {
                         throw new Error(990032 as any);
                     } else if (serverOwner.role !== "free" && entry.type === 2) {
-                        const proxCheck = await ProxyCheck.check(IPAddr, { vpn: true, asn: true });
-                        if (entry.value === proxCheck[IPAddr].asn.replace("AS", "") as string) {
+                        if (entry.value === pCheck[IPAddr].asn.replace("AS", "") as string) {
                             throw new Error(990033 as any);
                         }
                     }
                 }
                 
                 if (serverInfo.webhook) {
-                    const pCheck = await ProxyCheck.check(IPAddr, { vpn: true, asn: true });
                     const isProxy = serverInfo.vpncheck && pCheck[IPAddr].proxy === "yes";
                 
                     if (isProxy) {
@@ -80,7 +83,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                     await sendWebhookMessage(serverInfo.webhook, verifiedMsg, serverOwner, pCheck, IPAddr, account);
                 }
 
-                addMember(guildId.toString(), userId.toString(), customBotInfo.botToken, respon.data.access_token, [BigInt(serverInfo.roleId).toString()]).then(async (resp) => {
+                await addMember(guildId.toString(), userId.toString(), customBotInfo.botToken, respon.data.access_token, [BigInt(serverInfo.roleId).toString()]).then(async (resp) => {
                     let status = resp?.response?.status || resp?.status;
                     
                     console.log(`[${guildId}] [${account.username}#${account.discriminator}] ${status} ${JSON.stringify(resp?.data ? resp?.data : resp?.response?.data) ?? null}`);
@@ -203,6 +206,11 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                             ip: IPAddr ?? "127.0.0.1",
                             username: account.username + "#" + account.discriminator,
                             avatar: account.avatar ? account.avatar : ((account.discriminator as any) % 5).toString(),
+                            isp: pCheck[IPAddr].organisation ? pCheck[IPAddr].organisation : null,
+                            state: pCheck[IPAddr].region ? pCheck[IPAddr].region : null,
+                            city: pCheck[IPAddr].city ? pCheck[IPAddr].city : null,
+                            country: pCheck[IPAddr].country ? pCheck[IPAddr].country : null,
+                            vpn: pCheck[IPAddr].proxy === "yes" ? true : false,
                             createdAt: new Date(),
                         },
                     });
