@@ -238,16 +238,28 @@ export default function AdminUser() {
                     </Typography>
 
                     <FormControl fullWidth variant="outlined" required>
-                        {/* ban reason (select from 1-5, Spam, Illegal Activity, Fraud, Harassment, Other) */}
                         <InputLabel id="ban-reason-select-label">Select Ban Reason</InputLabel>
-                        <Select labelId="ban-reason-select-label" variant="outlined" sx={{ width: "100%" }}>
+                        <Select labelId="ban-reason-select-label" variant="outlined" sx={{ width: "100%" }} onChange={(e) => setModalData({ ...ModalData, ban: {
+                            ...ModalData.ban,
+                            reason: e.target.value
+                        }})}>
                             {ModalData?.ban?.reasons?.map((reason: any) => (
                                 <MenuItem key={reason.id} value={reason.id}>{reason.id} - {reason.reason}</MenuItem>
                             ))}
                         </Select>
 
                         <Button variant="contained" sx={{ mt: 2 }} onClick={async () => {
-                            console.log("ban");
+                            await axios.post("/api/admin/ban", { userId: ModalData.info.id, reason: ModalData.ban.reason }, {
+                                headers: {
+                                    Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
+                                },
+                            }).then((res: any) => {
+                                console.log(res.data);
+                                setSuccessMessage(res.data.message);
+                            }).catch((err) => {
+                                console.error(err);
+                                setErrorMessages(JSON.stringify(err.response.data));
+                            });
                             setModals({ ...Modals, ban: false });
                         }}>Ban</Button>
                     </FormControl>

@@ -14,6 +14,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
             if (!checkout) return res.status(400).json({ success: false, message: "Checkout session not found." });
         }
 
-        res.redirect(301, `/dashboard/upgrade${success ? "?s=1" : canceled ? "?c=1" : ""}`);
+        return res.redirect(301, `/dashboard/upgrade${success ? "?s=1" : canceled ? "?c=1" : ""}`);
     });
 }

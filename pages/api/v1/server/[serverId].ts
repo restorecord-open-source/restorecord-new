@@ -207,7 +207,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 if (members.length === 0) return res.status(400).json({ success: false, message: "No pullable members found" });
                 let delay: number = 500;
 
-
                 switch (user.role) {
                 case "free":
                     await prisma.servers.update({ where: { id: server.id }, data: { pulling: true, pullTimeout: new Date(Date.now() + 1000 * 60 * 60 * 18) } });
@@ -227,6 +226,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     break;
                 }
 
+                let trysPulled: number = 0;
                 let succPulled: number = 0;
                 let erroPulled: number = 0;
                 new Promise<void>(async (resolve, reject) => {
@@ -247,6 +247,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
                         console.log(`[${server.name}] [${member.username}] Pulling...`);
                         await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : []).then(async (resp: any) => {
+                            trysPulled++;
                             let status = resp?.response?.status || resp?.status;
                             let response = ((resp?.response?.data?.message || resp?.response?.data?.code) || (resp?.data?.message || resp?.data?.code)) ? (resp?.response?.data || resp?.data) : "";
 
@@ -265,7 +266,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                 }
                                 break;
                             case 403:
-                                if (await refreshTokenAddDB(member.userId.toString(), member.id, guildId.toString(), bot?.botToken, roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma)) {
+                                const refreshed = await refreshTokenAddDB(member.userId.toString(), member.id, guildId.toString(), bot?.botToken, roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
+                                if (refreshed) {
                                     console.log(`[${server.name}] [${member.username}] 201 | Refreshed token`);
                                     succPulled++;
                                 } else {
@@ -295,6 +297,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             case 404:
                                 console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 404 | ${JSON.stringify(response)}`);
                                 break;
+                            case 401:
+                                console.error(`[${server.name}] [${member.id}]-[${member.username}] Bot token invalid stopped pulling...`);
+                                reject(`[${server.name}] Bot token invalid stopped pulling...`);
+                                break;
                             default:
                                 console.error(`[FATAL ERROR] [UNDEFINED STATUS] [${server.name}] [${member.id}]-[${member.username}] ${status} | ${JSON.stringify(response.message)} | ${JSON.stringify(resp.message)}`);
                                 break;
@@ -323,7 +329,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             return;
                         }
 
-                        console.log(`[${server.name}] [${member.username}] Success: ${succPulled}/${pullCount ? pullCount : "∞"} (${membersNew.length}) | Errors: ${erroPulled} | Delay: ${delay}ms`);
+                        console.log(`[${server.name}] [${member.username}] Success: ${succPulled}/${pullCount ? pullCount : "∞"} (${trysPulled}/${membersNew.length}) | Errors: ${erroPulled} | Delay: ${delay}ms`);
 
                         await sleep(delay);
                     }

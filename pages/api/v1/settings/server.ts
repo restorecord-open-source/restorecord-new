@@ -32,6 +32,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 if (isNaN(Number(data.guildId)) || isNaN(Number(data.roleId))) return res.status(400).json({ success: false, message: "Server ID or Role ID is not a number" });
                 if (BigInt(data.guildId) > 18446744073709551615 || BigInt(data.roleId) > 18446744073709551615) return res.status(400).json({ success: false, message: "Server ID or Role ID is not a discord ID" });
 
+                data.serverName = data.serverName.trim();
 
                 const customBot = await prisma.customBots.findUnique({ where: { id: Number(data.customBot) } });
                 if (!customBot) return res.status(400).json({ success: false, message: "Custom Bot not found" });
@@ -91,6 +92,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 const data = { ...req.body };
 
                 if (data.newServerName && data.newGuildId && data.newRoleId && data.serverName && data.guildId && data.roleId) {
+                    data.newServerName = data.newServerName.trim();
                     const serverNameCheck = await prisma.servers.findFirst({ where: { name: data.newServerName, } });
                     const guildIdCheck = await prisma.servers.findFirst({ where: { guildId: BigInt(data.newGuildId), } });
                     const roleIdCheck = await prisma.servers.findFirst({ where: { roleId: BigInt(data.newRoleId), } });
