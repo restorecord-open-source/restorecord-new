@@ -87,6 +87,7 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
         proxy: false,
         httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
     }).then(async (resp) => {
+        console.log(`[INFO] Refreshed ${userId} in ${guildId} (access_token: ${resp?.data?.access_token}, refresh_token: ${resp?.data?.refresh_token})`);
         if (resp?.data?.access_token && resp?.data?.refresh_token) {
             await prisma.members.update({
                 where: {
@@ -108,7 +109,7 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
                     console.error(`[ERROR] 2 Failed to add ${userId} to ${guildId} (status: ${res?.status || res?.response?.status}) ${JSON.stringify(res?.data || res?.response?.data)}}`);
                     await prisma.members.update({
                         where: {
-                            id: memberId,
+                            id: Number(memberId as number),
                         },
                         data: {
                             accessToken: "unauthorized",

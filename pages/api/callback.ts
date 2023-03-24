@@ -150,7 +150,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                         return res.redirect(`https://${domain}/verify/${state}`);
                     }
                 }).catch((err: any) => {
-                    console.error(`[ERROR] [VERIFY4] ${err}]`)
+                    console.error(`[ERROR] [VERIFY4] ${err}`)
                     err.message = parseInt(err.message);
 
                     switch (err.message) {
@@ -191,7 +191,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                 });
 
 
-                if (verifiedMember) {
+                if (verifiedMember && verifiedMember !== null) {
                     console.log(`[${guildId}] ${account.username + "#" + account.discriminator} Updating member`);
                     await prisma.members.update({
                         where: {
@@ -235,7 +235,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                 }
 
             }).catch((err: any) => {
-                console.error(`[ERROR] [VERIFY3] ${err}]`)
+                console.error(`[ERROR] [VERIFY3] ${err}`)
                 err.message = parseInt(err.message);
 
                 switch (err.message) {
@@ -275,7 +275,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                 }
             });
         } catch (err: any) {
-            console.error(`[ERROR] [VERIFY2] ${err}]`)
+            console.error(`[ERROR] [VERIFY2] ${err}`)
             err.message = parseInt(err.message);
 
             switch (err.message) {
@@ -315,7 +315,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
             }
         }
     }).catch((err: any) => {
-        console.error(`[ERROR] [VERIFY1] ${err}]`)
+        console.error(`[ERROR] [VERIFY1] ${err}`)
         err.message = parseInt(err.message);
 
         switch (err.message) {
