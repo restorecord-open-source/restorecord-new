@@ -67,31 +67,31 @@ export default function Terms() {
                             <Typography variant="h6" component="h2" sx={{ mt: "3rem" }} id="prohibited-activities">6. PROHIBITED ACTIVITIES</Typography>
                             You may not access or use the Site for any purpose other than that for which we make the Site available. The Site may not be used in connection with any commercial endeavors except those that are specifically endorsed or approved by us.
                             <br/>As a user of the Site, you agree not to:
-                            <br/>Using the Site for any purpose other than its intended use, unless specifically endorsed or approved by us for commercial endeavors
-                            <br/>Systematically collecting data or content from the Site without our written permission
-                            <br/>Attempting to trick, defraud, or mislead us or other users for personal gain, including attempting to obtain sensitive account information
-                            <br/>Interfering with security-related features of the Site
-                            <br/>Disparaging or harming us or the Site in any way
-                            <br/>Using information obtained from the Site to harass, abuse, or harm others
-                            <br/>Making improper use of our support services or submitting false reports
-                            <br/>Violating any applicable laws or regulations while using the Site
-                            <br/>Engaging in unauthorized framing or linking to the Site
-                            <br/>Uploading or transmitting viruses, Trojan horses, or other harmful material that interferes with the Site or its features
-                            <br/>Engaging in automated use of the system or using data mining, robots, or similar tools
-                            <br/>Deleting copyright or other proprietary notices from any content
-                            <br/>Attempting to impersonate another user or person
-                            <br/>Uploading or transmitting any material that collects or transmits information without consent
-                            <br/>Interfering with or disrupting the Site or its connected networks and services
-                            <br/>Harassing, intimidating, or threatening our employees or agents
-                            <br/>Attempting to bypass any measures designed to prevent or restrict access to the Site
-                            <br/>Copying or adapting the Site&#39;s software or reverse engineering it
-                            <br/>Using any automated system to access the Site or its content
-                            <br/>Using a buying or purchasing agent to make purchases on the Site
-                            <br/>Making unauthorized use of the Site, including collecting user information for unsolicited emails or creating false accounts
-                            <br/>Using the Site to compete with us or for any commercial enterprise
-                            <br/>Selling or transferring your account for money, goods, or services
-                            <br/>Attacking the webserver or attempting arbitrary code execution
-                            <br/>Attempting to libel RestoreCord with the intent of hurting its reputation
+                            <br/>Using the Site for any purpose other than its intended use, unless specifically endorsed or approved by us for commercial endeavors.
+                            <br/>Systematically collecting data or content from the Site without our written permission.
+                            <br/>Attempting to trick, defraud, or mislead us or other users for personal gain, including attempting to obtain sensitive account information.
+                            <br/>Interfering with security-related features of the Site.
+                            <br/>Disparaging or harming us or the Site in any way.
+                            <br/>Using information obtained from the Site to harass, abuse, or harm others.
+                            <br/>Making improper use of our support services or submitting false reports.
+                            <br/>Violating any applicable laws or regulations while using the Site.
+                            <br/>Engaging in unauthorized framing or linking to the Site.
+                            <br/>Uploading or transmitting viruses, Trojan horses, or other harmful material that interferes with the Site or its features.
+                            <br/>Engaging in automated use of the system or using data mining, robots, or similar tools.
+                            <br/>Deleting copyright or other proprietary notices from any content.
+                            <br/>Attempting to impersonate another user or person.
+                            <br/>Uploading or transmitting any material that collects or transmits information without consent.
+                            <br/>Interfering with or disrupting the Site or its connected networks and services.
+                            <br/>Harassing, intimidating, or threatening our employees or agents.
+                            <br/>Attempting to bypass any measures designed to prevent or restrict access to the Site.
+                            <br/>Copying or adapting the Site&#39;s software or reverse engineering it.
+                            <br/>Using any automated system to access the Site or its content.
+                            <br/>Using a buying or purchasing agent to make purchases on the Site.
+                            <br/>Making unauthorized use of the Site, including collecting user information for unsolicited emails or creating false accounts.
+                            <br/>Using the Site to compete with us or for any commercial enterprise.
+                            <br/>Selling or transferring your account for money, goods, or services.
+                            <br/>Attacking the webserver or attempting arbitrary code execution.
+                            <br/>Attempting to libel RestoreCord with the intent of hurting its reputation.
                             <br/>Creating multiple accounts.
                             
                             <Typography variant="h6" component="h2" sx={{ mt: "3rem" }} id="guidelines-for-reviews">7. GUIDELINES FOR REVIEWS</Typography>
