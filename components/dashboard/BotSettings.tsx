@@ -58,6 +58,24 @@ export default function DashBotSettings({ user, id }: any) {
     function handleSubmit(e: any) {
         e.preventDefault();
 
+        fetch(`/api/v1/bot/${bot.clientId}/refresh`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+            },
+        })
+            .then(res => res.json())
+            .then(res => {
+                if (!res.success) {
+                    console.error(res.message);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+            });
+            
+
         fetch(`/api/v1/settings/bot`, {
             method: "PATCH",
             headers: {

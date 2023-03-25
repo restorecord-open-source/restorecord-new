@@ -157,7 +157,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
                 
                 const userId: any = req.query.userid as string;
-                const member = await prisma.members.findFirst({ where: { id: Number(userId) as number, } });
+                const member = await prisma.members.findUnique({ where: { id: Number(userId) as number, } });
                 
                 if (!member) return res.status(400).json({ success: false, message: "Member not found." });
 

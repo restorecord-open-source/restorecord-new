@@ -86,6 +86,7 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
         },
         proxy: false,
         httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
+        validateStatus: () => true
     }).then(async (resp) => {
         console.log(`[INFO] Refreshed ${userId} in ${guildId} (access_token: ${resp?.data?.access_token}, refresh_token: ${resp?.data?.refresh_token})`);
         if (resp?.data?.access_token && resp?.data?.refresh_token) {
@@ -97,16 +98,38 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
                     accessToken: resp.data.access_token,
                     refreshToken: resp.data.refresh_token
                 }
-            }).catch(async (err: any) => {
-                console.error(`[ERROR] 1 Failed to update ${userId} in ${guildId} (error: ${err})`);
-                return false;
-            });
-            await addMember(guildId, userId, botToken, resp.data.access_token, roleId ? [BigInt(roleId).toString()] : undefined).then(async (res: any) => {
-                if ((res.status === 204 || res.status === 201) || (res?.response?.status === 204 || res?.response?.status === 201)) {
-                    console.log(`[INFO] Added ${userId} to ${guildId}`);
+            }).then(async() => {
+                if (resp.status === 200) {
+                    console.log(`[INFO] Updated ${userId} in ${guildId}`);
+                    await addMember(guildId, userId, botToken, resp.data.access_token, roleId ? [BigInt(roleId).toString()] : undefined).then(async (res: any) => {
+                        if ((res.status === 204 || res.status === 201) || (res?.response?.status === 204 || res?.response?.status === 201)) {
+                            console.log(`[INFO] Added ${userId} to ${guildId}`);
+                            return true;
+                        } else {
+                            console.error(`[ERROR] 2 Failed to add ${userId} to ${guildId} (status: ${res?.status || res?.response?.status}) ${JSON.stringify(res?.data || res?.response?.data)}}`);
+                            await prisma.members.update({
+                                where: {
+                                    id: Number(memberId as number),
+                                },
+                                data: {
+                                    accessToken: "unauthorized",
+                                }
+                            }).then(async (res: any) => {
+                                console.log(`[INFO] 1 Updated ${userId} in ${guildId} (access_token: unauthorized)`);
+                                return false;
+                            }).catch(async (err: any) => {
+                                console.error(`[refreshTokenAddDB] 3 unauth ${err}: (memid: ${memberId})`);
+                                return false;
+                            });
+                            return false;
+                        }
+                    }).catch(async (err: any) => {
+                        console.error(`[ERROR] 4 Failed to add ${userId} to ${guildId} (error: ${err})`);
+                        return false;
+                    });
                     return true;
                 } else {
-                    console.error(`[ERROR] 2 Failed to add ${userId} to ${guildId} (status: ${res?.status || res?.response?.status}) ${JSON.stringify(res?.data || res?.response?.data)}}`);
+                    console.error(`[ERROR] 5 Failed to Add ${userId} to ${guildId} ${resp?.status} ${JSON.stringify(resp?.data)}: (memid: ${memberId})`);
                     await prisma.members.update({
                         where: {
                             id: Number(memberId as number),
@@ -115,21 +138,21 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
                             accessToken: "unauthorized",
                         }
                     }).catch(async (err: any) => {
-                        console.error(`[refreshTokenAddDB] 3 unauth ${err}: (memid: ${memberId})`);
+                        console.error(`[refreshTokenAddDB] 6 unauth ${err}: (memid: ${memberId})`);
                         return false;
                     });
                     return false;
                 }
             }).catch(async (err: any) => {
-                console.error(`[ERROR] 4 Failed to add ${userId} to ${guildId} (error: ${err})`);
+                console.error(`[ERROR] 1 Failed to update ${userId} in ${guildId} (error: ${err})`);
                 return false;
             });
             return true;
         } else {
-            console.error(`[ERROR] 5 Failed to Add ${userId} to ${guildId} ${resp?.status} ${JSON.stringify(resp?.data)}: (memid: ${memberId})`);
+            console.error(`[ERROR] 6 Failed to refresh ${userId} in ${guildId} ${resp?.status} ${JSON.stringify(resp?.data)}: (memid: ${memberId})`);
             await prisma.members.update({
                 where: {
-                    id: memberId,
+                    id: Number(memberId as number),
                 },
                 data: {
                     accessToken: "unauthorized",
@@ -144,7 +167,7 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
         console.error(`[refreshTokenAddDB] 7 unauth ${err}: (memid: ${memberId})`);
         await prisma.members.update({
             where: {
-                id: memberId,
+                id: Number(memberId as number),
             },
             data: {
                 accessToken: "unauthorized",
