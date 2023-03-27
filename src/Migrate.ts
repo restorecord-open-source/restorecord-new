@@ -88,7 +88,6 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
         httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
         validateStatus: () => true
     }).then(async (resp) => {
-        console.log(`[INFO] Refreshed ${userId} in ${guildId} (access_token: ${resp?.data?.access_token}, refresh_token: ${resp?.data?.refresh_token})`);
         if (resp?.data?.access_token && resp?.data?.refresh_token) {
             await prisma.members.update({
                 where: {
@@ -99,10 +98,11 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
                     refreshToken: resp.data.refresh_token
                 }
             }).then(async() => {
+                console.log(`[INFO] Refreshed ${userId} in ${guildId} (access_token: ${resp?.data?.access_token}, refresh_token: ${resp?.data?.refresh_token})`);
                 if (resp.status === 200) {
                     console.log(`[INFO] Updated ${userId} in ${guildId}`);
                     await addMember(guildId, userId, botToken, resp.data.access_token, roleId ? [BigInt(roleId).toString()] : undefined).then(async (res: any) => {
-                        if ((res.status === 204 || res.status === 201) || (res?.response?.status === 204 || res?.response?.status === 201)) {
+                        if ((res?.status === 204 || res?.status === 201) || (res?.response?.status === 204 || res?.response?.status === 201)) {
                             console.log(`[INFO] Added ${userId} to ${guildId}`);
                             return true;
                         } else {
@@ -114,7 +114,7 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
                                 data: {
                                     accessToken: "unauthorized",
                                 }
-                            }).then(async (res: any) => {
+                            }).then(async () => {
                                 console.log(`[INFO] 1 Updated ${userId} in ${guildId} (access_token: unauthorized)`);
                                 return false;
                             }).catch(async (err: any) => {

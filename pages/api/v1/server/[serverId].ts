@@ -109,7 +109,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 if (!guildId) return res.status(400).json({ success: false, message: "Server not provided" });
 
                 const roleId = req.query.role as string;
-                const pullCount = req.query.pullCount as string;
+                let pullCount = req.query.pullCount as string;
+
+                if (pullCount === undefined || pullCount === null || pullCount === "") pullCount = Number.MAX_SAFE_INTEGER.toString();
 
                 const server = await prisma.servers.findFirst({ where: { AND: [ { id: Number(serverId) as number }, { ownerId: user.id } ] } });
                 if (!server) return res.status(400).json({ success: false, message: "Server not found" });
@@ -147,6 +149,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     validateStatus: () => true,
                 }).then((resp) => {
                     if (resp?.status !== 200 || resp?.status != 200) return res.status(400).json({ success: false, message: "Discord server not found, invite bot or try again." });
+                    console.log(`[${server.name}] Started pulling to ${resp?.data?.name} (${resp?.data?.id})`);
                 }).catch((err) => {
                     console.error(err);
                     return res.status(400).json({ success: false, message: "Something went wrong" });
@@ -231,6 +234,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 let erroPulled: number = 0;
                 new Promise<void>(async (resolve, reject) => {
                     let membersNew = await shuffle(members);
+                    console.log(`[${server.name}] Total members: ${members.length}, pulling: ${membersNew.length}`);
 
                     await prisma.logs.create({
                         data: {
@@ -243,7 +247,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         const newServer = await prisma.servers.findFirst({ where: { id: server.id } });
 
                         if (!newServer) return reject(`[${server.name}] Server not found`);
-                        //if (!newServer.pulling) return reject(`[${server.name}] Pulling stopped`);
+                        if (!newServer.pulling) return reject(`[${server.name}] Pulling stopped`);
 
                         console.log(`[${server.name}] [${member.username}] Pulling...`);
                         await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : []).then(async (resp: any) => {
@@ -271,7 +275,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                     console.log(`[${server.name}] [${member.username}] 201 | Refreshed token`);
                                     succPulled++;
                                 } else {
-                                    console.log(`[${server.name}] [${member.username}] 403 | Refreshed token failed`);
+                                    console.log(`[${server.name}] [${member.username}] 403 | Refresh Failed`);
+                                    erroPulled++;
                                 }
                                 break;
                             case 407:
@@ -291,11 +296,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             case 400:
                                 if (response?.code !== 30001) {
                                     console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 400 | ${JSON.stringify(response)}`);
-                                    erroPulled++;
                                 }
+                                erroPulled++;
                                 break;
                             case 404:
                                 console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 404 | ${JSON.stringify(response)}`);
+                                erroPulled++;
                                 break;
                             case 401:
                                 console.error(`[${server.name}] [${member.id}]-[${member.username}] Bot token invalid stopped pulling...`);
@@ -303,6 +309,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                 break;
                             default:
                                 console.error(`[FATAL ERROR] [UNDEFINED STATUS] [${server.name}] [${member.id}]-[${member.username}] ${status} | ${JSON.stringify(response.message)} | ${JSON.stringify(resp.message)}`);
+                                erroPulled++;
                                 break;
                             }
                         }).catch(async (err: Error) => {
@@ -329,7 +336,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             return;
                         }
 
-                        console.log(`[${server.name}] [${member.username}] Success: ${succPulled}/${pullCount ? pullCount : "∞"} (${trysPulled}/${membersNew.length}) | Errors: ${erroPulled} | Delay: ${delay}ms`);
+                        console.log(`[${server.name}] [${member.username}] Success: ${succPulled}/${(pullCount !== Number.MAX_SAFE_INTEGER.toString()) ? pullCount : "∞"} (${trysPulled}/${membersNew.length}) | Errors: ${erroPulled} | Delay: ${delay}ms`);
 
                         await sleep(delay);
                     }
@@ -345,7 +352,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     }).catch(async (err: Error) => {
                         console.error(`[${server.name}] [PULLING] 5 ${err}`);
                     });
-
+                    
                     resolve();
                     return;
                 }).then(async () => {
@@ -364,7 +371,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     console.error(`[PULLING] 3 ${err}`);
                 });
 
-                let esimatedTime: any = members.length * 1000 + delay; 
+                let esimatedTime: any = members.length * (1000 + delay); 
                 esimatedTime = formatEstimatedTime(esimatedTime);
             
                 return res.status(200).json({ success: true, message: `Started Pull Process, this will take around ${esimatedTime}` });

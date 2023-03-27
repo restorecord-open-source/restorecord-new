@@ -6,8 +6,8 @@ const Vouches: Vouch[] = [
             name: "Colin Pucz",
             picture: true,
         },
-        title: "I've been using Restorecord for a while...",
-        description: "I've been using Restorecord for a while now and it has saved my butt so many times, just being able to get my members back is such a relief to me. Since then, I've stopped worrying all night waking up to my server being terminated. 🙏        ",
+        title: "I've been using RestoreCord for a while...",
+        description: "I've been using RestoreCord for a while now and it has saved my butt so many times, just being able to get my members back is such a relief to me. Since then, I've stopped worrying all night waking up to my server being terminated. 🙏        ",
         stars: 5,
     },
     {
@@ -29,7 +29,7 @@ const Vouches: Vouch[] = [
             picture: false,
         },
         title: "Perfect uptime, support and features.",
-        description: "Perfect uptime, support and features.\nI've been using Restorecord since almost two months, it is working totally fine and the support is faster then light\nReally recommending it",
+        description: "Perfect uptime, support and features.\nI've been using RestoreCord since almost two months, it is working totally fine and the support is faster then light\nReally recommending it",
         stars: 5,
     },
     {

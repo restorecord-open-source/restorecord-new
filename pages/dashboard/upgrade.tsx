@@ -137,7 +137,7 @@ export default function Upgrade() {
                                 </Stack>
                             </Button>
                         </Grid>
-                        <Grid item xs={12}>
+                        {/* <Grid item xs={12}>
                             <Button variant="contained" fullWidth sx={{ height: "100%", borderRadius: "1rem", border: `1px solid ${theme.palette.primary.main}`,  backgroundColor: paymentMethod === "paypal" ? theme.palette.primary.main : theme.palette.background.paper }} onClick={() => setPaymentMethod("paypal")}>
                                 <svg id="icon-logo-paypal" x="0px" y="0px" viewBox="0 0 28 32" style={{ height: "2rem", marginRight: "0.5rem" }}>
                                     <path fill="#253B80" d="M7.266,29.154l0.523-3.322l-1.165-0.027H1.061L4.927,1.292C4.939,1.218,4.978,1.149,5.035,1.1 c0.057-0.049,0.13-0.076,0.206-0.076h9.38c3.114,0,5.263,0.648,6.385,1.927c0.526,0.6,0.861,1.227,1.023,1.917 c0.17,0.724,0.173,1.589,0.007,2.644l-0.012,0.077v0.676l0.526,0.298c0.443,0.235,0.795,0.504,1.065,0.812 c0.45,0.513,0.741,1.165,0.864,1.938c0.127,0.795,0.085,1.741-0.123,2.812c-0.24,1.232-0.628,2.305-1.152,3.183 c-0.482,0.809-1.096,1.48-1.825,2c-0.696,0.494-1.523,0.869-2.458,1.109c-0.906,0.236-1.939,0.355-3.072,0.355h-0.73 c-0.522,0-1.029,0.188-1.427,0.525c-0.399,0.344-0.663,0.814-0.744,1.328l-0.055,0.299l-0.924,5.855l-0.042,0.215 c-0.011,0.068-0.03,0.102-0.058,0.125c-0.025,0.021-0.061,0.035-0.096,0.035H7.266z"></path>
@@ -150,7 +150,7 @@ export default function Upgrade() {
                                     <Typography variant="body2" color="text.secondary">PayPal Balance, Bank Account, Credit Card</Typography>
                                 </Stack>
                             </Button>
-                        </Grid>
+                        </Grid> */}
                     </Grid>
 
                     {(paymentMethod === "coinbase") && (

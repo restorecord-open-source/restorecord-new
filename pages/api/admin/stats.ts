@@ -12,7 +12,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             try {
                 if (!user.admin) return res.status(400).json({ success: false, message: "Account is not an admin." });
 
-
                 const cached = await redis.get("adminStats");
                 if (cached) return res.status(200).json(JSON.parse(cached));
 

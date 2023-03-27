@@ -11,7 +11,7 @@ export default function Footer() {
             <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, justifyContent: "space-between", alignItems: { sm: "center" } , flexWrap: "wrap" }}>
                 
                 <Box sx={{ display: { xs: "none", sm: "flex" }, flexDirection: "column", justifyContent: "center", flexWrap: "wrap", marginBottom: "auto", maxWidth: "30%" }}>
-                    <Typography variant="h6" color="text.secondary" sx={{ fontWeight: "bold" }}>Restorecord</Typography>
+                    <Typography variant="h6" color="text.secondary" sx={{ fontWeight: "bold" }}>RestoreCord</Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ wordWrap: "break-all" }}>RestoreCord is a Discord Recovery Service, that allows you to restore your Discord Guild after being nuked, raided, or otherwise lost.</Typography>
                 </Box>
 

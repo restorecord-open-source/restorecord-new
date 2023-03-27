@@ -18,7 +18,6 @@ import "nprogress/nprogress.css";
 import "../public/styles/globals.css";
 import "aos/dist/aos.css";
 
-
 NProgress.configure({ showSpinner: false });
 
 Router.events.on("routeChangeStart", () => NProgress.start());

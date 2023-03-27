@@ -61,6 +61,7 @@ export default function NavBar({ ...props }: any) {
     const isMobile = useMediaQuery(useTheme().breakpoints.down("md"));
 
     useEffect(() => {
+        userDropdownRef.current.style.display = "none";
         setPathName(router.pathname);
 
         if (isMobile) setOpenDrawer(false);
@@ -73,22 +74,18 @@ export default function NavBar({ ...props }: any) {
                 <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, background: "#09090d", borderBottomLeftRadius: "1rem", borderBottomRightRadius: "1rem", boxShadow: "none", borderBottom: "1px solid rgb(38, 38, 42)" }}>
                     <Toolbar>
                         {isMobile && (
-                            <>
-                                <IconButton onClick={() => setOpenDrawer(!openDrawer)} edge="start" sx={{ marginRight: (theme) => theme.spacing(2) }} color="inherit" aria-label="menu">
-                                    <MenuIcon />
-                                </IconButton>
-                            </>
+                            <IconButton onClick={() => setOpenDrawer(!openDrawer)} edge="start" sx={{ marginRight: (theme) => theme.spacing(2) }} color="inherit" aria-label="menu">
+                                <MenuIcon />
+                            </IconButton>
                         )}
                         <Typography variant="h6" noWrap component="div" sx={{  flexGrow: 0, cursor: "pointer" }} onClick={() => { router.push("/dashboard") }}>
                             RestoreCord
                         </Typography>
 
-                        {/* desktop only */}
                         <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", flexGrow: 1, justifyContent: "flex-end", mr: 2 }}>
                             <Stack direction="row" spacing={2} alignItems="center">
-                                <ButtonBase disableRipple onClick={() => { 
+                                <ButtonBase disableRipple onClick={() => {
                                     userDropdownRef?.current?.style?.display === "none" ? userDropdownRef.current.style.display = "flex" : userDropdownRef.current.style.display = "none";
-                                    // userDropdownRef?.current?.style?.flexDirection === "column" ? userDropdownRef.current.style.flexDirection = "row" : userDropdownRef.current.style.flexDirection = "column";
                                 }}>
                                     <Avatar alt="Profile Picture" src={props.user.icon} sx={{ width: 32, height: 32, mr: 1 }} />
                                     {/* <Avatar sx={{ width: 32, height: 32, mr: 1, bgcolor: stringToColor(props.user.username), color: theme.palette.getContrastText(stringToColor(props.user.username)) }}>{props.user.username[0].toUpperCase()}</Avatar> */}
@@ -125,9 +122,10 @@ export default function NavBar({ ...props }: any) {
                                 </ListItemButton>
                             </List>
                         </Box>
-                        
+
                     </Toolbar>
                 </AppBar>
+                
                 <Drawer open={openDrawer} onClose={() => setOpenDrawer(false)} variant="persistent" sx={{ width: drawerWidth, flexShrink: 0, [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: "border-box", background: "#00000000" } }}>
                     <Toolbar />
                     <Box sx={{ overflow: "auto" }}>

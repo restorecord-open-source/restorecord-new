@@ -38,6 +38,7 @@ export default function DashCustomBot({ user }: any) {
     const { data, isError, isLoading  } = useQuery("getCustomBotInfo", async() => {
         if (user.bots && user.bots.length > 0) {
             for (const bot of user.bots) {
+                await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * 100) + 100));
                 await fetch(`/api/v1/users/@me`, {
                     method: "GET",
                     headers: {
@@ -208,7 +209,7 @@ export default function DashCustomBot({ user }: any) {
         )
     }
 
-    function renderBotList(BotClient: any) {
+    function renderBot(BotClient: any) {
         return (
             <Paper key={BotClient.id} variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
                 <CardContent>
@@ -280,7 +281,7 @@ export default function DashCustomBot({ user }: any) {
                         {(user.bots.length > 0) && !createNewBot && (
                             <>
                                 {rendertitleBarUI()}
-                                {user.bots.map((item: any) => renderBotList(item))}
+                                {user.bots.map((item: any) => renderBot(item))}
                             </>
                         )}
 

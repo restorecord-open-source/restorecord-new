@@ -256,7 +256,7 @@ export default function Home() {
                                         </Box>
 
                                         <Typography sx={{ fontStyle: "normal", fontWeight: 300, fontSize: 20, color: theme.palette.text.primary, marginTop: 2, textAlign: "center",  padding: { xs: "0px 12px", sm: "0px 25px", md: "0px 50px" }, marginBottom: 2 }}>
-                                            Perfect uptime, support and features. I&apos;ve been using Restorecord since almost two months, it is working totally fine and the support is faster then light Really recommending it
+                                            Perfect uptime, support and features. I&apos;ve been using RestoreCord since almost two months, it is working totally fine and the support is faster then light Really recommending it
                                         </Typography>
                                     </Card>
                                     <Card sx={{ width: "100%", maxWidth: 600, height: "auto", display: "block", borderRadius: 12, marginTop: 5 }} data-aos="zoom-in">

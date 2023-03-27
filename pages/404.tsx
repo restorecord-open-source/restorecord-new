@@ -2,10 +2,8 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import styles from "../public/styles/error.module.css";
 
 export default function Error404() {
-
     return (
         <>
             <Box display="flex" justifyContent="center" alignItems="center" height="100vh" sx={{ textAlign: "center" }}>

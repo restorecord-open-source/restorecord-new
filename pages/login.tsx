@@ -28,7 +28,6 @@ export default function Login() {
     const [notiTextS, setNotiTextS] = useState("X");
     const [notiTextE, setNotiTextE] = useState("X");
 
-
     const redirect_to: any = router.query.redirect_to;
     const username_query: any = router.query.username;
 

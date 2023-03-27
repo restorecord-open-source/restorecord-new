@@ -40,8 +40,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         var Charge = coinbase.resources.Charge;
 
         const charge = await Charge.create({
-            name: "Restorecord Subscription",
-            description: "Restorecord Subscription",
+            name: "RestoreCord Subscription",
+            description: "RestoreCord Subscription",
             local_price: {
                 amount: amount,
                 currency: "USD"

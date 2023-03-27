@@ -24,6 +24,7 @@ import { useRef, useState } from "react";
 export default function AccountSettings() {
     const [ token ]: any = useToken()
     const router = useRouter();
+    
     const { Canvas: QRCode } = useQRCode();
     const [openS, setOpenS] = useState(false);
     const [openE, setOpenE] = useState(false);

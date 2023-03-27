@@ -26,6 +26,8 @@ export default function Logout() {
             })
                 .then(res => res.json())
                 .then(res => {
+                    window.localStorage.removeItem("token");
+                    window.location.href = "/";
                     if (!res.success || res.code === 50014) {
                         setNotiTextE(res.message);
                         setOpenE(true);
@@ -33,8 +35,6 @@ export default function Logout() {
                     else {
                         setNotiTextS(res.message);
                         setOpenS(true);
-                        window.localStorage.removeItem("token");
-                        window.location.href = "/";
                     }
                 })
         } catch (error) {
@@ -68,8 +68,6 @@ export default function Logout() {
                                 {notiTextS}
                             </Alert>
                         </Snackbar>
-
-
                     </CardContent>
                 </Paper>
             </Container>
