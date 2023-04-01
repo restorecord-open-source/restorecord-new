@@ -48,7 +48,7 @@ body {
 }
 
 .image-outline > path#Outline {
-	background-color: rgba(0, 0, 0, 0.5);
+	background-color: rgba(0, 0, 0, 0.5); 
 }
 
 .image-outline path#AppBar-2,

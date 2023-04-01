@@ -29,6 +29,7 @@ import axios from "axios";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Badge from "@mui/material/Badge";
+import LoadingButton from "../../components/misc/LoadingButton";
 
 export default function Backups() {
     const [ token ]: any = useToken()
@@ -191,7 +192,7 @@ export default function Backups() {
                                         </DialogContentText>
                                     </DialogContent>
                                     <DialogActions>
-                                        <Button onClick={() => {
+                                        <LoadingButton event={() => {
                                             setRestoreDialog(false);
                                             setRestoreOptions({ settings: false, channels: false, roles: false, clearGuild: false });
                                             setNotiTextI("Restoring Backup...");
@@ -223,7 +224,7 @@ export default function Backups() {
                                                 });
                                         } } color="success">
                                             Restore
-                                        </Button>
+                                        </LoadingButton>
                                         <Button onClick={() => setRestoreDialog(false)} color="primary" autoFocus>
                                             Cancel
                                         </Button>
