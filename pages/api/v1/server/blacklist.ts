@@ -111,7 +111,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     if (!value.match(/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/)) return res.status(400).json({ success: false, message: "Invalid IP Address" });
                     // check if ipv4 is a pirvate ip address
                     if (value.match(/^(?:10|127|172\.(?:1[6-9]|2[0-9]|3[0-1])|192\.168)\./)) return res.status(400).json({ success: false, message: "Invalid IP Address" });
-                    if (blacklist.find((item: any) => (item.ip === value && item.guildId === BigInt(guildId) as bigint))) return res.status(400).json({ success: false, message: "This IP is already blacklisted in this server." });
+                    if (blacklist.find((item: any) => (item.value === value && item.guildId === BigInt(guildId) as bigint))) return res.status(400).json({ success: false, message: "This IP is already blacklisted in this server." });
 
                     await prisma.blacklist.create({ 
                         data: { 
@@ -130,7 +130,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 case "user":
                     // match discord id snowflake
                     if (!value.match(/^[0-9]{17,19}$/)) return res.status(400).json({ success: false, message: "Invalid Discord ID." });
-                    if (blacklist.find((item: any) => (item.userId === BigInt(value) as bigint && item.guildId === BigInt(guildId) as bigint))) return res.status(400).json({ success: false, message: "This User is already blacklisted in this server." });
+                    if (blacklist.find((item: any) => (item.value === BigInt(value) as bigint && item.guildId === BigInt(guildId) as bigint))) return res.status(400).json({ success: false, message: "This User is already blacklisted in this server." });
 
                     await prisma.blacklist.create({
                         data: {
@@ -149,7 +149,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 case "asn":
                     if (user.role === "premium") return res.status(400).json({ success: false, message: "You need to have a Business subscription to blacklist ASN's." });
                     if (!value.match(/^[0-9]{1,10}$/)) return res.status(400).json({ success: false, message: "Invalid ASN." });
-                    if (blacklist.find((item: any) => (item.asn === value && item.guildId === BigInt(guildId) as bigint))) return res.status(400).json({ success: false, message: "This ASN is already blacklisted in this server." });
+                    if (blacklist.find((item: any) => (item.value === value && item.guildId === BigInt(guildId) as bigint))) return res.status(400).json({ success: false, message: "This ASN is already blacklisted in this server." });
 
                     await prisma.blacklist.create({
                         data: {
@@ -165,6 +165,26 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         return res.status(400).json({ success: false, message: "Could not blacklist ASN." });
                     });
                     break;
+                case "iso":
+                    // check if valid country code
+                    if (!value.match(/^[A-Z]{2}$/)) return res.status(400).json({ success: false, message: "Invalid Country Code." });
+                    if (blacklist.find((item: any) => (item.value === value && item.guildId === BigInt(guildId) as bigint))) return res.status(400).json({ success: false, message: "This Country is already blacklisted in this server." });
+
+                    await prisma.blacklist.create({
+                        data: {
+                            type: 3,
+                            value: String(value) as string,
+                            reason: reason,
+                            guildId: BigInt(guildId)
+                        }
+                    }).then(() => {
+                        return res.status(200).json({ success: true, message: "Country has been blacklisted." });
+                    }).catch((err: any) => {
+                        console.error(err);
+                        return res.status(400).json({ success: false, message: "Could not blacklist Country." });
+                    });
+                default:
+                    return res.status(400).json({ success: false, message: "Invalid type." });
                 }
             }
             catch (err: any) {

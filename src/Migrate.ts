@@ -57,7 +57,7 @@ export async function addRole(guildId: string, userId: string, botToken: any, ro
 
 export async function refreshToken(refreshToken: string, clientId: string, clientSecret: string) {
     return await axios.post("https://discord.com/api/oauth2/token", new URLSearchParams({
-        client_id: clientId,
+        client_id: String(clientId) as string,
         client_secret: clientSecret,
         grant_type: "refresh_token",
         refresh_token: refreshToken,

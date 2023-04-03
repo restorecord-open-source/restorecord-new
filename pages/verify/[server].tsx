@@ -82,7 +82,7 @@ export default function Verify({ server, status, err, errStack }: any) {
         default:
             return (
                 <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
-                    <AlertTitle>Error</AlertTitle>
+                    <AlertTitle>Error: {err}</AlertTitle>
                     Discord API error: {errStack}
                 </Alert>
             );
