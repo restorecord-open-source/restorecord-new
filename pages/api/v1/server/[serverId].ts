@@ -1,13 +1,13 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "../../../../src/db";
 import { getBrowser, getIPAddress, getPlatform } from "../../../../src/getIPAddress";
-import { addMember, addRole, refreshTokenAddDB, shuffle, sleep } from "../../../../src/Migrate";
+import { addMember, addRole, refreshToken, refreshTokenAddDB, shuffle, sleep } from "../../../../src/Migrate";
 import rateLimit from "../../../../src/rate-limit";
 import axios from "axios";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { formatEstimatedTime } from "../../../../src/functions";
 import withAuthentication from "../../../../src/withAuthentication";
-import { accounts } from "@prisma/client";
+import { accounts, members } from "@prisma/client";
 
 const limiter = rateLimit({
     uniqueTokenPerInterval: 500,
@@ -233,7 +233,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 let succPulled: number = 0;
                 let erroPulled: number = 0;
                 new Promise<void>(async (resolve, reject) => {
-                    let membersNew = await shuffle(members);
+                    let membersNew: members[] = await shuffle(members);
                     console.log(`[${server.name}] Total members: ${members.length}, pulling: ${membersNew.length}`);
 
                     await prisma.logs.create({
@@ -250,73 +250,101 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         if (!newServer.pulling) return reject(`[${server.name}] Pulling stopped`);
 
                         console.log(`[${server.name}] [${member.username}] Pulling...`);
-                        await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : []).then(async (resp: any) => {
-                            trysPulled++;
-                            let status = resp?.response?.status || resp?.status;
-                            let response = ((resp?.response?.data?.message || resp?.response?.data?.code) || (resp?.data?.message || resp?.data?.code)) ? (resp?.response?.data || resp?.data) : "";
+                        await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : [])
+                            .then(async (resp: any) => {
+                                trysPulled++;
+                                let status = resp?.response?.status || resp?.status;
+                                let response = ((resp?.response?.data?.message || resp?.response?.data?.code) || (resp?.data?.message || resp?.data?.code)) ? (resp?.response?.data || resp?.data) : "";
 
-                            console.log(`[${server.name}] [${member.username}] ${status} ${JSON.stringify(response).toString() ?? null}`);
+                                console.log(`[${server.name}] [${member.username}] ${status} ${JSON.stringify(response).toString() ?? null}`);
                     
-                            switch (status) {
-                            case 429:   
-                                const retryAfter = resp.response.headers["retry-after"];
-                                console.log(`[${server.name}] [${member.username}] 429 | retry-after: ${retryAfter} | delay: ${delay}ms`);
-                                if (retryAfter) {
-                                    const retry = parseInt(retryAfter);
-                                    setTimeout(async () => {
-                                        await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : [])
-                                    }, retry + 100);
-                                    delay += retry;
-                                }
-                                break;
-                            case 403:
-                                const refreshed = await refreshTokenAddDB(member.userId.toString(), member.id, guildId.toString(), bot?.botToken, roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
-                                if (refreshed) {
-                                    console.log(`[${server.name}] [${member.username}] 201 | Refreshed token`);
-                                    succPulled++;
-                                } else {
-                                    console.log(`[${server.name}] [${member.username}] 403 | Refresh Failed`);
-                                    erroPulled++;
-                                }
-                                break;
-                            case 407:
-                                console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);
-                                break;
-                            case 204:
-                                await addRole(guildId.toString(), member.userId.toString(), bot?.botToken, roleId ? BigInt(roleId).toString() : "");
-                                succPulled++;
-                                break;
-                            case 201:
-                                succPulled++;
+                                switch (status) {
+                                case 429:   
+                                    const retryAfter = resp.response.headers["retry-after"];
+                                    console.log(`[${server.name}] [${member.username}] 429 | retry-after: ${retryAfter} | delay: ${delay}ms`);
+                                    if (retryAfter) {
+                                        const retry = parseInt(retryAfter);
+                                        setTimeout(async () => {
+                                            await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : [])
+                                        }, retry + 100);
+                                        delay += retry;
+                                    }
+                                    break;
+                                case 403:
+                                    const refreshed = await refreshToken(member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString());
+                                    if (refreshed?.data?.access_token && refreshed?.data?.refresh_token) {
+                                        await prisma.members.update({
+                                            where: {
+                                                id: Number(member.id as number),
+                                            },
+                                            data: {
+                                                accessToken: refreshed.data.access_token,
+                                                refreshToken: refreshed.data.refresh_token
+                                            }
+                                        });
 
-                                if (delay > 2000) delay -= 1000;
-                                else if (delay < 500) delay = 550;
+                                        console.log(`[${server.name}] [${member.username}] Refreshed (access_token: ${refreshed.data.access_token}, refresh_token: ${refreshed.data.refresh_token})`);
+                                        await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, refreshed.data.access_token, roleId ? [BigInt(roleId).toString()] : []).then(async (respon: any) => {
+                                            if ((respon?.status === 204 || respon?.status === 201) || (respon?.response?.status === 204 || respon?.response?.status === 201)) {
+                                                succPulled++;
+                                                console.log(`[${server.name}] [${member.username}] ${respon?.status || respon?.response?.status} Refresh PULLED`); 
+                                            } else {
+                                                erroPulled++;
+                                                console.log(`[${server.name}] [${member.username}] ${respon?.status || respon?.response?.status} Refresh FAILED`);
+                                            }
+                                        });
+                                    } else {
+                                        await prisma.members.update({
+                                            where: {
+                                                id: Number(member.id as number),
+                                            },
+                                            data: {
+                                                accessToken: "unauthorized"
+                                            }
+                                        });
+                                        console.log(`[${server.name}] [${member.username}] 403 | Refresh Failed`);
+                                        erroPulled++;
+                                    }
+                                    break;
+                                case 407:
+                                    console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);
+                                    break;
+                                case 204:
+                                    await addRole(guildId.toString(), member.userId.toString(), bot?.botToken, roleId ? BigInt(roleId).toString() : "");
+                                    succPulled++;
+                                    break;
+                                case 201:
+                                    succPulled++;
+
+                                    if (delay > 2000) delay -= 1000;
+                                    else if (delay < 500) delay = 550;
                                 
-                                break;
-                            case 400:
-                                if (response?.code !== 30001) {
-                                    console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 400 | ${JSON.stringify(response)}`);
+                                    break;
+                                case 400:
+                                    if (response?.code !== 30001) {
+                                        console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 400 | ${JSON.stringify(response)}`);
+                                    }
+                                    erroPulled++;
+                                    break;
+                                case 404:
+                                    console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 404 | ${JSON.stringify(response)}`);
+                                    erroPulled++;
+                                    break;
+                                case 401:
+                                    console.error(`[${server.name}] [${member.id}]-[${member.username}] Bot token invalid stopped pulling...`);
+                                    reject(`[${server.name}] Bot token invalid stopped pulling...`);
+                                    break;
+                                default:
+                                    console.error(`[FATAL ERROR] [UNDEFINED STATUS] [${server.name}] [${member.id}]-[${member.username}] ${status} | ${JSON.stringify(response.message)} | ${JSON.stringify(resp.message)}`);
+                                    erroPulled++;
+                                    break;
                                 }
+                            })
+                            .catch(async (err: Error) => {
+                                console.error(`[${server.name}] [addMember.catch] [${member.username}] ${err}`);
                                 erroPulled++;
-                                break;
-                            case 404:
-                                console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 404 | ${JSON.stringify(response)}`);
-                                erroPulled++;
-                                break;
-                            case 401:
-                                console.error(`[${server.name}] [${member.id}]-[${member.username}] Bot token invalid stopped pulling...`);
-                                reject(`[${server.name}] Bot token invalid stopped pulling...`);
-                                break;
-                            default:
-                                console.error(`[FATAL ERROR] [UNDEFINED STATUS] [${server.name}] [${member.id}]-[${member.username}] ${status} | ${JSON.stringify(response.message)} | ${JSON.stringify(resp.message)}`);
-                                erroPulled++;
-                                break;
-                            }
-                        }).catch(async (err: Error) => {
-                            console.error(`[${server.name}] [addMember.catch] [${member.username}] ${err}`);
-                            erroPulled++;
                             // return res.status(400).json({ success: false, message: err?.message ? err?.message : "Something went wrong" });
-                        });
+                            });
 
                         if (succPulled >= Number(pullCount)) {
                             console.log(`[${server.name}] [${member.username}] ${pullCount} members have been pulled`);
