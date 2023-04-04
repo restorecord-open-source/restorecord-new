@@ -25,6 +25,9 @@ import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import CircularProgress from "@mui/material/CircularProgress";
+import { Avatar } from "@mui/material";
+import { countries } from "./index";
+
 
 
 export default function Blacklist() {
@@ -43,7 +46,7 @@ export default function Blacklist() {
     const [notiTextE, setNotiTextE] = useState("X");
     const [notiTextI, setNotiTextI] = useState("X");
 
-    const { data: user, isError, isLoading: userLoading } = useQuery('user', async () => await getUser({
+    const { data: user, isError, isLoading: userLoading } = useQuery("user", async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
     }), { retry: false,  refetchOnWindowFocus: false });
 
@@ -92,6 +95,7 @@ export default function Blacklist() {
                                                 <Select value={blacklistType} onChange={(e) => setBlacklistType(e.target.value)} name="blacklist-type" label="Blacklist Type" id="blacklist-type">
                                                     <MenuItem value="user">User</MenuItem>
                                                     <MenuItem value="ip">IP</MenuItem>
+                                                    <MenuItem value="iso">Country</MenuItem>
                                                     <MenuItem value="asn">ASN (Business)</MenuItem>
                                                 </Select>
                                             </FormControl>
@@ -100,6 +104,23 @@ export default function Blacklist() {
                                                 <TextField required fullWidth label="User ID" placeholder="9812345678912345678" variant="outlined" value={blacklist} onChange={(e) => setBlacklist(e.target.value)} inputProps={{ minLength: 17, maxLength: 19, pattern: "[0-9]{17,19}" }} />
                                             ) : blacklistType === "ip" ? (
                                                 <TextField required fullWidth label="IP Address" placeholder="123.212.167.89" variant="outlined" value={blacklist} onChange={(e) => setBlacklist(e.target.value)} inputProps={{ minLength: 7, maxLength: 15, pattern: "[0-9.]{7,15}" }} />
+                                            ) : blacklistType === "iso" ? (
+                                                <>
+                                                    {/* select field */}
+                                                    <FormControl fullWidth variant="outlined" required>
+                                                        <InputLabel htmlFor="blacklist-country">Country</InputLabel>
+                                                        <Select value={blacklist} onChange={(e) => setBlacklist(e.target.value)} name="blacklist-country" label="Country" id="blacklist-country">
+                                                            {countries.map((country) => (
+                                                                <MenuItem key={country.code} value={country.code}>
+                                                                    <Stack direction="row" alignItems="center">
+                                                                        <Avatar src={`https://cdn.ipregistry.co/flags/twemoji/${country.code.toLowerCase()}.svg`} sx={{ width: 20, height: 20, borderRadius: 0, mr: 1 }} />
+                                                                        {country.name}
+                                                                    </Stack>
+                                                                </MenuItem>
+                                                            ))}
+                                                        </Select>
+                                                    </FormControl>
+                                                </>
                                             ) : blacklistType === "asn" ? (
                                                 <TextField required fullWidth label="ASN Number" placeholder="15169" variant="outlined" value={blacklist} onChange={(e) => setBlacklist(e.target.value)} inputProps={{ minLength: 1, maxLength: 10, pattern: "[0-9]{1,10}" }} />
                                             ) : null}

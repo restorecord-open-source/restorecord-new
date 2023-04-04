@@ -64,10 +64,10 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                         throw new Error(990031 as any);
                     } else if (entry.type === 1 && entry.value === String(IPAddr) as string) {
                         throw new Error(990032 as any);
-                    } else if (serverOwner.role !== "free" && entry.type === 2) {
-                        if (entry.value === pCheck[IPAddr].asn.replace("AS", "") as string) {
-                            throw new Error(990033 as any);
-                        }
+                    } else if (entry.type === 2 && entry.value === String(pCheck[IPAddr].asn).replace("AS", "") as string && serverOwner.role === "business") {
+                        throw new Error(990033 as any);
+                    } else if (entry.type === 3 && entry.value === String(pCheck[IPAddr].isocode)) {
+                        throw new Error(990034 as any);
                     }
                 }
                 
@@ -173,6 +173,9 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                     case 990033:
                         res.setHeader("Set-Cookie",`RC_err=307 RC_errStack=Your ISP is blacklisted in this server.; Path=/; Max-Age=5;`);
                         return res.redirect(`https://${domain}/verify/${state}`);
+                    case 990034:
+                        res.setHeader("Set-Cookie",`RC_err=307 RC_errStack=Your Country is blacklisted in this server.; Path=/; Max-Age=5;`);
+                        return res.redirect(`https://${domain}/verify/${state}`);
                     case 990044:
                         res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=5;`);
                         return res.redirect(`https://${domain}/verify/${state}`);
@@ -258,6 +261,9 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                 case 990033:
                     res.setHeader("Set-Cookie",`RC_err=307 RC_errStack=Your ISP is blacklisted in this server.; Path=/; Max-Age=5;`);
                     return res.redirect(`https://${domain}/verify/${state}`);
+                case 990034:
+                    res.setHeader("Set-Cookie",`RC_err=307 RC_errStack=Your Country is blacklisted in this server.; Path=/; Max-Age=5;`);
+                    return res.redirect(`https://${domain}/verify/${state}`);
                 case 990044:
                     res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=5;`);
                     return res.redirect(`https://${domain}/verify/${state}`);
@@ -298,6 +304,9 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
             case 990033:
                 res.setHeader("Set-Cookie",`RC_err=307 RC_errStack=Your ISP is blacklisted in this server.; Path=/; Max-Age=5;`);
                 return res.redirect(`https://${domain}/verify/${state}`);
+            case 990034:
+                res.setHeader("Set-Cookie",`RC_err=307 RC_errStack=Your Country is blacklisted in this server.; Path=/; Max-Age=5;`);
+                return res.redirect(`https://${domain}/verify/${state}`);
             case 990044:
                 res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=5;`);
                 return res.redirect(`https://${domain}/verify/${state}`);
@@ -337,6 +346,9 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
             return res.redirect(`https://${domain}/verify/${state}`);
         case 990033:
             res.setHeader("Set-Cookie",`RC_err=307 RC_errStack=Your ISP is blacklisted in this server.; Path=/; Max-Age=5;`);
+            return res.redirect(`https://${domain}/verify/${state}`);
+        case 990034:
+            res.setHeader("Set-Cookie",`RC_err=307 RC_errStack=Your Country is blacklisted in this server.; Path=/; Max-Age=5;`);
             return res.redirect(`https://${domain}/verify/${state}`);
         case 990044:
             res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=5;`);

@@ -180,14 +180,14 @@ export async function refreshTokenAddDB(userId: any, memberId: any, guildId: any
     });
 }
 
-export async function exchange(code: string, redirectUri: string, clientId: any, clientSecret: any) {
+export async function exchange(code: string, redirectUri: string, clientId: any, clientSecret: any, scope = "identify+guilds.join") {
     return await axios.post("https://discord.com/api/oauth2/token", new URLSearchParams({
         client_id: clientId,
         client_secret: clientSecret,
         grant_type: "authorization_code",
         code: code,
         redirect_uri: redirectUri,
-        scope: "identify+guilds.join",
+        scope: scope,
     }), {
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
