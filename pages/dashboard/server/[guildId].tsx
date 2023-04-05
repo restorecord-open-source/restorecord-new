@@ -13,7 +13,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 export default function Settings() {
     const router = useRouter();
     const [ token ]: any = useToken()
-    const { server } = router.query;
+    const { guildId } = router.query;
 
     const { data, isError, isLoading } = useQuery('user', async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
@@ -38,7 +38,7 @@ export default function Settings() {
             <Box sx={{ display: "flex" }}>
                 <NavBar user={data}>
                     <Toolbar />
-                    <DashServerSettings user={data} id={server} />
+                    <DashServerSettings user={data} id={guildId} />
                 </NavBar>
             </Box>
         </>

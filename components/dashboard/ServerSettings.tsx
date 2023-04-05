@@ -102,10 +102,10 @@ export default function DashServerSettings({ user, id }: any) {
                     setNotiTextS(res.message);
                     setOpenS(true);
                     setTimeout(() => {
-                        router.push("/dashboard/settings");
+                        router.push("/dashboard/server");
                     }, 1250);
                     // functions.ToastAlert(res.message, "success");
-                    // router.push("/dashboard/settings");
+                    // router.push("/dashboard/server");
                 }
             })
             .catch(err => {
@@ -222,7 +222,7 @@ export default function DashServerSettings({ user, id }: any) {
                                                     setNotiTextS(res.data.message);
                                                     setOpenS(true);
                                                     setTimeout(() => {
-                                                        router.push("/dashboard/settings");
+                                                        router.push("/dashboard/server");
                                                     }, 1250);
                                                 }
                                             })

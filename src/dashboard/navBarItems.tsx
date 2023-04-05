@@ -10,7 +10,6 @@ import AccountBalanceWallet from "@mui/icons-material/AccountBalanceWallet";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import Help from "@mui/icons-material/HelpOutline";
 import FindInPage from "@mui/icons-material/FindInPage";
-import Logout from "@mui/icons-material/Logout";
 import PersonOffIcon from "@mui/icons-material/PersonOff";
 
 const navItemWrappers: navItemWrapper[] = [
@@ -22,7 +21,7 @@ const navItemWrappers: navItemWrapper[] = [
     {
         name: "Servers",
         icon: <Dns />,
-        href: "/dashboard/settings",
+        href: "/dashboard/server",
     },
     {
         name: "Backups",
