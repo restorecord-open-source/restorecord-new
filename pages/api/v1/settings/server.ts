@@ -34,7 +34,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
                 data.serverName = data.serverName.trim();
 
-                const customBot = await prisma.customBots.findUnique({ where: { id: Number(data.customBot) } });
+                const customBot = await prisma.customBots.findUnique({ where: { clientId: BigInt(data.customBot) as bigint } });
                 if (!customBot) return res.status(400).json({ success: false, message: "Custom Bot not found" });
 
                 const server = await prisma.servers.findFirst({
@@ -63,7 +63,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         name: data.serverName,
                         guildId: BigInt(data.guildId),
                         roleId: BigInt(data.roleId),
-                        customBotId: Number(data.customBot),
+                        customBotId: Number(customBot.id),
                         ownerId: user.id,
                     }
                 });

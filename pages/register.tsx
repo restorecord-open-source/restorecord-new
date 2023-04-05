@@ -85,7 +85,7 @@ export default function Register() {
                         email: email,
                         password: password,
                         captcha: token,
-                        ref: router.query.ref ? router.query.ref : null
+                        ref: router.query.r ? router.query.r : null
                     })
                 })
                     .then(res => res.json())

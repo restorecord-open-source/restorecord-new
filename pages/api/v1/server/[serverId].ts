@@ -149,7 +149,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     validateStatus: () => true,
                 }).then((resp) => {
                     if (resp?.status !== 200 || resp?.status != 200) return res.status(400).json({ success: false, message: "Discord server not found, invite bot or try again." });
-                    console.log(`[${server.name}] Started pulling to ${resp?.data?.name} (${resp?.data?.id})`);
+                    console.log(`[${server.name}] Server exists on Discord: ${resp?.data?.name} (${resp?.data?.id})`);
                 }).catch((err) => {
                     console.error(err);
                     return res.status(400).json({ success: false, message: "Something went wrong" });
@@ -242,6 +242,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             body: `${user.username} started pulling to ${server.name}, ip: ${getIPAddress(req)}, device: ${getPlatform(req.headers["user-agent"] ?? "")} (${getBrowser(req.headers["user-agent"] ?? "")})`,
                         }
                     });
+                    
+                    console.log(`[${server.name}] Started Pulling`);
+
 
                     for (const member of membersNew) { 
                         const newServer = await prisma.servers.findFirst({ where: { id: server.id } });
