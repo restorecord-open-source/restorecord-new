@@ -4,12 +4,12 @@ import { prisma } from "../../src/db";
 import { getIPAddress } from "../../src/getIPAddress";
 import { verify } from "jsonwebtoken";
 import axios from "axios";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 function handler(req: NextApiRequest, res: NextApiResponse) {
     let code: any = null;
     let domain: any = null;
     let userId: any = null;
-    let verifiedMember: any = null;
     let customBotInfo: any = null;
     let newMember: any = null;
 
@@ -36,45 +36,37 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                     if (!account || account === null) throw new Error(10001 as any);
 
                     userId = BigInt(account.id as any);
-                    verifiedMember = await prisma.members.findUnique({ where: { userId_guildId: { userId: userId, guildId: 0 } } });
 
-                    if (verifiedMember && verifiedMember !== null) {
-                        console.log(`[0] ${account.username + "#" + account.discriminator} Updating member`);
-                        newMember = await prisma.members.update({
-                            where: {
-                                userId_guildId: {
-                                    userId: userId,
-                                    guildId: 0,
-                                },
-                            },
-                            data: {
-                                accessToken: respon.data.access_token,
-                                refreshToken: respon.data.refresh_token,
-                                ip: IPAddr ?? "127.0.0.1",
-                                username: account.username + "#" + account.discriminator,
-                                avatar: account.avatar ? account.avatar : ((account.discriminator as any) % 5).toString(),
-                                createdAt: new Date(),
-                            },
-                        });
-                    } else {
-                        console.log(`[0] ${account.username + "#" + account.discriminator} Creating member`);
-                        newMember = await prisma.members.create({
-                            data: {
+                    await prisma.members.upsert({
+                        where: {
+                            userId_guildId: {
                                 userId: userId,
                                 guildId: 0,
-                                // guild: {
-                                //     connect: {
-                                //         guildId: rGuildId,
-                                //     },
-                                // },
-                                accessToken: respon.data.access_token,
-                                refreshToken: respon.data.refresh_token,
-                                ip: IPAddr ?? "127.0.0.1",
-                                username: account.username + "#" + account.discriminator,
-                                avatar: account.avatar ? account.avatar : ((account.discriminator as any) % 5).toString(),
                             },
-                        });
-                    }
+                        },
+                        update: {
+                            accessToken: respon.data.access_token,
+                            refreshToken: respon.data.refresh_token,
+                            ip: IPAddr ?? "127.0.0.1",
+                            username: account.username + "#" + account.discriminator,
+                            avatar: account.avatar ? account.avatar : ((account.discriminator as any) % 5).toString(),
+                            createdAt: new Date(),
+                        },
+                        create: {
+                            userId: userId,
+                            guildId: 0,
+                            // guild: {
+                            //     connect: {
+                            //         guildId: rGuildId,
+                            //     },
+                            // },
+                            accessToken: respon.data.access_token,
+                            refreshToken: respon.data.refresh_token,
+                            ip: IPAddr ?? "127.0.0.1",
+                            username: account.username + "#" + account.discriminator,
+                            avatar: account.avatar ? account.avatar : ((account.discriminator as any) % 5).toString(),
+                        },
+                    });
 
                     return res.redirect(`/dashboard/link?id=${newMember.id}&t=${newMember.accessToken}`);
                 });
@@ -123,7 +115,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
 
                 const metadata = {
                     platform_name: "RestoreBot",
-                    platform_username: user.username,
+                    platform_username: user.id,
                     metadata: {
                         plan: user.role === "free" ? 0 : (user.role === "premium" ? 1 : (user.role === "business" ? 2 : 3)),
                         created_at: String(user.createdAt.toISOString()) as string,
@@ -135,6 +127,8 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                         "Authorization": `Bearer ${member.accessToken}`,
                     },
                     validateStatus: () => true,
+                    proxy: false,
+                    httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
                 }).catch((err) => { console.log(err); });
 
                 return res.status(200).json({ error: false, message: "Successfully linked your account" });
