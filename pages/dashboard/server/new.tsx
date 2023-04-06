@@ -209,12 +209,11 @@ export default function Server() {
             popupWindow?.focus();
 
             const interval = setInterval(() => {
-                if (popupWindow?.closed) {
+                if (popupWindow?.closed || isMobile) {
                     clearInterval(interval);
 
                     const newActiveStep = (activeStep === 3 - 1) && !(Object.keys(completedSteps).length) ? steps.findIndex((step, i) => !(i in completedSteps)) : activeStep + 1;
                     setActiveStep(newActiveStep);
-                    
                 }
             }, 1000);
             break;
@@ -446,12 +445,6 @@ export default function Server() {
                                                         setCompletedSteps(newCompleted);
                                                         handleNext();
                                                     }} sx={{ mt: 2 }}>next</Button>
-                                                <Button variant="contained" onClick={() => {
-                                                    const newCompleted = completedSteps;
-                                                    newCompleted[activeStep] = false;
-                                                    setCompletedSteps(newCompleted);
-                                                    handleBack();
-                                                }} sx={{ mt: 2 }}>back [dev]</Button>
                                             </>
                                         )}
                                     </CardContent>
