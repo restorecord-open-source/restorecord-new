@@ -300,7 +300,10 @@ export default function Server() {
                     {allServers.length > 0 && (
                         <Stack spacing={2} sx={{ width: "100%" }}>
                             {allServers.map((server: any) => (
-                                <ButtonBase key={server.id} onClick={() => setSelectedServer(server.id)} disableRipple>
+                                <ButtonBase key={server.id} onClick={() => {
+                                    setSelectedServer(server.id);
+                                    setServerName(server.name);
+                                }} disableRipple>
                                     <Paper sx={{ width: "100%", display: "flex", alignItems: "center", p: 2,
                                         border: selectedServer === server.id ?`2px solid ${theme.palette.primary.main}` : "2px solid transparent",
                                         borderRadius: 5,

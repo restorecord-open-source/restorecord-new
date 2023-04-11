@@ -112,13 +112,13 @@ export default function Admin() {
                                         <TableContainer component={Paper} sx={{ borderRadius: "1rem", boxShadow: "0 0 0 0", border: `1px solid ${theme.palette.divider}` }}>
                                             <Table>
                                                 <TableBody>
-                                                    {tableElement("Accounts", stats.accounts, <PeopleIcon sx={{ mr: 1, mb: -0.75 }} />)}
-                                                    {tableElement("Premium", stats.accountsPremium, <SavingsIcon sx={{ mr: 1, mb: -0.75 }} />)}
-                                                    {tableElement("Business", stats.accountsBusiness, <PaymentsIcon sx={{ mr: 1, mb: -0.75 }} />)}
-                                                    {tableElement("Servers", stats.servers, <StorageIcon sx={{ mr: 1, mb: -0.75 }} />)}
+                                                    {tableElement("Accounts", stats.accounts.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), <PeopleIcon sx={{ mr: 1, mb: -0.75 }} />)}
+                                                    {tableElement("Premium", stats.accountsPremium.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), <SavingsIcon sx={{ mr: 1, mb: -0.75 }} />)}
+                                                    {tableElement("Business", stats.accountsBusiness.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), <PaymentsIcon sx={{ mr: 1, mb: -0.75 }} />)}
+                                                    {tableElement("Servers", stats.servers.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), <StorageIcon sx={{ mr: 1, mb: -0.75 }} />)}
                                                     {tableElement("Members", stats.members.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), <GroupsIcon sx={{ mr: 1, mb: -0.75 }} />)}
-                                                    {tableElement("Bots", stats.customBots, <SmartToyIcon sx={{ mr: 1, mb: -0.75 }} />)}
-                                                    {tableElement("Revenue", `$${stats.totalRevenue + (6289 + 16133 + 3731)} (${stats.payments})`, <AccountBalanceIcon sx={{ mr: 1, mb: -0.75 }} />)}
+                                                    {tableElement("Bots", stats.customBots.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), <SmartToyIcon sx={{ mr: 1, mb: -0.75 }} />)}
+                                                    {tableElement("Revenue", `$${stats.totalRevenue + (6289 + 16133 + 3731).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} (${stats.payments.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")})`, <AccountBalanceIcon sx={{ mr: 1, mb: -0.75 }} />)}
                                                 </TableBody>
                                             </Table>
                                         </TableContainer>
