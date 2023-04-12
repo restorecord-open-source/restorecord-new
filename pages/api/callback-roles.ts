@@ -115,7 +115,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
 
                 const metadata = {
                     platform_name: "RestoreBot",
-                    platform_username: user.id,
+                    platform_username: String(user.id) as string,
                     metadata: {
                         plan: user.role === "free" ? 0 : (user.role === "premium" ? 1 : (user.role === "business" ? 2 : 3)),
                         created_at: String(user.createdAt.toISOString()) as string,
@@ -136,7 +136,6 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
             }
 
         } catch (err: any) {
-            console.error(err);
             err.message = parseInt(err.message);
             switch (err.message) {
             case 10001:
@@ -149,6 +148,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                 return res.status(401).json({ error: "Unauthorized" });
                 break;
             default:
+                console.error(err);
                 return res.status(500).json({ error: "Internal server error" });
                 break;
             }
@@ -166,6 +166,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
             return res.status(401).json({ error: "Unauthorized" });
             break;
         default:
+            console.error(err);
             return res.status(500).json({ error: "Internal server error" });
             break;
         }
