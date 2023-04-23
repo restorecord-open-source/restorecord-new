@@ -1,4 +1,7 @@
 import Head from "next/head";
+import { prisma } from "../../src/db";
+import { useEffect, useState } from "react";
+
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
@@ -12,8 +15,7 @@ import Fade from "@mui/material/Fade";
 import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
 import LockIcon from "@mui/icons-material/Lock";
-import { prisma } from "../../src/db";
-import { useEffect, useState } from "react";
+import PublicOffIcon from "@mui/icons-material/PublicOff";
 import Link from "next/link";
 
 export default function Verify({ server, status, err, errStack }: any) {
@@ -143,9 +145,9 @@ export default function Verify({ server, status, err, errStack }: any) {
                                         {server.name}
                                     </Typography>
                                 </Tooltip>
-                                {server.verified && (
-                                    <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} placement="top" disableInteractive title={`Verified`}>
-                                        <CheckCircle sx={{ color: theme.palette.grey[500], width: "2rem", height: "2rem" }} />
+                                {!server.ipLogging && (
+                                    <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} placement="top" disableInteractive title={`This server has IP logging disabled.`}>
+                                        <PublicOffIcon sx={{ color: theme.palette.grey[500], width: "2rem", height: "2rem" }} />
                                     </Tooltip>
                                 )}
                             </Box>
@@ -254,7 +256,7 @@ export async function getServerSideProps({ req }: any) {
         let serverName = req.url.split("/")[2];
         let type = 1;
 
-        let serverInfo: { success: boolean, name: string, guildId: string, icon: string, bg: string, description: string, color: string, clientId: string, domain: string, locked: boolean } = {
+        let serverInfo: { success: boolean, name: string, guildId: string, icon: string, bg: string, description: string, color: string, ipLogging: boolean, clientId: string, domain: string, locked: boolean } = {
             success: false,
             name: decodeURI(serverName),
             guildId: "",
@@ -262,6 +264,7 @@ export async function getServerSideProps({ req }: any) {
             bg: "",
             description: "Verify to view the rest of the server.",
             color: "#4f46e5",
+            ipLogging: true,
             clientId: "",
             domain: "",
             locked: false
@@ -294,6 +297,7 @@ export async function getServerSideProps({ req }: any) {
                     bg: res.bgImage ? res.bgImage : "",
                     description: res.description,
                     color: `#${res.themeColor}`,
+                    ipLogging: res.ipLogging,
                     clientId: customBot?.clientId.toString(),
                     domain: customBot?.customDomain ? customBot.customDomain : "",
                     locked: res.locked
