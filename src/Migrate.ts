@@ -23,7 +23,7 @@ export async function addMember(guildId: string, userId: string, botToken: any, 
         payload.roles = roles;
     }
 
-    return await axios.put(`https://discordapp.com/api/guilds/${guildId}/members/${userId}`, payload, {
+    return await axios.put(`https://discord.com/api/v10/guilds/${guildId}/members/${userId}`, payload, {
         headers: {
             "Authorization": `Bot ${botToken}`,
             "Content-Type": "application/json",
@@ -232,10 +232,10 @@ export async function resolveUser(token: string): Promise<User> {
 export async function sendWebhookMessage(webhookUrl: string | null, title: string = "Successfully Verified", serverOwner: accounts, pCheck: any, IPAddr: string, account: User, type: number = 1) {
     if (!webhookUrl) return;
    
-   
     const createdAt: number = account.id / 4194304 + 1420070400000;
-    let operator;    
-    if (pCheck[IPAddr].proxy === "yes") operator = pCheck[IPAddr].operator ? `[\`${pCheck[IPAddr].operator.name}\`](${pCheck[IPAddr].operator.url})` : "Unknown";
+    let operator = "Unknown";
+    if (IPAddr !== null && pCheck[IPAddr].proxy === "yes")
+        operator = pCheck[IPAddr].operator ? `[\`${pCheck[IPAddr].operator.name}\`](${pCheck[IPAddr].operator.url})` : "Unknown";
 
     await axios.post(webhookUrl, {
         content: `<@${account.id}> (${account.username}#${account.discriminator})`,
@@ -247,7 +247,7 @@ export async function sendWebhookMessage(webhookUrl: string | null, title: strin
                 author: {
                     name: `${account.username}#${account.discriminator}`,
                     url: `https://discord.id/?prefill=${account.id}`,
-                    icon_url: account.avatar ? `https://cdn.discordapp.com/avatars/${account.id}/${account.avatar}.png` : `https://cdn.discordapp.com/embed/avatars/${account.discriminator % 5}.png`,
+                    icon_url: account.avatar ? `https://cdn.discord.com/avatars/${account.id}/${account.avatar}.png` : `https://cdn.discord.com/embed/avatars/${account.discriminator % 5}.png`,
                 },
                 fields: [
                     {
@@ -257,7 +257,7 @@ export async function sendWebhookMessage(webhookUrl: string | null, title: strin
                     },
                     {
                         name: ":earth_americas: Client IP:",
-                        value: `||${IPAddr}||`,
+                        value: `${IPAddr ? `||${IPAddr}||` : "Unavailable"}`,
                         inline: true,
                     },
                     {
@@ -265,16 +265,18 @@ export async function sendWebhookMessage(webhookUrl: string | null, title: strin
                         value: `<t:${Math.floor(createdAt / 1000)}:R>`,
                         inline: true,
                     },
-                    {
-                        name: `:flag_${pCheck[IPAddr].isocode ? pCheck[IPAddr].isocode.toLowerCase() : "us"}: IP Info:`,
-                        value: `**Country:** \`${pCheck[IPAddr].country}\`\n**Provider:** \`${pCheck[IPAddr].provider}\``,
-                        inline: true,
-                    },
-                    {
-                        name: ":globe_with_meridians: Connection Info:",
-                        value: serverOwner.role === "business" ? `**Type**: \`${pCheck[IPAddr].type}\`\n**VPN**: \`${pCheck[IPAddr].proxy}\`${pCheck[IPAddr].proxy === "yes" ? `\n**Operator**: ${operator}` : ""}` : "Upgrade to Business plan to view",
-                        inline: true,
-                    },
+                    ...(IPAddr ? [
+                        {
+                            name: `:flag_${pCheck[IPAddr].isocode ? pCheck[IPAddr].isocode.toLowerCase() : "us"}: IP Info:`,
+                            value: `**Country:** \`${pCheck[IPAddr].country}\`\n**Provider:** \`${pCheck[IPAddr].provider}\``,
+                            inline: true,
+                        },
+                        {
+                            name: ":globe_with_meridians: Connection Info:",
+                            value: serverOwner.role === "business" ? `**Type**: \`${pCheck[IPAddr].type}\`\n**VPN**: \`${pCheck[IPAddr].proxy}\`${pCheck[IPAddr].proxy === "yes" ? `\n**Operator**: ${operator}` : ""}` : "Upgrade to Business plan to view",
+                            inline: true,
+                        }
+                    ] : []),
                 ],
             },
         ],

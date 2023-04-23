@@ -324,7 +324,7 @@ export const clearGuild = async(server: servers, bot: customBots, channels: bool
                 validateStatus: () => true,
             });
 
-            if (!resp.status.toString().startsWith("2")) { console.error(`[Restore] [Clear] [Roles] ${resp.status} ${resp.statusText} ${JSON.stringify(resp.data)}`); }
+            if (!resp.status.toString().startsWith("2")) { console.error(`[Restore] [Clear] [Roles] ${resp.status} ${resp.statusText} ${JSON.stringify(resp.data)}`); return; }
 
             if (resp.data.retry_after) {
                 await new Promise((resolve) => setTimeout(resolve, ((resp.data.retry_after * 3) ?? 1000)));
@@ -366,7 +366,7 @@ export const clearGuild = async(server: servers, bot: customBots, channels: bool
                 validateStatus: () => true,
             });
 
-            if (!resp.status.toString().startsWith("2")) { console.error(`[Restore] [Clear] [Roles] ${resp.status} ${resp.statusText} ${JSON.stringify(resp.data)}`); }
+            if (!resp.status.toString().startsWith("2")) { console.error(`[Restore] [Clear] [Roles] ${resp.status} ${resp.statusText} ${JSON.stringify(resp.data)}`); return; }
 
             if (resp.data.retry_after) {
                 await new Promise((resolve) => setTimeout(resolve, ((resp.data.retry_after * 3) ?? 1000)));
