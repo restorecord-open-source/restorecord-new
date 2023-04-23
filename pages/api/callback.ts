@@ -15,6 +15,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
 
     let serverInfo: any = null;
     let customBotInfo: any = null;
+    let serverOwner: any = null;
 
     return new Promise(async (resolve, reject) => {
         code = req.query.code;
@@ -37,13 +38,14 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
         }
         if (!serverInfo) return reject(10004 as any);
 
+
         customBotInfo = await redis.get(`customBot:${serverInfo.customBotId}`);
         if (customBotInfo) { customBotInfo = JSON.parse(customBotInfo); }
         else {
             customBotInfo = await prisma.customBots.findUnique({ where: { id: serverInfo.customBotId } });
             customBotInfo.clientId = customBotInfo.clientId.toString();
 
-            await redis.set(`customBot:${serverInfo.customBotId}`, JSON.stringify(customBotInfo), "EX", 60 * 60 * 3);
+            await redis.set(`customBot:${serverInfo.customBotId}`, JSON.stringify(customBotInfo), "EX", 60 * 60);
         }
         if (!customBotInfo) return reject(10002 as any);
 
@@ -57,13 +59,15 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
             if (respon.status !== 200) return reject(10001 as any);
             if (!respon.data.access_token) return reject(990001 as any);
 
-            const account = await resolveUser(respon.data.access_token);
-            if (!account || account === null) return reject(10001 as any);
-
-            const serverOwner = await prisma.accounts.findUnique({ where: { id: serverInfo.ownerId } });
+            serverOwner = await redis.get(`serverOwner:${serverInfo.ownerId}`);
+            if (serverOwner) { serverOwner = JSON.parse(serverOwner); }
+            else {
+                serverOwner = await prisma.accounts.findUnique({ where: { id: serverInfo.ownerId } });
+                serverOwner.userId = serverOwner.userId ? serverOwner.userId.toString() : "0";
+                
+                await redis.set(`serverOwner:${serverInfo.ownerId}`, JSON.stringify(serverOwner), "EX", 60 * 60);
+            }
             if (!serverOwner) return res.status(400).json({ success: false, message: "No server owner found" });
-
-            userId = BigInt(account.id as any);
 
             const blacklistEntries = await prisma.blacklist.findMany({ where: { guildId: guildId } });
             const pCheck = await ProxyCheck.check(IPAddr, { vpn: true, asn: true });
@@ -82,30 +86,40 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
 
             // res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
             // res.redirect(`https://${domain}/verify/${state}`);
+
+            const account = await resolveUser(respon.data.access_token);
+            if (!account || account === null) return reject(10001 as any);
+
+            userId = BigInt(account.id as any);
                 
             if (serverInfo.webhook) {
                 const isProxy = serverInfo.vpncheck && pCheck[IPAddr].proxy === "yes";
                 
-                if (isProxy) {
-                    await sendWebhookMessage(serverInfo.webhook, "Failed VPN Check", serverOwner, pCheck, IPAddr, account, 0);
+                if (isProxy && serverInfo.ipLogging) {
+                    await sendWebhookMessage(serverInfo.webhook, "Failed VPN Check", serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0);
                     return reject(990044 as any);
                 }
                 
-                await sendWebhookMessage(serverInfo.webhook, "Successfully Verified", serverOwner, pCheck, IPAddr, account);
+                await sendWebhookMessage(serverInfo.webhook, "Successfully Verified", serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account);
             }
 
-            await addMember(guildId.toString(), userId.toString(), customBotInfo.botToken, respon.data.access_token, [BigInt(serverInfo.roleId).toString()]).then(async (resp) => {
+            await addMember(guildId.toString(), userId.toString(), customBotInfo.botToken, respon.data.access_token, serverInfo.guildId === serverInfo.roleId ? [] : [BigInt(serverInfo.roleId).toString()]).then(async (resp) => {
                 let status = resp?.response?.status || resp?.status;
-                    
-                console.log(`[${guildId}] [${account.username}#${account.discriminator}] ${status} ${JSON.stringify(resp?.data ? resp?.data : resp?.response?.data) ?? null}`);
+
+                console.log(`[${guildId}] [${account.username}#${account.discriminator}] ${status} ${status.toString().startsWith("4") ? JSON.stringify(resp?.data ? resp?.data : resp?.response?.data) ?? "" : ""}`);
 
                 switch (status) {
                 case 201:
                     res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
                     return res.redirect(`https://${domain}/verify/${state}`);
                 case 204:
+                    if (serverInfo.guildId === serverInfo.roleId) {
+                        res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
+                        return res.redirect(`https://${domain}/verify/${state}`);
+                    }
+
                     await addRole(guildId.toString(), userId.toString(), customBotInfo.botToken, serverInfo.roleId.toString()).then(async (response) => {
-                        console.log(`[${guildId}] [${account.username}] Adding Role... ${response?.response?.status || response?.status} ${JSON.stringify(response?.data ? response?.data : response?.response?.data) ?? null}`);
+                        console.log(`[${guildId}] [${account.username}#${account.discriminator}] Adding Role... ${response?.response?.status || response?.status} ${JSON.stringify(response?.data ? response?.data : response?.response?.data) ?? ""}`);
                             
                         switch (response?.response?.status || response?.status) {
                         case 204:
@@ -131,7 +145,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                     return reject(990401 as any);
                 case 429:
                     await sleep(resp?.response?.data?.retry_after ? resp?.response?.data?.retry_after : 1000);
-                    await addMember(guildId.toString(), userId.toString(), customBotInfo.botToken, respon.data.access_token, [BigInt(serverInfo.roleId).toString()]).then(async (resp) => {
+                    await addMember(guildId.toString(), userId.toString(), customBotInfo.botToken, respon.data.access_token, serverInfo.guildId === serverInfo.roleId ? [] : [BigInt(serverInfo.roleId).toString()]).then(async (resp) => {
                         switch (resp?.status || resp?.response?.status) {
                         case 204:
                             await addRole(guildId.toString(), userId.toString(), customBotInfo.botToken, serverInfo.roleId.toString()).then(async (response) => {
@@ -174,27 +188,27 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                     guildId: guildId,
                     accessToken: respon.data.access_token,
                     refreshToken: respon.data.refresh_token,
-                    ip: IPAddr ?? "127.0.0.1",
+                    ip: serverInfo.ipLogging ? (IPAddr ? IPAddr : "127.0.0.1") : null,
                     username: account.username + "#" + account.discriminator,
                     avatar: account.avatar ? account.avatar : ((account.discriminator as any) % 5).toString(),
-                    isp: pCheck[IPAddr].organisation ? pCheck[IPAddr].organisation : null,
-                    state: pCheck[IPAddr].region ? pCheck[IPAddr].region : null,
-                    city: pCheck[IPAddr].city ? pCheck[IPAddr].city : null,
-                    country: pCheck[IPAddr].country ? pCheck[IPAddr].country : null,
-                    vpn: pCheck[IPAddr].proxy === "yes" ? true : false,
+                    isp: serverInfo.ipLogging ? (pCheck[IPAddr].organisation ? pCheck[IPAddr].organisation : null) : null,
+                    state: serverInfo.ipLogging ? (pCheck[IPAddr].region ? pCheck[IPAddr].region : null) : null,
+                    city: serverInfo.ipLogging ? (pCheck[IPAddr].city ? pCheck[IPAddr].city : null) : null,
+                    country: serverInfo.ipLogging ? (pCheck[IPAddr].country ? pCheck[IPAddr].country : null) : null,
+                    vpn: serverInfo.ipLogging ? (pCheck[IPAddr].proxy === "yes" ? true : false) : false,
                     createdAt: new Date(),
                 },
                 update: {
                     accessToken: respon.data.access_token,
                     refreshToken: respon.data.refresh_token,
-                    ip: IPAddr ?? "127.0.0.1",
+                    ip: serverInfo.ipLogging ? (IPAddr ? IPAddr : "127.0.0.1") : null,
                     username: account.username + "#" + account.discriminator,
                     avatar: account.avatar ? account.avatar : ((account.discriminator as any) % 5).toString(),
-                    isp: pCheck[IPAddr].organisation ? pCheck[IPAddr].organisation : null,
-                    state: pCheck[IPAddr].region ? pCheck[IPAddr].region : null,
-                    city: pCheck[IPAddr].city ? pCheck[IPAddr].city : null,
-                    country: pCheck[IPAddr].country ? pCheck[IPAddr].country : null,
-                    vpn: pCheck[IPAddr].proxy === "yes" ? true : false,
+                    isp: serverInfo.ipLogging ? (pCheck[IPAddr].organisation ? pCheck[IPAddr].organisation : null) : null,
+                    state: serverInfo.ipLogging ? (pCheck[IPAddr].region ? pCheck[IPAddr].region : null) : null,
+                    city: serverInfo.ipLogging ? (pCheck[IPAddr].city ? pCheck[IPAddr].city : null) : null,
+                    country: serverInfo.ipLogging ? (pCheck[IPAddr].country ? pCheck[IPAddr].country : null) : null,
+                    vpn: serverInfo.ipLogging ? (pCheck[IPAddr].proxy === "yes" ? true : false) : false,
                     createdAt: new Date(),
                 },
             });
