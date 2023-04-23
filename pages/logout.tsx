@@ -19,7 +19,7 @@ export default function Logout() {
 
     useEffect(() => {
         try {
-            fetch(`/api/v1/logout`, {
+            fetch(`/api/v2/logout`, {
                 headers: {
                     "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
                 },

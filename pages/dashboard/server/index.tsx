@@ -79,7 +79,7 @@ export default function Server() {
 
     function getAllGuilds() {
         setAllServers([]);
-        axios.get("/api/v1/users/guilds", {
+        axios.get("/api/v2/users/guilds", {
             headers: {
                 "Authorization": `Bot ${customBotToken}`,
             },
@@ -94,7 +94,7 @@ export default function Server() {
 
     function getGuildRoles(guildId: string) {
         setAllRoles([]);
-        axios.get(`/api/v1/users/guilds/${guildId}/roles`, {
+        axios.get(`/api/v2/users/guilds/${guildId}/roles`, {
             headers: {
                 "Authorization": `Bot ${customBotToken}`,
             },
@@ -108,7 +108,7 @@ export default function Server() {
     }
 
     function getBotClient() {
-        axios.get(`/api/v1/users/@me`, {
+        axios.get(`/api/v2/users/@me`, {
             headers: {
                 "Authorization": `Bot ${customBotToken}`,
             },
@@ -282,7 +282,7 @@ export default function Server() {
                                             Refresh Server {pullSettings.giveRoleOnJoin ? "and Role" : ""} List
                                         </Button>
                                         <LoadingButton event={() => (
-                                            axios.put(`/api/v1/server/${guildId}?server=${pullSettings.selectedServer}${pullSettings.giveRoleOnJoin ? `&role=${pullSettings.selectedRole}` : ""}${pullSettings.customPullCountCheck ? `&pullCount=${pullSettings.customPullCount}` : ""}`, {}, {
+                                            axios.put(`/api/v2/self/servers/${guildId}/pull?server=${pullSettings.selectedServer}${pullSettings.giveRoleOnJoin ? `&role=${pullSettings.selectedRole}` : ""}${pullSettings.customPullCountCheck ? `&pullCount=${pullSettings.customPullCount}` : ""}`, {}, {
                                                 headers: {
                                                     "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
                                                 },
@@ -369,7 +369,7 @@ export default function Server() {
                                                                     </Button>
                                                                     <Button variant="contained" color="success" onClick={() => {
                                                                         setCustomBotToken(user.bots.find((bot: any) => bot.id === (user.servers.find((server: any) => server.guildId === item.guildId).customBotId)).botToken);
-                                                                        setGuildId(item.id);
+                                                                        setGuildId(item.guildId);
                                                                         setPullSettings({ ...pullSettings, pullWindow: true });
                                                                     }}>Migrate</Button>
                                                                     {(user.role === "business" || user.role === "enterprise") && (
@@ -377,7 +377,7 @@ export default function Server() {
                                                                             setNotiTextI("Creating a backup...");
                                                                             setOpenI(true);
 
-                                                                            axios.post(`/api/v1/server/backup/${item.guildId}`, {}, {
+                                                                            axios.post(`/api/v2/self/servers/${item.guildId}/backup`, {}, {
                                                                                 headers: {
                                                                                     "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
                                                                                 },

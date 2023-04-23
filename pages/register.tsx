@@ -75,7 +75,7 @@ export default function Register() {
     useEffect(() => {
         try {
             if (token) {
-                fetch(`/api/v1/auth/register`, {
+                fetch(`/api/v2/auth/register`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"

@@ -135,7 +135,7 @@ export default function Server() {
     }
 
     function getRoles(botToken: any, guildId: any) {
-        axios.get(`/api/v1/users/guilds/${guildId}/roles`, {
+        axios.get(`/api/v2/users/guilds/${guildId}/roles`, {
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bot ${botToken}`,
@@ -154,7 +154,7 @@ export default function Server() {
     }
 
     function getGuilds(botToken: any) {
-        axios.get(`/api/v1/users/guilds`, {
+        axios.get(`/api/v2/users/guilds`, {
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bot ${botToken}`,
@@ -174,7 +174,7 @@ export default function Server() {
             if (allBots[i].botId === bot.botId) return;
         }
         
-        fetch(`/api/v1/users/@me`, {
+        fetch(`/api/v2/users/@me`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -220,7 +220,7 @@ export default function Server() {
         case 2:
             if (!serverName || !selectedBot || !selectedServer || !selectedRole) return;
 
-            fetch(`/api/v1/settings/server`, {
+            fetch(`/api/v2/self/servers/create`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -327,7 +327,7 @@ export default function Server() {
                     <Stack spacing={2} sx={{ width: "100%" }}>
                         <Typography variant="body1" sx={{ mt: 2, color: "text.secondary" }}>And choose a server name</Typography>
                         <TextField label="Server name" variant="outlined" value={serverName} onChange={(e) => setServerName(e.target.value)} />
-                        <Typography variant="body2" sx={{ color: "text.secondary" }}>Your verify link will be this: https://{window.location.host}/verify/{serverName}</Typography>
+                        <Typography variant="body2" sx={{ color: "text.secondary" }}>This will be your verify link: <a href="javascript:void(0)">{window.location.origin}/verify/{encodeURIComponent(serverName ?? "")}</a></Typography>
                         {response?.error && <Typography variant="body2" sx={{ color: "error.main" }}>{response.message}</Typography>}
                     </Stack>
                     {/* )} */}
@@ -339,8 +339,8 @@ export default function Server() {
         case 2: // Step 3 (Almost there)
             return (
                 <>
-                    <Typography variant="h5" sx={{ mb: 2, fontWeight: "500" }}>Almost there</Typography>
-                    <Typography variant="body1" sx={{ mb: 2, color: "text.secondary" }}>Last step, almost finished! Select a role you want to give to your members when they verify. This role should be above the bot&apos;s role</Typography>
+                    <Typography variant="h5" sx={{ mb: 2, fontWeight: "500" }}>Almost there!</Typography>
+                    <Typography variant="body1" sx={{ mb: 2, color: "text.secondary" }}>Just one last step. You need to select a verified role for your members when they verify. Just make sure the Bot&apos;s own role is above than the one you pick.</Typography>
 
                     {allRoles.length === 0 && <CircularProgress />}
                     {allRoles.length > 0 && (

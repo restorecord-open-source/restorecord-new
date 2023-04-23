@@ -45,6 +45,7 @@ export default function Backups() {
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [restoreDialog, setRestoreDialog] = useState(false);
     const [backupId, setBackupId] = useState("0");
+    const [serverId, setServerId] = useState("0");
     const [confirmDeleteTimer, setConfirmDeleteTimer] = useState(5);
 
     const [restoreOptions, setRestoreOptions] = useState({
@@ -136,10 +137,11 @@ export default function Backups() {
                                             onClick={() => {
                                                 setConfirmDelete(false);
 
-                                                axios.get(`/api/v1/server/backup/delete/${backupId}`, { headers: {
-                                                    "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
-                                                },
-                                                validateStatus: () => true
+                                                axios.delete(`/api/v2/self/servers/${serverId}/backup/delete/`, { 
+                                                    headers: {
+                                                        "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                    },
+                                                    validateStatus: () => true
                                                 })
                                                     .then((res: any) => {
                                                         if (!res.data.success) {
@@ -198,7 +200,7 @@ export default function Backups() {
                                             setNotiTextI("Restoring Backup...");
                                             setOpenI(true);
 
-                                            axios.post(`/api/v1/server/backup/restore/${backupId}`, {
+                                            axios.post(`/api/v2/self/servers/${serverId}/backup/restore`, {
                                                 ...restoreOptions
                                             }, {
                                                 headers: {
@@ -259,10 +261,12 @@ export default function Backups() {
                                                     {/* <Button variant="contained" color="primary" disabled={true}>View Roles</Button> */}
                                                     <Button variant="contained" color="success" onClick={(e) => {
                                                         setBackupId(backup.backupId);
+                                                        setServerId(backup.guildId)
                                                         setRestoreDialog(true);
                                                     }}>Restore</Button>
                                                     <Button variant="contained" color="error" onClick={(e) => { 
                                                         setBackupId(backup.backupId);
+                                                        setServerId(backup.guildId)
                                                         setConfirmDelete(true);
                                                         new Promise((resolve, reject) => {
                                                             let timer = 3;

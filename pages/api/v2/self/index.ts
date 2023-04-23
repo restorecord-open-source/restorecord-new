@@ -1,29 +1,20 @@
-import { getBrowser, getIPAddress, getPlatform } from "../../../src/getIPAddress";
 import { accounts, backups, customBots, servers } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
-import { createRedisInstance } from "../../../src/Redis";
-import { generateQRUrl } from "../../../src/functions";
 import { compare, hash } from "bcrypt";
-import { prisma } from "../../../src/db";
-import withAuthentication from "../../../src/withAuthentication";
-import rateLimit from "../../../src/rate-limit";
-import Email from "../../../src/email";
 import * as speakeasy from "speakeasy";
 import axios from "axios";
+import { prisma } from "../../../../src/db";
+import Email from "../../../../src/email";
+import { getBrowser, getIPAddress, getPlatform } from "../../../../src/getIPAddress";
+import { generateQRUrl } from "../../../../src/functions";
+import withAuthentication from "../../../../src/withAuthentication";
 
-const limiter = rateLimit({
-    interval: 60 * 1000,
-    uniqueTokenPerInterval: 500,
-})
 
 async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts) {
     return new Promise(async resolve => {
         switch (req.method) {
         case "GET":
             try {
-                limiter.check(res, 500, "CACHE_TOKEN");
-                if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
-
                 const servers = await prisma.servers.findMany({ where: { ownerId: user.id } });
                 const backups = await prisma.backups.findMany({ where: { guildId: { in: servers.map(s => s.guildId) } } });
                 const customBots = await prisma.customBots.findMany({ where: { ownerId: user.id } });
@@ -65,6 +56,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         picture: server.picture,
                         description: server.description,
                         webhook: server.webhook,
+                        ipLogging: server.ipLogging,
                         bgImage: server.bgImage,
                         themeColor: server.themeColor,
                         vpncheck: server.vpncheck,
@@ -86,18 +78,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 return res.status(200).json(response);
             }
             catch (err: any) {
-                if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
-                if (err?.name === "" || err?.name === "JsonWebTokenError") return res.status(400).json({ success: false, message: "User not logged in" }); 
-                if (err?.name === "ValidationError") return res.status(400).json({ success: false, message: err.message, });
-                else console.error(err);
+                console.error(err);
                 return res.status(400).json({ success: false, message: "Something went wrong" });
             }
             break;
         case "POST":
             try {
-                limiter.check(res, 15, "CACHE_TOKEN");
-                if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
-
                 const { password, newPassword, newPassword2, confirmCode } = req.body;
 
                 if (!password || !newPassword || !newPassword2) return res.status(400).json({ success: false, message: "Missing fields." });
@@ -287,30 +273,43 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 }
             }
             catch (err: any) {
-                if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
-                if (err?.name === "" || err?.name === "JsonWebTokenError") return res.status(400).json({ success: false, message: "User not logged in" }); 
-                if (err?.name === "ValidationError") return res.status(400).json({ success: false, message: err.message, });
-                else console.error(err);
+                console.error(err);
                 return res.status(400).json({ success: false, message: "Something went wrong" });
             }
             break;
         case "PATCH":
             try {
-                limiter.check(res, 15, "CACHE_TOKEN");
-                if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
-                
                 if (!user) return res.status(400).json({ success: false, message: "Account not found." });
 
-                const { password, code } = req.body;
+                const { username, password, code } = req.body;
 
-                // check if password and code exist in req.body array
-                if (typeof password !== "string" || typeof code !== "string") return res.status(400).json({ success: false, message: "Missing password or code." });
+                if (typeof password !== "string") return res.status(400).json({ success: false, message: "Missing password." });
+                if (!await compare(password, user.password)) return res.status(400).json({ success: false, message: "Password does not match" });
 
+                if (username && password && !code) {
+                    // change username
+                    if (username.length < 3 || username.length > 20) return res.status(400).json({ success: false, message: "Username must be between 3 and 20 characters." });
+                    if (!/^[a-zA-Z0-9_]+$/.test(username)) return res.status(400).json({ success: false, message: "Username can only contain letters, numbers, and underscores." });
 
-                if (!await compare(password, user.password)) return res.status(400).json({ success: false, message: "Incorrect password." });
-                
+                    const userExists = await prisma.accounts.findFirst({
+                        where: {
+                            username: username
+                        }
+                    });
 
-                if (!code) {
+                    if (userExists) return res.status(400).json({ success: false, message: "Username is already taken." });
+
+                    await prisma.accounts.update({
+                        where: {
+                            id: user.id
+                        },
+                        data: {
+                            username: username
+                        }
+                    });
+
+                    return res.status(200).json({ success: true, message: "Username changed.", username: username });
+                } else if (!code && !username && password) {
                     if (user.googleAuthCode) {
                         const qrcodeUrl = generateQRUrl(user.googleAuthCode, user.username);
                         return res.status(200).json({ success: true, message: "2FA Requested", secret: user.googleAuthCode, url: qrcodeUrl });
@@ -334,9 +333,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
                         return res.status(200).json({ success: true, message: "2FA Requested", secret: secret.base32, url: qrcodeUrl });
                     }
-                } else {
-                    if (!user.googleAuthCode) return res.status(400).json({ success: false, message: "2FA not enabled." });
-
+                } else if (code && !username && password && user.googleAuthCode && !user.twoFactor) {
                     const verified = speakeasy.totp.verify({
                         secret: user.googleAuthCode,
                         encoding: "base32",
@@ -345,76 +342,73 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
                     if (!verified) return res.status(400).json({ success: false, message: "Invalid 2FA code." });
 
-                    if (user.twoFactor == 0) {
-                        await axios.get(`https://ipinfo.io/${getIPAddress(req)}/json?token=${process.env.IPINFO_TOKEN}`).then(async (res) => {
-                            await Email.send({
-                                to: user.email,
-                                from: {
-                                    email: "no-reply@restorecord.com",
-                                    name: "RestoreCord"
-                                },
-                                subject: "RestoreCord Two-Factor Authentication Enabled",
-                                html:
-                                `
-                                    <!DOCTYPE html>
-                                    <html>
-                                    	<head>
-                                    		<title>RestoreCord</title>
-                                    	</head>
-                                    	<body>
-                                    		<h1 style="text-align: center; margin-top: 1.5rem; line-height: 2rem; font-size: 2.25rem; font-weight: 600; margin-bottom: 1rem; color: rgb(79, 70, 229);">
-                                    			RestoreCord
-                                    		</h1>
-                                    		<div style="padding: 1rem; max-width: 30rem; margin-left: auto;margin-right: auto; width: 100%; border-radius: 0.75rem; border-width: 1px; background: rgb(250, 250, 250);">
-                                                <h2 style="color: rgb(0, 0, 0); font-size: 1.75rem; line-height: 2rem; font-weight: 600; line-height: 1.25; margin-bottom: 1rem">
-                                    				Two-Factor Authentication enabled
-                                    			</h2>
-                                    			<div>
-                                                    <p style="white-space: pre-line; color: rgb(0, 0, 0); font-weight: 400; margin-bottom: 0.75rem; overflow-wrap: break-word; font-size: 1rem;">
-                                    					Hello ${user.username},
-                                                        Two-Factor Authentication has been enabled on your account on ${new Date().toLocaleString()} (local time).
-                                                        <br />
-                                    					<b style="font-weight: 600">Location:</b> Near ${res.data.city}, ${res.data.region}, ${res.data.country}
-                                                        <b style="font-weight: 600">Device:</b> ${getPlatform(req.headers["user-agent"] ?? "")} (${getBrowser(req.headers["user-agent"] ?? "")})
-                                    					<b style="font-weight: 600">IP:</b> ${getIPAddress(req)} <br />
-                                    					If this was not you, contact us immediately at <a style="color: rgb(56,189, 248);" href="mailto:contact@restorecord.com">contact@restorecord.com</a> or <a style="color: rgb(56,189, 248);" href="https://t.me/restorecord">RestoreCord Telegram</a>.
-                                                        If you have any questions, please contact us at <a style="color: rgb(56,189, 248);" href="mailto:contact@restorecord.com">contact@restorecord.com</a>.
-                                                        <br />
-                                                        Sincerely,
-                                                        RestoreCord
-                                    				</p>
-                                    			</div>
-                                                <div style="text-align: center; margin-top: 1rem;">
-                                                    <em style="color: rb(190, 198, 213)">
-                                                        Copyright © 2023 RestoreCord. All rights reserved.
-                                                    </em>
-                                                </div>
-                                    		</div>
-                                    	</body>
-                                    </html>
-                                `,
-                            }).then(() => {
-                                console.log(`[EMAIL] [${new Date().toLocaleString()}] Sent 2FA enabled email to ${user.email}`);
-                            }).catch((err: any) => {
-                                console.error(err);
-                            })
-                        });
-
-                        await prisma.accounts.update({
-                            where: {
-                                id: user.id
+                    await axios.get(`https://ipinfo.io/${getIPAddress(req)}/json?token=${process.env.IPINFO_TOKEN}`).then(async (res) => {
+                        await Email.send({
+                            to: user.email,
+                            from: {
+                                email: "no-reply@restorecord.com",
+                                name: "RestoreCord"
                             },
-                            data: {
-                                twoFactor: Number(1) as number
-                            }
-                        });
-                    }
+                            subject: "RestoreCord Two-Factor Authentication Enabled",
+                            html:
+                            `
+                                <!DOCTYPE html>
+                                <html>
+                                	<head>
+                                		<title>RestoreCord</title>
+                                	</head>
+                                	<body>
+                                		<h1 style="text-align: center; margin-top: 1.5rem; line-height: 2rem; font-size: 2.25rem; font-weight: 600; margin-bottom: 1rem; color: rgb(79, 70, 229);">
+                                			RestoreCord
+                                		</h1>
+                                		<div style="padding: 1rem; max-width: 30rem; margin-left: auto;margin-right: auto; width: 100%; border-radius: 0.75rem; border-width: 1px; background: rgb(250, 250, 250);">
+                                            <h2 style="color: rgb(0, 0, 0); font-size: 1.75rem; line-height: 2rem; font-weight: 600; line-height: 1.25; margin-bottom: 1rem">
+                                				Two-Factor Authentication enabled
+                                			</h2>
+                                			<div>
+                                                <p style="white-space: pre-line; color: rgb(0, 0, 0); font-weight: 400; margin-bottom: 0.75rem; overflow-wrap: break-word; font-size: 1rem;">
+                                					Hello ${user.username},
+                                                    Two-Factor Authentication has been enabled on your account on ${new Date().toLocaleString()} (local time).
+                                                    <br />
+                                					<b style="font-weight: 600">Location:</b> Near ${res.data.city}, ${res.data.region}, ${res.data.country}
+                                                    <b style="font-weight: 600">Device:</b> ${getPlatform(req.headers["user-agent"] ?? "")} (${getBrowser(req.headers["user-agent"] ?? "")})
+                                					<b style="font-weight: 600">IP:</b> ${getIPAddress(req)} <br />
+                                					If this was not you, contact us immediately at <a style="color: rgb(56,189, 248);" href="mailto:contact@restorecord.com">contact@restorecord.com</a> or <a style="color: rgb(56,189, 248);" href="https://t.me/restorecord">RestoreCord Telegram</a>.
+                                                    If you have any questions, please contact us at <a style="color: rgb(56,189, 248);" href="mailto:contact@restorecord.com">contact@restorecord.com</a>.
+                                                    <br />
+                                                    Sincerely,
+                                                    RestoreCord
+                                				</p>
+                                			</div>
+                                            <div style="text-align: center; margin-top: 1rem;">
+                                                <em style="color: rb(190, 198, 213)">
+                                                    Copyright © 2023 RestoreCord. All rights reserved.
+                                                </em>
+                                            </div>
+                                		</div>
+                                	</body>
+                                </html>
+                            `,
+                        }).then(() => {
+                            console.log(`[EMAIL] [${new Date().toLocaleString()}] Sent 2FA enabled email to ${user.email}`);
+                        }).catch((err: any) => {
+                            console.error(err);
+                        })
+                    });
 
+                    await prisma.accounts.update({
+                        where: {
+                            id: user.id
+                        },
+                        data: {
+                            twoFactor: Number(1) as number
+                        }
+                    });
                     
                     await prisma.logs.create({
                         data: {
                             title: "2FA Enabled",
-                            body: `Enabled 2FA for ${user.username} (${user.email})`,
+                            body: `Enabled 2FA for ${user.username} (${user.email}) from ${getIPAddress(req)} (${getPlatform(req.headers["user-agent"] ?? "")} ${getBrowser(req.headers["user-agent"] ?? "")})`,
                         }
                     });
                     
@@ -425,13 +419,91 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     });
 
                     return res.status(200).json({ success: true, message: "2FA Successfully Enabled" });
+                } else if (code && !username && password && user.googleAuthCode && user.twoFactor) {
+                    const verified = speakeasy.totp.verify({
+                        secret: user.googleAuthCode,
+                        encoding: "base32",
+                        token: code,
+                    });
+
+                    if (!verified) return res.status(400).json({ success: false, message: "Invalid 2FA code." });
+
+                    await axios.get(`https://ipinfo.io/${getIPAddress(req)}/json?token=${process.env.IPINFO_TOKEN}`).then(async (res) => {
+                        await Email.send({
+                            to: user.email,
+                            from: {
+                                email: "no-reply@restorecord.com",
+                                name: "RestoreCord"
+                            },
+                            subject: "RestoreCord Two-Factor Authentication Disabled",
+                            html:
+                            `
+                            <!DOCTYPE html>
+                            <html>
+                                <head>
+                                    <title>RestoreCord</title>
+                                </head>
+                                <body>
+                                    <h1 style="text-align: center; margin-top: 1.5rem; line-height: 2rem; font-size: 2.25rem; font-weight: 600; margin-bottom: 1rem; color: rgb(79, 70, 229);">
+                                        RestoreCord
+                                    </h1>
+                                    <div style="padding: 1rem; max-width: 30rem; margin-left: auto;margin-right: auto; width: 100%; border-radius: 0.75rem; border-width: 1px; background: rgb(250, 250, 250);">
+                                        <h2 style="color: rgb(0, 0, 0); font-size: 1.75rem; line-height: 2rem; font-weight: 600; line-height: 1.25; margin-bottom: 1rem">
+                                            Two-Factor Authentication enabled
+                                        </h2>
+                                        <div>
+                                            <p style="white-space: pre-line; color: rgb(0, 0, 0); font-weight: 400; margin-bottom: 0.75rem; overflow-wrap: break-word; font-size: 1rem;">
+                                                Hello ${user.username},
+                                                Two-Factor Authentication has been enabled on your account on ${new Date().toLocaleString()} (local time).
+                                                <br />
+                                                <b style="font-weight: 600">Location:</b> Near ${res.data.city}, ${res.data.region}, ${res.data.country}
+                                                <b style="font-weight: 600">Device:</b> ${getPlatform(req.headers["user-agent"] ?? "")} (${getBrowser(req.headers["user-agent"] ?? "")})
+                                                <b style="font-weight: 600">IP:</b> ${getIPAddress(req)} <br />
+                                                If this was not you, contact us immediately at <a style="color: rgb(56,189, 248);" href="mailto:contact@restorecord.com">contact@restorecord.com</a> or <a style="color: rgb(56,189, 248);" href="https://t.me/restorecord">RestoreCord Telegram</a>.
+                                                If you have any questions, please contact us at <a style="color: rgb(56,189, 248);" href="mailto:contact@restorecord.com">contact@restorecord.com</a>.
+                                                <br />
+                                                Sincerely,
+                                                RestoreCord
+                                            </p>
+                                        </div>
+                                        <div style="text-align: center; margin-top: 1rem;">
+                                            <em style="color: rb(190, 198, 213)">
+                                                Copyright © 2023 RestoreCord. All rights reserved.
+                                            </em>
+                                        </div>
+                                    </div>
+                                </body>
+                            </html>
+                            `,
+                        }).then(() => {
+                            console.log(`[EMAIL] [${new Date().toLocaleString()}] Sent 2FA disabled email to ${user.email}`);
+                        }).catch((err: any) => {
+                            console.error(err);
+                        })
+                    });
+
+                    await prisma.accounts.update({
+                        where: {
+                            id: user.id
+                        },
+                        data: {
+                            twoFactor: Number(0) as number
+                        }
+                    });
+
+                    await prisma.logs.create({
+                        data: {
+                            title: "2FA Disabled",
+                            body: `Disabled 2FA for ${user.username} (${user.email}) from ${getIPAddress(req)} (${getPlatform(req.headers["user-agent"] ?? "")} ${getBrowser(req.headers["user-agent"] ?? "")})`,
+                        }
+                    });
+
+
+                    return res.status(200).json({ success: true, message: "2FA Successfully Disabled" });
                 }
             }
             catch (err: any) {
-                if (res.getHeader("x-ratelimit-remaining") == "0") return res.status(429).json({ success: false, message: "You are being Rate Limited" });
-                if (err?.name === "" || err?.name === "JsonWebTokenError") return res.status(400).json({ success: false, message: "User not logged in" }); 
-                if (err?.name === "ValidationError") return res.status(400).json({ success: false, message: err.message, });
-                else console.error(err);
+                console.error(err);
                 return res.status(400).json({ success: false, message: "Something went wrong" });
             }
             break;

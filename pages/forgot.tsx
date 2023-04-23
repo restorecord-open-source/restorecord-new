@@ -17,6 +17,7 @@ import Alert from "@mui/material/Alert";
 import Head from "next/head";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 import axios from "axios";
+import LoadingButton from "../components/misc/LoadingButton";
 
 export default function Login() {
     const router = useRouter();
@@ -45,15 +46,10 @@ export default function Login() {
         // functions.ToastAlert(err, "error");
     }
 
-    const onSubmit = (e: any) => {
-        e.preventDefault();
-        captchaRef.current.execute();
-    }
-
     const onReset = async (e: any) => {
         e.preventDefault();
         
-        await axios.post("/api/v1/auth/forgot?token=" + token, {
+        await axios.post("/api/v2/auth/forgot?token=" + token, {
             newPassword: newPassword,
         }, { validateStatus: () => true }).then(res => {
             if (res.status === 200) {
@@ -87,25 +83,25 @@ export default function Login() {
     useEffect(() => {
         try {
             if (captchaToken) {
-                fetch(`/api/v1/auth/forgot`, {
+                fetch(`/api/v2/auth/forgot`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        email: email,
+                        login: email,
                         captcha: captchaToken,
                     })
                 })
-                    .then(res => res.json())
                     .then(res => {
-                        if (!res.success) {
-                            setNotiTextE(res.message);
-                            setOpenE(true);
-                        }
-                        else {
-                            setNotiTextS(res.message);
+                        // check if res.status is 204
+                        if (res.status === 204) {
+                            setNotiTextS("Check your email for a link to reset your password");
                             setOpenS(true);
+                            router.push("/login");
+                        } else {
+                            setNotiTextE("Invalid email or captcha");
+                            setOpenE(true);
                         }
                     })
                     .catch(err => {
@@ -190,52 +186,49 @@ export default function Login() {
                                 </Box>
                             </form>
                         ) : (
-                            <form onSubmit={onSubmit}>
-                                <Box sx={{ width: "100%", maxWidth: "500px", mx: "auto", mt: "3rem" }}>
-                                    <TextField
-                                        variant="outlined"
-                                        margin="normal"
-                                        required
-                                        fullWidth
-                                        id="email"
-                                        label="Email"
-                                        name="email"
-                                        placeholder="Email"
-                                        autoComplete="email"
-                                        InputProps={{ inputProps: { minLength: 6, maxLength: 50 } }}
-                                        autoFocus
-                                        value={email}
-                                        onChange={handleChange}
-                                    />
-                                    <HCaptcha
-                                        sitekey="748ea2c2-9a8d-4791-b951-af4c52dc1f0f"
-                                        size="invisible"
-                                        theme="dark"
-                                        onVerify={setCaptchaToken}
-                                        onError={onError}
-                                        onExpire={onExpire}
-                                        ref={captchaRef}
-                                    />
-                                    <Button
-                                        type="submit"
-                                        fullWidth
-                                        variant="contained"
-                                        color="primary"
-                                        sx={{ mt: "2rem", mb: "0.5rem" }}
-                                    >
-                                        Send Password Reset Link
-                                    </Button>
-                                    <Grid container>
-                                        <Grid item xs>
-                                            <Link href="/login">
-                                                <MuiLink variant="body2" component="a" href="/login">
+                            <Box sx={{ width: "100%", maxWidth: "500px", mx: "auto", mt: "3rem" }}>
+                                <TextField
+                                    variant="outlined"
+                                    margin="normal"
+                                    required
+                                    fullWidth
+                                    id="email"
+                                    label="Email"
+                                    name="email"
+                                    placeholder="Email"
+                                    autoComplete="email"
+                                    InputProps={{ inputProps: { minLength: 6, maxLength: 50 } }}
+                                    autoFocus
+                                    value={email}
+                                    onChange={handleChange}
+                                />
+                                <HCaptcha
+                                    sitekey="748ea2c2-9a8d-4791-b951-af4c52dc1f0f"
+                                    size="invisible"
+                                    theme="dark"
+                                    onVerify={setCaptchaToken}
+                                    onError={onError}
+                                    onExpire={onExpire}
+                                    ref={captchaRef}
+                                />
+                                <LoadingButton
+                                    variant="contained"
+                                    color="primary"
+                                    sx={{ mt: "2rem", mb: "0.5rem", width: "100%" }}
+                                    event={() => captchaRef.current.execute()}
+                                >
+                                    Send Password Reset Link
+                                </LoadingButton>
+                                <Grid container>
+                                    <Grid item xs>
+                                        <Link href="/login">
+                                            <MuiLink variant="body2" component="a" href="/login">
                                                     Remember Password?
-                                                </MuiLink>
-                                            </Link>
-                                        </Grid>
+                                            </MuiLink>
+                                        </Link>
                                     </Grid>
-                                </Box>
-                            </form>
+                                </Grid>
+                            </Box>
                         )}
                     </Box>
 

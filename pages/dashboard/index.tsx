@@ -42,9 +42,10 @@ export default function Dashboard() {
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
     }), { retry: false });
 
+    const { data: newsData, isError: newsError, isLoading: newsLoading } = useQuery('news', async () => await fetch('/api/v2/news').then(res => res.json()), { retry: false });
 
-    if (isLoading || isLoading2) return <CircularProgress />
-    if (isError || isError2) return <div>Error</div>
+    if (isLoading || isLoading2 || newsLoading) return <CircularProgress />
+    if (isError || isError2 || newsError) return <div>Error</div>
 
     if (!data || !data.username || !data2) {
         router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
@@ -201,21 +202,6 @@ export default function Dashboard() {
             }).reverse()
         })) : [],
     };
-
-    function renderAlerts() {
-        return (
-            <Alert severity="error" sx={{ width: "100%", my: 2 }}>
-                <AlertTitle>Warning</AlertTitle>
-                <Typography variant="body2" component="p" sx={{ whiteSpace: "pre-line", wordBreak: "break-word" }} dangerouslySetInnerHTML={{ __html:`
-                We have no association with https://discord.gg/restorecord, for your own safety, we highly advise against joining it.
-                
-                Our official accounts are <a href="https://discord.com/users/853058505649029190">xenos#0001 (853058505649029190)</a> and <a href="https://discord.com/users/853404526613889064">Bl4ckBl1zZ#5652 (853404526613889064)</a>, and support server is <a href="https://discord.gg/restorebot">https://discord.gg/restorebot</a>
-                
-                Please note that we will never ask for your password or personal information, never share it with anyone. Stay safe and happy new year 🎉
-                `}}></Typography>
-            </Alert>
-        )
-    }
     
     function renderStatistics() {
         return (
@@ -301,7 +287,14 @@ export default function Dashboard() {
                     <Toolbar />
 
                     <Container maxWidth="xl">
-                        {renderAlerts()}
+                        {newsData.news.map((item: any) => {
+                            return (
+                                <Alert key={item.id} severity={item.severity === 0 ? "info" : (item.severity === 1 ? "warning" : "error")} sx={{ width: "100%", my: 2 }}>
+                                    <AlertTitle>{item.title}</AlertTitle>
+                                    <Typography variant="body2" component="p" sx={{ whiteSpace: "pre-line", wordBreak: "break-word" }} dangerouslySetInnerHTML={{ __html: item.content }}></Typography>
+                                </Alert>
+                            )
+                        })}
 
                         <Grid container spacing={3}>
                             {renderStatistics()}

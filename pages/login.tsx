@@ -34,7 +34,7 @@ export default function Login() {
 
     function onSubmit(e: any) {
         e.preventDefault();
-        fetch(`/api/v1/auth/login`, {
+        fetch(`/api/v2/auth/login`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -85,7 +85,7 @@ export default function Login() {
     useEffect(() => {
         try {
             if (localStorage.getItem("token")) {
-                fetch(`/api/v1/user`, {
+                fetch(`/api/v2/self`, {
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": `${localStorage.getItem("token")}`

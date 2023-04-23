@@ -2,7 +2,7 @@ import axios from "axios";
 import router from "next/router";
 
 export default async function getUser(options: any) {
-    return await axios.get(`/api/v1/user`, {
+    return await axios.get(`/api/v2/self`, {
         headers: options,
         validateStatus: () => true
     })
