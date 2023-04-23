@@ -75,7 +75,7 @@ export default function VerifiedMembers({ user }: any) {
 
     function requestInfo(userId: string) {
         setLoadingInfo(true);
-        fetch(`/api/v1/member/${userId}`, {
+        fetch(`/api/v2/member/${userId}`, {
             headers: {
                 "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
             },
@@ -162,13 +162,13 @@ export default function VerifiedMembers({ user }: any) {
                             {(userInfo.location && userInfo.location !== undefined && userInfo.location !== null && Object.keys(userInfo.location).length > 0) && (
                                 <>
                                     <Stack spacing={1} direction="row" alignItems="center" sx={{ mt: 2 }}>
-                                        <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200}} title={userInfo.location.country} placement="top"><Avatar alt="Bot" src={`https://cdn.ipregistry.co/flags/twemoji/${userInfo.location.isocode.toLowerCase()}.svg`} sx={{ width: 20, height: 20, borderRadius: 0 }} /></Tooltip>
-                                        <TextSB2>IP: <b>{userInfo.ip}</b></TextSB2>
+                                        {userInfo.location.country ? <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200}} title={userInfo.location.country} placement="top"><Avatar alt="Bot" src={`https://cdn.ipregistry.co/flags/twemoji/${userInfo.location.isocode.toLowerCase()}.svg`} sx={{ width: 20, height: 20, borderRadius: 0 }} /></Tooltip> : <></>}
+                                        {userInfo.ip ? <TextSB2>IP: <b>{userInfo.ip}</b></TextSB2> : <TextSB2>IP: <b>Unavailable</b></TextSB2>}
                                     </Stack>
 
-                                    <TextSB2>Country: <b>{userInfo.location.country}</b></TextSB2>
-                                    <TextSB2>Region: <b>{userInfo.location.region}</b></TextSB2>
-                                    <TextSB2>City: <b>{userInfo.location.city}</b></TextSB2>
+                                    {userInfo.location.country ? <TextSB2>Country: <b>{userInfo.location.country}</b></TextSB2> : <></>}
+                                    {userInfo.location.region && <TextSB2>Region: <b>{userInfo.location.region}</b></TextSB2>}
+                                    {userInfo.location.city && <TextSB2>City: <b>{userInfo.location.city}</b></TextSB2>}
                                     <TextSB2>Provider: <b>{userInfo.location.provider ? userInfo.location.provider : <BlurredBlob toolTipText={"Upgrade to view"} />}</b></TextSB2>
                                     <TextSB2>Type: <b>{userInfo.location.type ? userInfo.location.type : <BlurredBlob toolTipText={"Upgrade to view"} />}</b></TextSB2>
                                     {(userInfo.locale) && (
@@ -186,7 +186,7 @@ export default function VerifiedMembers({ user }: any) {
                     <LoadingButton loading={loading} variant="contained" color="success" onClick={() => {
                         setLoading(true);
                                                                 
-                        axios.put(`/api/v1/member/${userInfoID}`, {}, { 
+                        axios.put(`/api/v2/member/${userInfoID}`, {}, { 
                             headers: {
                                 "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
                             },
@@ -211,7 +211,7 @@ export default function VerifiedMembers({ user }: any) {
                         });
                     }}>Pull</LoadingButton>
                     <Button variant="contained" color="error" onClick={() => {
-                        axios.delete(`/api/v1/member/${userInfoID}`, { 
+                        axios.delete(`/api/v2/member/${userInfoID}`, { 
                             headers: {
                                 "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
                             },
