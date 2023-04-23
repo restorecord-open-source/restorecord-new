@@ -5,5 +5,6 @@ module.exports = {
     images: {
         domains: [ 'cdn.restorecord.com', 'restorerecord.com',  'cdn.discordapp.com', 'cdn.discord.com', 'i.imgur.com', 'docs.restorecord.com' ],
     },
+    staticPageGenerationTimeout: 300,
     distDir: process.env.BUILD_DIR,
 };
