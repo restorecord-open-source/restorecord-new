@@ -1,15 +1,20 @@
 import { useRouter } from "next/router";
 import { useQuery } from "react-query"
 import { useToken } from "../../src/token";
+import { useEffect, useRef, useState } from "react";
+import { useQRCode } from "next-qrcode";
 
 import NavBar from "../../components/dashboard/navBar";
 import getUser from "../../src/dashboard/getUser";
+import LoadingButton from "../../components/misc/LoadingButton";
+import theme from "../../src/theme";
+
+import axios from "axios";
 
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
-import LoadingButton from "@mui/lab/LoadingButton";
 import CardContent from "@mui/material/CardContent";
 import Container from "@mui/material/Container";
 import Paper from "@mui/material/Paper";
@@ -17,9 +22,9 @@ import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import axios from "axios";
-import { useQRCode } from "next-qrcode";
-import { useRef, useState } from "react";
+import AlertTitle from "@mui/material/AlertTitle";
+import TaskAltIcon from "@mui/icons-material/TaskAlt";
+import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 
 export default function AccountSettings() {
     const [ token ]: any = useToken()
@@ -33,13 +38,11 @@ export default function AccountSettings() {
     const [notiTextE, setNotiTextE] = useState("X");
     const [notiTextI, setNotiTextI] = useState("X");
 
-    const [loading1, setLoading1] = useState(false);
-    const [loading2, setLoading2] = useState(false);
-    const [loading3, setLoading3] = useState(false);
-    const [loading4, setLoading4] = useState(false);
-
     const [twoFASecret, setTwoFASecret] = useState("NULL");
     const [twoFAUrl, setTwoFAUrl] = useState("NULL");
+
+    const [userData, setUserData] = useState({ username: "", email: "" });
+    const [options, setOptions] = useState({ twoFA: false, darkMode: false });
 
     const [password, setPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
@@ -50,9 +53,15 @@ export default function AccountSettings() {
 
     const codeRef: any = useRef<HTMLInputElement>();
 
-    const { data, isError, isLoading } = useQuery('user', async () => await getUser({
+    const { data, isError, isLoading, refetch } = useQuery("user", async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
     }), { retry: false,  refetchOnWindowFocus: true });
+
+    useEffect(() => {
+        if (data && data.username) {
+            setUserData({ ...userData, username: data.username });
+        }
+    }, [data]);
 
 
     if (isLoading) {
@@ -104,8 +113,41 @@ export default function AccountSettings() {
         return (
             <Stack spacing={2}>
                 <TextField label="User ID" variant="outlined" fullWidth value={data.id} disabled />
-                <TextField label="Username" variant="outlined" fullWidth value={data.username} disabled />
+                <TextField label="Username" variant="outlined" fullWidth value={userData.username} onChange={(e) => { setUserData({ ...userData, username: e.target.value }) }} />
                 {/* <TextField label="Email" variant="outlined" fullWidth value={user.email} disabled /> */}
+
+                <TextField sx={{ display: data.username === userData.username ? "none" : "block" }} label="Confirm Password" variant="outlined" fullWidth type="password" value={password} onChange={(e) => { setPassword(e.target.value) }} />
+                <LoadingButton sx={{ display: data.username === userData.username ? "none" : "block" }} event={async () => {
+                    if (userData.username.length < 3) {
+                        setNotiTextE("Username must be at least 3 characters long");
+                        setOpenE(true);
+                        return;
+                    }
+
+                    try {
+                        await axios.patch("/api/v2/self", { 
+                            username: userData.username, 
+                            password: password 
+                        }, { 
+                            headers: { 
+                                Authorization: (process.browser && window.localStorage.getItem("token")) ?? token
+                            },
+                            validateStatus: () => true
+                        }).then((res) => {
+                            if (res.data.success) {
+                                refetch();
+                                setNotiTextS(res.data.message);
+                                setOpenS(true);
+                            } else {
+                                setNotiTextE(res.data.message);
+                                setOpenE(true);
+                            }
+                        });
+                    } catch (e) {
+                        setNotiTextE("An error occured");
+                        setOpenE(true);
+                    }
+                }}>Save Changes</LoadingButton>
             </Stack>
         )
     }
@@ -164,133 +206,151 @@ export default function AccountSettings() {
                         <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
                             <CardContent>
                                 <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
-                                    2FA
+                                    Security
                                 </Typography>
 
-                                <Typography variant="body1" sx={{ mb: 2 }}>
+                                {/* <Typography variant="body1" sx={{ mb: 2 }}>
                                     <b>2FA Status</b>: {data.tfa ? "Enabled" : "Disabled"}
-                                </Typography>
+                                </Typography> */}
+
+                                {(!options.twoFA) && (
+                                    <Stack spacing={2} direction={{ xs: "column", sm: "row" }} alignItems="center">
+                                        {data.tfa == 1 ? <TaskAltIcon sx={{ color: theme.palette.success.main }} /> : <HighlightOffIcon sx={{ color: theme.palette.error.main }} />}
+                                        <Typography variant="body1" sx={{ mb: 2 }}>{data.tfa == 1 ? "Your account is secured by two-factor authentication." : "Your account is not secured by two-factor authentication."}</Typography>
+                                        {data.tfa == 1 ? ( <LoadingButton variant="contained" color="error" event={() => { setOptions({ ...options, twoFA: true }) }} sx={{ ml: { sm: "auto !important" }, width: { xs: "100%", sm: "unset !important" } }}>Disable</LoadingButton> ) : ( <LoadingButton variant="contained" color="success" event={() => { setOptions({ ...options, twoFA: true }) }} sx={{ ml: { sm: "auto !important" }, width: { xs: "100%", sm: "unset !important" } }}>Enable</LoadingButton> )}
+                                    </Stack>
+                                )}
 
                                 {twoFASecret !== "NULL" ? (
                                     <>
-                                        <QRCode 
-                                            text={twoFAUrl}
-                                            options={{
-                                                type: "image/png",
-                                                level: "H",
-                                                margin: 0,
-                                                scale: 6,
-                                                color: {
-                                                    dark: "#ffffff",
-                                                    light: "#1e1e1e",
-                                                }
-                                            }} />
+                                        <QRCode text={twoFAUrl} options={{ type: "image/png", level: "H", margin: 0, scale: 6, color: { dark: "#ffffff", light: "#1e1e1e", } }} />
                                         <Typography variant="body1" sx={{ mb: 2 }}>
-                                            Or use the secret (hover for 3s): <Typography variant="caption" sx={{
-                                                filter: "blur(0.25rem)",
-                                                transition: "0.5s all",
-                                                transitionDelay: "0s",
-                                                [`&:hover`]: {
-                                                    filter: "blur(0px)",
-                                                    transitionDelay: "0.5s",
-                                                },
-                                            }}>{twoFASecret}</Typography>
+                                            Or use the secret (hover for 3s): <Typography variant="caption" sx={{ filter: "blur(0.25rem)", transition: "0.5s all", transitionDelay: "0s", [`&:hover`]: { filter: "blur(0px)", transitionDelay: "0.5s", }, }}>{twoFASecret}</Typography>
                                         </Typography>
                                     </>
                                 ) : null}
 
-                                <Stack spacing={2}>
-                                    <TextField label="Confirm Password" variant="outlined" type="password" fullWidth required onChange={(e) => { setPassword(e.target.value); }} onPaste={(e) => { setPassword(e.clipboardData.getData("text")); }} />
-                                    {data.tfa === true && ( 
-                                        <LoadingButton variant="contained" color="primary" loading={loading2} sx={{ mt: 2}} fullWidth onClick={() => { }} disabled>Remove 2-Factor Authentication</LoadingButton>
-                                    )}
+                                {options.twoFA && (
+                                    <Stack spacing={2}>
+                                        {(data.tfa == 1) && (
+                                            <>
+                                                <Alert severity="warning">
+                                                    <AlertTitle>Warning</AlertTitle>
+                                                    Once 2FA is disabled, anyone with your password can access your account.
+                                                </Alert>
+                                                <TextField label="Current 2FA code" variant="outlined" type="twoFACode" placeholder="123 456" defaultValue="" fullWidth required onChange={(e) => { setTwoFACode(e.target.value); }} onPaste={(e) => { setTwoFACode(e.clipboardData.getData("text")); }} />
+                                                <TextField label="Confirm Password" variant="outlined" type="password" fullWidth required onChange={(e) => { setPassword(e.target.value); }} />
+                                                <Stack spacing={2} direction={{ xs: "column", sm: "row" }} alignItems="center">
+                                                    <LoadingButton color="error" sx={{ width: "100%" }} event={async () => {
+                                                        try {
+                                                            await axios.patch("/api/v2/self", { 
+                                                                password: password,
+                                                                code: twoFACode,
+                                                            }, { 
+                                                                headers: { 
+                                                                    Authorization: (process.browser && window.localStorage.getItem("token")) ?? token
+                                                                },
+                                                                validateStatus: () => true
+                                                            }).then((res) => {
+                                                                if (res.data.success) {
+                                                                    refetch();
+                                                                    setNotiTextS(res.data.message);
+                                                                    setOpenS(true);
+                                                                } else {
+                                                                    setNotiTextE(res.data.message);
+                                                                    setOpenE(true);
+                                                                }
+                                                            });
+                                                        } catch (e) {
+                                                            setNotiTextE("An error occured");
+                                                            setOpenE(true);
+                                                        }
+                                                    }}>Remove 2-Factor Authentication</LoadingButton>
+                                                    <LoadingButton color="info" event={() => { setOptions({ ...options, twoFA: false }) }}>Cancel</LoadingButton>
+                                                </Stack>
+                                            </>
+                                        )}
 
-                                    {(twoFASecret == "NULL" && data.tfa == false) && (
-                                        <LoadingButton variant="contained" color="primary" loading={loading2} fullWidth onClick={(e: any) => {
-                                            setLoading2(true);
-                                            setNotiTextI("Updating...");
-                                            setOpenI(true);
+                                        {(twoFASecret == "NULL" && data.tfa == 0) && (
+                                            <>
+                                                <TextField label="Confirm Password" variant="outlined" type="password" fullWidth required onChange={(e) => { setPassword(e.target.value); }} />
+                                                <LoadingButton event={() => {
+                                                    setNotiTextI("Updating...");
+                                                    setOpenI(true);
 
-                                            axios.patch(`/api/v1/user`, {
-                                                password: password,
-                                                code: twoFACode,
-                                            }, {
-                                                headers: {
-                                                    "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
-                                                },
-                                                validateStatus: () => true
-                                            }).then((res: any) => {
-                                                setOpenI(false);
+                                                    axios.patch(`/api/v2/self`, {
+                                                        password: password,
+                                                    }, {
+                                                        headers: {
+                                                            "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                        },
+                                                        validateStatus: () => true
+                                                    }).then((res: any) => {
+                                                        setOpenI(false);
         
-                                                if (!res.data.success) {
-                                                    setNotiTextE(res.data.message);
-                                                    setOpenE(true);
-                                                }
-                                                else {
-                                                    setNotiTextS(res.data.message);
-                                                    setOpenS(true);
-                                                    setTwoFASecret(res.data.secret);
-                                                    setTwoFAUrl(res.data.url);
-                                                }
-                                        
-                                                setTimeout(() => {
-                                                    setLoading2(false);
-                                                }, 500);
-                                            }).catch((err: any) => {
-                                                console.error(err);
-                                                setNotiTextE(err);
-                                                setOpenE(true);
-                                            });
-                                        }}>
-                                        Start 2FA Setup
-                                        </LoadingButton>
-                                    )}
-                                    {(twoFASecret !== "NULL" && data.tfa == false) && (
-                                        <>
-                                            <TextField label="2-Factor Authentication code" variant="outlined" type="twoFACode" placeholder="123 456" defaultValue="" fullWidth required onChange={(e) => { setTwoFACode(e.target.value); }} onPaste={(e) => { setTwoFACode(e.clipboardData.getData("text")); }} />
-                                            <LoadingButton variant="contained" color="success" loading={loading1} fullWidth onClick={(e: any) => { 
-                                                setLoading1(true);
-                                                setNotiTextI("Updating...");
-                                                setOpenI(true);
-
-                                                axios.patch(`/api/v1/user`, {
-                                                    password: password,
-                                                    code: twoFACode,
-                                                }, {
-                                                    headers: {
-                                                        "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
-                                                    },
-                                                    validateStatus: () => true
-                                                }).then((res: any) => {
-                                                    setOpenI(false);
-        
-                                                    if (!res.data.success) {
-                                                        setNotiTextE(res.data.message);
+                                                        if (!res.data.success) {
+                                                            setNotiTextE(res.data.message);
+                                                            setOpenE(true);
+                                                        }
+                                                        else {
+                                                            setNotiTextS(res.data.message);
+                                                            setOpenS(true);
+                                                            setTwoFASecret(res.data.secret);
+                                                            setTwoFAUrl(res.data.url);
+                                                        }
+                                                    }).catch((err: any) => {
+                                                        console.error(err);
+                                                        setNotiTextE(err);
                                                         setOpenE(true);
-                                                    }
-                                                    else {
-                                                        setNotiTextS(res.data.message);
-                                                        setOpenS(true);
+                                                    });
+                                                }}>
+                                                    Start 2FA Setup
+                                                </LoadingButton>
+                                            </>
+                                        )}
+                                        {(twoFASecret !== "NULL" && data.tfa == 0) && (
+                                            <>
+                                                <TextField label="2-Factor Authentication code" variant="outlined" type="twoFACode" placeholder="123 456" defaultValue="" fullWidth required onChange={(e) => { setTwoFACode(e.target.value); }} onPaste={(e) => { setTwoFACode(e.clipboardData.getData("text")); }} />
+                                                <LoadingButton variant="contained" color="success" event={() => { 
+                                                    setNotiTextI("Updating...");
+                                                    setOpenI(true);
+
+                                                    axios.patch(`/api/v2/self`, {
+                                                        password: password,
+                                                        code: twoFACode,
+                                                    }, {
+                                                        headers: {
+                                                            "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                        },
+                                                        validateStatus: () => true
+                                                    }).then((res: any) => {
+                                                        setOpenI(false);
+        
+                                                        if (!res.data.success) {
+                                                            setNotiTextE(res.data.message);
+                                                            setOpenE(true);
+                                                        }
+                                                        else {
+                                                            setNotiTextS(res.data.message);
+                                                            setOpenS(true);
                                                 
-                                                        setTimeout(() => {
-                                                            location.reload();
-                                                        }, 2000);
-                                                    }
+                                                            setTimeout(() => {
+                                                                location.reload();
+                                                            }, 2000);
+                                                        }
                                         
-                                                    setTimeout(() => {
-                                                        setLoading1(false);
-                                                    }, 500);
-                                                }).catch((err: any) => {
-                                                    console.error(err);
-                                                    setNotiTextE(err);
-                                                    setOpenE(true);
-                                                });
-                                            }}>
-                                                Enable 2FA
-                                            </LoadingButton>
-                                        </>
-                                    )}
-                                </Stack>
+                                                    }).catch((err: any) => {
+                                                        console.error(err);
+                                                        setNotiTextE(err);
+                                                        setOpenE(true);
+                                                    });
+                                                }}>
+                                                    Enable 2FA
+                                                </LoadingButton>
+                                            </>
+                                        )}
+                                    </Stack>
+                                )}
                             </CardContent>
                         </Paper>
 
@@ -298,22 +358,21 @@ export default function AccountSettings() {
                             <CardContent>
                                 <form method="POST">
                                     <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
-                                Change password
+                                        Change password
                                     </Typography>
 
                                     <Stack spacing={2}>
-                                        <TextField label="Old password" variant="outlined" type="password" fullWidth required onChange={(e) => { setPassword(e.target.value); }} onPaste={(e) => { setPassword(e.clipboardData.getData("text")); }} />
-                                        <TextField label="New password" variant="outlined" type="password" fullWidth required onChange={(e) => { setNewPassword(e.target.value); }} onPaste={(e) => { setNewPassword(e.clipboardData.getData("text")); }} />
-                                        <TextField label="Confirm password" variant="outlined" type="password" fullWidth required onChange={(e) => { setNewPassword2(e.target.value); }} onPaste={(e) => { setNewPassword2(e.clipboardData.getData("text")); }} />
-                                        <TextField label="Code" variant="outlined" fullWidth required onChange={(e) => { setConfirmCode(e.target.value); }} onPaste={(e) => { setConfirmCode(e.clipboardData.getData("text")); }} ref={codeRef} sx={{ display: "none" }} />
+                                        <TextField label="Old password" variant="outlined" type="password" fullWidth required onChange={(e) => { setPassword(e.target.value); }} />
+                                        <TextField label="New password" variant="outlined" type="password" fullWidth required onChange={(e) => { setNewPassword(e.target.value); }} />
+                                        <TextField label="Confirm password" variant="outlined" type="password" fullWidth required onChange={(e) => { setNewPassword2(e.target.value); }} />
+                                        <TextField label="Code" variant="outlined" fullWidth required onChange={(e) => { setConfirmCode(e.target.value); }} ref={codeRef} sx={{ display: "none" }} />
                                     </Stack>
 
-                                    <LoadingButton variant="contained" color="primary" loading={loading3} fullWidth sx={{ mt: 2 }} onClick={(e: any) => {
-                                        setLoading3(true);
+                                    <LoadingButton sx={{ mt: 2, width: "100%" }} event={() => {
                                         setNotiTextI("Updating...");
                                         setOpenI(true);
                             
-                                        axios.post(`/api/v1/user`, {
+                                        axios.post(`/api/v2/self`, {
                                             password: password,
                                             newPassword: newPassword,
                                             newPassword2: newPassword2,
@@ -346,9 +405,6 @@ export default function AccountSettings() {
                                                 }
                                             }
                                 
-                                            setTimeout(() => {
-                                                setLoading3(false);
-                                            }, 500);
                                         }).catch((err: any) => {
                                             console.error(err);
                                             setNotiTextE(err);
