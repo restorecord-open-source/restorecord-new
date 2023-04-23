@@ -39,7 +39,7 @@ export default function DashCustomBot({ user }: any) {
         if (user.bots && user.bots.length > 0) {
             for (const bot of user.bots) {
                 await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * 100) + 100));
-                await fetch(`/api/v1/users/@me`, {
+                await fetch(`/api/v2/users/@me`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -82,7 +82,7 @@ export default function DashCustomBot({ user }: any) {
     function handleSubmit(e: any) {
         e.preventDefault();
 
-        fetch(`/api/v1/settings/bot`, {
+        fetch(`/api/v2/self/bots/create`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -116,7 +116,7 @@ export default function DashCustomBot({ user }: any) {
                 setOpenE(true);
             });
 
-        fetch(`/api/v1/bot/${clientId}/refresh`, {
+        fetch(`/api/v2/self/bots/${clientId}/refresh`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",

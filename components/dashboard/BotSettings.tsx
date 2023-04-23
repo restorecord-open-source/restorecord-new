@@ -58,7 +58,7 @@ export default function DashBotSettings({ user, id }: any) {
     function handleSubmit(e: any) {
         e.preventDefault();
 
-        fetch(`/api/v1/bot/${bot.clientId}/refresh`, {
+        fetch(`/api/v2/self/bots/${bot.clientId}/refresh`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -76,7 +76,7 @@ export default function DashBotSettings({ user, id }: any) {
             });
             
 
-        fetch(`/api/v1/settings/bot`, {
+        fetch(`/api/v2/self/bots/${bot.clientId}/edit`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
@@ -162,7 +162,7 @@ export default function DashBotSettings({ user, id }: any) {
                     <Button onClick={() => {
                         setConfirmDelete(false);
 
-                        axios.delete(`/api/v1/settings/bot?id=${botId}`, { headers: {
+                        axios.delete(`/api/v2/self/bots/${botId}/delete`, { headers: {
                             "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
                         },
                         validateStatus: () => true
@@ -224,7 +224,7 @@ export default function DashBotSettings({ user, id }: any) {
                             <>
                                 <Stack direction="row" spacing={2} sx={{ mb: 2, "@media screen and (max-width: 600px)": { flexDirection: "column", alignItems: "center", "& > *": { mb: 1 } } }}>
                                     <Button variant="contained" onClick={() => {
-                                        axios.get(`/api/v1/bot/${bot.clientId}/refresh`, {
+                                        axios.get(`/api/v2/self/bots/${bot.clientId}/refresh`, {
                                             headers: {
                                                 "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
                                             }
@@ -245,7 +245,7 @@ export default function DashBotSettings({ user, id }: any) {
                                     </Button>
                                     {/* red delete button */}
                                     <Button variant="contained" color="error" onClick={() => { 
-                                        setBotId(bot.id);
+                                        setBotId(bot.clientId);
                                         setConfirmDelete(true);
                                     }}>
                                         Delete Bot

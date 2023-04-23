@@ -28,16 +28,20 @@ export default function DashServerSettings({ user, id }: any) {
     const [token]: any = useToken();
     const router = useRouter();
 
-    const [serverName, setServerName] = useState("");
-    const [guildId, setGuildId] = useState("");
-    const [roleId, setRoleId] = useState("");
-    const [picture, setPicture] = useState("");
-    const [webhook, setWebhook] = useState("");
-    const [background, setBackground] = useState("");
-    const [description, setDescription] = useState("");
-    const [webhookcheck, setWebhookCheck] = useState(false);
-    const [vpncheck, setVpnCheck] = useState(false);
-    const [themeColor, setThemeColor] = useState("#4e46ef");
+    const [newServer, setNewServer] = useState({
+        serverName: "",
+        guildId: "",
+        roleId: "",
+        picture: "",
+        ipLogging: false,
+        webhook: "",
+        background: "",
+        description: "",
+        webhookcheck: false,
+        vpncheck: false,
+        themeColor: "#4e46ef",
+    });
+
 
     const server = user.servers.find((server: any) => server.guildId === id);
     
@@ -51,40 +55,43 @@ export default function DashServerSettings({ user, id }: any) {
 
     useEffect(() => {
         if (server) {
-            setServerName(server.name);
-            setGuildId(server.guildId);
-            setRoleId(server.roleId);
-
-            setWebhookCheck(server.webhook ? true : false);
-            setWebhook(server.webhook ? server.webhook : "");
-            setPicture(server.picture ? server.picture : "");
-            setDescription(server.description ? server.description : "");
-            setBackground(server.bgImage ? server.bgImage : "");
-            setVpnCheck(server.vpncheck);
-            setThemeColor(server.themeColor ? `#${server.themeColor}` : "#4e46ef");
+            setNewServer({
+                ...newServer,
+                serverName: server.name,
+                guildId: server.guildId,
+                roleId: server.roleId,
+                webhookcheck: server.webhook ? true : false,
+                webhook: server.webhook ? server.webhook : "",
+                picture: server.picture ? server.picture : "",
+                description: server.description ? server.description : "",
+                background: server.bgImage ? server.bgImage : "",
+                vpncheck: server.vpncheck,
+                themeColor: server.themeColor ? `#${server.themeColor}` : "#4e46ef",
+            });
         }
     }, [server]);
 
     function handleSubmit(e: any) {
         e.preventDefault();
 
-        fetch(`/api/v1/settings/server`, {
+        fetch(`/api/v2/self/servers/${server.guildId}/edit`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
             },
             body: JSON.stringify({
-                newServerName: serverName,
-                newGuildId: guildId,
-                newRoleId: roleId,
-                newWebhook: webhook,
-                newWebhookCheck: webhookcheck,
-                newVpnCheck: vpncheck,
-                newPicture: picture,
-                newBackground: background,
-                newDescription: description,
-                newThemeColor: themeColor,
+                newServerName: newServer.serverName,
+                newGuildId: newServer.guildId,
+                newRoleId: newServer.roleId,
+                newWebhook: newServer.webhook,
+                newWebhookCheck: newServer.webhookcheck,
+                newIpLogging: newServer.ipLogging,
+                newVpnCheck: newServer.vpncheck,
+                newPicture: newServer.picture,
+                newBackground: newServer.background,
+                newDescription: newServer.description,
+                newThemeColor: newServer.themeColor,
                 
                 serverName: server.name,
                 guildId: server.guildId,
@@ -119,31 +126,34 @@ export default function DashServerSettings({ user, id }: any) {
     function handleChange(e: any) {
         switch (e.target.name) {
         case "serverName":
-            setServerName(e.target.value);
+            setNewServer({ ...newServer, serverName: e.target.value });
             break;
         case "guildId":
-            setGuildId(e.target.value);
+            setNewServer({ ...newServer, guildId: e.target.value });
             break;
         case "roleId":
-            setRoleId(e.target.value);
+            setNewServer({ ...newServer, roleId: e.target.value });
             break;
         case "webhookcheck":
-            setWebhookCheck(e.target.checked);
+            setNewServer({ ...newServer, webhookcheck: e.target.checked });
             break;
         case "webhook":
-            setWebhook(e.target.value);
+            setNewServer({ ...newServer, webhook: e.target.value });
+            break;
+        case "ipLogging":
+            setNewServer({ ...newServer, ipLogging: e.target.checked });
             break;
         case "vpncheck":
-            setVpnCheck(e.target.checked);
+            setNewServer({ ...newServer, vpncheck: e.target.checked });
             break;
         case "picture":
-            setPicture(e.target.value);
+            setNewServer({ ...newServer, picture: e.target.value });
             break;
         case "background":
-            setBackground(e.target.value);
+            setNewServer({ ...newServer, background: e.target.value });
             break;
         case "description":
-            setDescription(e.target.value);
+            setNewServer({ ...newServer, description: e.target.value });
             break;
         default:
             break;
@@ -151,7 +161,8 @@ export default function DashServerSettings({ user, id }: any) {
     }
 
     function onColorChange(color: string, colors: MuiColorInputColors) {
-        setThemeColor(colors.hex);
+        // setThemeColor(colors.hex);
+        setNewServer({ ...newServer, themeColor: colors.hex });
     }
 
 
@@ -208,7 +219,7 @@ export default function DashServerSettings({ user, id }: any) {
                                     onClick={() => {
                                         setConfirmDelete(false);
 
-                                        axios.delete(`/api/v1/server/${guildId}`, { headers: {
+                                        axios.delete(`/api/v2/self/servers/${newServer.guildId}/delete`, { headers: {
                                             "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
                                         },
                                         validateStatus: () => true
@@ -270,25 +281,33 @@ export default function DashServerSettings({ user, id }: any) {
                                             <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                                 Server Name
                                             </Typography>
-                                            <TextField fullWidth variant="outlined" name="serverName" value={serverName} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Server Name" />
+                                            <TextField fullWidth variant="outlined" name="serverName" value={newServer.serverName} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Server Name" />
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                                 Guild ID
                                             </Typography>
-                                            <TextField fullWidth variant="outlined" name="guildId" value={guildId} onChange={handleChange} inputProps={{ minLength: 17, maxLength: 20 }} placeholder="Guild ID" />
+                                            <TextField fullWidth variant="outlined" name="guildId" value={newServer.guildId} onChange={handleChange} inputProps={{ minLength: 17, maxLength: 20 }} placeholder="Guild ID" />
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                                 Member Role ID
                                             </Typography>
-                                            <TextField fullWidth variant="outlined" name="roleId" value={roleId} onChange={handleChange} inputProps={{ minLength: 17, maxLength: 20 }} placeholder="Member Role ID" />
+                                            <TextField fullWidth variant="outlined" name="roleId" value={newServer.roleId} onChange={handleChange} inputProps={{ minLength: 17, maxLength: 20 }} placeholder="Member Role ID" />
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                                 Server Icon
                                             </Typography>
-                                            <TextField fullWidth variant="outlined" name="picture" value={picture} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Server Icon URL" type="url" />
+                                            <TextField fullWidth variant="outlined" name="picture" value={newServer.picture} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Server Icon URL" type="url" />
+                                        </Grid>
+                                        <Grid item>
+                                            <Stack direction="row" spacing={1}>
+                                                <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                                    IP Logging
+                                                </Typography>
+                                                <Switch onChange={handleChange} name="ipLogging" defaultChecked={server.ipLogging} />
+                                            </Stack>
                                         </Grid>
                                         {(user.role !== "free") && (
                                             <>
@@ -299,11 +318,11 @@ export default function DashServerSettings({ user, id }: any) {
                                                         </Typography>
                                                         <Switch onChange={handleChange} name="webhookcheck" defaultChecked={server.webhook ? true : false} />
                                                     </Stack>
-                                                    {webhookcheck && (
-                                                        <TextField fullWidth variant="outlined" name="webhook" value={webhook} onChange={handleChange} placeholder="Webhook Url" type="url" />
+                                                    {newServer.webhookcheck && (
+                                                        <TextField fullWidth variant="outlined" name="webhook" value={newServer.webhook} onChange={handleChange} placeholder="Webhook Url" type="url" />
                                                     )}
                                                 </Grid>
-                                                {(webhookcheck) && (
+                                                {(newServer.webhookcheck) && (
                                                     <Grid item>
                                                         <Stack direction="row" spacing={1}>
                                                             <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
@@ -321,19 +340,19 @@ export default function DashServerSettings({ user, id }: any) {
                                                     <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                                         Server Description
                                                     </Typography>
-                                                    <TextField fullWidth variant="outlined" name="description" value={description} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Description" rows={3} multiline />
+                                                    <TextField fullWidth variant="outlined" name="description" value={newServer.description} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Description" rows={3} multiline />
                                                 </Grid>
                                                 <Grid item>
                                                     <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                                         Server Background Image
                                                     </Typography>
-                                                    <TextField fullWidth variant="outlined" name="background" value={background} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Background Image URL" type="url" />
+                                                    <TextField fullWidth variant="outlined" name="background" value={newServer.background} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Background Image URL" type="url" />
                                                 </Grid>
                                                 <Grid item>
                                                     <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                                         Theme Color
                                                     </Typography>
-                                                    <MuiColorInput format="hex" fallbackValue="#4e46ef" isAlphaHidden value={themeColor} onChange={onColorChange} sx={{ width: "100%" }} />
+                                                    <MuiColorInput format="hex" fallbackValue="#4e46ef" isAlphaHidden value={newServer.themeColor} onChange={onColorChange} sx={{ width: "100%" }} />
                                                 </Grid>
                                             </>
                                         )}
