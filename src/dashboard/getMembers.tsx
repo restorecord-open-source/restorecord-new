@@ -10,7 +10,7 @@ export default async function getMembers(options: any, serverId?: any, search?: 
 }
 
 export async function getMemberList(options: any, serverId?: any, search?: any, page: any = null) {
-    return await axios.get(`/api/v1/server/memberList`, {
+    return await axios.get(`/api/v2/server/memberList`, {
         headers: options,
         validateStatus: () => true
     })

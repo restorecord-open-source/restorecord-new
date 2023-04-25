@@ -14,16 +14,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
                 const formatted = servers.map(async (server: any) => {
                     const members = await prisma.members.findMany({
-                        where: 
-                        {
+                        where: {
                             guildId: server.guildId,
-                            // if ?from and ?to are set only get members that have createdAt between that date, if it isnt set get the last 14 days
-                            createdAt: req.query.from && req.query.to ? {
-                                gte: new Date(req.query.from as string), lte: new Date(req.query.to as string) 
-                            } : {
-                                gte: new Date(new Date().setDate(new Date().getDate() - 14))
-                            }
                         },
+                        orderBy: { id: "desc" },
                     });
 
                     return {

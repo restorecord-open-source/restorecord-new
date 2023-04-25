@@ -138,7 +138,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             pullTimeout = new Date(Date.now() + 1000 * 60 * 60);
             break;
         case "enterprise":
-            delay = 350;
+            delay = 400;
             pullTimeout = new Date(Date.now() + 1000 * 60 * 5);
             break;
         }
@@ -299,7 +299,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         data: {
                             pulling: false,
                         }
-                    }).catch(async (err: Error) => {
+                    }).then(() => {
+                        console.log(`[${server.name}] [PULLING] Set pulling to false`);
+                    }).catch((err: Error) => {
                         console.error(`[${server.name}] [PULLING] 5 ${err}`);
                     });
 
@@ -308,7 +310,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 }
 
                 if (delay > 2000) delay -= 1000;
-                else if (delay < 300) delay = 500;
+                if (delay < 400) delay += 500;
 
                 console.log(`[${server.name}] [${member.username}] Success: ${succPulled}/${(pullCount !== Number.MAX_SAFE_INTEGER) ? pullCount : "∞"} (${trysPulled}/${membersNew.length}) | Errors: ${erroPulled} | Delay: ${delay}ms`);
 
@@ -323,7 +325,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 data: {
                     pulling: false,
                 }
-            }).catch(async (err: Error) => {
+            }).then(() => {
+                console.log(`[${server.name}] [PULLING] Set pulling to false`);
+            }).catch((err: Error) => {
                 console.error(`[${server.name}] [PULLING] 5 ${err}`);
             });
                     
@@ -338,10 +342,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 data: {
                     pulling: false,
                 }
-            }).catch(async (err: Error) => {
+            }).then(() => {
+                console.log(`[${server.name}] [PULLING] Set pulling to false`);
+            }).catch((err: Error) => {
                 console.error(`[${server.name}] [PULLING] 6 ${err}`);
             });
-        }).catch(async (err: Error) => {
+        }).catch((err: Error) => {
             console.error(`[PULLING] 3 ${err}`);
         });
 

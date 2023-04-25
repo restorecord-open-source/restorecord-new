@@ -20,7 +20,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 const { botName, botSecret, botToken, newBotName, newBotSecret, newBotToken, newCustomDomain, newPublicKey } = req.body;
 
                 const requiredFields = ["botName", "botSecret", "botToken", "newBotName", "newBotSecret", "newBotToken"];
-                
                 const missingFields = requiredFields.filter(field => !req.body[field]);
                 
                 if (missingFields.length > 0) {

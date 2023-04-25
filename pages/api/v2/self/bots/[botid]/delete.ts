@@ -12,12 +12,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         switch (req.method) {
         case "DELETE":
             try {
-                const botId = req.query.botid as string;
+                const botId: any = req.query.botid as any;
                 if (!botId) return res.status(400).json({ success: false, message: "Missing Bot ID" });
 
                 const bot = await prisma.customBots.findFirst({
                     where: {
-                        clientId: Number(botId) as number,
+                        clientId: BigInt(botId) as bigint,
                         ownerId: user.id,
                     },
                 });
@@ -36,7 +36,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
                 await prisma.customBots.delete({
                     where: {
-                        clientId: bot.id,
+                        clientId: bot.clientId,
                     },
                 }).then(() => {
                     return res.status(200).json({ success: true, message: "Bot successfully deleted" });
