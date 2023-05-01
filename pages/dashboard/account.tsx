@@ -65,7 +65,7 @@ export default function AccountSettings() {
 
 
     if (isLoading) {
-        return <CircularProgress />
+        return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><CircularProgress /></Box>
     }
 
     if (isError) {
@@ -75,7 +75,7 @@ export default function AccountSettings() {
     if (!data || !data.username) {
         router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
 
-        return <CircularProgress />
+        return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><CircularProgress /></Box>
     }
 
     function renderSuccessNotificaton() {

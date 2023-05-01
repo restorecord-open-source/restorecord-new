@@ -44,13 +44,13 @@ export default function Dashboard() {
 
     const { data: newsData, isError: newsError, isLoading: newsLoading } = useQuery('news', async () => await fetch('/api/v2/news').then(res => res.json()), { retry: false });
 
-    if (isLoading || isLoading2 || newsLoading) return <CircularProgress />
+    if (isLoading || isLoading2 || newsLoading) return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><CircularProgress /></Box>
     if (isError || isError2 || newsError) return <div>Error</div>
 
     if (!data || !data.username || !data2) {
         router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
 
-        return <CircularProgress />
+        return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><CircularProgress /></Box>
     }
 
     const apexChart: any = {

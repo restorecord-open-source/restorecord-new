@@ -341,10 +341,13 @@ export default function AdminUser() {
                                         }).then((res) => res.data).catch((err) => err.response.data);
 
 
-                                        if (banReasons.status === 200) setModalData({ ...ModalData, ban: banReasons });
-                                        else setErrorMessages(JSON.stringify(banReasons)); 
-
-                                        setModals({ ...Modals, ban: true });
+                                        if (banReasons.status === 200) {
+                                            setModalData({ ...ModalData, ban: banReasons });
+                                            setModals({ ...Modals, ban: true });
+                                        } 
+                                        else {
+                                            setErrorMessages(JSON.stringify(banReasons));
+                                        }
                                     }}>Ban</Button>
                                 </Stack>
                             </CardContent>

@@ -135,7 +135,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             break;
         case "business":
             delay = 600;
-            pullTimeout = new Date(Date.now() + 1000 * 60 * 60);
+            pullTimeout = new Date(Date.now() + 1000 * 60 * 30);
             break;
         case "enterprise":
             delay = 400;
@@ -188,8 +188,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             const retry = parseInt(retryAfter);
                             setTimeout(async () => {
                                 await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : [])
-                            }, retry + 100);
-                            delay += retry;
+                            }, retry * 100);
+                            delay += retry * 100;
                         }
                         break;
                     case 403:
@@ -313,8 +313,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 if (delay < 400) delay += 500;
 
                 console.log(`[${server.name}] [${member.username}] Success: ${succPulled}/${(pullCount !== Number.MAX_SAFE_INTEGER) ? pullCount : "∞"} (${trysPulled}/${membersNew.length}) | Errors: ${erroPulled} | Delay: ${delay}ms`);
-
-                await sleep(delay);
+                
+                await new Promise((resolve) => { setTimeout(resolve, delay); });
             }
 
             console.log(`[${server.name}] Finished pulling`);

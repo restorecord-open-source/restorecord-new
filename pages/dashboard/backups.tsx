@@ -60,7 +60,7 @@ export default function Backups() {
     }), { retry: false, refetchOnWindowFocus: false });
 
     if (isLoading) {
-        return <CircularProgress />
+        return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><CircularProgress /></Box>
     }
 
     if (isError) {
@@ -70,7 +70,7 @@ export default function Backups() {
     if (!userData.username) {
         router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
 
-        return <CircularProgress />
+        return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><CircularProgress /></Box>
     }
     
     return (

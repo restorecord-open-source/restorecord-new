@@ -45,7 +45,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                 admin: acc.admin,
                                 lastIp: acc.lastIp,
                                 createdAt: acc.createdAt,
-                                userId: acc.userId,
+                                userId: String(acc.userId) as string,
                                 referralCode: acc.referralCode,
                                 referrer: acc.referrer,
                             }

@@ -92,10 +92,10 @@ export default function Admin() {
                                 </Typography>
 
                                 <Stack direction={{ xs: "column", sm: "row" }} justifyContent="flex-start" alignItems="center" spacing={{ xs: 1, sm: 2 }}>
-                                    <Link href="/dashboard/admin/users"><Button variant="contained" href="/dashboard/admin/user"><GroupIcon sx={{ mr: 1 }} />User</Button></Link>
-                                    <Link href="/dashboard/admin/servers"><Button variant="contained" href="/dashboard/admin/servers"><StorageIcon sx={{ mr: 1 }} />Servers</Button></Link>
-                                    <Link href="/dashboard/admin/bots"><Button variant="contained" href="/dashboard/admin/bots"><SmartToyIcon sx={{ mr: 1 }} />Bots</Button></Link>
-                                    <Link href="/dashboard/admin/stats"><Button variant="contained" href="/dashboard/admin/stats"><TimelineIcon sx={{ mr: 1 }} />Graphs</Button></Link>
+                                    <Link href="/dashboard/admin/users"><Button fullWidth={true} variant="contained" href="/dashboard/admin/user"><GroupIcon sx={{ mr: 1 }} />User</Button></Link>
+                                    <Link href="/dashboard/admin/servers"><Button fullWidth={true} variant="contained" href="/dashboard/admin/servers"><StorageIcon sx={{ mr: 1 }} />Servers</Button></Link>
+                                    <Link href="/dashboard/admin/bots"><Button fullWidth={true} variant="contained" href="/dashboard/admin/bots"><SmartToyIcon sx={{ mr: 1 }} />Bots</Button></Link>
+                                    <Link href="/dashboard/admin/stats"><Button fullWidth={true} variant="contained" href="/dashboard/admin/stats"><TimelineIcon sx={{ mr: 1 }} />Graphs</Button></Link>
                                 </Stack>
                             </CardContent>
                         </Paper>
@@ -118,7 +118,7 @@ export default function Admin() {
                                                     {tableElement("Servers", stats.servers.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), <StorageIcon sx={{ mr: 1, mb: -0.75 }} />)}
                                                     {tableElement("Members", stats.members.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), <GroupsIcon sx={{ mr: 1, mb: -0.75 }} />)}
                                                     {tableElement("Bots", stats.customBots.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), <SmartToyIcon sx={{ mr: 1, mb: -0.75 }} />)}
-                                                    {tableElement("Revenue", `$${stats.totalRevenue + (6289 + 16133 + 3731).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} (${stats.payments.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")})`, <AccountBalanceIcon sx={{ mr: 1, mb: -0.75 }} />)}
+                                                    {tableElement("Revenue", `$${Math.round(stats.totalRevenue + (6289 + 16133 + 3731)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} (${stats.payments.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")})`, <AccountBalanceIcon sx={{ mr: 1, mb: -0.75 }} />)}
                                                 </TableBody>
                                             </Table>
                                         </TableContainer>

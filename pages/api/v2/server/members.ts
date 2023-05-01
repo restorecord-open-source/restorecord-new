@@ -51,7 +51,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     success: true,
                     max: count,
                     pullable: countPullable,
-                    maxPages: Math.ceil(count / limit) === 0 ? 1 : Math.ceil(count / limit),
+                    maxPages: Math.ceil(count / limit) === 0 ? 1 : (Math.ceil(count / limit) - 1),
                     members: [],
                     message: "No members found."
                 });
@@ -71,7 +71,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         success: true,
                         max: count,
                         pullable: countPullable,
-                        maxPages: Math.ceil(count / limit) === 0 ? 1 : Math.ceil(count / limit),
+                        maxPages: Math.ceil(count / limit) === 0 ? 1 : (Math.ceil(count / limit) - 1),
                         members: members.map((member: any) => {
                             return {
                                 id: member.id,

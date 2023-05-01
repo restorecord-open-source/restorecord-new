@@ -34,9 +34,9 @@ export default function Privacy() {
                             <br/>usernames
                             <br/>passwords (hashed)
                             <br/>ip address
-                            <br/>discord oauth2 tokens (not account)
-                            <br/>discord oauth2 information (e.g. username, avatar, banner)
-                            <br/>Payment Data. We may collect data necessary to process your payment if you make purchases, such as your payment instrument number (such as a credit card number), and the security code associated with your payment instrument. All payment data is stored by Sell.App. You may find their privacy notice link(s) here: <a href="https://sell.app/privacy-policy">Sell.app — Privacy Policy</a>.
+                            <br/>discord <strong>oauth2</strong> tokens (NOT account token)
+                            <br/>discord <strong>oauth2</strong> information (e.g. username, avatar, banner)
+                            <br/>Payment Data, is stored by our payment processor (Stripe) and we do not have access to it. For more information, please see Stripe&#39;s privacy policy here: <a href="https://stripe.com/privacy">https://stripe.com/privacy</a>
                             <br/>All personal information that you provide to us must be true, complete, and accurate, and you must notify us of any changes to such personal information. 
                            
                             <Typography variant="h6" component="h2" sx={{ mt: "1rem", mb: "1rem" }} id="how-do-we-process-your-information">2. HOW DO WE PROCESS YOUR INFORMATION?</Typography>
