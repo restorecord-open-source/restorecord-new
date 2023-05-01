@@ -37,11 +37,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             break;
         }
 
+        if (user.referrer === (25555 || 38)) {
+            amount = (Number(amount) - (Number(amount) * 0.15)).toFixed(2);
+        } else {
+            amount = (Number(amount) - (Number(amount) * 0.05)).toFixed(2);
+        }
+
         var Charge = coinbase.resources.Charge;
 
         const charge = await Charge.create({
             name: "RestoreCord Subscription",
-            description: "RestoreCord Subscription",
+            description: `RestoreCord ${plan} Subscription ${user.referrer ? `(Discount applied)` : ""}`,
             local_price: {
                 amount: amount,
                 currency: "USD"

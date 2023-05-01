@@ -19,7 +19,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 let guildIds: any = [];
                 let lastId: any = 0;
 
-                if (serverId !== undefined || serverId.toLowerCase() === "all") {
+                if (serverId === undefined || serverId.toLowerCase() === "all") {
                     guildIds = servers.map((server: any) => server.guildId);
                 } else {
                     guildIds = serverId ? [BigInt(serverId)] : servers.map((server: any) => server.guildId);

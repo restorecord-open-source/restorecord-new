@@ -62,6 +62,7 @@ export default function DashServerSettings({ user, id }: any) {
                 roleId: server.roleId,
                 webhookcheck: server.webhook ? true : false,
                 webhook: server.webhook ? server.webhook : "",
+                ipLogging: server.ipLogging,
                 picture: server.picture ? server.picture : "",
                 description: server.description ? server.description : "",
                 background: server.bgImage ? server.bgImage : "",
