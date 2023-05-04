@@ -225,66 +225,7 @@ export default function Register() {
                         </form>
                     </Box>
                 </Container>
-
-                <Footer />
             </Box>
-
-            {/* <div>
-                <div>
-                    <div>
-                        <h1>Register an Account</h1>
-                    </div>
-                    <form onSubmit={onSubmit}>
-                        <div>
-                            <div>
-                                <label htmlFor="username" className="block mb-2 text-sm font-medium text-gray-300">Username</label>
-                                <div className="relative mb-6">
-                                    <input name="username" onChange={handleChange} type="text" id="username" className="transition-all border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="User" />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-300">Email</label>
-                                <div className="relative mb-6">
-                                    <input name="email" onChange={handleChange} type="email" id="email" className="transition-all border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="johndoe@gmail.com" />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-300">Password</label>
-                                <div className="relative">
-                                    <input name="password" onChange={handleChange} type="password" id="password" className="transition-all border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="••••••••••" />
-                                </div>
-                            </div>
-
-                            <div>
-                                <HCaptcha
-                                    sitekey="748ea2c2-9a8d-4791-b951-af4c52dc1f0f"
-                                    size="invisible"
-                                    onVerify={setToken}
-                                    onError={onError}
-                                    onExpire={onExpire}
-                                    ref={captchaRef}
-                                />
-                            </div>
-                            
-                            <div>
-                                <a>
-                                    Already have an account? <Link href="/login"><span>Login</span></Link>.
-                                    <br/>
-                                    By clicking Register, you agree to our <Link href="/terms"><span>Terms</span></Link> and <Link href="/privacy"><span>Privacy Policy</span></Link>.
-                                </a>
-                            </div>
-                        </div>
-
-                        <div>
-                            <button type="submit">
-                                Register
-                            </button>
-                        </div>  
-                    </form>
-                </div>
-            </div> */}
         </>
     )
 }

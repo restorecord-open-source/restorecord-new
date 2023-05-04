@@ -8,6 +8,7 @@ import { useToken } from "../../../src/token";
 import NavBar from "../../../components/dashboard/navBar";
 import getUser from "../../../src/dashboard/getUser";
 import theme from "../../../src/theme";
+import LoadingButton from "../../../components/misc/LoadingButton";
 
 import axios from "axios";
 import Link from "next/link"
@@ -42,8 +43,10 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import Badge from "@mui/material/Badge";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import Checkbox from "@mui/material/Checkbox";
-import LoadingButton from "../../../components/misc/LoadingButton";
+import Tooltip from "@mui/material/Tooltip";
 
 export default function Server() {
     const [ token ]: any = useToken()
@@ -75,7 +78,7 @@ export default function Server() {
     const [notiTextE, setNotiTextE] = useState("X");
     const [notiTextI, setNotiTextI] = useState("X");
 
-    
+    const [isRotating, setIsRotating] = useState(false);
 
     function getAllGuilds() {
         setAllServers([]);
@@ -132,7 +135,7 @@ export default function Server() {
         }
     }, [customBotToken, pullSettings.giveRoleOnJoin, pullSettings.selectedServer]);
 
-    const { data: user, isError, isLoading } = useQuery('user', async () => await getUser({
+    const { data: user, isError, isLoading, refetch: reloadUser } = useQuery('user', async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
     }), { retry: false, refetchOnWindowFocus: false });
 
@@ -179,7 +182,7 @@ export default function Server() {
 
                                 <Dialog open={pullSettings.pullWindow} onClose={() => setPullSettings({ ...pullSettings, pullWindow: false })} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" fullWidth maxWidth="sm">
                                     <DialogTitle id="alert-dialog-title">
-                                            Migration
+                                        Migration
                                         <IconButton aria-label="close" onClick={() => setPullSettings({ ...pullSettings, pullWindow: false })} sx={{ position: "absolute", right: 8, top: 8, color: theme.palette.grey[500] }}>
                                             <CloseIcon />
                                         </IconButton>
@@ -187,9 +190,6 @@ export default function Server() {
                                     <DialogContent>
                                         <Typography variant="body1" sx={{ fontWeight: "400", mb: "1rem" }}>
                                             Select the server you want to pull your members into, make sure you invited the bot to the server.
-                                        </Typography>
-                                        <Typography variant="body1" sx={{ fontWeight: "400", mb: "1rem", color: theme.palette.warning.main }}>
-                                            ⚠ Warning: This action can&apos;t be stopped or paused. 
                                         </Typography>
                                         {allServers.length === 0 ? (
                                             <CircularProgress />
@@ -214,9 +214,7 @@ export default function Server() {
                                         {/* role select */}
                                         {(pullSettings.giveRoleOnJoin && pullSettings.selectedServer && botClient) && (
                                             <>
-                                                <Typography variant="body1" sx={{ fontWeight: "400", mb: "1rem", mt: "1rem" }}>
-                                                    Select the role you want to give to your members.
-                                                </Typography>
+                                                <Typography variant="body1" sx={{ fontWeight: "400", mb: "1rem", mt: "1rem" }}>Select the role you want to give to your members.</Typography>
                                                 {allRoles.length === 0 ? (
                                                     <CircularProgress />
                                                 ) : (
@@ -278,53 +276,103 @@ export default function Server() {
 
                                     </DialogContent>
                                     <DialogActions>
-                                        <Button onClick={() => getAllGuilds()} color="primary" variant="contained" sx={{ mr: 1 }}>
-                                            Refresh Server {pullSettings.giveRoleOnJoin ? "and Role" : ""} List
-                                        </Button>
-                                        <LoadingButton event={() => (
-                                            axios.put(`/api/v2/self/servers/${guildId}/pull?server=${pullSettings.selectedServer}${pullSettings.giveRoleOnJoin ? `&role=${pullSettings.selectedRole}` : ""}${pullSettings.customPullCountCheck ? `&pullCount=${pullSettings.customPullCount}` : ""}`, {}, {
-                                                headers: {
-                                                    "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
-                                                },
-                                                validateStatus: () => true
-                                            }).then(res => {
-                                                setOpenI(false);
-                                                if (!res.data.success) {
-                                                    if (res.data.pullTimeout) {
-                                                        const timeArr = new Date(new Date(res.data.pullTimeout).getTime() - new Date().getTime()).toISOString().substr(11, 8).split(":");
-                                                        const hours = parseInt(timeArr[0]);
-                                                        const minutes = parseInt(timeArr[1]);
-                                                        const seconds = parseInt(timeArr[2]);
-                                                        const timeString = `${hours > 0 ? `${hours} hour${hours > 1 ? "s" : ""} ` : ""}${minutes > 0 ? `${minutes} minute${minutes > 1 ? "s" : ""} ` : ""}${seconds > 0 ? `${seconds} second${seconds > 1 ? "s" : ""} ` : ""}`;
-                                                        setNotiTextE(`${res.data.message} ${timeString}`);
-                                                    }
-                                                    else {
-                                                        setNotiTextE(res.data.message);
-                                                    }
-                                                    setOpenE(true);
-                                                }
-                                                else {
-                                                    setNotiTextS(res.data.message);
-                                                    setOpenS(true);
-                                                    // setPullWindow(false);
-                                                    setPullSettings({ ...pullSettings, pullWindow: false });
-                                                }
-                                            }).catch((err): any => {
-                                                setNotiTextE(err.message);
-                                                setOpenE(true);
-                                                console.error(err);
-                                            })
-                                        )} color="success" sx={{ mr: 1 }}>
-                                            Pull Members
-                                        </LoadingButton>
+                                        <Stack direction={{ sm: "column", md: "row" }} spacing={2} justifyContent="space-between" alignItems="center" width="100%">
+                                            <Button onClick={() => getAllGuilds()} color="primary" variant="contained" sx={{ width: "100%", mb: { sm: "1rem", md: "0" } }}>
+                                                Refresh Server List
+                                            </Button>
+                                            {guildId !== "" && user.servers.find((item: any) => item.guildId === guildId).pulling ? (
+                                                <LoadingButton event={() => (
+                                                    axios.delete(`/api/v2/self/servers/${guildId}/stop`, {
+                                                        headers: {
+                                                            "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                        },
+                                                        validateStatus: () => true
+                                                    }).then(res => {
+                                                        setOpenI(false);
+                                                        if (!res.data.success) {
+                                                            setNotiTextE(res.data.message);
+                                                            setOpenE(true);
+                                                        }
+                                                        else {
+                                                            setNotiTextS(res.data.message);
+                                                            setOpenS(true);
+                                                            // setPullWindow(false);
+                                                            setPullSettings({ ...pullSettings, pullWindow: false });
+                                                        }
+                                                    }).catch((err): any => {
+                                                        setNotiTextE(err.message);
+                                                        setOpenE(true);
+                                                        console.error(err);
+                                                    })
+                                                )} color="error" sx={{ width: "100%", mt: { sm: "1rem", md: "0" } }}>
+                                                    Stop Pulling
+                                                </LoadingButton>
+                                            ) : (
+                                                <LoadingButton event={() => (
+                                                    axios.put(`/api/v2/self/servers/${guildId}/pull?server=${pullSettings.selectedServer}${pullSettings.giveRoleOnJoin ? `&role=${pullSettings.selectedRole}` : ""}${pullSettings.customPullCountCheck ? `&pullCount=${pullSettings.customPullCount}` : ""}`, {}, {
+                                                        headers: {
+                                                            "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                        },
+                                                        validateStatus: () => true
+                                                    }).then(res => {
+                                                        setOpenI(false);
+                                                        if (!res.data.success) {
+                                                            if (res.data.pullTimeout) {
+                                                                const timeArr = new Date(new Date(res.data.pullTimeout).getTime() - new Date().getTime()).toISOString().substr(11, 8).split(":");
+                                                                const hours = parseInt(timeArr[0]);
+                                                                const minutes = parseInt(timeArr[1]);
+                                                                const seconds = parseInt(timeArr[2]);
+                                                                const timeString = `${hours > 0 ? `${hours} hour${hours > 1 ? "s" : ""} ` : ""}${minutes > 0 ? `${minutes} minute${minutes > 1 ? "s" : ""} ` : ""}${seconds > 0 ? `${seconds} second${seconds > 1 ? "s" : ""} ` : ""}`;
+                                                                setNotiTextE(`${res.data.message} ${timeString}`);
+                                                            }
+                                                            else {
+                                                                setNotiTextE(res.data.message);
+                                                            }
+                                                            setOpenE(true);
+                                                        }
+                                                        else {
+                                                            setNotiTextS(res.data.message);
+                                                            setOpenS(true);
+                                                            // setPullWindow(false);
+                                                            setPullSettings({ ...pullSettings, pullWindow: false });
+                                                        }
+                                                    }).catch((err): any => {
+                                                        setNotiTextE(err.message);
+                                                        setOpenE(true);
+                                                        console.error(err);
+                                                    })
+                                                )} color="success" sx={{ width: "100%", mt: { sm: "1rem", md: "0" } }}>
+                                                    Pull Members
+                                                </LoadingButton>
+                                            )}
+                                        </Stack>
                                     </DialogActions>
                                 </Dialog>
 
 
                                 <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between" sx={{ "@media screen and (max-width: 600px)": { flexDirection: "column" } }}>
-                                    <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
-                                        Servers
-                                    </Typography>
+                                    <Box sx={{ display: "inline-flex", alignItems: "center", mb: 2 }}>
+                                        <Typography variant="h4" sx={{ fontWeight: "500" }}>
+                                            Servers
+                                        </Typography>
+                                        <IconButton onClick={() => {
+                                            setIsRotating(true);
+                                            reloadUser();
+                                            setTimeout(() => { setIsRotating(false); }, 1000);
+                                        }} size="medium" sx={{ ml: 1, mt: 1, animation: `${isRotating ? "rotation 0.5s linear forwards" : ""}`, transition: "transform 0.2s ease-out", }}>
+                                            <RefreshIcon />
+                                        </IconButton>
+                                        <style jsx global>{`
+                                        @keyframes rotation {
+                                            from {
+                                                transform: rotate(0deg);
+                                            }
+                                            to {
+                                                transform: rotate(360deg);
+                                            }
+                                        }
+                                        `}</style>
+                                    </Box>
                                     <Button variant="contained" sx={{ mb: 2 }} onClick={(e) => {
                                         e.preventDefault();
                                         router.push("/dashboard/server/new");
@@ -341,16 +389,18 @@ export default function Server() {
                                                     <CardContent>
                                                         <Grid container spacing={3} direction="row" justifyContent={"space-between"}>
                                                             <Grid item>
-                                                                <div style={{ display: "inline-flex", alignItems: "center" }}>
-                                                                    {item.picture === "https://cdn.restorecord.com/logo512.png" ? (
-                                                                        <Avatar {...stringAvatar(item.name, { sx: { mr: "0.5rem" } })}></Avatar>
+                                                                <Box sx={{ display: "inline-flex", alignItems: "center" }}>
+                                                                    {item.picture === "" ? (
+                                                                        <Avatar {...stringAvatar(item.name, { sx: { mr: "0.5rem" } })} />
                                                                     ) : (
                                                                         <Avatar src={item.picture} alt={item.serverName} sx={{ mr: "0.5rem" }} />
                                                                     )}
-                                                                    <Typography variant="h6" sx={{ fontWeight: "500", wordBreak: "break-all" }}>
-                                                                        {item.name}
-                                                                    </Typography>
-                                                                </div>
+                                                                    <Badge badgeContent={new Date(item.pullTimeout).getTime() - new Date().getTime() > 0 ? "Cooldown" : (item.pulling ? "Pulling" : "Idle")} color={new Date(item.pullTimeout).getTime() - new Date().getTime() > 0 ? "warning" : "info"} sx={{ [`& .MuiBadge-badge`]: { mt: "0.95rem", mr: "-3rem", color: "#fff", padding: "0.75rem", fontSize: "0.75rem", fontWeight: "bold", display: (item.pulling || new Date(item.pullTimeout).getTime() - new Date().getTime() > 0) ? "flex" : "none" } }}>
+                                                                        <Typography variant="h6" sx={{ fontWeight: "500", wordBreak: "break-all" }}>
+                                                                            {item.name}
+                                                                        </Typography>
+                                                                    </Badge>
+                                                                </Box>
                                                                 <Typography variant="body2" color="textSecondary">
                                                                     {item.description}
                                                                 </Typography>
@@ -370,6 +420,7 @@ export default function Server() {
                                                                     <Button variant="contained" color="success" onClick={() => {
                                                                         setCustomBotToken(user.bots.find((bot: any) => bot.id === (user.servers.find((server: any) => server.guildId === item.guildId).customBotId)).botToken);
                                                                         setGuildId(item.guildId);
+                                                                        reloadUser();
                                                                         setPullSettings({ ...pullSettings, pullWindow: true });
                                                                     }}>Migrate</Button>
                                                                     {(user.role === "business" || user.role === "enterprise") && (

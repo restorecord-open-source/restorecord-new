@@ -61,7 +61,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         themeColor: server.themeColor,
                         vpncheck: server.vpncheck,
                         createdAt: server.createdAt,
-                        customBotId: server.customBotId
+                        customBotId: server.customBotId,
+                        pullTimeout: server.pullTimeout,
+                        pulling: server.pulling,
                     })),
                     backups: await Promise.all(allBackups),
                     bots: customBots.map((bot: customBots) => ({

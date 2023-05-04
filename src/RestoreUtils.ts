@@ -299,7 +299,7 @@ export const loadChannels = async(server: servers, bot: customBots, backup: back
 
         channelPromises.push(resp.data);
 
-        if (!resp.status.toString().startsWith("2")) { console.error(`[Restore] [Channels] [Channels] ${resp.status} ${resp.statusText} ${JSON.stringify(resp.data)}`); }
+        if (!resp.status.toString().startsWith("2")) { console.error(`[Restore] [Channels] [Create] ${resp.status} ${resp.statusText} ${JSON.stringify(resp.data)}`); }
         if (resp.data.retry_after) { await new Promise((resolve) => setTimeout(resolve, resp.data.retry_after)); }
     }
     // });

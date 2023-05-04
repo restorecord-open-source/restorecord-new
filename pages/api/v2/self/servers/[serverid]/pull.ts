@@ -161,8 +161,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     
             console.log(`[${server.name}] Started Pulling`);
 
-            // const MAX_PULL_TIME = 1000 * 60 * 5;
-            const MAX_PULL_TIME = 1000 * 15;
+            const MAX_PULL_TIME = 1000 * 60 * 2;
+            // const MAX_PULL_TIME = 1000 * 15;
 
             for (const member of membersNew) {
                 const newServer = await prisma.servers.findFirst({ where: { id: server.id } });
@@ -289,7 +289,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                   
                 await pullPromise;
                   
-                if (succPulled >= Number(pullCount)) {
+                if (Number(succPulled) >= Number(pullCount)) {
                     console.log(`[${server.name}] [${member.username}] ${pullCount} members have been pulled`);
                     console.log(`[${server.name}] Finished pulling`);
                     await prisma.servers.update({
@@ -306,7 +306,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     });
 
                     resolve();
-                    return;
                 }
 
                 if (delay > 2000) delay -= 1000;
@@ -330,9 +329,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             }).catch((err: Error) => {
                 console.error(`[${server.name}] [PULLING] 5 ${err}`);
             });
-                    
+
+            console.log(`[${server.name}] [PULLING] Done with ${succPulled} members pulled`);
             resolve();
-            return;
         }).then(async () => {
             console.log(`[${server.name}] Pulling done with ${succPulled} members pulled`);
             await prisma.servers.update({

@@ -15,6 +15,9 @@ import Typography from "@mui/material/Typography";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import Head from "next/head";
+import theme from "../src/theme";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material";
 
 export default function Login() {
     const router = useRouter();
@@ -214,43 +217,7 @@ export default function Login() {
                         </form>
                     </Box>
 
-                    {/* <div>
-                    <div>
-                        <h1>Log into your Account</h1>
-                    </div>
-                    <form onSubmit={onSubmit}>
-                        <div>
-                            <div>
-                                <label htmlFor="username" className="block mb-2 text-sm font-medium text-gray-300">Username</label>
-                                <div className="relative mb-6">
-                                    <input name="username" onChange={handleChange} type="text" id="username" className="transition-all border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="Username" defaultValue={username_query} />
-                                </div>
-                            </div>
-                            
-                            <div>
-                                <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-300">Password</label>
-                                <div className="relative">
-                                    <input name="password" onChange={handleChange} type="password" id="password" className="transition-all border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="••••••••••" />
-                                </div>
-                            </div>
-                            
-                            <div>
-                                <a>
-                                    Don&#39;t have an account? Register <Link href="/register"><span>here</span></Link>.
-                                </a>
-                            </div>
-                        </div>
-
-                        
-                        <div>
-                            <button type="button"  onClick={() => setOpen(true) }>
-                                Login
-                            </button>
-                        </div>
-                    </form>
-                </div> */}
                 </Container>
-                <Footer />
             </Box>
         </>
     )
