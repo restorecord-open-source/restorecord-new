@@ -27,38 +27,38 @@ import AlertTitle from "@mui/lab/AlertTitle";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 
-const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
+const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 export default function Dashboard() {
     const [ token ]: any = useToken()
     const router = useRouter();
     let memId: any = 0;
 
-    const { data, isError, isLoading } = useQuery('user', async () => await getUser({
+    const { data, isError, isLoading } = useQuery("user", async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
     }), { retry: false,  refetchOnWindowFocus: true });
 
-    const { data: data2, isError: isError2, isLoading: isLoading2 } = useQuery('memberList', async () => await getMemberList({
+    const { data: data2, isError: isError2, isLoading: isLoading2 } = useQuery("memberList", async () => await getMemberList({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
     }), { retry: false });
 
-    const { data: newsData, isError: newsError, isLoading: newsLoading } = useQuery('news', async () => await fetch('/api/v2/news').then(res => res.json()), { retry: false });
+    const { data: newsData, isError: newsError, isLoading: newsLoading } = useQuery("news", async () => await fetch("/api/v2/news").then(res => res.json()), { retry: false });
 
-    if (isLoading || isLoading2 || newsLoading) return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><CircularProgress /></Box>
+    if (isLoading || isLoading2 || newsLoading) return <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}><CircularProgress /></Box>
     if (isError || isError2 || newsError) return <div>Error</div>
 
     if (!data || !data.username || !data2) {
         router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
 
-        return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><CircularProgress /></Box>
+        return <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}><CircularProgress /></Box>
     }
 
     const apexChart: any = {
         options: {
             chart: {
-                id: 'members',
-                type: 'area',
-                foreColor: '#fff',
+                id: "members",
+                type: "area",
+                foreColor: "#fff",
                 dropShadow: {
                     enabled: true,
                     top: 0,
@@ -91,11 +91,11 @@ export default function Dashboard() {
                 curve: "smooth",
             },
             legend: {
-                horizontalAlign: 'left'
+                horizontalAlign: "left"
             },
             plotOptions: {
                 bar: {
-                    columnWidth: '30%',
+                    columnWidth: "30%",
                     horizontal: false,
                 },
             },
@@ -124,7 +124,7 @@ export default function Dashboard() {
                 theme.palette.secondary.main,
             ],
             tooltip: {
-                theme: 'dark',
+                theme: "dark",
                 marker: {
                     show: false
                 },
@@ -133,16 +133,16 @@ export default function Dashboard() {
                 },
             },
             noData: {
-                text: 'No data',
-                align: 'center',
-                verticalAlign: 'middle',
+                text: "No data",
+                align: "center",
+                verticalAlign: "middle",
                 offsetX: 0,
                 offsetY: 0,
                 style: {
-                    color: '#fff',
-                    fontSize: '14px',
-                    fontFamily: 'Inter',
-                    fontWeight: 'bold'
+                    color: "#fff",
+                    fontSize: "14px",
+                    fontFamily: "Inter",
+                    fontWeight: "bold"
                 },
             },
             xaxis: {
@@ -161,10 +161,10 @@ export default function Dashboard() {
                 categories: new Array(14).fill(0).map((_, i) => {
                     const date = new Date();
                     date.setDate(date.getDate() - i);
-                    return date.toLocaleDateString('en-US', {
-                        weekday: 'short',
-                        month: 'short',
-                        day: 'numeric',
+                    return date.toLocaleDateString("en-US", {
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
                     });
                 }).reverse(),
             },
@@ -268,7 +268,7 @@ export default function Dashboard() {
 
                         {!isLoading2 && ( 
                             <Link href="/dashboard/members">
-                                <Button variant="filled" color="white" sx={{ width: '100%' }}>
+                                <Button variant="filled" color="white" sx={{ width: "100%" }}>
                                     View All
                                 </Button>
                             </Link>

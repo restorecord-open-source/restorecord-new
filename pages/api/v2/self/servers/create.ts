@@ -20,6 +20,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
     if (isNaN(Number(data.guildId)) || isNaN(Number(data.roleId))) return res.status(400).json({ success: false, message: "Server ID or Role ID is not a number" });
     if (BigInt(data.guildId) > 18446744073709551615 || BigInt(data.roleId) > 18446744073709551615) return res.status(400).json({ success: false, message: "Server ID or Role ID is not a discord ID" });
+    if (data.serverName.length < 3 || data.serverName.length > 99) return res.status(400).json({ success: false, message: "Server name must be between 3 and 99 characters" });
 
     data.serverName = data.serverName.trim();
 
