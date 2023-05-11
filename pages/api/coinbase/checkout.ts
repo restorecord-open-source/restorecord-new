@@ -39,8 +39,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
         if (user.referrer === (25555 || 38)) {
             amount = (Number(amount) - (Number(amount) * 0.15)).toFixed(2);
-        } else {
+        } else if (user.referrer !== null) {
             amount = (Number(amount) - (Number(amount) * 0.05)).toFixed(2);
+        } else {
+            amount = String(Number(amount) * 1.10);
         }
 
         var Charge = coinbase.resources.Charge;
