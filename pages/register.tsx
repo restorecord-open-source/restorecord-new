@@ -17,6 +17,7 @@ import Typography from "@mui/material/Typography";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import { LoadingButton } from "@mui/lab";
+import { makeXTrack } from "../src/getIPAddress";
 
 export default function Register() {
     const [username, setUsername] = useState("");
@@ -78,7 +79,8 @@ export default function Register() {
                 fetch(`/api/v2/auth/register`, {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        "x-track": makeXTrack()
                     },
                     body: JSON.stringify({
                         username: username,

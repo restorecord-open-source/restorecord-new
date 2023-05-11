@@ -3,7 +3,7 @@ import { sign } from "jsonwebtoken";
 import * as bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import { prisma } from "../../../../src/db";
-import { getIPAddress, getBrowser, getPlatform } from "../../../../src/getIPAddress";
+import { getIPAddress, getBrowser, getPlatform, getXTrack } from "../../../../src/getIPAddress";
 import { ProxyCheck } from "../../../../src/proxycheck";
 import Email from "../../../../src/email";
 import * as speakeasy from "speakeasy";
@@ -17,8 +17,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     try {
         const data = { ...req.body };
-        let tokenExpiry: string = "90d";
+        const xTrack = getXTrack(req);
+        if (!xTrack) return res.status(400).json({ success: false, message: "Invalid Request" });
 
+        let tokenExpiry: string = "90d";
         if (!data.username || !data.password) {
             return res.status(400).json({ message: "Missing username or password" });
         }
@@ -73,8 +75,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         await prisma.logs.create({
             data: {
-                title: "New Login",
-                body: `${account.username} logged in from ${getIPAddress(req)}, device: ${getPlatform(req.headers["user-agent"] ?? "")} (${getBrowser(req.headers["user-agent"] ?? "")})`,
+                type: 1,
+                username: `${account.username} (${account.id})`,
+                ipAddr: getIPAddress(req),
+                device: JSON.stringify(xTrack)
             }
         });
 

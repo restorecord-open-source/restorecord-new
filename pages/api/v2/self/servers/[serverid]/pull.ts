@@ -4,7 +4,7 @@ import { accounts, members } from "@prisma/client";
 
 import { prisma } from "../../../../../../src/db";
 import { addMember, addRole, refreshToken, shuffle, sleep } from "../../../../../../src/Migrate";
-import { getBrowser, getIPAddress, getPlatform } from "../../../../../../src/getIPAddress";
+import { getBrowser, getIPAddress, getPlatform, getXTrack } from "../../../../../../src/getIPAddress";
 import { formatEstimatedTime } from "../../../../../../src/functions";
 
 import axios from "axios";
@@ -14,6 +14,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
     if (req.method !== "PUT") return res.status(405).json({ code: 0, message: "Method not allowed", });
 
     try {
+        const xTrack = getXTrack(req);
+        if (!xTrack) return res.status(400).json({ success: false, message: "Invalid Request" });
+    
         const serverId: any = String(req.query.serverid) as any;
         const guildId = req.query.server as string;
         const roleId = req.query.role as string;
@@ -154,10 +157,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
             await prisma.logs.create({
                 data: {
-                    title: "Started Pulling",
-                    body: `${user.username} started pulling to ${server.name}, ip: ${getIPAddress(req)}, device: ${getPlatform(req.headers["user-agent"] ?? "")} (${getBrowser(req.headers["user-agent"] ?? "")})`,
+                    type: 10,
+                    username: `${user.username} (${user.id})`,
+                    ipAddr: getIPAddress(req),
+                    device: JSON.stringify(xTrack),
                 }
             });
+
                     
             console.log(`[${server.name}] Started Pulling`);
 
@@ -309,7 +315,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 }
 
                 if (delay > 2000) delay -= 1000;
-                if (delay < 400) delay += 500;
+                if (delay < 300) delay += 500;
 
                 console.log(`[${server.name}] [${member.username}] Success: ${succPulled}/${(pullCount !== Number.MAX_SAFE_INTEGER) ? pullCount : "∞"} (${trysPulled}/${membersNew.length}) | Errors: ${erroPulled} | Delay: ${delay}ms`);
                 

@@ -18,6 +18,7 @@ import Head from "next/head";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 import axios from "axios";
 import LoadingButton from "../components/misc/LoadingButton";
+import { makeXTrack } from "../src/getIPAddress";
 
 export default function Login() {
     const router = useRouter();
@@ -86,7 +87,8 @@ export default function Login() {
                 fetch(`/api/v2/auth/forgot`, {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        "x-track": makeXTrack()
                     },
                     body: JSON.stringify({
                         login: email,

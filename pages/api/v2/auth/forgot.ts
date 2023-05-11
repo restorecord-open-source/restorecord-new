@@ -3,7 +3,7 @@ import { sign } from "jsonwebtoken";
 import * as bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import { prisma } from "../../../../src/db";
-import { getIPAddress, getBrowser, getPlatform } from "../../../../src/getIPAddress";
+import { getIPAddress, getBrowser, getPlatform, getXTrack } from "../../../../src/getIPAddress";
 import axios from "axios";
 import Email from "../../../../src/email";
 dotenv.config({ path: "../../" });
@@ -15,7 +15,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         case "POST":
             try {
                 const data = { ...req.body };
-
+                const xTrack = getXTrack(req);
+                if (!xTrack) return res.status(400).json({ success: false, message: "Invalid Request" });
+        
                 if (!req.query.token) {
                     if (!data) return res.status(400).json({ message: "Please provide all fields" });
                     if (!data.login || !data.captcha) return res.status(400).json({ message: "Missing email or captcha" });
@@ -42,8 +44,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                     await prisma.logs.create({
                         data: {
-                            title: "Requested Password Reset",
-                            body: `${account.username} requested password reset from ${getIPAddress(req)}, device: ${getPlatform(req.headers["user-agent"] ?? "")} (${getBrowser(req.headers["user-agent"] ?? "")})`,
+                            type: 2,
+                            username: `${account.username} (${account.id})`,
+                            ipAddr: getIPAddress(req),
+                            device: JSON.stringify(xTrack)
                         }
                     });
 
@@ -135,8 +139,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                     await prisma.logs.create({
                         data: {
-                            title: "Reset Password",
-                            body: `${account.username} reset their password from ${getIPAddress(req)}, device: ${getPlatform(req.headers["user-agent"] ?? "")} (${getBrowser(req.headers["user-agent"] ?? "")})`,
+                            type: 3,
+                            username: `${account.username} (${account.id})`,
+                            ipAddr: getIPAddress(req),
+                            device: JSON.stringify(xTrack)
                         }
                     });
 

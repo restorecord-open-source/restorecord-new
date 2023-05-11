@@ -25,6 +25,7 @@ import Typography from "@mui/material/Typography";
 import AlertTitle from "@mui/material/AlertTitle";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
+import { makeXTrack } from "../../src/getIPAddress";
 
 export default function AccountSettings() {
     const [ token ]: any = useToken()
@@ -283,6 +284,7 @@ export default function AccountSettings() {
                                                     }, {
                                                         headers: {
                                                             "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                            "x-track": makeXTrack()
                                                         },
                                                         validateStatus: () => true
                                                     }).then((res: any) => {
@@ -321,6 +323,7 @@ export default function AccountSettings() {
                                                     }, {
                                                         headers: {
                                                             "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                            "x-track": makeXTrack()
                                                         },
                                                         validateStatus: () => true
                                                     }).then((res: any) => {

@@ -3,7 +3,7 @@ import * as bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import { prisma } from "../../../../src/db";
 import { accounts } from "@prisma/client";
-import { getIPAddress, getBrowser, getPlatform } from "../../../../src/getIPAddress";
+import { getIPAddress, getBrowser, getPlatform, getXTrack } from "../../../../src/getIPAddress";
 import { isBreached } from "../../../../src/functions";
 dotenv.config({ path: "../../" });
 
@@ -12,6 +12,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     try {
         const data = {...req.body};
+        const xTrack = getXTrack(req);
+        if (!xTrack) return res.status(400).json({ success: false, message: "Invalid Request" });
 
         if (!data.username || !data.password || !data.email || !data.captcha) {
             let errors = [];
@@ -75,8 +77,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         await prisma.logs.create({
             data: {
-                title: "New Account Created",
-                body: `${account.username} created an account from ${getIPAddress(req)}, email: ${account.email}, device: ${getPlatform(req.headers["user-agent"] ?? "")} (${getBrowser(req.headers["user-agent"] ?? "")})`,
+                type: 0,
+                username: `${account.username} (${account.id}, ${account.email})`,
+                ipAddr: getIPAddress(req),
+                device: JSON.stringify(xTrack)
             }
         });
 

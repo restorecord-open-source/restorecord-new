@@ -23,6 +23,59 @@ export function getIPAddress(req: NextApiRequest): string {
     return ip;
 }
 
+
+export function makeXTrack() {
+
+    // create a new json object for the x-track header with the following properties:
+    // {"os":"Windows","browser":"Chrome","system_locale":"en-US","browser_user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36","browser_version":"112.0.0.0","referrer":"https://xenos.services/","referring_domain":"xenos.services","device-aspect-ratio":"16/9","screen":"1920x1080","hardwareConcurrency":"12"}
+    // then base64 encode it
+    
+    const gcd: any = (a: any, b: any) => b == 0 ? a : gcd(b, a % b);
+    const screenRatio = gcd(window.screen.width, window.screen.height);
+
+
+    const os = getPlatform(navigator.userAgent);
+    const browser = getBrowser(navigator.userAgent);
+    const system_locale = navigator.language;
+    const browser_user_agent = navigator.userAgent;
+    const browser_version = getBrowserName(navigator.userAgent);
+    const referrer = document.referrer;
+    const referring_domain = document.referrer.split("/")[2];
+    const device_aspect_ratio = `${window.screen.width / screenRatio}/${window.screen.height / screenRatio}`; // 16/9
+    const screen = `${window.screen.width}x${window.screen.height}`;
+    const hardwareConcurrency = navigator.hardwareConcurrency;
+
+    const xTrack = {
+        os,
+        browser,
+        system_locale,
+        browser_user_agent,
+        browser_version,
+        referrer,
+        referring_domain,
+        device_aspect_ratio,
+        screen,
+        hardwareConcurrency
+    };
+
+    return Buffer.from(JSON.stringify(xTrack)).toString("base64");
+}
+
+export function getXTrack(req: NextApiRequest) {
+    // get the x-track header from the request
+    // if it exists, decode it and return it as an object
+    // if it doesn't exist, return null
+
+    const xTrack = req.headers["x-track"];
+    if (xTrack) {
+        return JSON.parse(Buffer.from(xTrack.toString(), "base64").toString("ascii"));
+    }
+    else {
+        return null;
+    }
+}
+
+
 export function getPlatform(userAgent: string) {
     let platform = "";
     if (userAgent.indexOf("Android") > -1) platform = "Android";
@@ -35,6 +88,14 @@ export function getPlatform(userAgent: string) {
     else platform = "Unknown";
 
     return platform;
+}
+
+export function getBrowserName(userAgent: string) {
+    // get browser name
+    const browser = userAgent.match(/\b(?:MSIE |Trident\/7\.0;.*?rv:|Edge\/|OPR\/|Chrome\/|Firefox\/|DuckDuckGo\/|Instagram)(\d+)/);
+    if (browser) return browser[1];
+
+    return "Unknown";
 }
 
 export function getBrowser(userAgent: string) {

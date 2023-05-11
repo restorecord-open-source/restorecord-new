@@ -137,8 +137,10 @@ model guildMembers {
 
 model logs {
     id        Int      @id @default(autoincrement())
-    title     String   @db.LongText()
-    body      String   @db.LongText()
+    type      Int
+    username  String
+    ipAddr    String
+    device    String   @db.LongText()
     createdAt DateTime @default(now())
 }
 

@@ -18,6 +18,7 @@ import Head from "next/head";
 import theme from "../src/theme";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material";
+import { makeXTrack } from "../src/getIPAddress";
 
 export default function Login() {
     const router = useRouter();
@@ -40,7 +41,8 @@ export default function Login() {
         fetch(`/api/v2/auth/login`, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "x-track": makeXTrack()
             },
             body: JSON.stringify({
                 username: username,
@@ -91,7 +93,7 @@ export default function Login() {
                 fetch(`/api/v2/self`, {
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": `${localStorage.getItem("token")}`
+                        "Authorization": `${localStorage.getItem("token")}`,
                     }
                 })
                     .then(res => res.json())
