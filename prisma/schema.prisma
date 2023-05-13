@@ -36,30 +36,31 @@ model accounts {
 }
 
 model servers {
-    id           Int            @id @default(autoincrement())
-    name         String         @unique
-    ownerId      Int
-    guildId      BigInt         @unique @db.UnsignedBigInt
-    roleId       BigInt         @unique @db.UnsignedBigInt
-    redirectUrl  String?
-    picture      String?        @default("https://cdn.restorecord.com/logo512.png")
-    vpncheck     Boolean        @default(false)
-    webhook      String?
-    bgImage      String?
-    description  String         @default("Verify to view the rest of the server.")
-    themeColor   String         @default("4f46e5")
-    customBotId  Int
-    pulling      Boolean        @default(false)
-    pullTimeout  DateTime?      @default(now())
-    ipLogging    Boolean        @default(true)
-    locked       Boolean        @default(false)
-    createdAt    DateTime       @default(now())
-    customBot    customBots     @relation(fields: [customBotId], references: [id])
-    owner        accounts       @relation(fields: [ownerId], references: [id])
-    members      members[]
-    blacklist    blacklist[]
-    backups      backups[]
-    guildMembers guildMembers[]
+    id            Int            @id @default(autoincrement())
+    name          String         @unique
+    ownerId       Int
+    guildId       BigInt         @unique @db.UnsignedBigInt
+    roleId        BigInt         @unique @db.UnsignedBigInt
+    redirectUrl   String?
+    picture       String?        @default("https://cdn.restorecord.com/logo512.png")
+    vpncheck      Boolean        @default(false)
+    webhook       String?
+    bgImage       String?
+    description   String         @default("Verify to view the rest of the server.")
+    themeColor    String         @default("4f46e5")
+    customBotId   Int
+    pulling       Boolean        @default(false)
+    pullTimeout   DateTime?      @default(now())
+    ipLogging     Boolean        @default(true)
+    locked        Boolean        @default(false)
+    discoverable  Int            @default(0)
+    createdAt     DateTime       @default(now())
+    customBot     customBots     @relation(fields: [customBotId], references: [id])
+    owner         accounts       @relation(fields: [ownerId], references: [id])
+    members       members[]
+    blacklist     blacklist[]
+    backups       backups[]
+    guildMembers  guildMembers[]
 }
 
 model backups {

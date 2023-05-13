@@ -102,3 +102,33 @@ export function formatEstimatedTime(estimatedTime: any) {
         return `${Math.round(estimatedTime / 1000)} seconds`;
     }
 }
+
+export function formatRoundNumber(number: number) {
+    // format number so 7 becomes 10, 87 becomes 90, 127 becomes 130, 1372 becomes 1.4k and 8172912 becomes 8.2m
+    if (number < 10) {
+        return Math.ceil(number);
+    } else if (number < 100) {
+        return Math.ceil(number / 10) * 10;
+    } else if (number < 1000) {
+        return Math.ceil(number / 100) * 100;
+    } else if (number < 10000) {
+        return Math.ceil(number / 1000) * 1000;
+    } else if (number < 100000) {
+        return `${Math.ceil(number / 1000 * 10) / 10}k`;
+    } else if (number < 1000000) {
+        return `${Math.ceil(number / 1000)}k`;
+    } else if (number < 10000000) {
+        return `${Math.ceil(number / 100000) * 100}k`;
+    } else if (number < 100000000) {
+        return `${Math.ceil(number / 1000000 * 10) / 10}m`;
+    } else if (number < 1000000000) {
+        return `${Math.ceil(number / 1000000)}m`;
+    } else if (number < 10000000000) {
+        return `${Math.ceil(number / 100000000) * 100}m`;
+    } else if (number < 100000000000) {
+        return "1b+";
+    } else {
+        return "1b+";
+    }
+    
+}

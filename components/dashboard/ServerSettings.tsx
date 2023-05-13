@@ -34,6 +34,7 @@ export default function DashServerSettings({ user, id }: any) {
         roleId: "",
         picture: "",
         ipLogging: false,
+        discoverable: 0,
         webhook: "",
         background: "",
         description: "",
@@ -63,6 +64,7 @@ export default function DashServerSettings({ user, id }: any) {
                 webhookcheck: server.webhook ? true : false,
                 webhook: server.webhook ? server.webhook : "",
                 ipLogging: server.ipLogging,
+                discoverable: server.discoverable,
                 picture: server.picture ? server.picture : "",
                 description: server.description ? server.description : "",
                 background: server.bgImage ? server.bgImage : "",
@@ -88,6 +90,7 @@ export default function DashServerSettings({ user, id }: any) {
                 newWebhook: newServer.webhook,
                 newWebhookCheck: newServer.webhookcheck,
                 newIpLogging: newServer.ipLogging,
+                newDiscoverable: newServer.discoverable,
                 newVpnCheck: newServer.vpncheck,
                 newPicture: newServer.picture,
                 newBackground: newServer.background,
@@ -143,6 +146,9 @@ export default function DashServerSettings({ user, id }: any) {
             break;
         case "ipLogging":
             setNewServer({ ...newServer, ipLogging: e.target.checked });
+            break;
+        case "discoverable":
+            setNewServer({ ...newServer, discoverable: e.target.checked ? 1 : 0 });
             break;
         case "vpncheck":
             setNewServer({ ...newServer, vpncheck: e.target.checked });
@@ -337,6 +343,16 @@ export default function DashServerSettings({ user, id }: any) {
                                         )}
                                         {(user.role === "business" || user.role === "enterprise") && (
                                             <>
+                                                {server.discoverable !== 2 && (
+                                                    <Grid item>
+                                                        <Stack direction="row" spacing={1}>
+                                                            <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                                            Discoverable
+                                                            </Typography>
+                                                            <Switch onChange={handleChange} name="discoverable" defaultChecked={server.discoverable} />
+                                                        </Stack>
+                                                    </Grid>
+                                                )}
                                                 <Grid item>
                                                     <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                                         Server Description
