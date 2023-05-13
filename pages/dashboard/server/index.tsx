@@ -47,6 +47,7 @@ import Badge from "@mui/material/Badge";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import Checkbox from "@mui/material/Checkbox";
 import Tooltip from "@mui/material/Tooltip";
+import { makeXTrack } from "../../../src/getIPAddress";
 
 export default function Server() {
     const [ token ]: any = useToken()
@@ -312,6 +313,7 @@ export default function Server() {
                                                     axios.put(`/api/v2/self/servers/${guildId}/pull?server=${pullSettings.selectedServer}${pullSettings.giveRoleOnJoin ? `&role=${pullSettings.selectedRole}` : ""}${pullSettings.customPullCountCheck ? `&pullCount=${pullSettings.customPullCount}` : ""}`, {}, {
                                                         headers: {
                                                             "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                            "x-track": makeXTrack()
                                                         },
                                                         validateStatus: () => true
                                                     }).then(res => {
