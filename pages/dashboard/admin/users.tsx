@@ -343,7 +343,7 @@ export default function AdminUser() {
 
                                         if (banReasons.status === 200) {
                                             setModalData({ ...ModalData, ban: banReasons });
-                                            setModals({ ...Modals, ban: true });
+                                            setTimeout(() => { setModals({ ...Modals, ban: true }); }, 100);
                                         } 
                                         else {
                                             setErrorMessages(JSON.stringify(banReasons));

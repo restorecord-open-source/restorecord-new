@@ -128,42 +128,42 @@ export default function Admin() {
 
                             <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", width: "100%" }}>
                                 <CardContent>
-                                    <Typography variant="h5" sx={{ mb: 2, fontWeight: "500" }}>
-                                        Last Purchases
-                                    </Typography>
-                                    <Typography variant="body1" sx={{ mb: 2, fontWeight: "500" }}>
-                                        {statsLoading ? <CircularProgress /> : (<>
-                                            Revenue Last 24h: ${stats.totalRevenueToday}<br />
-                                            Revenue Last 7d: ${stats.totalRevenue7d}<br />
-                                            Revenue Last 30d: ${stats.totalRevenue30d}<br />
-                                        </>)}
-                                    </Typography>
-
                                     {statsLoading ? <CircularProgress /> : (
-                                        <TableContainer component={Paper} sx={{ borderRadius: "1rem", boxShadow: "0 0 0 0", border: `1px solid ${theme.palette.divider}` }}>
-                                            <Table>
-                                                <TableHead>
-                                                    <TableRow>
-                                                        {isMobile ? ( <></> ) : ( <TableCell><Typography variant="body1" sx={{ fontWeight: "600" }}>ID</Typography></TableCell> )}
-                                                        <TableCell><Typography variant="body1" sx={{ fontWeight: "600" }}>Plan</Typography></TableCell>
-                                                        <TableCell><Typography variant="body1" sx={{ fontWeight: "600" }}>Username</Typography></TableCell>
-                                                        <TableCell><Typography variant="body1" sx={{ fontWeight: "600" }}>Date</Typography></TableCell>
-                                                    </TableRow>
-                                                </TableHead>
-                                                <TableBody>
-                                                    {stats.lastPurchases.map((purchase: any, index: any) => (
-                                                        <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }} key={index}>
-                                                            {isMobile ? ( <></> ) : ( <TableCell component="th" scope="row"><Typography variant="body1">{purchase.id}</Typography></TableCell> )}
-                                                            <TableCell><Typography variant="body1">{purchase.plan}</Typography></TableCell>
-                                                            <TableCell><Typography variant="body1">{purchase.username}</Typography></TableCell>
-                                                            {/* <TableCell><Typography variant="body1">{purchase.date}</Typography></TableCell> */}
-                                                            {/* convert date to relative time like 7s ago etc */}
-                                                            <TableCell><Typography variant="body1">{relativeTime(new Date(purchase.date))}</Typography></TableCell>
+                                        <>
+                                            <Typography variant="h5" sx={{ mb: 2, fontWeight: "500" }}>
+                                                Last Purchases
+                                            </Typography>
+                                            <Typography variant="body1" sx={{ mb: 2, fontWeight: "500" }}>
+                                                Revenue Last 24h: ${stats.totalRevenueToday}<br />
+                                                Revenue Last 7d: ${stats.totalRevenue7d}<br />
+                                                Revenue Last 30d: ${stats.totalRevenue30d}<br />
+                                            </Typography>
+
+                                            <TableContainer component={Paper} sx={{ borderRadius: "1rem", boxShadow: "0 0 0 0", border: `1px solid ${theme.palette.divider}` }}>
+                                                <Table>
+                                                    <TableHead>
+                                                        <TableRow>
+                                                            {isMobile ? ( <></> ) : ( <TableCell><Typography variant="body1" sx={{ fontWeight: "600" }}>ID</Typography></TableCell> )}
+                                                            <TableCell><Typography variant="body1" sx={{ fontWeight: "600" }}>Plan</Typography></TableCell>
+                                                            <TableCell><Typography variant="body1" sx={{ fontWeight: "600" }}>Username</Typography></TableCell>
+                                                            <TableCell><Typography variant="body1" sx={{ fontWeight: "600" }}>Date</Typography></TableCell>
                                                         </TableRow>
-                                                    ))}
-                                                </TableBody>
-                                            </Table>
-                                        </TableContainer>
+                                                    </TableHead>
+                                                    <TableBody>
+                                                        {stats.lastPurchases.map((purchase: any, index: any) => (
+                                                            <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }} key={index}>
+                                                                {isMobile ? ( <></> ) : ( <TableCell component="th" scope="row"><Typography variant="body1">{purchase.id}</Typography></TableCell> )}
+                                                                <TableCell><Typography variant="body1">{purchase.plan}</Typography></TableCell>
+                                                                <TableCell><Typography variant="body1">{purchase.username}</Typography></TableCell>
+                                                                {/* <TableCell><Typography variant="body1">{purchase.date}</Typography></TableCell> */}
+                                                                {/* convert date to relative time like 7s ago etc */}
+                                                                <TableCell><Typography variant="body1">{relativeTime(new Date(purchase.date))}</Typography></TableCell>
+                                                            </TableRow>
+                                                        ))}
+                                                    </TableBody>
+                                                </Table>
+                                            </TableContainer>
+                                        </>
                                     )}
 
                                 </CardContent>

@@ -17,6 +17,7 @@ import Link from "@mui/material/Link";
 import { useQuery } from "react-query";
 import { useEffect, useState } from "react";
 import { formatRoundNumber } from "../src/functions";
+import Alert from "@mui/material/Alert";
 
 
 export default function Discovery() {
@@ -41,11 +42,18 @@ export default function Discovery() {
     return (
         <>
             <Container maxWidth="xl">
-                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", height: "30vh !important" }}>
+                {/* info banner stating its beta and early stage */}
+                <Alert severity="info" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+                    <Stack direction="column" spacing={1}>
+                        <Typography>RestoreCord Discovery is in Beta</Typography>
+                        <Typography>This feature is still in early development and may not work as expected</Typography>
+                    </Stack>
+                </Alert>
+                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", height: { xs: "20vh !important", md: "30vh !important" } }}>
                     <Stack direction="column" spacing={2}>
                         <FormControl variant="standard" sx={{ width: "100%" }}>
-                            <Typography variant="h5" component="h1" fontWeight={600}>Find your Server on RestoreCord</Typography>
-                            <Typography variant="h6" component="div" fontWeight={400}>Discover new communities or find new members for your own server</Typography>
+                            <Typography variant="h5" component="h1" fontWeight={600} sx={{ fontSize: { xs: "1.2rem", md: "2rem" }}}>Find your Server on RestoreCord</Typography>
+                            <Typography variant="h6" component="div" fontWeight={400} sx={{ display: { xs: "none", md: "flex" }}}>Discover new communities or find new members for your own server</Typography>
                             <TextField id="search" label="Explore communities" placeholder="Enter a search term" onChange={(e) => setSearch(e.target.value)} sx={{ width: "100%", mt: 4 }} />
                             {/* error text shown if text is shorter than 3 characters or longer than 99 */}
                             {(search.length < 3 || search.length > 99) && search.length !== 0 && <Typography variant="body2" component="div" fontWeight={400} sx={{ color: theme.palette.error.main }}>Search term must be between 3 and 99 characters</Typography>}

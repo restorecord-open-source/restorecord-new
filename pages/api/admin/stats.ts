@@ -50,9 +50,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     payments: payments,
                     paymentsCompleted: paymentsCompleted.length,
                     totalRevenue: paymentsCompleted.reduce((a, b) => a + b.amount, 0) / 100,
-                    totalRevenueToday: paymentsCompleted.filter(p => new Date(p.createdAt).getDate() === new Date().getDate()).reduce((a, b) => a + b.amount, 0) / 100,
-                    totalRevenue7d: paymentsCompleted.filter(p => new Date(p.createdAt).getTime() > new Date().getTime() - 604800000).reduce((a, b) => a + b.amount, 0) / 100,
-                    totalRevenue30d: paymentsCompleted.filter(p => new Date(p.createdAt).getTime() > new Date().getTime() - 2592000000).reduce((a, b) => a + b.amount, 0) / 100,
+                    totalRevenueToday: paymentsCompleted.filter(payment => new Date(payment.createdAt).getTime() > Date.now() - 86400000).reduce((a, b) => a + b.amount, 0) / 100,
+                    totalRevenue7d: paymentsCompleted.filter(payment => new Date(payment.createdAt).getTime() > Date.now() - 604800000).reduce((a, b) => a + b.amount, 0) / 100,
+                    totalRevenue30d: paymentsCompleted.filter(payment => new Date(payment.createdAt).getTime() > Date.now() - 2592000000).reduce((a, b) => a + b.amount, 0) / 100,
                     lastPurchases: lastPurchases
                 };
 

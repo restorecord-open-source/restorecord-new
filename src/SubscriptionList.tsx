@@ -87,6 +87,12 @@ const SubscriptionList: Subscription[] = [
                 value: "Bot Commands",
                 description: "Send verify embed, pull members and more directly from Discord",
                 icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
+            },
+            {
+                name: "discovery",
+                value: "Discovery",
+                description: "Your server will be shown on our website",
+                icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
             }
         ]
     },
@@ -173,6 +179,12 @@ const SubscriptionList: Subscription[] = [
                 value: "Bot Commands",
                 description: "Send verify embed, pull members and more directly from Discord",
                 icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
+            },
+            {
+                name: "discovery",
+                value: "Discovery",
+                description: "Your server will be shown on our website",
+                icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
             }
         ]
     },
@@ -258,6 +270,12 @@ const SubscriptionList: Subscription[] = [
                 name: "botCommands",
                 value: "Bot Commands",
                 description: "Send verify embed, pull members and more directly from Discord",
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
+            },
+            {
+                name: "discovery",
+                value: "Discovery",
+                description: "Your server will be shown on our website",
                 icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             }
         ]

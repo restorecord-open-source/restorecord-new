@@ -126,8 +126,8 @@ export default function Terms() {
                             
                             <Typography variant="h6" component="h2" sx={{ mt: "3rem" }} id="contact-us">16. CONTACT US</Typography>
                             <br/>In order to resolve a complaint regarding the Site or to receive further information regarding use of the Site, please contact us at:
-                            <br/><br/>SMS (only): <a href="tel:+15083883458">+1 (508)-388-3458</a>
                             <br/>Email: <a href="mailto:contact@restorecord.com">contact@restorecord.com</a>
+                            <br/>Address: 1207 Delaware Ave, #1336, Wilmington, DE, 19806, United States
                         </Typography>
                     </Box>
                 </Container>

@@ -94,11 +94,12 @@ export default function Register() {
                     .then(res => {
                         setLoadingBtn(false);
                         setToken(null);
-                        if (res.success) {
+                        if (res.success && res.token) {
                             setNotiTextS("Account created");
                             setOpenS(true);
-                            // functions.ToastAlert("Account created", "success");
-                            router.push("/login?username=" + encodeURIComponent(username));
+
+                            localStorage.setItem("token", res.token);
+                            router.push("/dashboard");
                         } 
                         else {
                             setNotiTextE(res.message);

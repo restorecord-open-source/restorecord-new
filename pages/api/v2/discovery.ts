@@ -48,16 +48,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }
                 }
             },
-            ...(search && search.length >= 3) && {
-                where: {
-                    name: {
-                        contains: search
-                    }
-                },
-            },
             where: {
-                locked: false,
-                discoverable: 1
+                AND: [
+                    {
+                        locked: false,
+                    },
+                    {
+                        discoverable: 1
+                    },
+                    ...(search && (search.length >= 3 && search.length <= 99)) ? [{
+                        name: {
+                            contains: search
+                        }
+                    }] : []
+                ]
             },
             take: 50
         });
@@ -69,8 +73,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             server.customBot.clientId = server.customBot?.clientId ? String(server.customBot.clientId) : "0" as any;
             server.customBot.customDomain = server.customBot?.customDomain ? String(server.customBot.customDomain) : "restorecord.com" as any;
         });
-
-        console.log(servers);
 
         // cache the servers for 1 hour
         search ? null : await redis.set("discovery", JSON.stringify(servers), "EX", 3600);

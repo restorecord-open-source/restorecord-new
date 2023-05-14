@@ -5,6 +5,7 @@ import { prisma } from "../../../../src/db";
 import { accounts } from "@prisma/client";
 import { getIPAddress, getBrowser, getPlatform, getXTrack } from "../../../../src/getIPAddress";
 import { isBreached } from "../../../../src/functions";
+import { sign } from "jsonwebtoken";
 dotenv.config({ path: "../../" });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) { 
@@ -45,16 +46,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const accounts: accounts[] = await prisma.accounts.findMany({
             where: {
                 OR: [
-                    { username: data.username },
-                    { email: data.email },
+                    { username: data.username.toLowerCase() },
+                    { email: data.email.toLowerCase() },
                 ]
             }
         });
 
         if (accounts.length > 0) {
             let errors = [];
-            if (accounts.find(account => account.username === data.username)) errors.push("Username");
-            if (accounts.find(account => account.email === data.email)) errors.push("Email");
+            if (accounts.find(account => account.username.toLowerCase() === data.username.toLowerCase())) errors.push("Username");
+            if (accounts.find(account => account.email.toLowerCase() === data.email.toLowerCase())) errors.push("Email");
 
             return res.status(400).json({ success: false, message: `${errors.join(" and ")} already exists` });
         }
@@ -72,6 +73,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 email: data.email,
                 password: hashedPassword,
                 referrer: refUser?.id,
+                lastIp: getIPAddress(req),
             },
         });
 
@@ -84,17 +86,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         });
 
+        const token = sign({ id: account.id }, `${process.env.JWT_SECRET}`, { expiresIn: "30d" });
+
+        await prisma.sessions.deleteMany({ where: { accountId: account.id, token: token } });
+        await prisma.sessions.create({
+            data: {
+                accountId: account.id,
+                token: token,
+            }
+        });
+
+        await prisma.logs.create({
+            data: {
+                type: 1,
+                username: `${account.username} (${account.id})`,
+                ipAddr: getIPAddress(req),
+                device: JSON.stringify(xTrack)
+            }
+        });
+
         return res.status(200).json({ 
             success: true,
             message: "Account created successfully",
-            account: {
-                username: account.username,
-                email: account.email,
-                role: account.role,
-                pfp: account.pfp,
-                createdAt: account.createdAt,
-                lastIp: getIPAddress(req),
-            },
+            token: token
         });
     } catch (err: any) {
         console.error(err);

@@ -60,7 +60,6 @@ export default function Login() {
                     setNotiTextS(res.message);
                     setOpenS(true);
                     localStorage.setItem("token", res.token);
-                    // setTimeout(() => router.push(redirect_to ? redirect_to : "/dashboard"), 500);
                     router.push(redirect_to ? redirect_to : "/dashboard");
                 }
             })
