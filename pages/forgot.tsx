@@ -52,7 +52,12 @@ export default function Login() {
         
         await axios.post("/api/v2/auth/forgot?token=" + token, {
             newPassword: newPassword,
-        }, { validateStatus: () => true }).then(res => {
+        }, {
+            headers: {
+                "x-track": makeXTrack(),
+            },
+            validateStatus: () => true 
+        }).then(res => {
             if (res.status === 200) {
                 setNotiTextS(res.data.message);
                 setOpenS(true);
