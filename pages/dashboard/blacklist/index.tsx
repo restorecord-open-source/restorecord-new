@@ -473,7 +473,7 @@ export default function Blacklist() {
                         <Grid item xs={12} sm={12} md={3} lg={2} xl={1}>
                             <Stack spacing={2} direction="column" justifyContent={"space-between"}>
                                 <Button variant="contained" color="error" onClick={() => {                                                                
-                                    axios.delete(`/api/v1/server/blacklist?id=${item.id}`, { 
+                                    axios.delete(`/api/v2/server/blacklist?id=${item.id}`, { 
                                         headers: {
                                             "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
                                         },

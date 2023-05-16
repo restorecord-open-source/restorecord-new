@@ -143,7 +143,7 @@ export default function Blacklist() {
                                             )}
                                             <Button type="submit" variant="contained" onClick={(e: any) => {
                                                 e.preventDefault();
-                                                axios.put("/api/v1/server/blacklist", {
+                                                axios.put("/api/v2/server/blacklist", {
                                                     type: blacklistType,
                                                     value: blacklist,
                                                     reason: blacklistReason,

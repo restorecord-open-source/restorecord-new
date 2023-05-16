@@ -107,7 +107,7 @@ export default function Server() {
         const timeout = setTimeout(() => {
             if (serverName || serverName === "") {
                 setResponse({ ...response, error: false, loading: true });
-                axios.get(`/api/v1/server?id=${serverName}`).then((res) => {
+                axios.get(`/api/v2/server?id=${serverName}`).then((res) => {
                     if (res.data.success === true) {
                         setResponse({ ...response, loading: false, error: true, message: "This server name is already taken" });
                     }
