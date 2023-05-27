@@ -124,6 +124,14 @@ const theme = createTheme({
                 },
             ],         
         },
+        MuiCard: {
+            // border: 0.75px solid #272a2c
+            styleOverrides: {
+                root: ({ ownerState }: any) => ({
+                    border: `0.1rem solid ${theme.palette.grey[900]}`,
+                }),
+            },
+        },
         MuiButtonBase: {
             styleOverrides: {
                 root: ({ ownerState }: any) => ({

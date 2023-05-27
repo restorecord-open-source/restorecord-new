@@ -310,29 +310,27 @@ export default function Upgrade() {
         )
     }
     return (
-        <>
-            <Box sx={{ display: "flex" }}>
-                <NavBar user={user}>
-                    <Toolbar />
-                    <Container maxWidth="xl">
-                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
-                            <CardContent>
-                                <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
-                            Upgrade
-                                </Typography>
+        <Box sx={{ display: "flex" }}>
+            <NavBar user={user}>
+                <Toolbar />
+                <Container maxWidth="xl">
+                    <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
+                        <CardContent>
+                            <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                                    Upgrade
+                            </Typography>
 
-                                {(router.query.s === "1" && user.role === "free") ? renderSuccessfullPayment() : null}
-                                {(router.query.s === "2" && user.role === "free") ? renderPendingPayment() : null}
-                                {user.role !== "free" ? renderSubscriptionStatus() : null}
-                                {purchaseWindow ? renderPaymentWindow() : null}
+                            {(router.query.s === "1") ? renderSuccessfullPayment() : null}
+                            {(router.query.s === "2") ? renderPendingPayment() : null}
+                            {user.role !== "free" ? renderSubscriptionStatus() : null}
+                            {purchaseWindow ? renderPaymentWindow() : null}
                         
-                                {renderSubscriptionList()}
+                            {renderSubscriptionList()}
                         
-                            </CardContent>
-                        </Paper>
-                    </Container>
-                </NavBar>
-            </Box>
-        </>
+                        </CardContent>
+                    </Paper>
+                </Container>
+            </NavBar>
+        </Box>
     )
 }

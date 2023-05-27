@@ -144,6 +144,13 @@ export default function Register() {
                             Register an Account
                         </Typography>
 
+                        {/* if ref is in url show alert */}
+                        {router.query.r && (
+                            <Alert severity="info" sx={{ mb: "1rem" }}>
+                                You were invited by <strong>{router.query.r}</strong>, save up to 15% on your subscription!
+                            </Alert>
+                        )}
+
                         <form onSubmit={onSubmit}>
                             <Box sx={{ width: "100%", maxWidth: "500px", mx: "auto", mt: "3rem" }}>
                                 <TextField

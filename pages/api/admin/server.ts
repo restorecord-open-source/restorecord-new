@@ -26,7 +26,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             { guildId: { equals: guildIdSearch ? BigInt(guildIdSearch) as bigint : undefined } }
                         ]
                     },
-                    take: 10,
                 });
 
                 if (!server[0]) return res.status(400).send("Server not found.");

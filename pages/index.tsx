@@ -32,6 +32,7 @@ export default function Home() {
 
         const options = {
             strings: [
+                "safest",
                 "easiest",
                 "fastest",
                 "best",
@@ -115,7 +116,7 @@ export default function Home() {
 
                         <Box id="features" sx={{ marginTop: 4 }} />
 
-                        <Card sx={{ width: "100%", height: "auto", display: "block", borderRadius: 12,  marginTop: 10 }} data-aos="zoom-in-down">
+                        <Card sx={{ width: "100%", height: "auto", display: "block", borderRadius: 12, marginTop: 10 }} data-aos="zoom-in-down">
                             <Box sx={{ display: "flex", justifyContent: "flex-start", padding: "36px 50px", alignItems: "center" }}>
                                 <Box>
                                     <Typography sx={{ fontStyle: "normal", fontWeight: 500, fontSize: { sm: 10, md: 20, }, textTransform: "uppercase", color: theme.palette.text.primary, marginTop: 2 }}>
