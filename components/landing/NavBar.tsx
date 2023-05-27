@@ -96,17 +96,6 @@ export default function NavBar() {
                                 </IconButton>
                                 <Menu id="menu" anchorEl={anchorEl} open={open} onClose={handleClose} MenuListProps={{ "aria-labelledby": "menu-btn" }}>
                                     <MenuItem onClick={handleClose}>
-                                        <Link href="/#features">
-                                            <ButtonBase href="/#features">
-                                                <ListItemIcon>
-                                                    <Apps />
-                                                </ListItemIcon>
-                                                <ListItemText>Features</ListItemText>
-                                            </ButtonBase>
-                                        </Link>
-                                    </MenuItem>
-
-                                    <MenuItem onClick={handleClose}>
                                         <Link href="/#pricing">
                                             <ButtonBase href="/#pricing">
                                                 <ListItemIcon>
@@ -118,11 +107,11 @@ export default function NavBar() {
                                     </MenuItem>
 
                                     <MenuItem onClick={handleClose}>
-                                        <ButtonBase href="https://community.restorecord.com">
+                                        <ButtonBase href="/discovery">
                                             <ListItemIcon>
                                                 <Help />
                                             </ListItemIcon>
-                                            <ListItemText>Support</ListItemText>
+                                            <ListItemText>Discovery</ListItemText>
                                         </ButtonBase>
                                     </MenuItem>
                                 </Menu>
@@ -134,14 +123,11 @@ export default function NavBar() {
                             </Link>
                             <Box sx={{ display: { xs: "none", md: "block" }}}>
                                 <Stack direction="row" spacing={1}>
-                                    <Button href="/#features">
-                                        Features
-                                    </Button>
                                     <Button href="/#pricing">
                                         Pricing
                                     </Button>
-                                    <Button href="https://community.restorecord.com">
-                                        Support
+                                    <Button href="/discovery">
+                                        Discovery
                                     </Button>
                                 </Stack>
                             </Box>

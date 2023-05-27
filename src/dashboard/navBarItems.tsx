@@ -55,7 +55,7 @@ const navItemWrappers: navItemWrapper[] = [
         href: "/dashboard/account",
     },
     {
-        name: "Upgrade",
+        name: "Subscription",
         icon: <AccountBalanceWallet />,
         href: "/dashboard/upgrade",
     },
