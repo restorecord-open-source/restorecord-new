@@ -3,6 +3,14 @@ import { createHash, createHmac, randomBytes } from "crypto";
 import axios from "axios";
 import crypto from "crypto";
 
+export async function iconUrlToBase64(url: string): Promise<string> {
+    // request the url and then convert it to a base64 image string
+    const response = await axios.get(url, { responseType: "arraybuffer" });
+    const buffer = Buffer.from(response.data, "binary").toString("base64");
+    const base64 = `data:${response.headers["content-type"]};base64,${buffer}`;
+    return base64;
+}
+
 export function stringToColor(string: string): string {
     let hash = 0;
     let i;

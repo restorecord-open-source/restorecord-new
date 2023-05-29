@@ -30,6 +30,7 @@ import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Badge from "@mui/material/Badge";
 import LoadingButton from "../../components/misc/LoadingButton";
+import TextField from "@mui/material/TextField";
 
 export default function Backups() {
     const [ token ]: any = useToken()
@@ -40,37 +41,53 @@ export default function Backups() {
     const [openI, setOpenI] = useState(false);
     const [notiTextS, setNotiTextS] = useState("X");
     const [notiTextE, setNotiTextE] = useState("X");
-    const [notiTextI, setNotiTextI] = useState("X");
 
-    const [confirmDelete, setConfirmDelete] = useState(false);
-    const [restoreDialog, setRestoreDialog] = useState(false);
+    const [backupData, setBackupData]: any = useState({});
     const [backupId, setBackupId] = useState("0");
     const [serverId, setServerId] = useState("0");
     const [confirmDeleteTimer, setConfirmDeleteTimer] = useState(5);
 
-    const [restoreOptions, setRestoreOptions] = useState({
+    const [dialogs, setDialogs]: any = useState({
+        view: false,
+        delete: false,
+        restore: false,
+    });
+
+    const [restoreOptions, setRestoreOptions]: any = useState({
+        instant: false,
         clearGuild: false,
         settings: false,
         channels: false,
         roles: false,
+        invite: "",
+        guildId: "",
+        discordId: "",
     });
 
-    const { data: userData, isError, isLoading } = useQuery('user', async () => await getUser({
+    const { data: userData, isError, isLoading } = useQuery("user", async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
     }), { retry: false, refetchOnWindowFocus: false });
 
-    if (isLoading) {
-        return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><CircularProgress /></Box>
-    }
-
-    if (isError) {
-        return <div>Error</div>
-    }
+    if (isLoading) return <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}><CircularProgress /></Box>;
+    if (isError) return <div>Error</div>;
 
     if (!userData.username) {
         router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
 
-        return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><CircularProgress /></Box>
+        return <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}><CircularProgress /></Box>;
+    }
+
+    async function getBackup(serverId: string) {
+        await axios.get(`/api/v2/self/servers/${serverId}/backup`, {
+            headers: {
+                Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
+            },
+        }).then((res) => {
+            setBackupData(res.data.backup);
+        }).catch((err) => {
+            setNotiTextE(err.response.data.message);
+            setOpenE(true);
+        });
     }
     
     return (
@@ -100,15 +117,22 @@ export default function Backups() {
                                     </Alert>
                                 </Snackbar>
 
-                                <Snackbar open={openI} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenI(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
-                                    <Alert elevation={6} variant="filled" severity="info">
-                                        {notiTextI}
-                                    </Alert>
-                                </Snackbar>
+                                {/* <Dialog open={dialogs.view} onClose={() => setDialogs({ ...dialogs, view: true })} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" fullWidth maxWidth="sm">
+                                    <DialogTitle id="alert-dialog-title">{"Viewing backup"}
+                                        <IconButton aria-label="close" onClick={() => setDialogs({ ...dialogs, view: true })} sx={{ position: "absolute", right: 8, top: 8, color: theme.palette.grey[500] }}>
+                                            <CloseIcon />
+                                        </IconButton>
+                                    </DialogTitle>
+                                    <DialogActions>
+                                        <Button onClick={() => setDialogs({ ...dialogs, view: false })} color="primary" autoFocus>
+                                            Go back
+                                        </Button>
+                                    </DialogActions>
+                                </Dialog> */}
 
-                                <Dialog open={confirmDelete} onClose={() => setConfirmDelete(false)} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" fullWidth maxWidth="sm">
+                                <Dialog open={dialogs.delete} onClose={() => setDialogs({ ...dialogs, delete: true })} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" fullWidth maxWidth="sm">
                                     <DialogTitle id="alert-dialog-title">{"Are you sure?"}
-                                        <IconButton aria-label="close" onClick={() => setConfirmDelete(false)} sx={{ position: 'absolute', right: 8, top: 8, color: theme.palette.grey[500] }}>
+                                        <IconButton aria-label="close" onClick={() => setDialogs({ ...dialogs, delete: true })} sx={{ position: "absolute", right: 8, top: 8, color: theme.palette.grey[500] }}>
                                             <CloseIcon />
                                         </IconButton>
                                     </DialogTitle>
@@ -135,7 +159,7 @@ export default function Backups() {
                                     <DialogActions>
                                         <Button disabled={confirmDeleteTimer > 0}
                                             onClick={() => {
-                                                setConfirmDelete(false);
+                                                setDialogs({ ...dialogs, delete: false })
 
                                                 axios.delete(`/api/v2/self/servers/${serverId}/backup/delete/`, { 
                                                     headers: {
@@ -162,15 +186,15 @@ export default function Backups() {
                                             } } color="error">
                                             Delete
                                         </Button>
-                                        <Button onClick={() => setConfirmDelete(false)} color="primary" autoFocus>
+                                        <Button onClick={() => setDialogs({ ...dialogs, delete: false })} color="primary" autoFocus>
                                             Cancel
                                         </Button>
                                     </DialogActions>
                                 </Dialog>
 
-                                <Dialog open={restoreDialog} onClose={() => setRestoreDialog(false)} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" fullWidth maxWidth="sm">
+                                <Dialog open={dialogs.restore} onClose={() => setDialogs({ ...dialogs, restore: false })} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" fullWidth maxWidth="sm">
                                     <DialogTitle id="alert-dialog-title">{"Are you sure?"}
-                                        <IconButton aria-label="close" onClick={() => setRestoreDialog(false)} sx={{ position: 'absolute', right: 8, top: 8, color: theme.palette.grey[500] }}>
+                                        <IconButton aria-label="close" onClick={() => setDialogs({ ...dialogs, restore: false })} sx={{ position: "absolute", right: 8, top: 8, color: theme.palette.grey[500] }}>
                                             <CloseIcon />
                                         </IconButton>
                                     </DialogTitle>
@@ -183,23 +207,34 @@ export default function Backups() {
                                             <Typography variant="body1">
                                                 Options:
                                             </Typography>
-                                            <FormControlLabel control={<Checkbox onChange={(e) => setRestoreOptions({ ...restoreOptions, clearGuild: e.target.checked })} color={"error"} sx={{ color: theme.palette.error.main }} />} label="Delete all channels, roles, before restoring from backup?" /><br/><br/>
+                                            {restoreOptions.invite === "" ? (
+                                                <FormControlLabel control={<Checkbox onChange={(e) => setRestoreOptions({ ...restoreOptions, instant: e.target.checked })} color={"primary"} sx={{ color: theme.palette.primary.main }} />} label="Instantly restore backup" />
+                                            ) : (
+                                                <>
+                                                    <Typography variant="body1" sx={{ fontWeight: "500", color: theme.palette.warning.main, mb: 2 }}>
+                                                        You need to join the server <a href={`https://discord.gg/${restoreOptions.invite}`} target="_blank" rel="noreferrer">{`https://discord.gg/${restoreOptions.invite}`}</a> and enter your Discord ID below, to transfer ownership.
+                                                    </Typography>
+
+                                                    <TextField label="Your Discord ID" variant="outlined" fullWidth value={restoreOptions.discordId} onChange={(e) => setRestoreOptions({ ...restoreOptions, discordId: e.target.value })} /><br/><br/>
+                                                </>
+                                            )}
+
+                                            {!restoreOptions.instant && (
+                                                <>
+                                                    <FormControlLabel control={<Checkbox onChange={(e) => setRestoreOptions({ ...restoreOptions, clearGuild: e.target.checked })} color={"error"} sx={{ color: theme.palette.error.main }} />} label="Delete all channels, roles, before restoring from backup" /><br/><br/>
                                     
-                                            <Typography variant="body1" sx={{ fontWeight: "500" }}>
-                                                What do you want to restore?
-                                            </Typography>
-                                            <FormControlLabel control={<Checkbox onChange={(e) => setRestoreOptions({ ...restoreOptions, settings: e.target.checked })} />} label="Server Settings" /><br/>
-                                            <FormControlLabel control={<Checkbox onChange={(e) => setRestoreOptions({ ...restoreOptions, channels: e.target.checked })} />} label="Channels" /><br/>
-                                            <FormControlLabel control={<Checkbox onChange={(e) => setRestoreOptions({ ...restoreOptions, roles: e.target.checked })} />} label="Roles" /><br/>
+                                                    <Typography variant="body1" sx={{ fontWeight: "500" }}>
+                                                        What do you want to restore?
+                                                    </Typography>
+                                                    <FormControlLabel control={<Checkbox onChange={(e) => setRestoreOptions({ ...restoreOptions, settings: e.target.checked })} />} label="Server Settings" /><br/>
+                                                    <FormControlLabel control={<Checkbox onChange={(e) => setRestoreOptions({ ...restoreOptions, channels: e.target.checked })} />} label="Channels" /><br/>
+                                                    <FormControlLabel control={<Checkbox onChange={(e) => setRestoreOptions({ ...restoreOptions, roles: e.target.checked })} />} label="Roles" /><br/>
+                                                </>
+                                            )}
                                         </DialogContentText>
                                     </DialogContent>
                                     <DialogActions>
                                         <LoadingButton event={() => {
-                                            setRestoreDialog(false);
-                                            setRestoreOptions({ settings: false, channels: false, roles: false, clearGuild: false });
-                                            setNotiTextI("Restoring Backup...");
-                                            setOpenI(true);
-
                                             axios.post(`/api/v2/self/servers/${serverId}/backup/restore`, {
                                                 ...restoreOptions
                                             }, {
@@ -209,12 +244,17 @@ export default function Backups() {
                                                 validateStatus: () => true
                                             })
                                                 .then((res: any) => {
-                                                    setOpenI(false);
+                                                    console.log(res.data);
                                                     if (!res.data.success) {
                                                         setNotiTextE(res.data.message);
                                                         setOpenE(true);
                                                     }
-                                                    else {
+                                                    else if (res.data.invite) {
+                                                        setRestoreOptions({ ...restoreOptions, invite: res.data.invite, guildId: res.data.guildId });
+                                                    } else {
+                                                        setDialogs({ ...dialogs, restore: false })
+                                                        setRestoreOptions({ instant: false, settings: false, channels: false, roles: false, clearGuild: false, invite: "", guildId: "" });
+
                                                         setNotiTextS(res.data.message);
                                                         setOpenS(true);
                                                     }
@@ -227,12 +267,11 @@ export default function Backups() {
                                         } } color="success">
                                             Restore
                                         </LoadingButton>
-                                        <Button onClick={() => setRestoreDialog(false)} color="primary" autoFocus>
+                                        <Button onClick={() => setDialogs({ ...dialogs, restore: false })} color="primary" autoFocus>
                                             Cancel
                                         </Button>
                                     </DialogActions>
                                 </Dialog>
-
 
                                 {(Array.isArray(userData.backups) && userData.backups.length >= 1) ? (
                                     <>
@@ -257,17 +296,21 @@ export default function Backups() {
                                                     </Typography>
                                                 </CardContent>
                                                 <CardActions sx={{ justifyContent: "flex-start", ml: "0.5rem", mb: "0.75rem" }}>
-                                                    {/* <Button variant="contained" color="primary" disabled={true}>View Channels</Button> */}
-                                                    {/* <Button variant="contained" color="primary" disabled={true}>View Roles</Button> */}
+                                                    {/* <Button variant="contained" color="primary" onClick={(e) => {
+                                                        setBackupId(backup.backupId);
+                                                        setServerId(backup.guildId)
+                                                        getBackup(backup.guildId);
+                                                        setDialogs({ ...dialogs, view: true })
+                                                    }}>View Backup</Button> */}
                                                     <Button variant="contained" color="success" onClick={(e) => {
                                                         setBackupId(backup.backupId);
                                                         setServerId(backup.guildId)
-                                                        setRestoreDialog(true);
+                                                        setDialogs({ ...dialogs, restore: true })
                                                     }}>Restore</Button>
                                                     <Button variant="contained" color="error" onClick={(e) => { 
                                                         setBackupId(backup.backupId);
                                                         setServerId(backup.guildId)
-                                                        setConfirmDelete(true);
+                                                        setDialogs({ ...dialogs, delete: true })
                                                         new Promise((resolve, reject) => {
                                                             let timer = 3;
                                                             setConfirmDeleteTimer(timer--);

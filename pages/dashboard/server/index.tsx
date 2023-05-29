@@ -430,7 +430,7 @@ export default function Server() {
                                                                             setNotiTextI("Creating a backup...");
                                                                             setOpenI(true);
 
-                                                                            axios.post(`/api/v2/self/servers/${item.guildId}/backup`, {}, {
+                                                                            axios.post(`/api/v2/self/servers/${item.guildId}/backup/create`, {}, {
                                                                                 headers: {
                                                                                     "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
                                                                                 },
