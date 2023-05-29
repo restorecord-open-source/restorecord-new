@@ -13,11 +13,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 const servers = await prisma.servers.findMany({ where: { ownerId: user.id } });
                 if (!servers) return res.status(400).json({ success: false, message: "No servers found." });
 
-                const limit: any = req.query.max ? req.query.max : 50;
+                const limit: any = req.query.max ? req.query.max : 100;
                 const page = req.query.page ? req.query.page : 0;
 
                 let guildIds: any = [];
-                let lastId: any = 0;
 
                 if (serverId === undefined || serverId.toLowerCase() === "all") {
                     guildIds = servers.map((server: any) => server.guildId);
@@ -34,18 +33,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 else if (userIdSearch) conditions.push({ userId: { equals: BigInt(userIdSearch) as bigint } });
                 else if (search) conditions.push({ username: { contains: search } });
 
-                const count = await prisma.members.count({ where: { AND: conditions } });
-                const countPullable = await prisma.members.count({ where: { AND: conditions, accessToken: { not: "unauthorized" } } });
-
-                // get first id of the page
                 const memberList = await prisma.members.findMany({
                     where: {
                         AND: conditions,
                     },
-                    orderBy: { id: "asc" },
-                    take: 1,
+                    orderBy: { id: "desc" },
                     skip: page ? (Number(page) - 1) * limit : 0,
                 });
+
+                const count = memberList.length;
+                const countPullable = memberList.filter((member: any) => member.accessToken !== "unauthorized").length;
 
                 if (memberList.length === 0) return res.status(200).json({
                     success: true,
@@ -56,36 +53,27 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     message: "No members found."
                 });
 
-                lastId = memberList[0].id -1;
+                const memberListFixed = memberList.slice(0, limit).map((member: any) => {
+                    return {
+                        id: member.id,
+                        userId: String(member.userId),
+                        username: member.username,
+                        avatar: member.avatar,
+                        ip: user.role !== "free" ? member.ip : null,
+                        createdAt: member.createdAt,
+                        guildId: String(member.guildId),
+                        guildName: servers.find((server: any) => server.guildId === member.guildId)?.name,
+                        unauthorized: (member.accessToken === "unauthorized"),
+                    };
+                })
+                
 
-                conditions.push({ id: { gt: lastId } });
-                await prisma.members.findMany({
-                    where: {
-                        AND: conditions,
-                    },
-                    orderBy: { id: "desc" },
-                    take: limit,
-                    skip: page ? (Number(page) - 1) * limit : 0,
-                }).then((members: any) => {
-                    return res.status(200).json({
-                        success: true,
-                        max: count,
-                        pullable: countPullable,
-                        maxPages: Math.ceil(count / limit) === 0 ? 1 : (Math.ceil(count / limit) - 1),
-                        members: members.map((member: any) => {
-                            return {
-                                id: member.id,
-                                userId: String(member.userId),
-                                username: member.username,
-                                avatar: member.avatar,
-                                ip: user.role !== "free" ? member.ip : null,
-                                createdAt: member.createdAt,
-                                guildId: String(member.guildId),
-                                guildName: servers.find((server: any) => server.guildId === member.guildId)?.name,
-                                unauthorized: (member.accessToken === "unauthorized"),
-                            };
-                        })
-                    })
+                return res.status(200).json({
+                    success: true,
+                    max: count,
+                    pullable: countPullable,
+                    maxPages: Math.ceil(count / limit) === 0 ? 1 : (Math.ceil(count / limit) - 1),
+                    members: memberListFixed
                 })
             }
             catch (err: any) {

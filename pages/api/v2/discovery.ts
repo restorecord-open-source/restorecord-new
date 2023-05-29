@@ -63,7 +63,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }] : []
                 ]
             },
-            take: 50
+            take: 39
         });
         servers.sort((a, b) => b.members.length - a.members.length);
 
