@@ -69,6 +69,18 @@ async function postWebhook(subscription: any, account: any, status: string, desc
     }).catch(err => console.error(err));
 }
 
+// look up array of price ids and the plan name + expiry
+const priceIds: { [key: string]: { plan: string; expiry: number } } = {
+    "price_1MVilQIDsTail4YBuxkF8JRc": { plan: "business", expiry: 31536000 },
+    "price_1MakYkIDsTail4YBS7RWBqQL": { plan: "business_monthly", expiry: 2592000 },
+    "price_1MVilKIDsTail4YBdF2GvIUi": { plan: "premium", expiry: 31536000 },
+    "price_1MakYlIDsTail4YBvmoAoG37": { plan: "premium_monthly", expiry: 2592000 },
+
+    // stripe test data:
+    "price_1MSt40IDsTail4YBGWYS6YvP": { plan: "business", expiry: 31536000 },
+    "price_1MSks7IDsTail4YBgM8FFLTg": { plan: "premium", expiry: 31536000 },
+};
+
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
     return new Promise(async (resolve, reject) => {
         let event;
@@ -76,8 +88,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         let status: string;
 
         const buf = await buffer(req);
-        // const endpointSecret = "whsec_V36i82Fn70v9edAJHKeKwykhUI8bFLBt";
-        const endpointSecret = "whsec_J2ZCMxWPvKeaStSWl4r1RdSnvTu39Gix";
+        const endpointSecret = "whsec_V36i82Fn70v9edAJHKeKwykhUI8bFLBt";
+        //const endpointSecret = "whsec_J2ZCMxWPvKeaStSWl4r1RdSnvTu39Gix";
         if (endpointSecret) {
             const signature: any = req.headers["stripe-signature"];
             try {
@@ -134,6 +146,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
             subscription = event.data.object;
             status = subscription.status;
 
+            const planFull = priceIds[subscription.items.data[0].price.id].plan;
+            // create plan so without _monthly
+            const plan = planFull.replace("_monthly", "");
+
             if (status !== "incomplete" && status !== "incomplete_expired") {
                 let account;
                 if (subscription.metadata.account_id) account = await prisma.accounts.findUnique({ where: { id: Number(subscription.metadata.account_id) as number } });
@@ -150,16 +166,22 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                     }
                 });
 
-                if (payment) {
-                    // if payment.amount !== subscription.plan.amount then update payment.amount
+                // update the metadata on stripe
+                await stripe.subscriptions.update(subscription.id, {
+                    metadata: {
+                        plan: planFull,
+                    }
+                });
 
+                if (payment) {
                     await prisma.payments.update({
                         where: {
                             id: payment.id
                         },
                         data: {
                             payment_status: status,
-                            amount: subscription.plan.amount
+                            amount: subscription.plan.amount,
+                            type: planFull
                         }
                     });
 
@@ -168,7 +190,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                             id: Number(payment.accountId) as number
                         },
                         data: {
-                            role: payment.type.includes("_") ? payment.type.split("_")[0] : payment.type,
+                            role: plan,
                             expiry: new Date(subscription.current_period_end * 1000)
                         }
                     });
@@ -190,7 +212,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                             id: Number(subscription.metadata.account_id) as number
                         },
                         data: {
-                            role: subscription.metadata.plan.includes("_") ? subscription.metadata.plan.split("_")[0] : subscription.metadata.plan,
+                            role: plan,
                             expiry: new Date(subscription.current_period_end * 1000)
                         }
                     });
@@ -240,6 +262,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         //     break;
         // }
 
-        return res.status(200).json({ success: true });
+        return res.status(200).json({ received: true, date: new Date().toISOString() });
     });
 }

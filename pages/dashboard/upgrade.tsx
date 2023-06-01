@@ -41,6 +41,7 @@ export default function Upgrade() {
     const router = useRouter();
     const alertRef: any = useRef();
 
+    const [upgradeWindow, setUpgradeWindow] = useState(false);
     const [purchaseWindow, setPurchaseWindow] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState("");
     const [selectedPlan, setSelectedPlan] = useState({
@@ -52,7 +53,7 @@ export default function Upgrade() {
 
 
 
-    const { data: user, isError, isLoading } = useQuery('user', async () => await getUser({
+    const { data: user, isError, isLoading } = useQuery("user", async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
     }), { retry: false, refetchOnWindowFocus: false });
 
@@ -75,7 +76,7 @@ export default function Upgrade() {
         setSelectedPlan({
             ...selectedPlan,
             id: event.target.value,
-            name: event.target.name,
+            // name: event.target.name,
         });
     }
 
@@ -91,7 +92,7 @@ export default function Upgrade() {
                             </Badge>
                         } />
                         <FormControlLabel value={`${selectedPlan.id.split("_")[0]}_monthly`} checked={selectedPlan.id.split("_")[1] === "monthly"} control={<Radio />} label={
-                            <Typography variant="h6" color="white" sx={{ fontWeight: "500" }}>Monthly (${selectedPlan.priceMonthly})/mo</Typography>
+                            <Typography variant="h6" color="white" sx={{ fontWeight: "500" }}>Monthly (${selectedPlan.priceMonthly}/mo)</Typography>
                         } />
                     </Stack>
                 </RadioGroup>
@@ -107,13 +108,14 @@ export default function Upgrade() {
                     <Typography variant="h6" sx={{ fontWeight: "500" }}>
                         Select a payment method
                     </Typography>
-                    <IconButton aria-label="close" onClick={() => setPurchaseWindow(false)} sx={{ position: 'absolute', right: 8, top: 8, color: theme.palette.grey[500] }}>
+                    <IconButton aria-label="close" onClick={() => setPurchaseWindow(false)} sx={{ position: "absolute", right: 8, top: 8, color: theme.palette.grey[500] }}>
                         <CloseIcon />
                     </IconButton>
                 </DialogTitle>
                 <DialogContent>
                     {/* error alert if request fails */}
                     <Alert ref={alertRef} severity="error" sx={{ display: "none" }}></Alert>
+
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
                             <Button variant="contained" fullWidth sx={{ height: "100%", borderRadius: "1rem", border: `1px solid ${theme.palette.primary.main}`, backgroundColor: paymentMethod === "coinbase" ? theme.palette.primary.main : theme.palette.background.paper }}  onClick={() => setPaymentMethod("coinbase")}>
@@ -223,6 +225,62 @@ export default function Upgrade() {
         )
     }
 
+    function renderUpgradeWindow() {
+        return (
+            <Dialog open={upgradeWindow} onClose={() => setUpgradeWindow(false)} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" fullWidth maxWidth="sm">
+                <DialogTitle id="alert-dialog-title">
+                    <Typography variant="h6" sx={{ fontWeight: "500" }}>
+                        Upgrade
+                    </Typography>
+
+                    <IconButton aria-label="close" onClick={() => setUpgradeWindow(false)} sx={{ position: "absolute", right: 8, top: 8, color: theme.palette.grey[500] }}>
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent>
+                    <Alert ref={alertRef} severity="error" sx={{ display: "none" }}>
+                        <AlertTitle>Error</AlertTitle>
+                        <Typography variant="body2" color="text.secondary" sx={{ textAlign: "left", fontSize: "0.75rem", mt: 1 }}></Typography>
+                    </Alert>
+
+                    {/* show a table with the upcharge if he upgrades */}
+                    <Typography component="h6" variant="body1" sx={{ fontWeight: "400", wordWrap: "break-word", whiteSpace: "pre-line" }}>
+                        You are currently on the <b>{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</b> plan.<br/>
+                        Upgrading to the <b>{selectedPlan.name}</b> plan will cost you <b>${Number(selectedPlan.price) - Number(SubscriptionList.find((plan: any) => plan.name.toLowerCase() === user.role.toLowerCase())?.priceYearly ?? 0)}</b> more.
+                        This currently only works if you have paid via Stripe.
+                    </Typography>
+
+                    <Grid container spacing={2} sx={{ mt: 2, mb: 2 }}>
+                        {renderBillingCycleSelect()}
+                        <Button variant="contained" color="primary" fullWidth onClick={() => {
+                            axios.post("/api/stripe/update", {
+                                plan: selectedPlan.id,
+                            }, {
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                },
+                            }).then((res) => {
+                                alertRef.current.style.display = "none";
+
+                                document.location.href = res.data.redirect;
+                            }).catch((err) => {
+                                alertRef.current.style.display = "flex";
+                                alertRef.current.children[1].innerHTML = err.response.data.message;
+                                
+                                console.error(err);
+                            });
+                        }}>Go to checkout</Button>
+                    </Grid>
+
+                    <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center", fontSize: "0.75rem", mt: 1 }}>
+                        As soon as you subscribe you agree to our <MuiLink href="/terms">Terms of Service</MuiLink>, <MuiLink href="/privacy">Privacy Policy</MuiLink> and <MuiLink href="/refund-policy">Refund Policy</MuiLink>. <br/>Your card will be charged ${selectedPlan.id.split("_")[1] === "monthly" ? selectedPlan.priceMonthly : selectedPlan.price} every {selectedPlan.id.split("_")[1] === "monthly" ? "month" : "year"}.
+                    </Typography>
+                </DialogContent>
+            </Dialog>
+        )
+    }
+
     function renderSubscriptionStatus() {
         return (
             <>
@@ -298,7 +356,12 @@ export default function Upgrade() {
                                         price: Number(tier.priceYearly) as number,
                                         priceMonthly: Number(tier.priceMonthly) as number,
                                     });
-                                    setPurchaseWindow(true);
+
+                                    if (tier.name.toLowerCase() !== user.role) {
+                                        setUpgradeWindow(true);
+                                    } else {
+                                        setPurchaseWindow(true);
+                                    }
                                 }}>
                                     {tier.name.toLowerCase() === user.role ? "Current Plan" : "Upgrade"}
                                 </Button>
@@ -309,6 +372,7 @@ export default function Upgrade() {
             </Grid>
         )
     }
+
     return (
         <Box sx={{ display: "flex" }}>
             <NavBar user={user}>
@@ -324,6 +388,7 @@ export default function Upgrade() {
                             {(router.query.s === "2") ? renderPendingPayment() : null}
                             {user.role !== "free" ? renderSubscriptionStatus() : null}
                             {purchaseWindow ? renderPaymentWindow() : null}
+                            {upgradeWindow ? renderUpgradeWindow() : null}
                         
                             {renderSubscriptionList()}
                         
