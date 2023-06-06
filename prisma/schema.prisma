@@ -146,6 +146,7 @@ model guildMembers {
     // @@index([userId, guildId])
 
     @@unique([userId, guildId])
+    @@index([backupId])
 }
 
 model logs {
@@ -196,6 +197,7 @@ model members {
 
     @@unique([userId, guildId])
     @@index([userId])
+    @@index([guildId])
 }
 
 model blacklist {
