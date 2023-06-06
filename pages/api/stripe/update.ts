@@ -36,6 +36,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
         const payments = await prisma.payments.findMany({ where: { accountId: user.id, payment_status: "active" }, orderBy: { id: "desc" } });
         if (!payments) return res.status(400).json({ success: false, message: "No payments found." });
+        if (payments[0].subscriptionId === null || payments[0].subscriptionId === undefined) return res.status(400).json({ success: false, message: "Subscription not found." });
 
         const subscription = await stripe.subscriptions.retrieve(payments[0].subscriptionId);
 
