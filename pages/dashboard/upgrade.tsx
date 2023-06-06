@@ -357,7 +357,7 @@ export default function Upgrade() {
                                         priceMonthly: Number(tier.priceMonthly) as number,
                                     });
 
-                                    if (tier.name.toLowerCase() !== user.role) {
+                                    if (tier.name.toLowerCase() !== user.role && user.role !== "free") {
                                         setUpgradeWindow(true);
                                     } else {
                                         setPurchaseWindow(true);
