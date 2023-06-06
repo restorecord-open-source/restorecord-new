@@ -80,184 +80,189 @@ const priceIds: { [key: string]: { plan: string; expiry: number } } = {
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    let event;
-    let subscription: any;
-    let status: string;
+    try {
+        let event;
+        let subscription: any;
+        let status: string;
 
-    const buf = await buffer(req);
-    //const endpointSecret = "whsec_V36i82Fn70v9edAJHKeKwykhUI8bFLBt";
-    const endpointSecret = "whsec_J2ZCMxWPvKeaStSWl4r1RdSnvTu39Gix";
-    if (endpointSecret) {
-        const signature: any = req.headers["stripe-signature"];
-        try {
-            event = stripe.webhooks.constructEvent(buf, signature, endpointSecret);
-        } catch (err: any) {
-            console.log(`[STRIPE] ⚠️ Webhook signature verification failed.`, err.message);
-            return res.status(400).end();
-        }
-    }
-    if (!event) return res.status(400).json({ success: false, message: "Event not found." });
-
-
-    //console.log(`[${event.type}] ${JSON.stringify(event.data.object)}`);
-
-    switch (event.type) {
-    case "customer.subscription.created":
-        subscription = event.data.object;
-        status = subscription.status;
-
-        if (await prisma.payments.findUnique({ where: { subscriptionId: subscription.id } })) return;
-
-        await prisma.payments.create({
-            data: {
-                subscriptionId: subscription.id,
-                accountId: Number(subscription.metadata.account_id) as number,
-                type: subscription.metadata.plan,
-                amount: subscription.plan.amount,
-                payment_status: status,
+        const buf = await buffer(req);
+        //const endpointSecret = "whsec_V36i82Fn70v9edAJHKeKwykhUI8bFLBt";
+        const endpointSecret = "whsec_J2ZCMxWPvKeaStSWl4r1RdSnvTu39Gix";
+        if (endpointSecret) {
+            const signature: any = req.headers["stripe-signature"];
+            try {
+                event = stripe.webhooks.constructEvent(buf, signature, endpointSecret);
+            } catch (err: any) {
+                console.log(`[STRIPE] ⚠️ Webhook signature verification failed.`, err.message);
+                return res.status(400).end();
             }
-        });
-        break;
-    case "customer.subscription.deleted":
-        subscription = event.data.object;
-        status = subscription.status;
+        }
+        if (!event) return res.status(400).json({ success: false, message: "Event not found." });
 
-        if (status === "canceled") {
-            let account;
-            if (subscription.metadata.account_id) account = await prisma.accounts.findUnique({ where: { id: Number(subscription.metadata.account_id) as number } });
 
-            await postWebhook(subscription, account, status, `Subscription canceled. ${subscription?.cancellation_details?.reason ? `Reason: ${subscription?.cancellation_details?.reason}` : ""} ${subscription?.cancellation_details?.comment ? `Comment: ${subscription?.cancellation_details?.comment}` : ""} ${subscription?.cancellation_details?.feedback ? `Feedback: ${subscription?.cancellation_details?.feedback}` : ""}`);
+        //console.log(`[${event.type}] ${JSON.stringify(event.data.object)}`);
 
-            await prisma.accounts.update({
-                where: {
-                    id: Number(subscription.metadata.account_id) as number
-                },
+        switch (event.type) {
+        case "customer.subscription.created":
+            subscription = event.data.object;
+            status = subscription.status;
+
+            if (await prisma.payments.findUnique({ where: { subscriptionId: subscription.id } })) return;
+
+            await prisma.payments.create({
                 data: {
-                    role: "free",
-                    expiry: null
+                    subscriptionId: subscription.id,
+                    accountId: Number(subscription.metadata.account_id) as number,
+                    type: subscription.metadata.plan,
+                    amount: subscription.plan.amount,
+                    payment_status: status,
                 }
             });
-        }
-        break;
-    case "customer.subscription.updated":
-        subscription = event.data.object;
-        status = subscription.status;
+            break;
+        case "customer.subscription.deleted":
+            subscription = event.data.object;
+            status = subscription.status;
 
-        const planFull = priceIds[subscription.items.data[0].price.id].plan;
-        // create plan so without _monthly
-        const plan = planFull.replace("_monthly", "");
+            if (status === "canceled") {
+                let account;
+                if (subscription.metadata.account_id) account = await prisma.accounts.findUnique({ where: { id: Number(subscription.metadata.account_id) as number } });
 
-        if (status !== "incomplete" && status !== "incomplete_expired") {
-            let account;
-            if (subscription.metadata.account_id) account = await prisma.accounts.findUnique({ where: { id: Number(subscription.metadata.account_id) as number } });
-
-            await postWebhook(subscription, account, status);
-        }
-
-        if (status === "active") {
-            console.log(`[STRIPE] Subscription status is ${status}.`);
-
-            const payment = await prisma.payments.findUnique({
-                where: {
-                    subscriptionId: subscription.id
-                }
-            });
-
-            // update the metadata on stripe
-            await stripe.subscriptions.update(subscription.id, {
-                metadata: {
-                    plan: planFull,
-                }
-            });
-
-            if (payment) {
-                await prisma.payments.update({
-                    where: {
-                        id: payment.id
-                    },
-                    data: {
-                        payment_status: status,
-                        amount: subscription.plan.amount,
-                        type: planFull
-                    }
-                });
-
-                await prisma.accounts.update({
-                    where: {
-                        id: Number(payment.accountId) as number
-                    },
-                    data: {
-                        role: plan,
-                        expiry: new Date(subscription.current_period_end * 1000)
-                    }
-                });
-            } else {
-                console.error(`[STRIPE] Payment not found for subscription ${subscription.id}`);
-
-                await prisma.payments.create({
-                    data: {
-                        subscriptionId: subscription.id,
-                        accountId: Number(subscription.metadata.account_id) as number,
-                        type: subscription.metadata.plan,
-                        amount: subscription.plan.amount,
-                        payment_status: status,
-                    }
-                });
+                await postWebhook(subscription, account, status, `Subscription canceled. ${subscription?.cancellation_details?.reason ? `Reason: ${subscription?.cancellation_details?.reason}` : ""} ${subscription?.cancellation_details?.comment ? `Comment: ${subscription?.cancellation_details?.comment}` : ""} ${subscription?.cancellation_details?.feedback ? `Feedback: ${subscription?.cancellation_details?.feedback}` : ""}`);
 
                 await prisma.accounts.update({
                     where: {
                         id: Number(subscription.metadata.account_id) as number
                     },
                     data: {
-                        role: plan,
-                        expiry: new Date(subscription.current_period_end * 1000)
+                        role: "free",
+                        expiry: null
                     }
                 });
             }
+            break;
+        case "customer.subscription.updated":
+            subscription = event.data.object;
+            status = subscription.status;
+
+            const planFull = priceIds[subscription.items.data[0].price.id].plan;
+            // create plan so without _monthly
+            const plan = planFull.replace("_monthly", "");
+
+            if (status !== "incomplete" && status !== "incomplete_expired") {
+                let account;
+                if (subscription.metadata.account_id) account = await prisma.accounts.findUnique({ where: { id: Number(subscription.metadata.account_id) as number } });
+
+                await postWebhook(subscription, account, status);
+            }
+
+            if (status === "active") {
+                console.log(`[STRIPE] Subscription status is ${status}.`);
+
+                const payment = await prisma.payments.findUnique({
+                    where: {
+                        subscriptionId: subscription.id
+                    }
+                });
+
+                // update the metadata on stripe
+                await stripe.subscriptions.update(subscription.id, {
+                    metadata: {
+                        plan: planFull,
+                    }
+                });
+
+                if (payment) {
+                    await prisma.payments.update({
+                        where: {
+                            id: payment.id
+                        },
+                        data: {
+                            payment_status: status,
+                            amount: subscription.plan.amount,
+                            type: planFull
+                        }
+                    });
+
+                    await prisma.accounts.update({
+                        where: {
+                            id: Number(payment.accountId) as number
+                        },
+                        data: {
+                            role: plan,
+                            expiry: new Date(subscription.current_period_end * 1000)
+                        }
+                    });
+                } else {
+                    console.error(`[STRIPE] Payment not found for subscription ${subscription.id}`);
+
+                    await prisma.payments.create({
+                        data: {
+                            subscriptionId: subscription.id,
+                            accountId: Number(subscription.metadata.account_id) as number,
+                            type: subscription.metadata.plan,
+                            amount: subscription.plan.amount,
+                            payment_status: status,
+                        }
+                    });
+
+                    await prisma.accounts.update({
+                        where: {
+                            id: Number(subscription.metadata.account_id) as number
+                        },
+                        data: {
+                            role: plan,
+                            expiry: new Date(subscription.current_period_end * 1000)
+                        }
+                    });
+                }
+            }
+            break;
         }
-        break;
-    }
 
-    // switch (event.type) {
-    // case "customer.subscription.updated":
-    //     subscription = event.data.object;
-    //     status = subscription.status;
-    //     if (status === "active") {
-    //         console.log(`Subscription status is ${status}.`);
-    //         // console.log(JSON.stringify(event));
-    //         const sub = await stripe.checkout.sessions.retrieve(subscription.latest_invoice.payment_intent);
+        // switch (event.type) {
+        // case "customer.subscription.updated":
+        //     subscription = event.data.object;
+        //     status = subscription.status;
+        //     if (status === "active") {
+        //         console.log(`Subscription status is ${status}.`);
+        //         // console.log(JSON.stringify(event));
+        //         const sub = await stripe.checkout.sessions.retrieve(subscription.latest_invoice.payment_intent);
 
-    //         const payment = await prisma.payments.findUnique({
-    //             where: {
-    //                 sessionId: sub.latest_invoice.payment_intent
-    //             }
-    //         })
+        //         const payment = await prisma.payments.findUnique({
+        //             where: {
+        //                 sessionId: sub.latest_invoice.payment_intent
+        //             }
+        //         })
 
-    //         console.log(payment)
+        //         console.log(payment)
                 
-    //         if (payment) {
-    //             await prisma.payments.update({
-    //                 where: {
-    //                     id: payment.id
-    //                 },
-    //                 data: {
-    //                     payment_status: sub.status
-    //                 }
-    //             });
+        //         if (payment) {
+        //             await prisma.payments.update({
+        //                 where: {
+        //                     id: payment.id
+        //                 },
+        //                 data: {
+        //                     payment_status: sub.status
+        //                 }
+        //             });
 
-    //             await prisma.accounts.update({
-    //                 where: {
-    //                     id: payment.accountId
-    //                 },
-    //                 data: {
-    //                     expiry: new Date(sub.current_period_end * 1000),
-    //                     role: payment.type
-    //                 }
-    //             });
-    //         }
-    //     }
-    //     break;
-    // }
+        //             await prisma.accounts.update({
+        //                 where: {
+        //                     id: payment.accountId
+        //                 },
+        //                 data: {
+        //                     expiry: new Date(sub.current_period_end * 1000),
+        //                     role: payment.type
+        //                 }
+        //             });
+        //         }
+        //     }
+        //     break;
+        // }
 
-    return res.status(200).json({ success: true });
+        return res.status(200).json({ success: true });
+    } catch (err: any) {
+        console.error(err);
+        return res.status(200).json({ success: false, message: "Something went wrong" });
+    }
 }
