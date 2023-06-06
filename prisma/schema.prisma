@@ -33,34 +33,40 @@ model accounts {
     sessions       sessions[]
     emails         emails[]
     payments       payments[]
+
+    @@index([username])
+    @@index([createdAt])
 }
 
 model servers {
-    id            Int            @id @default(autoincrement())
-    name          String         @unique
-    ownerId       Int
-    guildId       BigInt         @unique @db.UnsignedBigInt
-    roleId        BigInt         @unique @db.UnsignedBigInt
-    redirectUrl   String?
-    picture       String?        @default("https://cdn.restorecord.com/logo512.png")
-    vpncheck      Boolean        @default(false)
-    webhook       String?
-    bgImage       String?
-    description   String         @default("Verify to view the rest of the server.")
-    themeColor    String         @default("4f46e5")
-    customBotId   Int
-    pulling       Boolean        @default(false)
-    pullTimeout   DateTime?      @default(now())
-    ipLogging     Boolean        @default(true)
-    locked        Boolean        @default(false)
-    discoverable  Int            @default(0)
-    createdAt     DateTime       @default(now())
-    customBot     customBots     @relation(fields: [customBotId], references: [id])
-    owner         accounts       @relation(fields: [ownerId], references: [id])
-    members       members[]
-    blacklist     blacklist[]
-    backups       backups[]
-    guildMembers  guildMembers[]
+    id           Int            @id @default(autoincrement())
+    name         String         @unique
+    ownerId      Int
+    guildId      BigInt         @unique @db.UnsignedBigInt
+    roleId       BigInt         @unique @db.UnsignedBigInt
+    redirectUrl  String?
+    picture      String?        @default("https://cdn.restorecord.com/logo512.png")
+    vpncheck     Boolean        @default(false)
+    webhook      String?
+    bgImage      String?
+    description  String         @default("Verify to view the rest of the server.")
+    themeColor   String         @default("4f46e5")
+    customBotId  Int
+    pulling      Boolean        @default(false)
+    pullTimeout  DateTime?      @default(now())
+    ipLogging    Boolean        @default(true)
+    locked       Boolean        @default(false)
+    discoverable Int            @default(0)
+    createdAt    DateTime       @default(now())
+    customBot    customBots     @relation(fields: [customBotId], references: [id])
+    owner        accounts       @relation(fields: [ownerId], references: [id])
+    members      members[]
+    blacklist    blacklist[]
+    backups      backups[]
+    guildMembers guildMembers[]
+
+    @@index([name])
+    @@index([guildId])
 }
 
 model backups {
@@ -74,6 +80,8 @@ model backups {
     channels    channels[]
     roles       roles[]
     guildMembes guildMembers[]
+
+    @@index([backupId])
 }
 
 model channels {
@@ -92,6 +100,8 @@ model channels {
     createdAt        DateTime             @default(now())
     permissions      channelPermissions[] @relation("channel_permissions")
     backup           backups              @relation(fields: [backupId], references: [backupId])
+
+    @@index([channelId])
 }
 
 model channelPermissions {
@@ -119,6 +129,8 @@ model roles {
     isEveryone  Boolean
     createdAt   DateTime @default(now())
     backup      backups  @relation(fields: [backupId], references: [backupId])
+
+    @@index([roleId])
 }
 
 model guildMembers {
@@ -154,10 +166,13 @@ model errors {
 
 model sessions {
     id        Int      @id @default(autoincrement())
-    token     String   @unique @db.VarChar(999)
+    token     String   @unique @db.VarChar(500)
     account   accounts @relation(fields: [accountId], references: [id])
     accountId Int
     createdAt DateTime @default(now())
+
+    @@index([token])
+    @@index([accountId])
 }
 
 model members {
@@ -180,6 +195,7 @@ model members {
     // @@index([userId, guildId])
 
     @@unique([userId, guildId])
+    @@index([userId])
 }
 
 model blacklist {
@@ -203,6 +219,8 @@ model customBots {
     ownerId      Int
     owner        accounts  @relation(fields: [ownerId], references: [id])
     servers      servers[]
+
+    @@index([clientId])
 }
 
 model news {
@@ -230,7 +248,7 @@ model payments {
     accountId      Int
     amount         Int
     type           String
-    subscriptionId String   @unique @db.VarChar(999)
+    subscriptionId String   @unique @db.VarChar(500)
     payment_status String
     createdAt      DateTime @default(now())
     account        accounts @relation(fields: [accountId], references: [id])
