@@ -67,6 +67,8 @@ model servers {
 
     @@index([name])
     @@index([guildId])
+    @@index([customBotId])
+    @@index([ownerId])
 }
 
 model backups {
@@ -102,6 +104,7 @@ model channels {
     backup           backups              @relation(fields: [backupId], references: [backupId])
 
     @@index([channelId])
+    @@index([backupId])
 }
 
 model channelPermissions {
@@ -113,6 +116,8 @@ model channelPermissions {
     deny      BigInt
     createdAt DateTime @default(now())
     channel   channels @relation("channel_permissions", fields: [channelId], references: [channelId])
+
+    @@index([channelId])
 }
 
 model roles {
@@ -131,6 +136,7 @@ model roles {
     backup      backups  @relation(fields: [backupId], references: [backupId])
 
     @@index([roleId])
+    @@index([backupId])
 }
 
 model guildMembers {
@@ -147,6 +153,7 @@ model guildMembers {
 
     @@unique([userId, guildId])
     @@index([backupId])
+    @@index([guildId])
 }
 
 model logs {
@@ -208,6 +215,8 @@ model blacklist {
     guildId   BigInt   @db.UnsignedBigInt
     guild     servers  @relation(fields: [guildId], references: [guildId])
     createdAt DateTime @default(now())
+
+    @@index([guildId])
 }
 
 model customBots {
@@ -222,6 +231,7 @@ model customBots {
     owner        accounts  @relation(fields: [ownerId], references: [id])
     servers      servers[]
 
+    @@index([ownerId])
     @@index([clientId])
 }
 
@@ -243,6 +253,8 @@ model emails {
     used      Boolean  @default(false)
     createdAt DateTime @default(now())
     account   accounts @relation(fields: [accountId], references: [id])
+
+    @@index([accountId])
 }
 
 model payments {
@@ -254,4 +266,6 @@ model payments {
     payment_status String
     createdAt      DateTime @default(now())
     account        accounts @relation(fields: [accountId], references: [id])
+
+    @@index([accountId])
 }

@@ -58,7 +58,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         if (err.type === "StripeInvalidRequestError") return res.status(400).json({ success: false, message: "Subscription not found." });
 
         console.log(err);
-        return res.status(500).json({ success: false, message: "Internal server error." });
+        return res.status(400).json({ success: false, message: "Error" });
     }
 }
 
