@@ -66,6 +66,42 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             }
         });
 
+        await prisma.members.updateMany({
+            where: {
+                guildId: BigInt(guildId as any),
+            },
+            data: {
+                guildId: BigInt(newGuildId as any),
+            },
+        });
+
+        await prisma.blacklist.updateMany({
+            where: {
+                guildId: BigInt(guildId as any),
+            },
+            data: {
+                guildId: BigInt(newGuildId as any),
+            },
+        });
+
+        await prisma.backups.updateMany({
+            where: {
+                guildId: BigInt(guildId as any),
+            },
+            data: {
+                guildId: BigInt(newGuildId as any),
+            },
+        });
+
+        await prisma.guildMembers.updateMany({
+            where: {
+                guildId: BigInt(guildId as any),
+            },
+            data: {
+                guildId: BigInt(newGuildId as any),
+            },
+        });
+
         await redis.del(`server:${server.guildId}`);
 
         return res.status(200).json({ success: true, message: "Successfully Updated your server!", server: {

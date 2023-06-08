@@ -108,6 +108,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     }
                 });
 
+                await prisma.servers.updateMany({
+                    where: {
+                        customBotId: bot.id,
+                    },
+                    data: {
+                        customBotId: newBot.id,
+                    }
+                });
+
                 await redis.del(`customBot:${newBot.id}`);
 
                 return res.status(200).json({ success: true, message: "Bot successfully Updated", bot: {
