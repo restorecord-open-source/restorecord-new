@@ -31,16 +31,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 description: true,
                 themeColor: true,
                 createdAt: true,
-                members: {
-                    select: {
-                        id: true
-                    },
-                    where: {
-                        guildId: {
-                            equals: Prisma.raw("servers.guildId").values[0] as any
-                        },
-                    }
-                },
                 customBot: {
                     select: {
                         clientId: true,
@@ -65,11 +55,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             },
             take: 39
         });
-        servers.sort((a, b) => b.members.length - a.members.length);
 
         servers.forEach(server => {
             server.guildId = String(server.guildId) as any;
-            server.members = server.members.length as any;
             server.customBot.clientId = server.customBot?.clientId ? String(server.customBot.clientId) : "0" as any;
             server.customBot.customDomain = server.customBot?.customDomain ? String(server.customBot.customDomain) : "restorecord.com" as any;
         });

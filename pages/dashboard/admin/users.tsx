@@ -131,26 +131,58 @@ export default function AdminUser() {
                     </IconButton>
                 </DialogTitle>
                 <DialogContent>
-                    <Typography variant="body1" sx={{ mb: 1 }}>
-                        User ID: <code>{ModalData.info.id}</code><br />
-                        Username: <code>{ModalData.info.username}</code><br />
-                        Current Plan: <code>{ModalData.info.role}</code><br />
-                        {/* Expires at: <code>{new Date(ModalData.info.expiry).toLocaleDateString()}</code><br /> */}
-                        Expiry: <code>{new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(ModalData.info.expiry))}</code><br />
-                    </Typography>
+                    {ModalData.info ? (
+                        <Typography variant="body1" sx={{ mb: 1 }}>
+                            User ID: <code>{ModalData.info.id}</code><br />
+                            Username: <code>{ModalData.info.username}</code><br />
+                            Current Plan: <code>{ModalData.info.role}</code><br />
+                            {/* Expires at: <code>{new Date(ModalData.info.expiry).toLocaleDateString()}</code><br /> */}
+                            Expiry: <code>{new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(ModalData.info.expiry ?? "0"))}</code><br />
+                        </Typography>
+                    ) : ( <CircularProgress /> )}
 
                     <FormControl fullWidth variant="outlined" required>
                         <InputLabel id="plan-select-label">Select Plan</InputLabel>
-                        <Select labelId="plan-select-label" variant="outlined" sx={{ width: "100%" }}>
+                        <Select labelId="plan-select-label" variant="outlined" sx={{ width: "100%" }} onChange={(e) => setModalData({ ...ModalData, upgrade: { ...ModalData.upgrade, plan: e.target.value }})}>
                             <MenuItem value="free">Free (Default)</MenuItem>
-                            <MenuItem value="premium">Premium</MenuItem>
-                            <MenuItem value="business">Business</MenuItem>
-                            <MenuItem value="premium_1m">Premium 1 month</MenuItem>
-                            <MenuItem value="business_1m">Business 1 month</MenuItem>
+                            <MenuItem value="premium_m">Premium - 1 Month</MenuItem>
+                            <MenuItem value="business_m">Business - 1 Month</MenuItem>
+                            <MenuItem value="premium">Premium - Yearly</MenuItem>
+                            <MenuItem value="business">Business - Yearly</MenuItem>
+                            <MenuItem value="premium_custom">Premium - Other/Custom</MenuItem>
+                            <MenuItem value="business_custom">Business - Other/Custom</MenuItem>
                         </Select>
 
+                        {ModalData?.upgrade?.plan?.includes("custom") && (
+                            <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                                <FormControl variant="outlined" sx={{ width: "100%" }}>
+                                    <InputLabel id="duration-select-label">Select Duration</InputLabel>
+                                    <Select labelId="duration-select-label" variant="outlined" sx={{ width: "100%" }} onChange={(e) => setModalData({ ...ModalData, upgrade: { ...ModalData.upgrade, duration: e.target.value }})}>
+                                        <MenuItem value="1">1 Month</MenuItem>
+                                        <MenuItem value="3">3 Months</MenuItem>
+                                        <MenuItem value="6">6 Months</MenuItem>
+                                        <MenuItem value="9">9 Months</MenuItem>
+                                        <MenuItem value="12">1 Year</MenuItem>
+                                        <MenuItem value="24">2 Years</MenuItem>
+                                        <MenuItem value="60">5 Years</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Stack>
+                        )}
+
                         <Button variant="contained" sx={{ mt: 2 }} onClick={async () => {
-                            console.log("upgrade");
+                            await axios.post("/api/admin/upgrade", { userId: ModalData.info.id, plan: ModalData?.upgrade?.plan, expiry: new Date(ModalData?.upgrade?.duration ? Date.now() + (parseInt(ModalData?.upgrade?.duration) * 30 * 24 * 60 * 60 * 1000) : Date.now()).toISOString() }, {
+                                headers: {
+                                    Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
+                                },
+                            }).then((res: any) => {
+                                console.log(res.data);
+                                setSuccessMessage(res.data.message);
+                            }).catch((err) => {
+                                console.error(err);
+                                setErrorMessages(JSON.stringify(err.response.data));
+                            });
+                            
                             setModals({ ...Modals, upgrade: false });
                         }}>Upgrade</Button>
                     </FormControl>
@@ -240,7 +272,7 @@ export default function AdminUser() {
                     <FormControl fullWidth variant="outlined" required>
                         <InputLabel id="ban-reason-select-label">Select Ban Reason</InputLabel>
                         <Select labelId="ban-reason-select-label" variant="outlined" sx={{ width: "100%" }} onChange={(e) => setModalData({ ...ModalData, ban: {
-                            ...ModalData.ban,
+                            ...ModalData?.ban,
                             reason: e.target.value
                         }})}>
                             {ModalData?.ban?.reasons?.map((reason: any) => (
@@ -249,7 +281,7 @@ export default function AdminUser() {
                         </Select>
 
                         <Button variant="contained" sx={{ mt: 2 }} onClick={async () => {
-                            await axios.post("/api/admin/ban", { userId: ModalData.info.id, reason: ModalData.ban.reason }, {
+                            await axios.post("/api/admin/ban", { userId: ModalData.info.id, reason: ModalData?.ban?.reason }, {
                                 headers: {
                                     Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
                                 },
@@ -343,7 +375,7 @@ export default function AdminUser() {
 
                                         if (banReasons.status === 200) {
                                             setModalData({ ...ModalData, ban: banReasons });
-                                            setTimeout(() => { setModals({ ...Modals, ban: true }); }, 100);
+                                            setTimeout(() => { setModals({ ...Modals, ban: true }); }, 300);
                                         } 
                                         else {
                                             setErrorMessages(JSON.stringify(banReasons));

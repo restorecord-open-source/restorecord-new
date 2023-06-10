@@ -78,7 +78,7 @@ export default function Discovery() {
                                             <CardContent>
                                                 <Typography variant="h6" component="h2" fontWeight={600}>{server.name}</Typography>
                                                 <Typography variant="body1" component="div" fontWeight={400}>{server.description}</Typography>
-                                                <Typography variant="body2" component="div" fontWeight={400} sx={{ mt: 2 }}><span style={{ color: theme.palette.success.main }}>{formatRoundNumber(server.members)}+</span> members • Since {new Date(server.createdAt).toLocaleString()}</Typography>
+                                                <Typography variant="body2" component="div" fontWeight={400} sx={{ mt: 2 }}>Since {new Date(server.createdAt).toLocaleString()}</Typography>
                                             </CardContent>
                                         </Card>
                                     </Link>
