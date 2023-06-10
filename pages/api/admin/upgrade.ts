@@ -4,15 +4,6 @@ import { prisma } from "../../../src/db";
 import withAuthentication from "../../../src/withAuthentication";
 import Email from "../../../src/email";
 
-const Subscriptions: { [key: string]: { plan: string; expiry: number | null } } = {
-    free: { plan: "free", expiry: null },
-    premium_m: { plan: "premium", expiry: 2678400 },
-    business_m: { plan: "business", expiry: 2678400 },
-    premium: { plan: "premium", expiry: 31536000 },
-    business: { plan: "business", expiry: 31536000 },
-    premium_custom: { plan: "premium", expiry: null },
-    business_custom: { plan: "business", expiry: null },
-};
 
 async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts) {
     return new Promise(async resolve => {
@@ -22,8 +13,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 if (!user.admin) return res.status(400).json({ success: false, message: "Account is not an admin." });
 
                 const fullId: any = req.body.userId ?? '';
-                const plan: number = req.body.plan ?? '';
-                const expiry: string = req.body.expiry ?? Subscriptions[plan].expiry;
+                const plan: string = req.body.plan ?? '';
+                const expiry: string = req.body.expiry ?? null;
 
                 const account = await prisma.accounts.findUnique({
                     where: {
@@ -38,7 +29,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         id: parseInt(fullId) as number,
                     },
                     data: {
-                        role: Subscriptions[plan].plan,
+                        role: plan,
                         expiry: new Date(expiry),
                     },
                 });
@@ -69,8 +60,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                     <p style="white-space: pre-line; color: rgb(0, 0, 0); font-weight: 400; margin-bottom: 0.75rem; overflow-wrap: break-word; font-size: 1rem;">
                                         Dear ${account.username},
                                         <br>Your Subscription has been changed.
-                                        Plan: ${Subscriptions[plan].plan.charAt(0).toUpperCase() + Subscriptions[plan].plan.slice(1)}
-                                        Expiry: ${Subscriptions[plan].expiry ? new Date(new Date().getTime() + Number(Subscriptions[plan].expiry) * 1000).toLocaleString() : "Never"}
+                                        Plan: ${plan.charAt(0).toUpperCase() + plan.slice(1)}
+                                        Expiry: ${expiry ? new Date(new Date(expiry).getTime() + 1000 * 60 * 60 * 24 * 30).toLocaleDateString() : "Never"}
                                         <br>Sincerely,
                                         RestoreCord Trust & Safety Team
                                     </p>
@@ -90,7 +81,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     console.error(err);
                 })
 
-                return res.status(200).json({ success: true, message: "Successfully upgraded account, Email Sent!" });
+                return res.status(200).json({ success: true, message: `${account.username} Subscription changed to ${plan.charAt(0).toUpperCase() + plan.slice(1)} until ${expiry ? new Date(new Date(expiry).getTime() + 1000 * 60 * 60 * 24 * 30).toLocaleDateString() : "Never"}` });
             }
             catch (e: any) {
                 console.error(e);

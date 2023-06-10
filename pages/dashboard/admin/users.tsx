@@ -145,30 +145,25 @@ export default function AdminUser() {
                         <InputLabel id="plan-select-label">Select Plan</InputLabel>
                         <Select labelId="plan-select-label" variant="outlined" sx={{ width: "100%" }} onChange={(e) => setModalData({ ...ModalData, upgrade: { ...ModalData.upgrade, plan: e.target.value }})}>
                             <MenuItem value="free">Free (Default)</MenuItem>
-                            <MenuItem value="premium_m">Premium - 1 Month</MenuItem>
-                            <MenuItem value="business_m">Business - 1 Month</MenuItem>
-                            <MenuItem value="premium">Premium - Yearly</MenuItem>
-                            <MenuItem value="business">Business - Yearly</MenuItem>
-                            <MenuItem value="premium_custom">Premium - Other/Custom</MenuItem>
-                            <MenuItem value="business_custom">Business - Other/Custom</MenuItem>
+                            <MenuItem value="premium">Premium</MenuItem>
+                            <MenuItem value="business">Business</MenuItem>
                         </Select>
 
-                        {ModalData?.upgrade?.plan?.includes("custom") && (
-                            <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-                                <FormControl variant="outlined" sx={{ width: "100%" }}>
-                                    <InputLabel id="duration-select-label">Select Duration</InputLabel>
-                                    <Select labelId="duration-select-label" variant="outlined" sx={{ width: "100%" }} onChange={(e) => setModalData({ ...ModalData, upgrade: { ...ModalData.upgrade, duration: e.target.value }})}>
-                                        <MenuItem value="1">1 Month</MenuItem>
-                                        <MenuItem value="3">3 Months</MenuItem>
-                                        <MenuItem value="6">6 Months</MenuItem>
-                                        <MenuItem value="9">9 Months</MenuItem>
-                                        <MenuItem value="12">1 Year</MenuItem>
-                                        <MenuItem value="24">2 Years</MenuItem>
-                                        <MenuItem value="60">5 Years</MenuItem>
-                                    </Select>
-                                </FormControl>
-                            </Stack>
-                        )}
+                        <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                            <FormControl variant="outlined" sx={{ width: "100%" }}>
+                                <InputLabel id="duration-select-label">Select Duration</InputLabel>
+                                <Select labelId="duration-select-label" variant="outlined" sx={{ width: "100%" }} onChange={(e) => setModalData({ ...ModalData, upgrade: { ...ModalData.upgrade, duration: e.target.value }})}>
+                                    <MenuItem value="0">NULL</MenuItem>
+                                    <MenuItem value="1">1 Month</MenuItem>
+                                    <MenuItem value="3">3 Months</MenuItem>
+                                    <MenuItem value="6">6 Months</MenuItem>
+                                    <MenuItem value="9">9 Months</MenuItem>
+                                    <MenuItem value="12">1 Year</MenuItem>
+                                    <MenuItem value="24">2 Years</MenuItem>
+                                    <MenuItem value="60">5 Years</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Stack>
 
                         <Button variant="contained" sx={{ mt: 2 }} onClick={async () => {
                             await axios.post("/api/admin/upgrade", { userId: ModalData.info.id, plan: ModalData?.upgrade?.plan, expiry: new Date(ModalData?.upgrade?.duration ? Date.now() + (parseInt(ModalData?.upgrade?.duration) * 30 * 24 * 60 * 60 * 1000) : Date.now()).toISOString() }, {
