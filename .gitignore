@@ -1,5 +1,4 @@
-package-lock.json
-
+.env
 
 # Logs
 logs
@@ -132,4 +131,3 @@ dist
 .yarn/install-state.gz
 .pnp.*
 .DS_Store
-.env
