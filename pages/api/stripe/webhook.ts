@@ -164,12 +164,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }
                 });
 
-                // update the metadata on stripe
-                await stripe.subscriptions.update(subscription.id, {
-                    metadata: {
-                        plan: planFull,
-                    }
-                });
+
+                // update the metadata on stripe if its not the same
+                if (subscription.metadata.plan !== planFull) {
+                    await stripe.subscriptions.update(subscription.id, {
+                        metadata: {
+                            plan: planFull,
+                        }
+                    });
+                }
 
                 if (payment) {
                     await prisma.payments.update({

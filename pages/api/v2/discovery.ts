@@ -14,14 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (cached && !search) return res.status(200).json({ success: true, servers: JSON.parse(cached) });
         if (search && (search.length < 3 || search.length > 99)) return res.status(200).json({ success: true, servers: [] });
 
-        // check if ?q= is in the url
-        // select id,name,guildId,picture,bgImage,description,themeColor,,createdAt from the `servers` table and then query all members from the `members` table where the guildId is equal to the server id and then sort which server has the most members in the last 14 days
         const servers = await prisma.servers.findMany({
-            orderBy: {
-                members: {
-                    _count: "desc"
-                }
-            },
             select: {
                 id: true,
                 name: true,
@@ -55,6 +48,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             },
             take: 39
         });
+
+        servers.sort(() => Math.random() - 0.5);
 
         servers.forEach(server => {
             server.guildId = String(server.guildId) as any;
