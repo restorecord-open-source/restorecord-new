@@ -1,4 +1,5 @@
 name: deploy
+
 on:
   workflow_run:
     workflows:
@@ -10,6 +11,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -17,13 +20,18 @@ jobs:
       - name: Split servers variable
         id: split_servers
         run: |
-          echo "::set-output name=servers::${SERVERS//,/\\n}"
+          echo "${{ env.SERVERS//,/\\n }}" >> servers.txt
+
+      - name: Read servers file
+        id: read_servers
+        run: |
+          echo "::set-env name=SERVERS::$(cat servers.txt)"
 
       - name: Send deploy requests
         run: |
-          for server in ${{ steps.split_servers.outputs.servers }}; do
+          IFS=$'\n' read -d '' -ra servers <<< "${SERVERS}"
+          for server in "${servers[@]}"; do
             curl -X GET \
               -H "Host: restorecord.com" \
-              "http://$server/api/admin/deploy?token=${DEPLOY_TOKEN}"
+              "http://$server/api/admin/deploy?token=${TOKEN}"
           done
-
