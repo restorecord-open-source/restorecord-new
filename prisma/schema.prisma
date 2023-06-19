@@ -84,6 +84,7 @@ model backups {
     guildMembes guildMembers[]
 
     @@index([backupId])
+    @@index([guildId])
 }
 
 model channels {

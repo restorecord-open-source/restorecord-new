@@ -13,7 +13,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 const servers = await prisma.servers.findMany({ where: { ownerId: user.id } });
                 if (!servers) return res.status(400).json({ success: false, message: "No servers found." });
 
-                const limit: any = req.query.max ? req.query.max : 100;
+                const limit: any = req.query.max ? req.query.max : 50;
                 const page = req.query.page ? req.query.page : 0;
 
                 let guildIds: any = [];
