@@ -1,4 +1,4 @@
-name: deploy
+name: Deploy
 
 on:
   workflow_run:
@@ -20,7 +20,7 @@ jobs:
       - name: Split servers variable
         id: split_servers
         run: |
-          echo "${{ env.SERVERS//,/\\n }}" >> servers.txt
+          echo "${{ env.SERVERS }}" | tr ',' '\n' >> servers.txt
 
       - name: Read servers file
         id: read_servers
