@@ -1,0 +1,29 @@
+name: deploy
+
+on:
+  workflow_run:
+    workflows:
+      - Build
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Split servers variable
+        id: split_servers
+        run: |
+          echo "::set-output name=servers::${{ env.SERVERS.split(',') }}"
+
+      - name: Send deploy requests
+        run: |
+          for server in ${{ steps.split_servers.outputs.servers }}; do
+            curl -X GET \
+              -H "Host: restorecord.com" \
+              "http://$server/api/admin/deploy?token=${{ env.DEPLOY_TOKEN }}"
+          done
