@@ -1,5 +1,4 @@
 name: deploy
-
 on:
   workflow_run:
     workflows:
@@ -18,12 +17,13 @@ jobs:
       - name: Split servers variable
         id: split_servers
         run: |
-          echo "::set-output name=servers::${{ env.SERVERS.split(',') }}"
+          echo "::set-output name=servers::${SERVERS//,/\\n}"
 
       - name: Send deploy requests
         run: |
           for server in ${{ steps.split_servers.outputs.servers }}; do
             curl -X GET \
               -H "Host: restorecord.com" \
-              "http://$server/api/admin/deploy?token=${{ env.DEPLOY_TOKEN }}"
+              "http://$server/api/admin/deploy?token=${DEPLOY_TOKEN}"
           done
+
