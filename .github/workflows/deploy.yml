@@ -25,7 +25,7 @@ jobs:
       - name: Read servers file
         id: read_servers
         run: |
-          echo "::set-env name=SERVERS::$(cat servers.txt)"
+          echo "SERVERS=$(cat servers.txt)" >> $GITHUB_ENV
 
       - name: Send deploy requests
         run: |
@@ -33,5 +33,5 @@ jobs:
           for server in "${servers[@]}"; do
             curl -X GET \
               -H "Host: restorecord.com" \
-              "http://$server/api/admin/deploy?token=${TOKEN}"
+              "http://$server/api/admin/deploy?token=${{ env.DEPLOY_TOKEN }}"
           done
