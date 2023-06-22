@@ -20,7 +20,6 @@ import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
 import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
-import LoadingButton from "@mui/lab/LoadingButton";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -35,6 +34,12 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Badge from "@mui/icons-material/Badge";
 import BlurredBlob from "../misc/BlurredBlob";
 import TextSB2 from "../misc/TextSB2";
+import LoadingButton from "../misc/LoadingButton";
+import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
+import ListItemText from "@mui/material/ListItemText";
+import Checkbox from "@mui/material/Checkbox";
+import OutlinedInput from "@mui/material/OutlinedInput";
+import Chip from "@mui/material/Chip";
 
 export default function VerifiedMembers({ user }: any) {
     const [token]: any = useToken();
@@ -50,6 +55,21 @@ export default function VerifiedMembers({ user }: any) {
     const [open, setOpen] = useState(false);
     const [userInfo, setUserInfo]: any = useState({});
     const [userInfoID, setUserInfoID]: any = useState("");
+
+    const [exportOptions, setExportOptions] = useState<any>({
+        open: false,
+        serverId: "",
+        format: "csv",
+        options: [
+            { label: "Id", value: "id" },
+            { label: "User Id", value: "userId" },
+            { label: "Access Token", value: "accessToken" },
+            { label: "Refresh Token", value: "refreshToken" },
+            { label: "Username", value: "username" },
+            { label: "Created At", value: "createdAt" },
+        ],
+        selectedOptions: []
+    });
 
     const [loading, setLoading] = useState(false);
     const [loadingInfo, setLoadingInfo] = useState(true);
@@ -183,7 +203,7 @@ export default function VerifiedMembers({ user }: any) {
                     ) : <CircularProgress />}
                 </DialogContent>
                 <DialogActions sx={{ mx: 2, mb: 2, justifyContent: "flex-start" }}>
-                    <LoadingButton loading={loading} variant="contained" color="success" onClick={() => {
+                    <LoadingButton variant="contained" color="success" event={() => {
                         setLoading(true);
                                                                 
                         axios.put(`/api/v2/member/${userInfoID}`, {}, { 
@@ -240,14 +260,109 @@ export default function VerifiedMembers({ user }: any) {
         )
     }
 
+    function renderExportModal() {
+        return (
+            <Dialog open={exportOptions.open} onClose={() => setExportOptions({ ...exportOptions, open: false })} maxWidth="sm" fullWidth>
+                <DialogTitle sx={{ backgroundColor: "grey.900" }}>
+                    <Stack spacing={1} direction="row" alignItems="center" justifyContent="space-between">
+                        <Typography variant="h5" sx={{ fontWeight: "500" }}>
+                            Export
+                        </Typography>
+                        <IconButton onClick={() => setExportOptions({ ...exportOptions, open: false })}>
+                            <CloseIcon />
+                        </IconButton>
+                    </Stack>
+                </DialogTitle>
+
+                <DialogContent sx={{ marginTop: 2 }}>
+                    <Stack spacing={1} direction="row" alignItems="center">
+                        <Typography variant="body1" sx={{ fontWeight: "500" }}>
+                            Options
+                        </Typography>
+                        <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title="Select what you want to export" placement="top">
+                            <HelpOutlineOutlinedIcon sx={{ color: "grey.500", fontSize: "1rem" }} />
+                        </Tooltip>
+                    </Stack>
+
+                        
+
+                    <FormControl fullWidth sx={{ mt: 1 }}>
+                        <InputLabel id="server-select-label">Server</InputLabel>
+                        <Select labelId="server-select-label" id="server-select" label="Server" value={exportOptions.serverId} onChange={(event: any) => setExportOptions({ ...exportOptions, serverId: event.target.value })}>
+                            {user.servers.map((server: any) => (
+                                <MenuItem key={server.id} value={server.guildId}>{server.name}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
+                    {/* multi select for the options */}
+                    <FormControl fullWidth sx={{ mt: 1 }}>
+                        <InputLabel id="options-select-label">Options</InputLabel>
+                        <Select labelId="options-select-label" id="options-select" label="Options" multiple value={exportOptions.selectedOptions} input={<OutlinedInput label="Format" />} onChange={(event: any) =>  setExportOptions({ ...exportOptions, selectedOptions: event.target.value })} renderValue={(selected) => ( <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>{selected.map((value: any) => ( <Chip key={value} label={value} /> ))}</Box> )} MenuProps={{ PaperProps: { style: { maxHeight: 300 } } }}>
+                            {exportOptions.options.map((option: any) => (
+                                <MenuItem key={option.value} value={option.value} sx={{ padding: 0 }}>
+                                    <Checkbox checked={exportOptions.selectedOptions.indexOf(option.value) > -1} />
+                                    <ListItemText primary={option.label} />
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
+                    <FormControl fullWidth sx={{ mt: 1 }}>
+                        <InputLabel id="format-select-label">Format</InputLabel>
+                        <Select labelId="format-select-label" id="format-select" label="Format" value={exportOptions.format} onChange={(event: any) => setExportOptions({ ...exportOptions, format: event.target.value })}>
+                            <MenuItem value="json">JSON</MenuItem>
+                            <MenuItem value="csv">CSV</MenuItem>
+                        </Select>
+                    </FormControl>
+                </DialogContent>
+
+                <DialogActions sx={{ mx: 2, mb: 2, justifyContent: "flex-start" }}>
+                    <LoadingButton variant="contained" color="success" event={() => {
+                        axios.post(`/api/v2/self/servers/${exportOptions.serverId}/export?options=${exportOptions.selectedOptions.join(",")}&format=${exportOptions.format}`, {}, {
+                            headers: {
+                                "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                "Content-Type": "application/octet-stream"
+                            },
+                            validateStatus: () => true,
+                            responseType: "blob"
+                        }).then((res: any) => {
+                            const url = window.URL.createObjectURL(new Blob([res.data]));
+                            const link = document.createElement("a");
+                            link.href = url;
+                            link.setAttribute("download", res.headers["content-disposition"].split("filename=")[1]);
+                            document.body.appendChild(link);
+                            link.click();
+                            link.remove();
+
+
+                            setTimeout(() => {
+                                setExportOptions({ ...exportOptions, open: false });
+                            }, 200);
+                        }).catch((err): any => {
+                            setNotiTextE(err.message);
+                            setOpenE(true);
+                            console.error(err);
+                        });
+                    }}>Export</LoadingButton>
+                </DialogActions>
+            </Dialog>
+        )   
+    }
+
     return (
         <>
             <Container maxWidth="xl">
                 <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
                     <CardContent>
-                        <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
-                            Verified Members
-                        </Typography>
+                        <Stack direction="row" alignItems="center" justifyContent="space-between">
+                            <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                                Verified Members
+                            </Typography>
+
+                            {/* export button, opens modal */}
+                            <Button variant="contained" color="success" onClick={() => setExportOptions({ ...exportOptions, open: true })}>Export</Button>
+                        </Stack>
 
                         <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
                             <Alert elevation={6} variant="filled" severity="error">
@@ -262,6 +377,7 @@ export default function VerifiedMembers({ user }: any) {
                         </Snackbar>
 
                         {open && renderMoreInfo()}
+                        {exportOptions.open && renderExportModal()}
 
                         {isLoading ? ( <CircularProgress /> ) : (
                             <>
