@@ -86,8 +86,8 @@ const handler = async(_: NextApiRequest, res: NextApiResponse, interaction: any)
                     }
                 }
             ],
-            username: "Verification",
-            avatar_url: `${server.data.icon ? `https://cdn.discordapp.com/icons/${server.data.id}/${server.data.icon}.png` : "https://cdn.discordapp.com/embed/avatars/0.png"}`,
+            username: server.data.name,
+            // avatar_url: `${server.data.icon ? `https://cdn.discordapp.com/icons/${server.data.id}/${server.data.icon}.png` : "https://cdn.discordapp.com/embed/avatars/0.png"}`,
             components: [{
                 type: 1,
                 components: [{
@@ -98,10 +98,38 @@ const handler = async(_: NextApiRequest, res: NextApiResponse, interaction: any)
                 }]
             }]
         }, {
+            headers: { "Content-Type": "application/json" },
             proxy: false, 
             httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) 
+        }).then(async (res) => {
+            await axios.patch(`https://discord.com/api/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`, {
+                content: null,
+                embeds: [{
+                    title: "✅ Success",
+                    description: "The embed has been sent successfully.",
+                    color: 0x00ff00
+                }],
+                flags: InteractionResponseFlags.EPHEMERAL
+            }, {
+                headers: { "Content-Type": "application/json" },
+                proxy: false,
+                httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) 
+            });
+        }).catch(async (err) => {
+            await axios.patch(`https://discord.com/api/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`, {
+                content: null,
+                embeds: [{
+                    title: "❌ Error",
+                    description: "The embed has not been sent successfully.",
+                    color: 0xff0000
+                }],
+                flags: InteractionResponseFlags.EPHEMERAL
+            }, {
+                headers: { "Content-Type": "application/json" },
+                proxy: false,
+                httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) 
+            });
         });
-        
         break;
     default:
         return res.status(200).json(INVALID_COMMAND_RESPONSE);

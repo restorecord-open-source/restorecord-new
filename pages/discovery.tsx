@@ -16,7 +16,6 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Link from "@mui/material/Link";
 import { useQuery } from "react-query";
 import { useEffect, useState } from "react";
-import { formatRoundNumber } from "../src/functions";
 import Alert from "@mui/material/Alert";
 
 
@@ -30,9 +29,16 @@ export default function Discovery() {
         if (data) setServerList(data);
 
         const timeout = setTimeout(() => {
-            refetch();
-            if (search === "" || search.length < 3) return ;
-        }, 300);
+            // add ?q= to url if search is not empty and longer than 3 characters
+            if (search.length >= 3 && search.length <= 99) {
+                window.history.replaceState(null, "", `?q=${search}`);
+            } else if (search.length === 0) {
+                window.history.replaceState(null, "", "");
+            }
+            // refetch ONCE and check if old search search is same as new search
+            if (search !== "" && search !== data?.search)
+                refetch();
+        }, 10);
 
         return () => clearTimeout(timeout);
     }, [search, serverList, data, refetch]);

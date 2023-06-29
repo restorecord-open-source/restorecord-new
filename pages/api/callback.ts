@@ -224,43 +224,24 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
         console.error(`[ERROR] [VERIFY1] ${error} | ${errorCode}`)
 
         switch (errorCode) {
-        case 10001:
-            return res.status(400).json({ code: err.message, message: "Unknown user" });
-        case 10002:
-            return res.status(400).json({ code: err.message, message: "Unknown application" });
-        case 10004:
-            return res.status(400).json({ code: err.message, message: "Unknown guild" });
-        case 10401:
-            return res.status(400).json({ code: err.message, message: "Wrongly formatted request" });
-        case 990001:
-            return res.status(400).json({ code: err.message, message: "Server not setup correctly", help: "https://docs.restorecord.com" });
-        case 990031:
-            res.setHeader("Set-Cookie",`RC_err=307 RC_errStack=Your Discord Account is blacklisted in this server.; Path=/; Max-Age=5;`);
-            return res.redirect(`https://${domain}/verify/${state}`);
-        case 990032:
-            res.setHeader("Set-Cookie",`RC_err=307 RC_errStack=Your IP-Address is blacklisted in this server.; Path=/; Max-Age=5;`);
-            return res.redirect(`https://${domain}/verify/${state}`);
-        case 990033:
-            res.setHeader("Set-Cookie",`RC_err=307 RC_errStack=Your ISP is blacklisted in this server.; Path=/; Max-Age=5;`);
-            return res.redirect(`https://${domain}/verify/${state}`);
-        case 990034:
-            res.setHeader("Set-Cookie",`RC_err=307 RC_errStack=Your Country is blacklisted in this server.; Path=/; Max-Age=5;`);
-            return res.redirect(`https://${domain}/verify/${state}`);
-        case 990044:
-            res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=5;`);
-            return res.redirect(`https://${domain}/verify/${state}`);
-        case 990401:
-            res.setHeader("Set-Cookie", `RC_err=401; Path=/; Max-Age=5;`);
-            return res.redirect(`https://${domain}/verify/${state}`);
-        case 990403:
-            res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=5;`);
-            return res.redirect(`https://${domain}/verify/${state}`);
-        case 990404:
-            res.setHeader("Set-Cookie", `RC_err=404; Path=/; Max-Age=5;`);
-            return res.redirect(`https://${domain}/verify/${state}`);
-        default:
-            return res.status(500).json({ code: err.message, message: "Internal Server Error" });
+        case 10001: return res.status(400).json({ code: err.message, message: "Unknown user" });
+        case 10002: return res.status(400).json({ code: err.message, message: "Unknown application" });
+        case 10004: return res.status(400).json({ code: err.message, message: "Unknown guild" });
+        case 10401: return res.status(400).json({ code: err.message, message: "Wrongly formatted request" });
+        case 990001: return res.status(400).json({ code: err.message, message: "Server not setup correctly", help: "https://docs.restorecord.com" });
+        case 990031: res.setHeader("Set-Cookie",`RC_err=307 RC_errStack=Your Discord Account is blacklisted in this server.; Path=/; Max-Age=5;`); break;
+        case 990032: res.setHeader("Set-Cookie",`RC_err=307 RC_errStack=Your IP-Address is blacklisted in this server.; Path=/; Max-Age=5;`); break;
+        case 990033: res.setHeader("Set-Cookie",`RC_err=307 RC_errStack=Your ISP is blacklisted in this server.; Path=/; Max-Age=5;`); break;
+        case 990034: res.setHeader("Set-Cookie",`RC_err=307 RC_errStack=Your Country is blacklisted in this server.; Path=/; Max-Age=5;`); break;
+        case 990044: res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=5;`); break;
+        case 990401: res.setHeader("Set-Cookie", `RC_err=401; Path=/; Max-Age=5;`); break;
+        case 990403: res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=5;`); break;
+        case 990404: res.setHeader("Set-Cookie", `RC_err=404; Path=/; Max-Age=5;`); break;
+        default: return res.status(500).json({ code: err.message, message: "Internal Server Error" }); 
         }
+
+        return res.redirect(`https://${domain}/verify/${state}`);
+
     });
 }
 

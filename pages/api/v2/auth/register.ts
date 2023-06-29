@@ -62,7 +62,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         let refUser = null;
         if (data.ref) {
-            refUser = await prisma.accounts.findFirst({ where: { referralCode: data.ref } });
+            refUser = await prisma.accounts.findFirst({ where: { referralCode: { contains: data.ref.toLowerCase() } } });
         }
 
         const hashedPassword = await bcrypt.hash(data.password, await bcrypt.genSalt(10));

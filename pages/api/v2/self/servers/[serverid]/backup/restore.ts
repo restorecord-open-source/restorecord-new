@@ -98,6 +98,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
             if (!createGuild.data.id) return res.status(400).json({ success: false, message: "Failed to create guild, your bot may not be eligable" });
 
+            
             const newChannels = await axios.get(`https://discord.com/api/v10/guilds/${createGuild.data.id}/channels`, {
                 headers: {
                     "Authorization": `Bot ${bot.botToken}`,
@@ -106,6 +107,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 validateStatus: () => true,
             });
 
+            if (!newChannels.data.find((c: any) => c.type === 0)) return res.status(400).json({ success: false, message: "Failed to create guild, your bot may not be eligable" });
+
+
             const createInvite = await axios.post(`https://discord.com/api/v10/channels/${newChannels.data.find((c: any) => c.type === 0).id}/invites`, {}, {
                 headers: {
                     "Authorization": `Bot ${bot.botToken}`,
@@ -113,6 +117,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 },
                 validateStatus: () => true,
             });
+           
+            if (!createInvite.data.code) return res.status(400).json({ success: false, message: "Failed to create invite, your bot may not be eligable" });
+
 
             return res.status(200).json({ success: true, invite: createInvite.data.code, guildId: createGuild.data.id });
         } else if (data.guildId && data.discordId) {

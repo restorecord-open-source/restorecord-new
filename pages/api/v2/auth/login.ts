@@ -61,7 +61,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             data: {
                 accountId: account.id,
                 token: token,
-            }
+            },
         });
 
         await prisma.accounts.update({

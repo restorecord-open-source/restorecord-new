@@ -16,7 +16,7 @@ export function createRedisInstance(config = getRedisConfiguration()) {
             enableAutoPipelining: true,
             maxRetriesPerRequest: 0,
             retryStrategy: (times: number) => {
-                if (times > 3) {
+                if (times > 10) {
                     throw new Error(`[Redis] Could not connect after ${times} attempts`);
                 }
 
