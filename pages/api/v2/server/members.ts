@@ -57,7 +57,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     return {
                         id: member.id,
                         userId: String(member.userId),
-                        username: member.username,
+                        // if username ends with #0 then do @username
+                        username: member.username.endsWith("#0") ? `@${member.username.slice(0, -2)}` : member.username,
                         avatar: member.avatar,
                         ip: user.role !== "free" ? member.ip : null,
                         createdAt: member.createdAt,
