@@ -179,9 +179,29 @@ export default function DashServerSettings({ user, id }: any) {
             <Container maxWidth="xl">
                 <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
                     <CardContent>
-                        <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
-                            Edit Server
-                        </Typography>
+                        <Stack direction="row" spacing={1} justifyContent="space-between">
+                            <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
+                                Edit Server
+                            </Typography>
+
+                            <Button variant="contained" color="error" sx={{ mb: 2 }} onClick={() => { 
+                                setConfirmDelete(true) 
+                                new Promise((resolve, reject) => {
+                                    let timer = 15;
+                                    setConfirmDeleteTimer(timer--);
+                                    const interval = setInterval(() => {
+                                        setConfirmDeleteTimer(timer);
+                                        timer--;
+                                        if (timer === -1) {
+                                            clearInterval(interval);
+                                            resolve(true);
+                                        }
+                                    }, 1000);
+                                });
+                            }}>
+                                Delete Server
+                            </Button>
+                        </Stack>
 
                         <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
                             <Alert elevation={6} variant="filled" severity="error">
@@ -209,9 +229,9 @@ export default function DashServerSettings({ user, id }: any) {
 
                                     Deleting this server will remove:
                                     <ul>
-                                        <li>All Backups</li>
-                                        <li>All Verified Members</li>
-                                        <li>All Customized Settings</li>
+                                        <li><b style={{ fontSize: "1.25rem" }}>All Backups</b></li>
+                                        <li><b style={{ fontSize: "1.25rem" }}>All Verified Members</b></li>
+                                        <li><b style={{ fontSize: "1.25rem" }}>All Customized Settings</b></li>
                                     </ul>
 
                                     {confirmDeleteTimer > 0 && 
@@ -260,28 +280,6 @@ export default function DashServerSettings({ user, id }: any) {
                         
                         {(user.servers.find((server: any) => server.guildId === id)) ? (
                             <>
-                                <Grid container spacing={3} direction="row" justifyContent={"space-between"}>
-                                    <Grid item>
-                                        <Button variant="contained" color="error" sx={{ mb: 2 }} onClick={() => { 
-                                            setConfirmDelete(true) 
-                                            new Promise((resolve, reject) => {
-                                                let timer = 3;
-                                                setConfirmDeleteTimer(timer--);
-                                                const interval = setInterval(() => {
-                                                    setConfirmDeleteTimer(timer);
-                                                    timer--;
-                                                    if (timer === -1) {
-                                                        clearInterval(interval);
-                                                        resolve(true);
-                                                    }
-                                                }, 1000);
-                                            });
-                                        }}>
-                                            Delete Server
-                                        </Button>
-                                    </Grid>
-                                </Grid>
-
                                 <form onSubmit={handleSubmit}>
                                     <Grid container spacing={3} direction="column">
                                         <Grid item>
