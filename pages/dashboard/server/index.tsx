@@ -408,9 +408,9 @@ export default function Server() {
                                                                 </Typography>
                                                                 <Typography variant="body2" color="white" sx={{ wordBreak: "break-word" }}>
                                                                         Verification URL
-                                                                    <MuiLink color={theme.palette.primary.light} href={`https://${user.bots.find((bot: any) => bot.id === (user.servers.find((server: any) => server.guildId === item.guildId).customBotId)).customDomain ?? window.location.origin.replace("www.", "")}/verify/${encodeURIComponent(item.name)}`} target="_blank" rel="noopener noreferrer">
+                                                                    <MuiLink color={theme.palette.primary.light} href={(user.bots.find((bot: any) => bot.id === (user.servers.find((server: any) => server.guildId === item.guildId).customBotId)).customDomain != null ? "https://" + user.bots.find((bot: any) => bot.id === (user.servers.find((server: any) => server.guildId === item.guildId).customBotId)).customDomain : window.location.origin.replace("www.", "")) + "/verify/" + encodeURIComponent(item.name)} target="_blank" rel="noopener noreferrer">
                                                                         <br/>
-                                                                        {"https://" + user.bots.find((bot: any) => bot.id === (user.servers.find((server: any) => server.guildId === item.guildId).customBotId)).customDomain ?? window.location.origin.replace("www.", "")}/verify/{encodeURIComponent(item.name)}
+                                                                        {(user.bots.find((bot: any) => bot.id === (user.servers.find((server: any) => server.guildId === item.guildId).customBotId)).customDomain != null ? "https://" + user.bots.find((bot: any) => bot.id === (user.servers.find((server: any) => server.guildId === item.guildId).customBotId)).customDomain : window.location.origin.replace("www.", ""))}/verify/{encodeURIComponent(item.name)}
                                                                     </MuiLink>
                                                                 </Typography>
                                                             </Grid>
