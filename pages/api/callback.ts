@@ -31,6 +31,8 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
         if (serverInfo) { serverInfo = JSON.parse(serverInfo); }
         else { 
             serverInfo = await prisma.servers.findUnique({ where: { guildId: guildId } });
+            if (!serverInfo) return reject(10004 as any);
+
             serverInfo.guildId = serverInfo.guildId.toString();
             serverInfo.roleId = serverInfo.roleId.toString();
 
@@ -43,6 +45,8 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
         if (customBotInfo) { customBotInfo = JSON.parse(customBotInfo); }
         else {
             customBotInfo = await prisma.customBots.findUnique({ where: { id: serverInfo.customBotId } });
+            if (!customBotInfo) return reject(10002 as any);
+            
             customBotInfo.clientId = customBotInfo.clientId.toString();
 
             await redis.set(`customBot:${serverInfo.customBotId}`, JSON.stringify(customBotInfo), "EX", 60 * 60);
@@ -75,11 +79,14 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
             for (const entry of blacklistEntries) {
                 if (entry.type === 0 && entry.value === String(userId) as string) {
                     return reject(990031 as any);
-                } else if (entry.type === 1 && entry.value === String(IPAddr) as string) {
+                } 
+                else if (entry.type === 1 && entry.value === String(IPAddr) as string) {
                     return reject(990032 as any);
-                } else if (entry.type === 2 && entry.value === String(pCheck[IPAddr].asn).replace("AS", "") as string && serverOwner.role === "business") {
+                } 
+                else if (entry.type === 2 && entry.value === String(pCheck[IPAddr].asn).replace("AS", "") as string && serverOwner.role === "business") {
                     return reject(990033 as any);
-                } else if (entry.type === 3 && entry.value === String(pCheck[IPAddr].isocode)) {
+                } 
+                else if (entry.type === 3 && entry.value === String(pCheck[IPAddr].isocode)) {
                     return reject(990034 as any);
                 }
             }
