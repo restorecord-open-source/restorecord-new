@@ -15,9 +15,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         if (!server) return res.status(400).send("Server not found.");
         // generate random 18 digit number
         let newGuildId = (Math.floor(Math.random() * 90000000000000000) + 10000000000000000).toString();
+        let newRoleId = (Math.floor(Math.random() * 90000000000000000) + 10000000000000000).toString();
 
-        while (await prisma.servers.findFirst({ where: { guildId: BigInt(newGuildId as any) } })) {
+        while (await prisma.servers.findFirst({ where: { OR: [{ guildId: BigInt(newGuildId as any) }, { roleId: BigInt(newRoleId as any) }] } })) {
             newGuildId = (Math.floor(Math.random() * 90000000000000000) + 10000000000000000).toString();
+            newRoleId = (Math.floor(Math.random() * 90000000000000000) + 10000000000000000).toString();
         }
 
         console.log(newGuildId);
@@ -28,6 +30,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             },
             data: {
                 guildId: BigInt(newGuildId as any),
+                roleId: BigInt(newRoleId as any),
             }
         });
 
