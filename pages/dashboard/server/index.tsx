@@ -354,7 +354,7 @@ export default function Server() {
 
                                 <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between" sx={{ "@media screen and (max-width: 600px)": { flexDirection: "column" } }}>
                                     <Box sx={{ display: "inline-flex", alignItems: "center", mb: 2 }}>
-                                        <Typography variant="h4" sx={{ fontWeight: "500" }}>
+                                        <Typography variant="h4" sx={{ fontWeight: "700" }}>
                                             Servers
                                         </Typography>
                                         <IconButton onClick={() => {
@@ -408,9 +408,9 @@ export default function Server() {
                                                                 </Typography>
                                                                 <Typography variant="body2" color="white" sx={{ wordBreak: "break-word" }}>
                                                                         Verification URL
-                                                                    <MuiLink color={theme.palette.primary.light} href={`/verify/${encodeURIComponent(item.name)}`} rel="noopener noreferrer" target="_blank">
+                                                                    <MuiLink color={theme.palette.primary.light} href={`https://${user.bots.find((bot: any) => bot.id === (user.servers.find((server: any) => server.guildId === item.guildId).customBotId)).customDomain ?? window.location.origin.replace("www.", "")}/verify/${encodeURIComponent(item.name)}`} target="_blank" rel="noopener noreferrer">
                                                                         <br/>
-                                                                        {window.location.origin}/verify/{encodeURIComponent(item.name)}
+                                                                        {"https://" + user.bots.find((bot: any) => bot.id === (user.servers.find((server: any) => server.guildId === item.guildId).customBotId)).customDomain ?? window.location.origin.replace("www.", "")}/verify/{encodeURIComponent(item.name)}
                                                                     </MuiLink>
                                                                 </Typography>
                                                             </Grid>
