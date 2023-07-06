@@ -407,7 +407,7 @@ export default function Blacklist() {
             <Grid justifyContent={"space-between"}>
                 <Grid item>
                     <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between" sx={{ mb: 2, "@media screen and (max-width: 600px)": { flexDirection: "column" } }}>
-                        <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                        <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
                             Blacklist
                         </Typography>
                         <Button variant="contained" color="primary" onClick={() => router.push("/dashboard/blacklist/add")} sx={{ fontWeight: "500" }}>

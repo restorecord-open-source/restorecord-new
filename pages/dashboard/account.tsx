@@ -181,7 +181,7 @@ export default function AccountSettings() {
 
                         <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
                             <CardContent>
-                                <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                                <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
                                     Account
                                 </Typography>
 
@@ -206,7 +206,7 @@ export default function AccountSettings() {
 
                         <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
                             <CardContent>
-                                <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                                <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
                                     Security
                                 </Typography>
 
@@ -360,7 +360,7 @@ export default function AccountSettings() {
                         <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
                             <CardContent>
                                 <form method="POST">
-                                    <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                                    <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
                                         Change password
                                     </Typography>
 
@@ -422,7 +422,7 @@ export default function AccountSettings() {
 
                         {/* <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #ff0000" }}>
                     <CardContent>
-                        <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                        <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
                             Delete account
                         </Typography>
 

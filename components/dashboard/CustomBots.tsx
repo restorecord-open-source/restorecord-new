@@ -261,7 +261,7 @@ export default function DashCustomBot({ user }: any) {
     function rendertitleBarUI() {
         return (
             <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between" sx={{ "@media screen and (max-width: 600px)": { flexDirection: "column" } }}>
-                <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
                     Custom Bots
                 </Typography>
                 <Button variant="contained" sx={{ mb: 2 }} onClick={() => setcreateNewBot(true)}>

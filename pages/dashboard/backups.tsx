@@ -100,7 +100,7 @@ export default function Backups() {
                         <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
                             <CardContent>
                                 <Badge badgeContent={<>BETA</>} color="primary" sx={{ [`& .MuiBadge-badge`]: { mt: "1.5rem", mr: "-2.5rem", color: "#fff", padding: "0.85rem", fontSize: "0.95rem", fontWeight: "bold" } }}>
-                                    <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                                    <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
                                         Backups
                                     </Typography>
                                 </Badge>
@@ -280,19 +280,16 @@ export default function Backups() {
                                         </Typography>
                                         {userData.backups.map((backup: any) => (
                                             <Paper key={backup.id} variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }} id={`backup_${backup.backupId}`}>
-                                                <CardHeader title={backup.name} subheader={new Intl.DateTimeFormat(navigator.language, { dateStyle: "long", timeStyle: "medium" }).format(new Date(backup.createdAt))} />
+                                                <CardHeader title={userData.servers.find((server: any) => server.guildId === backup.guildId).name} subheader={new Intl.DateTimeFormat(navigator.language, { dateStyle: "long", timeStyle: "medium" }).format(new Date(backup.createdAt))} />
                                                 <CardContent>
-                                                    <Typography variant="h6" sx={{ fontWeight: "500" }}>
-                                                        Guild Id: <code>{backup.guildId}</code>
+                                                    <Typography variant="h6" sx={{ fontWeight: "400" }}>
+                                                        Server: <span style={{ fontWeight: "500" }}>{backup.name}</span>
                                                     </Typography>
-                                                    <Typography variant="h6" sx={{ fontWeight: "500" }}>
-                                                        Channels: <code>{backup.channels}</code>
+                                                    <Typography variant="h6" sx={{ fontWeight: "400" }}>
+                                                        Channel: <span style={{ fontWeight: "500" }}>{backup.channels}</span>
                                                     </Typography>
-                                                    <Typography variant="h6" sx={{ fontWeight: "500" }}>
-                                                        Roles: <code>{backup.roles}</code>
-                                                    </Typography>
-                                                    <Typography variant="h6" sx={{ fontWeight: "500" }}>
-                                                        Guild Members: <code>{backup.guildMembers}</code>
+                                                    <Typography variant="h6" sx={{ fontWeight: "400" }}>
+                                                        Roles: <span style={{ fontWeight: "500" }}>{backup.roles}</span>
                                                     </Typography>
                                                 </CardContent>
                                                 <CardActions sx={{ justifyContent: "flex-start", ml: "0.5rem", mb: "0.75rem" }}>
