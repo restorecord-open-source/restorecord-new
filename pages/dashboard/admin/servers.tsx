@@ -108,6 +108,40 @@ export default function AdminServer() {
         );
     }
 
+    function renderUnclaimModal() {
+        return (
+            <Dialog open={Modals.unclaim} onClose={() => setModals({ ...Modals, unclaim: false })} fullWidth maxWidth="sm">
+                <DialogTitle id="alert-dialog-title">
+                    Unclaim server
+                    <IconButton aria-label="close" onClick={() => setModals({ ...Modals, unclaim: false })} sx={{ position: "absolute", right: 8, top: 8, color: theme.palette.grey[500] }}>
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent>
+                    <Paper sx={{ background: "#000", mt: 2, p: 3, borderRadius: "1rem" }}>
+                        <Stack direction="column" spacing={2}>
+                            <Typography variant="body1" sx={{ mb: 1 }}>Are you sure you want to unclaim this server?</Typography>
+                            <Button variant="contained" color="error" onClick={async () => {
+                                setErrorMessages("");
+                                await axios.post("/api/admin/unclaim", { serverId: ModalData.info.id }, {
+                                    headers: {
+                                        Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
+                                    },
+                                }).then((res: any) => {
+                                    console.log(res.data);
+                                    setSuccessMessage(JSON.stringify(res.data));
+                                }).catch((err) => {
+                                    console.error(err);
+                                    setErrorMessages(JSON.stringify(err.response.data));
+                                });
+                            }}>Unclaim</Button>
+                        </Stack>
+                    </Paper>
+                </DialogContent>
+            </Dialog>
+        )
+    }
+
 
     function renderSearch() {
         return (
@@ -129,7 +163,7 @@ export default function AdminServer() {
             }}>
                 <Stack direction="column" spacing={2}>
                     <TextField label="Search" variant="outlined" placeholder="ID/Guild Id/Name" onChange={(e) => setSearchQuery(e.target.value)} />
-                    <Button variant="contained" type="submit">Get user info</Button>
+                    <Button variant="contained" type="submit">Get server info</Button>
                 </Stack>
             </form>
         );
@@ -202,6 +236,10 @@ export default function AdminServer() {
                                             setErrorMessages(JSON.stringify(err.response.data));
                                         });
                                     }}>Reset Members</Button>
+                                    <Button variant="contained" color="error" onClick={async () => {
+                                        getServerInfo(server.id);
+                                        setModals({ ...Modals, unclaim: true });
+                                    }}>UNCLAIM ID</Button>
                                 </Stack>
                             </CardContent>
                         </Stack>
@@ -225,7 +263,7 @@ export default function AdminServer() {
                                 </Typography>
 
                                 {Modals.info && renderInfoModal()}
-
+                                {Modals.unclaim && renderUnclaimModal()}
 
                                 {renderSearch()}
                                 

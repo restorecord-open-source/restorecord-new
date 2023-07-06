@@ -23,10 +23,6 @@ import DialogActions from "@mui/material/DialogActions";
 import CloseIcon from "@mui/icons-material/Close";
 import theme from "../../src/theme";
 import axios from "axios";
-import Box from "@mui/material/Box";
-import Image from "next/image";
-import ButtonBase from "@mui/material/ButtonBase";
-import AttachFileIcon from "@mui/icons-material/AttachFile";
 
 export default function DashServerSettings({ user, id }: any) {
     const [token]: any = useToken();
@@ -116,9 +112,9 @@ export default function DashServerSettings({ user, id }: any) {
                 else {
                     setNotiTextS(res.message);
                     setOpenS(true);
-                    // setTimeout(() => {
-                    //     router.push("/dashboard/server");
-                    // }, 500);
+                    setTimeout(() => {
+                        router.push("/dashboard/server");
+                    }, 1250);
                     // functions.ToastAlert(res.message, "success");
                     // router.push("/dashboard/server");
                 }
@@ -176,150 +172,117 @@ export default function DashServerSettings({ user, id }: any) {
         setNewServer({ ...newServer, themeColor: colors.hex });
     }
 
-    function renderNotifications() {
-        return (
-            <>
-                <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
-                    <Alert elevation={6} variant="filled" severity="error">
-                        {notiTextE}
-                    </Alert>
-                </Snackbar>
-
-                <Snackbar open={openS} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenS(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
-                    <Alert elevation={6} variant="filled" severity="success">
-                        {notiTextS}
-                    </Alert>
-                </Snackbar>
-            </>
-        )   
-    }
-
-    function renderDeleteDialog() {
-        return (
-            <Dialog open={confirmDelete} onClose={() => setConfirmDelete(false)} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" fullWidth maxWidth="sm">
-                <DialogTitle id="alert-dialog-title">{"Are you sure?"}
-                    <IconButton aria-label="close" onClick={() => setConfirmDelete(false)} sx={{ position: "absolute", right: 8, top: 8, color: theme.palette.grey[500] }}>
-                        <CloseIcon />
-                    </IconButton>
-                </DialogTitle>
-                <DialogContent>
-                    <DialogContentText id="alert-dialog-description">
-                        <Typography variant="body1" sx={{ fontWeight: "500", color: theme.palette.error.main }}>
-                        This action cannot be undone.
-                        </Typography>
-
-                        Deleting this server will remove:
-                        <ul>
-                            <li>All Backups</li>
-                            <li>All Verified Members</li>
-                            <li>All Customized Settings</li>
-                        </ul>
-
-                        {confirmDeleteTimer > 0 && 
-                            <Typography variant="body1" sx={{ fontWeight: "500", color: theme.palette.warning.main }}>
-                                ⚠ You can delete this Server in {confirmDeleteTimer} second{confirmDeleteTimer > 1 && "s"}.
-                            </Typography>
-                        }
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button disabled={confirmDeleteTimer > 0}
-                        onClick={() => {
-                            setConfirmDelete(false);
-
-                            axios.delete(`/api/v2/self/servers/${newServer.guildId}/delete`, { headers: {
-                                "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
-                            },
-                            validateStatus: () => true
-                            })
-                                .then((res: any) => {
-                                    if (!res.data.success) {
-                                        setNotiTextE(res.data.message);
-                                        setOpenE(true);
-                                    }
-                                    else {
-                                        setNotiTextS(res.data.message);
-                                        setOpenS(true);
-                                        setTimeout(() => {
-                                            router.push("/dashboard/server");
-                                        }, 1250);
-                                    }
-                                })
-                                .catch((err: any) => {
-                                    setNotiTextE(err.message);
-                                    setOpenE(true);
-                                    console.error(err);
-                                });
-                        } } color="error">
-                        Delete
-                    </Button>
-                    <Button onClick={() => setConfirmDelete(false)} color="primary" autoFocus>
-                        Cancel
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        )
-    }
-
-    function renderNoAccess() {
-        return (
-            <>
-                <Grid container spacing={3} direction="column">
-                    <Grid item>
-                        <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
-                            You do not have access to this server
-                        </Typography>
-                    </Grid>
-                </Grid>
-            </>
-        )
-    }
-
-    function deleteServerbtn() {
-        return (
-            <Grid container spacing={3} direction="row" justifyContent={"space-between"}>
-                <Grid item>
-                    <Button variant="contained" color="error" sx={{ mb: 2 }} onClick={() => { 
-                        setConfirmDelete(true) 
-                        new Promise((resolve, reject) => {
-                            let timer = 3;
-                            setConfirmDeleteTimer(timer--);
-                            const interval = setInterval(() => {
-                                setConfirmDeleteTimer(timer);
-                                timer--;
-                                if (timer === -1) {
-                                    clearInterval(interval);
-                                    resolve(true);
-                                }
-                            }, 1000);
-                        });
-                    }}>
-                        Delete Server
-                    </Button>
-                </Grid>
-            </Grid>
-        )
-    }
-
 
 
     return (
         <>
             <Container maxWidth="xl">
+                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
+                    <CardContent>
+                        <Typography variant="h4" sx={{ mb: 2, fontWeight: "500" }}>
+                            Edit Server
+                        </Typography>
 
-                {renderNotifications()}
-                {renderDeleteDialog()}
+                        <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+                            <Alert elevation={6} variant="filled" severity="error">
+                                {notiTextE}
+                            </Alert>
+                        </Snackbar>
 
-                {user.servers.find((server: any) => server.guildId === id) ? null : renderNoAccess()}
+                        <Snackbar open={openS} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenS(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+                            <Alert elevation={6} variant="filled" severity="success">
+                                {notiTextS}
+                            </Alert>
+                        </Snackbar>
 
-                <form onSubmit={handleSubmit}>
-                    <Grid container spacing={3} direction="row" justifyContent={"space-between"}>
-                        <Grid item xs={12} xl={8}>
-                            <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
-                                <CardContent>
+                        <Dialog open={confirmDelete} onClose={() => setConfirmDelete(false)} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" fullWidth maxWidth="sm">
+                            <DialogTitle id="alert-dialog-title">{"Are you sure?"}
+                                <IconButton aria-label="close" onClick={() => setConfirmDelete(false)} sx={{ position: "absolute", right: 8, top: 8, color: theme.palette.grey[500] }}>
+                                    <CloseIcon />
+                                </IconButton>
+                            </DialogTitle>
+                            <DialogContent>
+                                <DialogContentText id="alert-dialog-description">
+                                    <Typography variant="body1" sx={{ fontWeight: "500", color: theme.palette.error.main }}>
+                                        This action cannot be undone.
+                                    </Typography>
 
-                                    {/* {deleteServerbtn()} */}
+                                    Deleting this server will remove:
+                                    <ul>
+                                        <li>All Backups</li>
+                                        <li>All Verified Members</li>
+                                        <li>All Customized Settings</li>
+                                    </ul>
 
+                                    {confirmDeleteTimer > 0 && 
+                                        <Typography variant="body1" sx={{ fontWeight: "500", color: theme.palette.warning.main }}>
+                                            ⚠ You can delete this Server in {confirmDeleteTimer} second{confirmDeleteTimer > 1 && "s"}.
+                                        </Typography>
+                                    }
+                                </DialogContentText>
+                            </DialogContent>
+                            <DialogActions>
+                                <Button disabled={confirmDeleteTimer > 0}
+                                    onClick={() => {
+                                        setConfirmDelete(false);
+
+                                        axios.delete(`/api/v2/self/servers/${newServer.guildId}/delete`, { headers: {
+                                            "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                        },
+                                        validateStatus: () => true
+                                        })
+                                            .then((res: any) => {
+                                                if (!res.data.success) {
+                                                    setNotiTextE(res.data.message);
+                                                    setOpenE(true);
+                                                }
+                                                else {
+                                                    setNotiTextS(res.data.message);
+                                                    setOpenS(true);
+                                                    setTimeout(() => {
+                                                        router.push("/dashboard/server");
+                                                    }, 1250);
+                                                }
+                                            })
+                                            .catch((err: any) => {
+                                                setNotiTextE(err.message);
+                                                setOpenE(true);
+                                                console.error(err);
+                                            });
+                                    } } color="error">
+                                    Delete
+                                </Button>
+                                <Button onClick={() => setConfirmDelete(false)} color="primary" autoFocus>
+                                    Cancel
+                                </Button>
+                            </DialogActions>
+                        </Dialog>
+                        
+                        {(user.servers.find((server: any) => server.guildId === id)) ? (
+                            <>
+                                <Grid container spacing={3} direction="row" justifyContent={"space-between"}>
+                                    <Grid item>
+                                        <Button variant="contained" color="error" sx={{ mb: 2 }} onClick={() => { 
+                                            setConfirmDelete(true) 
+                                            new Promise((resolve, reject) => {
+                                                let timer = 3;
+                                                setConfirmDeleteTimer(timer--);
+                                                const interval = setInterval(() => {
+                                                    setConfirmDeleteTimer(timer);
+                                                    timer--;
+                                                    if (timer === -1) {
+                                                        clearInterval(interval);
+                                                        resolve(true);
+                                                    }
+                                                }, 1000);
+                                            });
+                                        }}>
+                                            Delete Server
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+
+                                <form onSubmit={handleSubmit}>
                                     <Grid container spacing={3} direction="column">
                                         <Grid item>
                                             <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
@@ -384,7 +347,7 @@ export default function DashServerSettings({ user, id }: any) {
                                                     <Grid item>
                                                         <Stack direction="row" spacing={1}>
                                                             <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
-                                                                Discoverable
+                                                            Discoverable
                                                             </Typography>
                                                             <Switch onChange={handleChange} name="discoverable" defaultChecked={server.discoverable} />
                                                         </Stack>
@@ -416,68 +379,22 @@ export default function DashServerSettings({ user, id }: any) {
                                             </Button>
                                         </Grid>
                                     </Grid>
-                                </CardContent>
-                            </Paper>
-                        </Grid>
-                        <Grid item xs={12} xl={4}>
-                            <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
-                                <CardContent>
-
-                                    <Grid container spacing={3} direction="column">
-                                        <Grid item>
-                                            <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
-                                                Server Icon <small style={{ color: "#888" }}>(optional)</small>
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            {/* grid outline button to upload image */}
-                                            <Box>
-                                                <label htmlFor="file-upload" style={{ alignItems: "center", border: "1px dashed #888", borderRadius: "0.5rem", cursor: "pointer", display: "flex", justifyContent: "center", overflow: "hidden", position: "relative", width: "100%", height: "25rem", aspectRatio: "1/1" }}>
-                                                    <Box id="file" sx={{ alignItems: "center", color: theme.palette.grey[600], display: "flex", flexDirection: "column", justifyContent: "space-between", position: "absolute", width: "50%" }}>
-                                                        <AttachFileIcon fontSize="large" sx={{ color: "#888" }} />
-                                                        <Typography variant="body2" sx={{ fontWeight: "500" }}>Upload Image</Typography>
-                                                    </Box>
-                                                    {/* preview the file he selected with name */}
-                                                    <Box id="preview" sx={{ alignItems: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", position: "absolute", width: "100%", height: "100%", aspectRatio: "1/1" }}>
-                                                        {/* <Image src={newServer.picture} alt="Server Image" layout="fill" objectFit="cover" /> */}
-                                                    </Box>
-                                                    <input id="file-upload" type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => {
-                                                        if (e.target.files && e.target.files[0]) {
-                                                            const reader = new FileReader();
-                                                            reader.onload = function (e) {
-                                                                // @ts-ignore
-                                                                document.getElementById("file").style.display = "none";
-                                                                // @ts-ignore
-                                                                document.getElementById("preview").style.display = "flex";
-                                                                // @ts-ignore
-                                                                document.getElementById("preview").style.backgroundImage = `url(${e.target.result})`;
-                                                                // @ts-ignore
-                                                                document.getElementById("preview").style.backgroundSize = "cover";
-                                                                // @ts-ignore
-                                                                document.getElementById("preview").style.backgroundPosition = "center";
-                                                                // @ts-ignore
-                                                                document.getElementById("preview").style.backgroundRepeat = "no-repeat";
-                                                                // @ts-ignore
-                                                                document.getElementById("preview").style.borderRadius = "0.5rem";
-                                                                // @ts-ignore
-                                                                document.getElementById("preview").style.border = "1px dashed #888";
-                                                            };
-                                                            reader.readAsDataURL(e.target.files[0]);
-                                                        }
-                                                    }
-                                                    } />
-                                                </label>
-                                            </Box>
-                                        </Grid>
+                                </form>
+                            </>
+                        ) : (
+                            <>
+                                <Grid container spacing={3} direction="row" justifyContent={"space-between"}>
+                                    <Grid item>
+                                        <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                            You do not have access to this server
+                                        </Typography>
                                     </Grid>
-
-                                </CardContent>
-                            </Paper>
-                        </Grid>
-                    </Grid>
-                </form>
+                                </Grid>
+                            </>
+                        )}
+                    </CardContent>
+                </Paper>
             </Container>
         </>
     )
 }
-

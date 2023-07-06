@@ -1,74 +1,108 @@
-import { accounts } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "../../../src/db";
+import { accounts } from "@prisma/client";
 import { createRedisInstance } from "../../../src/Redis";
 import withAuthentication from "../../../src/withAuthentication";
+
 const redis = createRedisInstance();
 
 async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts) {
-    return new Promise(async resolve => {
-        switch (req.method) {
-        case "GET":
-            try {
-                if (!user.admin) return res.status(400).json({ success: false, message: "Account is not an admin." });
+    if (!user.admin) return res.status(400).json({ success: false, message: "Account is not an admin." });
 
-                const cached = await redis.get("adminStats");
-                if (cached) return res.status(200).json(JSON.parse(cached));
-
-                const accounts = await prisma.accounts.count();
-                const accountsBusiness = await prisma.accounts.count({ where: { role: "business" } });
-                const accountsPremium = await prisma.accounts.count({ where: { role: "premium" } });
-                const servers = await prisma.servers.count();
-                const serversPulling = await prisma.servers.count({ where: { pulling: true } });
-                const members = await prisma.members.count();
-                const customBots = await prisma.customBots.count();
-                const payments = await prisma.payments.count();
-                const paymentsCompleted = await prisma.payments.findMany({ where: { OR: [{ payment_status: "CONFIRMED" }, { payment_status: "active" }] } });
-
-                const lastPurchases = await prisma.payments.findMany({ where: { OR: [{ payment_status: "CONFIRMED" }, { payment_status: "active" }] }, orderBy: { createdAt: "desc" }, take: 4 }).then(payments => {
-                    return Promise.all(payments.map(async payment => {
-                        const account = await prisma.accounts.findUnique({ where: { id: payment.accountId } });
-                        return { 
-                            id: payment.id,
-                            // plan: payment.type.slice(0, 1).toUpperCase() + payment.type.slice(1).split("_").join(" "),
-                            // plan if contains _ then split and only get first word + first letter of last word  so if "business_monthly" do "Business M"
-                            plan: payment.type.includes("_") ? payment.type.split("_")[0].slice(0, 1).toUpperCase() + payment.type.split("_")[0].slice(1) + " " + payment.type.split("_")[1].slice(0, 1).toUpperCase() : payment.type.slice(0, 1).toUpperCase() + payment.type.slice(1),
-                            username: account?.username,
-                            date: new Date(payment.createdAt),
-                        };
-                    }));
-                });
-
-                const response = {
-                    accounts: accounts,
-                    accountsBusiness: accountsBusiness,
-                    accountsPremium: accountsPremium,
-                    servers: servers,
-                    serversPulling: serversPulling,
-                    members: members,
-                    customBots: customBots,
-                    payments: payments,
-                    paymentsCompleted: paymentsCompleted.length,
-                    totalRevenue: paymentsCompleted.reduce((a, b) => a + b.amount, 0) / 100,
-                    totalRevenueToday: paymentsCompleted.filter(payment => new Date(payment.createdAt).getTime() > Date.now() - 86400000).reduce((a, b) => a + b.amount, 0) / 100,
-                    totalRevenue7d: paymentsCompleted.filter(payment => new Date(payment.createdAt).getTime() > Date.now() - 604800000).reduce((a, b) => a + b.amount, 0) / 100,
-                    totalRevenue30d: paymentsCompleted.filter(payment => new Date(payment.createdAt).getTime() > Date.now() - 2592000000).reduce((a, b) => a + b.amount, 0) / 100,
-                    lastPurchases: lastPurchases
-                };
-
-                await redis.set("adminStats", JSON.stringify(response), "EX", 15);
-                return res.status(200).json(response);
-            }
-            catch (e: any) {
-                console.error(e);
-                return res.status(400).send("400 Bad Request");
-            }
-            break;
-        default:
-            return res.status(400).send("400 Bad Request");
-            break;
+    try {
+        const cached = await redis.get("adminStats");
+        if (cached) {
+            return res.status(200).json(JSON.parse(cached));
         }
-    });
+
+        const [ accountsCount, accountsBusinessCount, accountsPremiumCount, serversCount, serversPullingCount, membersCount, customBotsCount, payments ] = await Promise.all([
+            prisma.accounts.count(),
+            prisma.accounts.count({ where: { role: "business" } }),
+            prisma.accounts.count({ where: { role: "premium" } }),
+            prisma.servers.count(),
+            prisma.servers.count({ where: { pulling: true } }),
+            prisma.members.count(),
+            prisma.customBots.count(),
+            prisma.payments.findMany({
+                where: {
+                    OR: [{ payment_status: "CONFIRMED" }, { payment_status: "active" }],
+                },
+                include: {
+                    account: true,
+                },
+                orderBy: { createdAt: "desc" },
+                take: 4,
+            }),
+        ]);
+
+        const formattedLastPurchases = payments.map(payment => ({
+            id: payment.id,
+            plan: getFormattedPlan(payment.type),
+            username: payment.account?.username,
+            date: new Date(payment.createdAt),
+        }));
+
+        const paymentsCompleted = payments.filter(payment => payment.payment_status === "CONFIRMED" || payment.payment_status === "active");
+        const totalRevenue = calculateTotalRevenue(paymentsCompleted);
+        const totalRevenueToday = calculateTotalRevenueToday(paymentsCompleted);
+        const totalRevenue7d = calculateTotalRevenue7d(paymentsCompleted);
+        const totalRevenue30d = calculateTotalRevenue30d(paymentsCompleted);
+
+        const response = {
+            accounts: accountsCount,
+            accountsBusiness: accountsBusinessCount,
+            accountsPremium: accountsPremiumCount,
+            servers: serversCount,
+            serversPulling: serversPullingCount,
+            members: membersCount,
+            customBots: customBotsCount,
+            payments: payments.length,
+            paymentsCompleted: paymentsCompleted.length,
+            totalRevenue: totalRevenue,
+            totalRevenueToday: totalRevenueToday,
+            totalRevenue7d: totalRevenue7d,
+            totalRevenue30d: totalRevenue30d,
+            lastPurchases: formattedLastPurchases,
+        };
+
+        await redis.set("adminStats", JSON.stringify(response), "EX", 60);
+        return res.status(200).json(response);
+    } catch (e: any) {
+        console.error(e);
+        return res.status(400).send("400 Bad Request");
+    }
 }
 
+function getFormattedPlan(type: string): string {
+    if (type.includes("_")) {
+        const [category, duration] = type.split("_");
+        const categoryFormatted = category.charAt(0).toUpperCase() + category.slice(1);
+        const durationFormatted = duration.charAt(0).toUpperCase();
+        return `${categoryFormatted} ${durationFormatted}`;
+    } else {
+        return type.charAt(0).toUpperCase() + type.slice(1);
+    }
+}
+function calculateTotalRevenue(payments: any[]): number {
+    return payments.reduce((total, payment) => total + payment.amount, 0) / 100;
+}
+  
+function calculateTotalRevenueToday(payments: any[]): number {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return payments.filter(payment => new Date(payment.createdAt) >= today).reduce((total, payment) => total + payment.amount, 0) / 100;
+}
+  
+function calculateTotalRevenue7d(payments: any[]): number {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    return payments.filter(payment => new Date(payment.createdAt) >= sevenDaysAgo).reduce((total, payment) => total + payment.amount, 0) / 100;
+}
+  
+function calculateTotalRevenue30d(payments: any[]): number {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    return payments.filter(payment => new Date(payment.createdAt) >= thirtyDaysAgo).reduce((total, payment) => total + payment.amount, 0) / 100;
+}
+  
 export default withAuthentication(handler);

@@ -38,7 +38,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 guildId: true,
             }
         });
+
+        if (user) return res.status(400).json({ success: false, message: "You are not authorized to perform this action" });
+
+
         
+        // THIS DOESNT WORK YET
+
+
+
         if (!server) return res.status(400).json({ success: false, message: "Server not found" });
 
         const members = await prisma.members.findMany({

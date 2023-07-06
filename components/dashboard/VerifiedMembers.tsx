@@ -361,7 +361,7 @@ export default function VerifiedMembers({ user }: any) {
                             </Typography>
 
                             {/* export button, opens modal */}
-                            <Button variant="contained" color="success" onClick={() => setExportOptions({ ...exportOptions, open: true })}>Export</Button>
+                            {/* <Button variant="contained" color="success" onClick={() => setExportOptions({ ...exportOptions, open: true })}>Export</Button> */}
                         </Stack>
 
                         <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>

@@ -9,14 +9,24 @@ export default async function getMembers(options: any, serverId?: any, search?: 
         .catch(err => { return err; });
 }
 
-export async function getMemberList(options: any, serverId?: any, search?: any, page: any = null) {
-    return await axios.get(`/api/v2/server/memberList`, {
+export async function getMemberList(options: any) {
+    return await axios.get(`/api/v2/server/graph`, {
         headers: options,
         validateStatus: () => true
     })
         .then(res => { return res.data; })
         .catch(err => { return err; });
 }
+
+export async function getMemberStats(token: any, option: string, limit: number | null | undefined = null) {
+    return await axios.get(`/api/v2/server/stats?q=${option}${limit ? `&limit=${limit}` : ""}`, {
+        headers: token,
+        validateStatus: () => true
+    })
+        .then(res => { return res.data; })
+        .catch(err => { return err; });
+}
+
 
 
 
