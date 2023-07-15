@@ -20,6 +20,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     },
                 },
                 orderBy: { id: "desc" },
+                take: 99999
             });
 
             return {

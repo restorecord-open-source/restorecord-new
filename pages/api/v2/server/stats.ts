@@ -33,6 +33,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     createdAt: true,
                 },
                 orderBy: { id: "desc" },
+                take: 99999,
             }) as members[];
 
             members = members.slice(0, Number(limit) || 10);
@@ -53,6 +54,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 select: {
                     isp: true,
                 },
+                take: 99999,
             }) as members[];
 
 
@@ -82,6 +84,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 select: {
                     state: true,
                 },
+                take: 99999,
             }) as members[];
 
             const states = members.map(member => member.state);
@@ -110,6 +113,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 select: {
                     city: true,
                 },
+                take: 99999,
             }) as members[];
 
             const cities = members.map(member => member.city);
@@ -138,6 +142,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 select: {
                     country: true,
                 },
+                take: 99999,
             }) as members[];
 
             const countries = members.map(member => member.country);
