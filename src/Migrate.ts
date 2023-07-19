@@ -229,7 +229,7 @@ export async function resolveUser(token: string): Promise<User> {
 }
 
 
-export async function sendWebhookMessage(webhookUrl: string | null, title: string = "Successfully Verified", serverOwner: accounts, pCheck: any, IPAddr: string, account: User, type: number = 1) {
+export async function sendWebhookMessage(webhookUrl: string, title: string = "Successfully Verified", description: string | null | undefined = undefined, serverOwner: accounts, pCheck: any, IPAddr: string | null, account: User, type: number = 1) {
     if (!webhookUrl) return;
    
     const createdAt: number = account.id / 4194304 + 1420070400000;
@@ -242,8 +242,9 @@ export async function sendWebhookMessage(webhookUrl: string | null, title: strin
         embeds: [
             {
                 title: title,
+                ...(description ? { description: description } : {}),
                 timestamp: new Date().toISOString(),
-                color: type === 0 ? 0xff0000 : 0x52ef52,
+                color: type === 0 ? 0xff0000 : type === 1 ? 0x00ff00 : type === 2 ? 0xffff00 : 0x000000,
                 author: {
                     name: `${account.username}#${account.discriminator}`,
                     url: `https://discord.id/?prefill=${account.id}`,
@@ -311,7 +312,7 @@ export async function sendWebhookMessage(webhookUrl: string | null, title: strin
     });
 }
 
-interface User {
+export interface User {
 	id: number;
 	username: string;
 	discriminator: any;

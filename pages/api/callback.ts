@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "../../src/db";
 import { getIPAddress } from "../../src/getIPAddress";
-import { addMember, addRole, exchange, resolveUser, sendWebhookMessage, sleep } from "../../src/Migrate";
+import { User, addMember, addRole, exchange, resolveUser, sendWebhookMessage, sleep } from "../../src/Migrate";
 import { ProxyCheck } from "../../src/proxycheck";
 import { createRedisInstance } from "../../src/Redis";
 
@@ -76,38 +76,45 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
             const blacklistEntries = await prisma.blacklist.findMany({ where: { guildId: guildId } });
             const pCheck = await ProxyCheck.check(IPAddr, { vpn: true, asn: true });
 
+            const account: User = await resolveUser(respon.data.access_token);
+            if (!account || account === null) return reject(10001 as any);
+
+            userId = BigInt(account.id as any);
+
             for (const entry of blacklistEntries) {
                 if (entry.type === 0 && entry.value === String(userId) as string) {
+                    await sendWebhookMessage(serverInfo.webhook, "Attempted Blacklist", `This user attempted to verify, but is blacklisted in this server.`, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0);
                     return reject(990031 as any);
                 } 
                 else if (entry.type === 1 && entry.value === String(IPAddr) as string) {
+                    await sendWebhookMessage(serverInfo.webhook, "Attempted Blacklist", `This user attempted to verify, but their IP is blacklisted in this server.`, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0);
                     return reject(990032 as any);
                 } 
                 else if (entry.type === 2 && entry.value === String(pCheck[IPAddr].asn).replace("AS", "") as string && serverOwner.role === "business") {
+                    await sendWebhookMessage(serverInfo.webhook, "Attempted Blacklist", `This user attempted to verify, but their ISP is blacklisted in this server.`, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0);
                     return reject(990033 as any);
                 } 
                 else if (entry.type === 3 && entry.value === String(pCheck[IPAddr].isocode)) {
+                    await sendWebhookMessage(serverInfo.webhook, "Attempted Blacklist", `This user attempted to verify, but their Country is blacklisted in this server.`, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0);
                     return reject(990034 as any);
                 }
             }
 
             // res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
             // res.redirect(`https://${domain}/verify/${state}`);
-
-            const account = await resolveUser(respon.data.access_token);
-            if (!account || account === null) return reject(10001 as any);
-
-            userId = BigInt(account.id as any);
                 
             if (serverInfo.webhook) {
                 const isProxy = serverInfo.vpncheck && pCheck[IPAddr].proxy === "yes";
+                const altCheck = await prisma.members.findMany({ where: { guildId: guildId, ip: IPAddr, NOT: { userId: userId } }, select: { username: true, userId: true } });
                 
                 if (isProxy && serverInfo.ipLogging) {
-                    await sendWebhookMessage(serverInfo.webhook, "Failed VPN Check", serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0);
+                    await sendWebhookMessage(serverInfo.webhook, "Failed VPN Check", null, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0);
                     return reject(990044 as any);
+                } else if (altCheck.length > 0 && serverOwner.role === "business") {
+                    await sendWebhookMessage(serverInfo.webhook, "WARNING: Alt Found", `A user with this IP has already verified with another account(s):\n${altCheck.map((a: any) => `${a.username.replace(/#0+$/, "")} (${a.userId})`).join("\n")},\n\nThis user has been allowed to verify, but may be an alt.`, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 2);
+                } else {
+                    await sendWebhookMessage(serverInfo.webhook, "Successfully Verified", null, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 1);
                 }
-                
-                await sendWebhookMessage(serverInfo.webhook, "Successfully Verified", serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account);
             }
 
             await addMember(guildId.toString(), userId.toString(), customBotInfo.botToken, respon.data.access_token, serverInfo.guildId === serverInfo.roleId ? [] : [BigInt(serverInfo.roleId).toString()]).then(async (resp) => {

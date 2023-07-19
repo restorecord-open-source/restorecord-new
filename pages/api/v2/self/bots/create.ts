@@ -36,7 +36,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
             if (bot) {
                 if (bot.clientId === BigInt(clientId)) {
-                    return res.status(400).json({ success: false, message: "Client Id is already in use" });
+                    return res.status(400).json({ success: false, message: "Client ID is already in use" });
                 }
                 if (bot.botSecret.toLowerCase() === botSecret.toLowerCase()) {
                     return res.status(400).json({ success: false, message: "Client Secret is already in use" });
@@ -66,11 +66,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             });
 
             if ((user.role === "free" && accountBot.length >= 1) || (user.role === "premium" && accountBot.length >= 5)) {
-                return res.status(400).json({ success: false, message: "You can't have more than 1 bot (for free accounts) or 5 bots (for premium accounts)." });
+                return res.status(400).json({ success: false, message: "Your Subscription is limited to 1 bot." });
             }
 
             if (publicKey && (user.role !== "business" && user.role !== "enterprise")) {
-                return res.status(400).json({ success: false, message: "This feature is only available to Business subscribers." });
+                return res.status(400).json({ success: false, message: "This feature is only available to Business users." });
             }
 
             const newBot = await prisma.customBots.create({
