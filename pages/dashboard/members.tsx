@@ -20,7 +20,7 @@ export default function Members() {
 
 
     if (isLoading) {
-        return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><CircularProgress /></Box>
+        return <CircularProgress sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
     }
 
     if (isError) {
@@ -30,7 +30,7 @@ export default function Members() {
     if (!data || !data.username) {
         router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
 
-        return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><CircularProgress /></Box>
+        return <CircularProgress sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
     }
 
     return (

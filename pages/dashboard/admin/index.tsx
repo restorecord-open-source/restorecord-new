@@ -53,13 +53,13 @@ export default function Admin() {
         }
     }).then(res => res.json()), { retry: true, refetchOnWindowFocus: true, refetchInterval: 1000, refetchIntervalInBackground: true, refetchOnMount: true, refetchOnReconnect: true });
 
-    if (isLoading) return <CircularProgress />
+    if (isLoading) return <CircularProgress sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
     if (isError || statsError) return <div>Error</div>
 
     if (!data || !data.username) {
         router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
 
-        return <CircularProgress />
+        return <CircularProgress sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
     }
 
     if (!data.admin) return <ErrorPage statusCode={404} /> 

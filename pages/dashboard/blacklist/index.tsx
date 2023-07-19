@@ -336,14 +336,13 @@ export default function Blacklist() {
         }       
     }, [hasNextPage, fetchNextPage, refetch, search]);
     
-    if (userLoading) return <CircularProgress />
     if (userError) return <div>Error</div>
-    if (listsLoading) return <CircularProgress />
+    if (listsLoading || userLoading) return <CircularProgress sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
     
     if (!user.username) {
         router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
 
-        return <CircularProgress />
+        return <CircularProgress sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
     }
 
 

@@ -68,13 +68,13 @@ export default function Backups() {
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
     }), { retry: false, refetchOnWindowFocus: false });
 
-    if (isLoading) return <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}><CircularProgress /></Box>;
+    if (isLoading) return <CircularProgress sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
     if (isError) return <div>Error</div>;
 
     if (!userData.username) {
         router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
 
-        return <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}><CircularProgress /></Box>;
+        return <CircularProgress sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
     }
 
     async function getBackup(serverId: string) {
