@@ -247,9 +247,10 @@ export default function AccountSettings() {
                                                             await axios.patch("/api/v2/self", { 
                                                                 password: password,
                                                                 code: twoFACode,
-                                                            }, { 
+                                                            }, {
                                                                 headers: { 
-                                                                    Authorization: (process.browser && window.localStorage.getItem("token")) ?? token
+                                                                    Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                                    "x-track": makeXTrack()
                                                                 },
                                                                 validateStatus: () => true
                                                             }).then((res) => {
