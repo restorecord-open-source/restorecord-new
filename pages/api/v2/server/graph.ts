@@ -14,9 +14,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             const members = await prisma.members.findMany({
                 where: {
                     guildId: server.guildId,
-                    // createdat within the last 30 days
                     createdAt: {
-                        gte: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
+                        gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
                     },
                 },
                 orderBy: { id: "desc" },
@@ -29,9 +28,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 members: members.map((member: any) => {
                     return {
                         id: member.id,
-                        userId: String(member.userId) as string,
-                        username: member.username,
-                        avatar: member.avatar,
                         createdAt: member.createdAt
                     }
                 }),

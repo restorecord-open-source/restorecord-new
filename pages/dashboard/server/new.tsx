@@ -118,6 +118,7 @@ export default function Server() {
         }, 250);
 
         return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activeStep, user, serverName]);
 
     if (isLoading) {

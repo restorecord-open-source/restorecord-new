@@ -334,10 +334,11 @@ export default function Backups() {
                                                 </Typography>
                                             ) : (
                                                 <>
-                                                    <Typography variant="h5" sx={{ mb: 2, fontWeight: "500" }}>
-                                                        You need to upgrade to the business plan to use this feature.
+                                                    {/* user needs to upgrade subscription to use backups */}
+                                                    <Typography variant="body1" sx={{ mb: 2, fontWeight: "400" }}>
+                                                        Backups are only available for users with a Business subscription.
                                                     </Typography>
-                                                    <Button variant="contained" color="primary" onClick={() => router.push("/dashboard/upgrade")}>Upgrade</Button>
+                                                    <Button variant="contained" color="primary" href="/dashboard/upgrade">Upgrade</Button>
                                                 </>
                                             )}
                                         </CardContent>

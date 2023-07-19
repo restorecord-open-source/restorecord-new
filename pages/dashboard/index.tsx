@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import { useQuery } from "react-query"
 import { useToken } from "../../src/token";
+import { countries } from "./blacklist";
 import { getMemberList, getMemberStats } from "../../src/dashboard/getMembers";
 
 import NavBar from "../../components/dashboard/navBar";
@@ -29,21 +30,19 @@ import Toolbar from "@mui/material/Toolbar";
 import Table from "@mui/material/Table";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
-import { countries } from "./blacklist";
 import Stack from "@mui/material/Stack";
 
-const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
+const ApexChart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 export default function Dashboard() {
     const [ token ]: any = useToken()
     const router = useRouter();
-    let memId: any = 0;
 
     const { data, isError, isLoading } = useQuery("user", async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
     }), { retry: false,  refetchOnWindowFocus: true });
 
-    const { data: data2, isError: isError2, isLoading: isLoading2 } = useQuery("memberList", async () => await getMemberList({
+    const { data: memberList, isError: isError2, isLoading: isLoading2, refetch: refetchMemberList } = useQuery("memberList", async () => await getMemberList({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
     }), { retry: false });
 
@@ -53,14 +52,14 @@ export default function Dashboard() {
 
     const { data: topCountries, isError: topCountriesError, isLoading: topCountriesLoading } = useQuery("topCountries", async () => await getMemberStats({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
-    }, "country"), { retry: false });
+    }, "country", 10), { retry: false });
 
     const { data: newsData, isError: newsError, isLoading: newsLoading } = useQuery("news", async () => await fetch("/api/v2/news").then(res => res.json()), { retry: false });
 
     if (isLoading || isLoading2 || newsLoading || recentVerifiedLoading || topCountriesLoading) return <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}><CircularProgress /></Box>
     if (isError || isError2 || newsError || recentVerifiedError || topCountriesError) return <div>Error</div>
 
-    if (!data || !data.username || !data2) {
+    if (!data || !data.username) {
         router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
 
         return <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}><CircularProgress /></Box>
@@ -167,9 +166,11 @@ export default function Dashboard() {
                     hideOverlappingLabels: true,
                     formatter: function (value: any, timestamp: any) {
                         const date = new Date(timestamp);
-                        return date.toLocaleTimeString("en-US", {
-                            hour: "2-digit",
-                            minute: "2-digit"
+                        // show day and month so: 29th June
+                        return date.toLocaleDateString("en-US", {
+                            weekday: "short",
+                            day: "numeric",
+                            month: "short",
                         });
                     }
                 },
@@ -179,14 +180,15 @@ export default function Dashboard() {
                 crosshairs: {
                     show: false,
                 },
-                categories: Array.from({ length: 56 }, (_, i) => {
-                    const currentDate = new Date();
-                    const daysAgo = Math.floor(i / 4) - 13; // Go back 14 days and add days incrementally
-                    const hoursOffset = (i % 4) * 4; // Offset hours within each day
-                    currentDate.setDate(currentDate.getDate() + daysAgo);
-                    currentDate.setHours(hoursOffset);
-                    return currentDate.getTime();
-                }),
+                categories: new Array(30).fill(0).map((_, i) => {
+                    const date = new Date();
+                    date.setDate(date.getDate() - i);
+                    return date.toLocaleDateString("en-US", {
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                    });
+                }).reverse(),
             },
             yaxis: {
                 show: true,
@@ -210,25 +212,19 @@ export default function Dashboard() {
                 }
             },
         },
-        series: data2 ? data2.servers.map((server: any) => ({
+        series: memberList ? memberList.servers.map((server: any) => ({
             name: server.name,
-            data: Array.from({ length: 56 }, (_, i) => {
-                const currentDate = new Date();
-                const daysAgo = Math.floor(i / 4) - 13; // Go back 14 days and add days incrementally
-                const hoursOffset = (i % 4) * 4; // Offset hours within each day
-                currentDate.setDate(currentDate.getDate() + daysAgo);
-                currentDate.setHours(hoursOffset);
-                const currentSlot: any = currentDate.getTime();
-                const nextSlot: any = currentSlot + 4 * 60 * 60 * 1000; // Add 4 hours
+            data: Array.from({ length: 30 }, (_, i) => {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
                 return server.members.filter((member: any) => {
-                    const createdAt: any = new Date(member.createdAt);
-                    return (
-                        createdAt >= currentSlot && createdAt < nextSlot
-                    );
+                    const createdAt = new Date(member.createdAt);
+                    return createdAt.getDate() === date.getDate() && createdAt.getMonth() === date.getMonth() && createdAt.getFullYear() === date.getFullYear();
                 }).length;
-            })
+            }).reverse()
         })) : [],
     };
+
     
     function renderGraph() {
         return (
@@ -238,9 +234,15 @@ export default function Dashboard() {
                         {isLoading2 ? ( <CircularProgress /> ) : (
                             <>
                                 <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>Verified Members</Typography>
-                                <Typography variant="body1" color="grey.200">Verified members over the past 14 days</Typography>
+                                <Typography variant="body1" color="grey.200">Verified members over the past 30 days</Typography>
 
-                                <Chart options={apexChart.options} series={apexChart.series} type="area" height={350} />
+
+                                <ApexChart
+                                    options={apexChart.options}
+                                    series={apexChart.series}
+                                    type="area"
+                                    height={350}
+                                />
                             </>
                         )}
                     </CardContent>

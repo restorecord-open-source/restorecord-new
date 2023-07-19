@@ -10,10 +10,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         const servers = await prisma.servers.findMany({ where: { ownerId: user.id } });
         if (!servers) return res.status(400).json({ success: false, message: "No servers found." });
 
-        const query = req.query.q as string;
-        const limit = req.query.limit as string;
+        let query = req.query.q as string;
+        let limit = req.query.limit as string | undefined | null | number;
 
-        if (limit && Number(limit) > 100) return res.status(400).json({ success: false, message: "limit must be less than 100" });
+        if (limit && Number(limit) > 100) limit = 100;
 
         let members: members[] = [];
 
@@ -36,8 +36,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 take: 99999,
             }) as members[];
 
-            members = members.slice(0, Number(limit) || 10);
             members = members.map(member => ({ ...member, userId: String(member.userId) })) as any;
+            members = members.slice(0, Number(limit) || 10);
 
             return res.status(200).json({ success: true, content: members });
             break;
@@ -61,13 +61,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             const isps = members.map(member => member.isp);
             const uniqueIsps: Set<string | null> = new Set(isps);
               
-            const ispCount = Array.from(uniqueIsps).map(isp => ({
+            let ispCount = Array.from(uniqueIsps).map(isp => ({
                 isp,
                 count: isps.filter(i => i === isp).length,
             }));
             
-            ispCount.sort((a, b) => b.count - a.count);
-            ispCount.slice(0, Number(limit) || 10);
+            ispCount = ispCount.sort((a, b) => b.count - a.count);
+            ispCount = ispCount.slice(0, Number(limit) || 10);
 
             return res.status(200).json({ success: true, content: ispCount });
             break;
@@ -90,13 +90,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             const states = members.map(member => member.state);
             const uniqueStates: Set<string | null> = new Set(states);
 
-            const stateCount = Array.from(uniqueStates).map(state => ({
+            let stateCount = Array.from(uniqueStates).map(state => ({
                 state,
                 count: states.filter(s => s === state).length,
             }));
 
-            stateCount.sort((a, b) => b.count - a.count);
-            stateCount.slice(0, Number(limit) || 10);
+            stateCount = stateCount.sort((a, b) => b.count - a.count);
+            stateCount = stateCount.slice(0, Number(limit) || 10);
 
             return res.status(200).json({ success: true, content: stateCount });
             break;
@@ -119,13 +119,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             const cities = members.map(member => member.city);
             const uniqueCities: Set<string | null> = new Set(cities);
 
-            const cityCount = Array.from(uniqueCities).map(city => ({
+            let cityCount = Array.from(uniqueCities).map(city => ({
                 city,
                 count: cities.filter(c => c === city).length,
             }));
 
-            cityCount.sort((a, b) => b.count - a.count);
-            cityCount.slice(0, Number(limit) || 10);
+            cityCount = cityCount.sort((a, b) => b.count - a.count);
+            cityCount = cityCount.slice(0, Number(limit) || 10);
 
             return res.status(200).json({ success: true, content: cityCount });
             break;
@@ -148,13 +148,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             const countries = members.map(member => member.country);
             const uniqueCountries: Set<string | null> = new Set(countries);
 
-            const countryCount = Array.from(uniqueCountries).map(country => ({
+            let countryCount = Array.from(uniqueCountries).map(country => ({
                 country,
                 count: countries.filter(c => c === country).length,
             }));
 
-            countryCount.sort((a, b) => b.count - a.count);
-            countryCount.slice(0, Number(limit) || 10);
+            countryCount = countryCount.sort((a, b) => b.count - a.count);
+            countryCount = countryCount.slice(0, Number(limit) || 10);
 
             return res.status(200).json({ success: true, content: countryCount });
             break;

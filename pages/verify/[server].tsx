@@ -38,58 +38,25 @@ export default function Verify({ server, status, err, errStack }: any) {
     }, [server, status]);
 
     function ErrorAlert(err: string) {
-        switch (err) {
-        case "404":
-            return (
-                <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
-                    <AlertTitle>Error</AlertTitle>
-                    Seems like this server hasn&#39;t been setup correctly, please contact the owner and let him know: <b><code>Unknown Role</code></b>.
-                </Alert>
-            );
-        case "403":
-            return (
-                <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
-                    <AlertTitle>Error</AlertTitle>
-                    Seems like this server hasn&#39;t been setup correctly, please contact the owner and let him know: <b><code>Missing Permission</code></b>.
-                </Alert>
-            );
-        case "401":
-            return (
-                <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
-                    <AlertTitle>Error</AlertTitle>
-                    Seems like this bot hasn&#39;t been setup correctly, please contact the owner and let him know: <b><code>Invalid Token</code></b>.
-                </Alert>
-            );
-        case "306":
-            return (
-                <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
-                    <AlertTitle>Error</AlertTitle>
-                    VPN or Proxy detected, please disable it and try again.
-                </Alert>
-            );
-        case "307":
-            return (
-                <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
-                    <AlertTitle>Error</AlertTitle>
-                    You&#39;re blacklisted in this server, please contact the owner.<br/>{errStack}
-                </Alert>
-            );
-        case "30001":
-            return (
-                <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
-                    <AlertTitle>Error</AlertTitle>
-                    Seems like you have reached the 100 server limit, please leave a server and try again.
-                </Alert>
-            );
-        default:
-            return (
-                <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
-                    <AlertTitle>Error: {err}</AlertTitle>
-                    Discord API error: {errStack}
-                </Alert>
-            );
-        }
+        const errorMessages: { [key: string]: string } = {
+            "404": "Seems like this server hasn't been set up correctly, please contact the owner and let them know: Unknown Role.",
+            "403": "Seems like this server hasn't been set up correctly, please contact the owner and let them know: Missing Permission.",
+            "401": "Seems like this bot hasn't been set up correctly, please contact the owner and let them know: Invalid Token.",
+            "306": "VPN or Proxy detected, please disable it and try again.",
+            "307": `You're blacklisted in this server, please contact the owner.\n${errStack}`,
+            "30001": "Seems like you have reached the 100 server limit, please leave a server and try again.",
+        };
+      
+        const errorMessage = errorMessages[err] || `Discord API error: ${errStack}`;
+      
+        return (
+            <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
+                <AlertTitle>Error{err !== undefined ? `: ${err}` : ""}</AlertTitle>
+                {errorMessage}
+            </Alert>
+        );
     }
+      
 
     return (
         <>
@@ -132,7 +99,6 @@ export default function Verify({ server, status, err, errStack }: any) {
                         <>{server.success && err ? ErrorAlert(err) : null}</>
 
 
-
                         {server.success && (
                             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                                 {server.locked && (
@@ -152,13 +118,12 @@ export default function Verify({ server, status, err, errStack }: any) {
                                 )}
                             </Box>
                         )}
+
                         {!server.success && (
                             <Typography variant="h1" component="h1" sx={{ textAlign: "center", fontWeight: "700", fontSize: { xs: "1.5rem", md: "3rem" } }}>
                                 Server not found
                             </Typography>
                         )}
-
-
 
                         {server.locked ? (
                             <>
