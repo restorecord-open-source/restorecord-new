@@ -369,7 +369,7 @@ export default function Server() {
                                     {(pullSettings.customPullCountCheck && pullSettings.selectedServer) && (
                                         <>
                                             <Typography variant="body1" sx={{ fontWeight: "400", mb: "0.5rem", mt: "1rem" }}>Enter the amount of members you want to pull.</Typography>
-                                            <Typography variant="body2" sx={{ fontWeight: "300", mb: "1rem" }}>Note: This will only count &quot;sucessfully&quot; pulled members, erros will not be counted.</Typography>
+                                            <Typography variant="body2" sx={{ fontWeight: "300", mb: "1rem" }}>Note: This will only count &quot;successfully&quot; pulled members, errors will not be counted.</Typography>
                                             <TextField fullWidth label="Pull Amount" variant="outlined" type={"number"} value={pullSettings.customPullCount} onChange={(e) => setPullSettings({ ...pullSettings, customPullCount: Number(e.target.value) as number }) } />
                                         </>
                                     )}

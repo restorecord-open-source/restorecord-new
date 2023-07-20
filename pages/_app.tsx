@@ -148,7 +148,7 @@ export default function MyApp(props: MyAppProps) {
         <>
             <Head>
                 <title>RestoreCord</title>
-                <meta name="keywords" content="restorecord, discord, backup, restore, backup service, savecord, letoa, restorebot" />
+                <meta name="keywords" content="restorecord, discord, backup, restore, backup service, savecord, letoa, restorebot, restorio, guildmergers, backup members, discord backup bot, discord backup, save discord members" />
                 <meta name="theme-color" content="#09090d" />
                 <meta name="apple-mobile-web-app-status-bar-style" content="#09090d" />
                 <meta name="apple-mobile-web-app-capable" content="yes" />

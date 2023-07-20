@@ -135,7 +135,7 @@ export default function Upgrade() {
                                 </svg>
                                 <Stack direction="column" spacing={0} sx={{ textAlign: "left", textTransform: "none" }}>
                                     <Typography variant="h6" color="white" sx={{ fontWeight: "500" }}>Stripe</Typography>
-                                    <Typography variant="body2" color="text.secondary">Credit Card, Apple & Google Pay, SOFORT, iDEAL</Typography>
+                                    <Typography variant="body2" color="text.secondary">Debit/Credit Card, Apple & Google Pay</Typography>
                                 </Stack>
                             </Button>
                         </Grid>
@@ -209,13 +209,13 @@ export default function Upgrade() {
                         </>
                     )}
 
-                    {(paymentMethod === "paypal") && (
+                    {/* {(paymentMethod === "paypal") && (
                         <Typography variant="body1" sx={{ mt: 2, fontWeight: "300", whiteSpace: "pre-line", breakWord: "break-word" }}>
                             To proceed with your payment using PayPal, please contact us via Discord by messaging <b>xenos#0001</b> or <b>Bl4ckBl1zZ#5652</b> or via Telegram at <MuiLink href="https://t.me/xenos1337">https://t.me/xenos1337</MuiLink> or <MuiLink href="https://t.me/Bl4ckBl1zZ">https://t.me/Bl4ckBl1zZ</MuiLink>.
                             <br/>Kindly provide us with your <b>username</b> and <b>email address</b> for verification purposes. Once we have confirmed your payment, we will provide you with access to the selected plan.
                             <br/><br/>Thank you for your support!
                         </Typography>
-                    )}
+                    )} */}
 
                     <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center", fontSize: "0.75rem", mt: 1 }}>
                         Coinbase or Stripe accounts are not required to purchase.
@@ -297,7 +297,7 @@ export default function Upgrade() {
         )
     }
 
-    function renderSuccessfullPayment() {
+    function renderSuccessfulPayment() {
         if (typeof window !== "undefined") window.history.replaceState({}, document.title, window.location.pathname);
         
         return (
@@ -384,7 +384,7 @@ export default function Upgrade() {
                                     Upgrade
                             </Typography>
 
-                            {(router.query.s === "1") ? renderSuccessfullPayment() : null}
+                            {(router.query.s === "1") ? renderSuccessfulPayment() : null}
                             {(router.query.s === "2") ? renderPendingPayment() : null}
                             {user.role !== "free" ? renderSubscriptionStatus() : null}
                             {purchaseWindow ? renderPaymentWindow() : null}

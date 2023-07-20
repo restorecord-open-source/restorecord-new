@@ -143,7 +143,6 @@ export default function CustomBots() {
                 },
                 body: JSON.stringify({
                     botName: `${botInfo.username}#${botInfo.discriminator}`,
-                    // unbase64 the first part of bottoken to get clientid
                     clientId: Buffer.from(botToken.split(".")[0], "base64").toString("ascii"),
                     botToken: botToken,
                     botSecret: botSecret,
@@ -185,7 +184,7 @@ export default function CustomBots() {
             return (
                 <>
                     <Typography variant="h5" sx={{ fontWeight: "500" }}>Create a Discord Bot</Typography>
-                    <Typography variant="body1" sx={{ mb: 2, color: "text.secondary" }}>Headover to the <Link href="https://discord.com/developers/applications" target="_blank">Discord Developer Portal</Link> and create a new application, then create a bot for that application.</Typography>
+                    <Typography variant="body1" sx={{ mb: 2, color: "text.secondary" }}>Head over to the <Link href="https://discord.com/developers/applications" target="_blank">Discord Developer Portal</Link> and create a new application, then create a bot for that application.</Typography>
                     
                     <img src="https://mintlify.s3-us-west-1.amazonaws.com/restorecord/images/setup_create_bot.png" alt="Create a bot" style={{ width: isMobile ? "100%" : "45%", borderRadius: "1rem", display: "flex", margin: "auto" }} />
                 </>
@@ -313,7 +312,7 @@ export default function CustomBots() {
                                                 handleNext();
                                             }} sx={{ mt: 2 }}>next</Button>
 
-                                        <Button fullWidth variant="outlined" disabled={activeStep === 0} onClick={handleBack} sx={{ mt: 2 }}>back</Button>
+                                        {/* <Button fullWidth variant="outlined" disabled={activeStep === 0} onClick={handleBack} sx={{ mt: 2 }}>back</Button> */}
                                     </CardContent>
                                 </Paper>
 

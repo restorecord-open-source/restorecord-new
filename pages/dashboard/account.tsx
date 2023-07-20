@@ -145,7 +145,7 @@ export default function AccountSettings() {
                             }
                         });
                     } catch (e) {
-                        setNotiTextE("An error occured");
+                        setNotiTextE("An error occurred");
                         setOpenE(true);
                     }
                 }}>Save Changes</LoadingButton>
@@ -264,7 +264,7 @@ export default function AccountSettings() {
                                                                 }
                                                             });
                                                         } catch (e) {
-                                                            setNotiTextE("An error occured");
+                                                            setNotiTextE("An error occurred");
                                                             setOpenE(true);
                                                         }
                                                     }}>Remove 2-Factor Authentication</LoadingButton>
