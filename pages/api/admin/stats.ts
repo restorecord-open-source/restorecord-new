@@ -31,7 +31,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     account: true,
                 },
                 orderBy: { createdAt: "desc" },
-                take: 4,
             }),
         ]);
 

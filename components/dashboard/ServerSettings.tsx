@@ -345,7 +345,7 @@ export default function DashServerSettings({ user, id }: any) {
                                                     <Grid item>
                                                         <Stack direction="row" spacing={1}>
                                                             <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
-                                                            Discoverable
+                                                                Discoverable
                                                             </Typography>
                                                             <Switch onChange={handleChange} name="discoverable" defaultChecked={server.discoverable} />
                                                         </Stack>

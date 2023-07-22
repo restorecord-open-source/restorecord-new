@@ -17,9 +17,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             const servers = await prisma.servers.findMany({ where: { ownerId: user.id } });
             const backups = await prisma.backups.findMany({ where: { guildId: { in: servers.map(s => s.guildId) } } });
             const customBots = await prisma.customBots.findMany({ where: { ownerId: user.id } });
-
-            if (!user) return res.status(400).json({ success: false, message: "No account found." });
-
+            
             const allBackups = backups.map(async(backup: backups) => {
                 const channelCount = await prisma.channels.count({ where: { backupId: backup.backupId } });
                 const roleCount = await prisma.roles.count({ where: { backupId: backup.backupId } });
