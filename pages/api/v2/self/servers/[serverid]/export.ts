@@ -8,19 +8,12 @@ import { prisma } from "../../../../../../src/db";
 
 import withAuthentication from "../../../../../../src/withAuthentication";
 
-const availableOptions = [
-    { label: "Id", value: "id" },
-    { label: "User Id", value: "userId" },
-    { label: "Access Token", value: "accessToken" },
-    { label: "Refresh Token", value: "refreshToken" },
-    { label: "Username", value: "username" },
-    { label: "Created At", value: "createdAt" },
-];
-
 async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts) {
     if (req.method !== "POST") return res.status(405).json({ code: 0, message: "Method not allowed" });
 
     try {
+        if (user.role !== "business" && user.role !== "enterprise") return res.status(400).json({ success: false, message: "You need to be a business user to export members" });
+
         const serverId: any = BigInt(req.query.serverid as any);
         const options = (req.query.options as string).split(",");
         const format = (req.query.format as string) || "csv";
@@ -39,14 +32,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             }
         });
 
-        if (user) return res.status(400).json({ success: false, message: "You are not authorized to perform this action" });
-
-
-        
-        // THIS DOESNT WORK YET
-
-
-
         if (!server) return res.status(400).json({ success: false, message: "Server not found" });
 
         const members = await prisma.members.findMany({
@@ -62,7 +47,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 createdAt: true
             }
         });
-
 
 
         if (format === "csv") {

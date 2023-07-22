@@ -47,7 +47,7 @@ const withAuthentication = (next: any) => async (req: NextApiRequest, res: NextA
                                         <br />
                                         Your ${user.role.charAt(0).toUpperCase() + user.role.slice(1)} subscription has expired. Please <a href="https://restr.co/upgrade">renew</a> your subscription if you like to keep using ${user.role.charAt(0).toUpperCase() + user.role.slice(1)} plan features.
                                         <br />
-                                        <small>Quick tip: If you paid with Stripe (Credit/Debit Card, Apple Pay, Google Pay, iDeal, etc.), your subscription will automatically renew, and you can safely ignore this email.</small>
+                                        <small>Quick tip: If you paid with Stripe (Credit/Debit Card, Apple Pay, Google Pay, iDeal, etc.), your subscription will automatically renew within the next few hours, and you can safely ignore this email.</small>
                                         <br />
                                         If you have any questions, please contact us at <a style="color: rgb(56,189, 248);" href="mailto:contact@restorecord.com">contact@restorecord.com</a>.
                                         <br />

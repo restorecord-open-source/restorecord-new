@@ -9,6 +9,8 @@ interface LoadingButtonProps {
     color?: "inherit" | "primary" | "secondary" | "error" | "info" | "success" | "warning" | "yellow";
     sx?: SxProps<Theme>;
     children: React.ReactNode;
+    disabled?: boolean;
+    fullWidth?: boolean;
 }
 
 export default function LoadingButton(props: LoadingButtonProps) {
@@ -20,7 +22,8 @@ export default function LoadingButton(props: LoadingButtonProps) {
             variant={variant ?? "contained"}
             color={color ?? "primary"}
             sx={sx}
-            disabled={loading}
+            disabled={loading || props.disabled}
+            fullWidth={props.fullWidth}
             onClick={async () => {
                 setLoading(true);
                 await event();

@@ -275,6 +275,12 @@ export default function VerifiedMembers({ user }: any) {
                 </DialogTitle>
 
                 <DialogContent sx={{ marginTop: 2 }}>
+                    {user.role !== "business" && user.role !== "enterprise" && (
+                        <Alert severity="warning" sx={{ mb: 2 }}>
+                            You need to have the <b>Business</b> plan to export data.
+                        </Alert>
+                    )}
+
                     <Stack spacing={1} direction="row" alignItems="center">
                         <Typography variant="body1" sx={{ fontWeight: "500" }}>
                             Options
@@ -283,8 +289,6 @@ export default function VerifiedMembers({ user }: any) {
                             <HelpOutlineOutlinedIcon sx={{ color: "grey.500", fontSize: "1rem" }} />
                         </Tooltip>
                     </Stack>
-
-                        
 
                     <FormControl fullWidth sx={{ mt: 1 }}>
                         <InputLabel id="server-select-label">Server</InputLabel>
@@ -315,10 +319,22 @@ export default function VerifiedMembers({ user }: any) {
                             <MenuItem value="csv">CSV</MenuItem>
                         </Select>
                     </FormControl>
+
+                    {/* warning when u export ur members they prob wont be able to be used again on restorecord */}
+                    <Alert severity="error" sx={{ mt: 2 }}>
+                        <Typography variant="body1" sx={{ fontWeight: "500" }}>
+                            Warning
+                        </Typography>
+                        <Typography variant="body2">
+                            Exporting your members may result in them not being able to be used again on RestoreCord.
+                        </Typography>
+                    </Alert>
+
+
                 </DialogContent>
 
                 <DialogActions sx={{ mx: 2, mb: 2, justifyContent: "flex-start" }}>
-                    <LoadingButton variant="contained" color="success" event={() => {
+                    <LoadingButton variant="contained" color="success" fullWidth={true} disabled={(user.role !== "business" && user.role !== "enterprise") || exportOptions.selectedOptions.length === 0} event={() => {
                         axios.post(`/api/v2/self/servers/${exportOptions.serverId}/export?options=${exportOptions.selectedOptions.join(",")}&format=${exportOptions.format}`, {}, {
                             headers: {
                                 "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
@@ -361,7 +377,7 @@ export default function VerifiedMembers({ user }: any) {
                             </Typography>
 
                             {/* export button, opens modal */}
-                            {/* <Button variant="contained" color="success" onClick={() => setExportOptions({ ...exportOptions, open: true })}>Export</Button> */}
+                            <Button variant="contained" color="success" onClick={() => setExportOptions({ ...exportOptions, open: true })}>Export</Button>
                         </Stack>
 
                         <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>

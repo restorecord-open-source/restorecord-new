@@ -5,6 +5,7 @@ import theme from "./theme";
 
 const SubscriptionList: Subscription[] = [
     {
+        id: 0,
         name: "Free", 
         priceMonthly: "0",
         priceYearly: "0",
@@ -93,10 +94,17 @@ const SubscriptionList: Subscription[] = [
                 value: "Discovery",
                 description: "Your server will be shown on our website",
                 icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
+            },
+            {
+                name: "export",
+                value: "Export Members",
+                description: "Export all your members to a CSV file",
+                icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
             }
         ]
     },
     {
+        id: 1,
         name: "Premium",
         priceMonthly: "2",
         priceYearly: "15",
@@ -185,10 +193,17 @@ const SubscriptionList: Subscription[] = [
                 value: "Discovery",
                 description: "Your server will be shown on our website",
                 icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
+            },
+            {
+                name: "export",
+                value: "Export Members",
+                description: "Export all your members to a CSV file",
+                icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
             }
         ]
     },
     {
+        id: 2,
         name: "Business",
         priceMonthly: "5",
         priceYearly: "30",
@@ -277,12 +292,19 @@ const SubscriptionList: Subscription[] = [
                 value: "Discovery",
                 description: "Your server will be shown on our website",
                 icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
+            },
+            {
+                name: "export",
+                value: "Export Members",
+                description: "Export all your members to a CSV file",
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             }
         ]
     },
 ];
 
 interface Subscription {
+    id: number;
     name: string;
     priceMonthly: string;
     priceYearly: string;
