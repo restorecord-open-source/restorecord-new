@@ -27,17 +27,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 where: {
                     OR: [{ payment_status: "CONFIRMED" }, { payment_status: "active" }],
                 },
-                include: {
-                    account: true,
-                },
                 orderBy: { createdAt: "desc" },
             }),
         ]);
 
-        const formattedLastPurchases = payments.map(payment => ({
+        const formattedLastPurchases = payments.slice(0, 5).map(payment => ({
             id: payment.id,
             plan: getFormattedPlan(payment.type),
-            username: payment.account?.username,
             date: new Date(payment.createdAt),
         }));
 

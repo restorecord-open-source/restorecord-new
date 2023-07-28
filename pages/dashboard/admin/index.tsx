@@ -66,7 +66,7 @@ export default function Admin() {
 
     function relativeTime(date: Date): string {
         const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
-        return seconds < 0 ? `in ${-seconds / 3600} hours` : seconds < 60 ? "just now" : seconds < 3600 ? `${Math.floor(seconds / 60)} minutes ago` : seconds < 86400 ? `${Math.floor(seconds / 3600)} hours ago` : seconds < 2592000 ? `${Math.floor(seconds / 86400)} days ago` : `in ${Math.floor(seconds / 2592000)} months`;
+        return seconds < 60 ? `${seconds}s` : seconds < 3600 ? `${Math.floor(seconds / 60)}m` : seconds < 86400 ? `${Math.floor(seconds / 3600)}h` : seconds < 604800 ? `${Math.floor(seconds / 86400)}d` : seconds < 2629800 ? `${Math.floor(seconds / 604800)}w` : seconds < 31557600 ? `${Math.floor(seconds / 2629800)}mo` : `${Math.floor(seconds / 31557600)}y`;
     }
 
     function tableElement(name: string, value: string, icon?: any) {
@@ -145,7 +145,6 @@ export default function Admin() {
                                                         <TableRow>
                                                             {isMobile ? ( <></> ) : ( <TableCell><Typography variant="body1" sx={{ fontWeight: "600" }}>ID</Typography></TableCell> )}
                                                             <TableCell><Typography variant="body1" sx={{ fontWeight: "600" }}>Plan</Typography></TableCell>
-                                                            <TableCell><Typography variant="body1" sx={{ fontWeight: "600" }}>Username</Typography></TableCell>
                                                             <TableCell><Typography variant="body1" sx={{ fontWeight: "600" }}>Date</Typography></TableCell>
                                                         </TableRow>
                                                     </TableHead>
@@ -154,7 +153,6 @@ export default function Admin() {
                                                             <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }} key={index}>
                                                                 {isMobile ? ( <></> ) : ( <TableCell component="th" scope="row"><Typography variant="body1">{purchase.id}</Typography></TableCell> )}
                                                                 <TableCell><Typography variant="body1">{purchase.plan}</Typography></TableCell>
-                                                                <TableCell><Typography variant="body1">{purchase.username}</Typography></TableCell>
                                                                 {/* <TableCell><Typography variant="body1">{purchase.date}</Typography></TableCell> */}
                                                                 {/* convert date to relative time like 7s ago etc */}
                                                                 <TableCell><Typography variant="body1">{relativeTime(new Date(purchase.date))}</Typography></TableCell>
