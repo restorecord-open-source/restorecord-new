@@ -35,6 +35,7 @@ export default function DashServerSettings({ user, id }: any) {
         picture: "",
         ipLogging: false,
         discoverable: 0,
+        blockAlts: false,
         webhook: "",
         background: "",
         description: "",
@@ -64,6 +65,7 @@ export default function DashServerSettings({ user, id }: any) {
                 webhookcheck: server.webhook ? true : false,
                 webhook: server.webhook ? server.webhook : "",
                 ipLogging: server.ipLogging,
+                blockAlts: server.blockAlts,
                 discoverable: server.discoverable,
                 picture: server.picture ? server.picture : "",
                 description: server.description ? server.description : "",
@@ -90,6 +92,7 @@ export default function DashServerSettings({ user, id }: any) {
                 newWebhook: newServer.webhook,
                 newWebhookCheck: newServer.webhookcheck,
                 newIpLogging: newServer.ipLogging,
+                newBlockAlts: newServer.blockAlts,
                 newDiscoverable: newServer.discoverable,
                 newVpnCheck: newServer.vpncheck,
                 newPicture: newServer.picture,
@@ -146,6 +149,9 @@ export default function DashServerSettings({ user, id }: any) {
             break;
         case "ipLogging":
             setNewServer({ ...newServer, ipLogging: e.target.checked });
+            break;
+        case "blockAlts":
+            setNewServer({ ...newServer, blockAlts: e.target.checked });
             break;
         case "discoverable":
             setNewServer({ ...newServer, discoverable: e.target.checked ? 1 : 0 });
@@ -334,6 +340,16 @@ export default function DashServerSettings({ user, id }: any) {
                                                                 VPN Check
                                                             </Typography>
                                                             <Switch onChange={handleChange} name="vpncheck" defaultChecked={server.vpncheck} />
+                                                        </Stack>
+                                                    </Grid>
+                                                )}
+                                                {(newServer.webhookcheck) && (
+                                                    <Grid item>
+                                                        <Stack direction="row" spacing={1}>
+                                                            <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                                                Block Alts
+                                                            </Typography>
+                                                            <Switch onChange={handleChange} name="blockAlts" defaultChecked={server.blockAlts} />
                                                         </Stack>
                                                     </Grid>
                                                 )}

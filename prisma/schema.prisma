@@ -48,6 +48,7 @@ model servers {
     redirectUrl  String?
     picture      String?        @default("https://cdn.restorecord.com/logo512.png")
     vpncheck     Boolean        @default(false)
+    blockAlts    Boolean        @default(false)
     webhook      String?
     bgImage      String?
     description  String         @default("Verify to view the rest of the server.")

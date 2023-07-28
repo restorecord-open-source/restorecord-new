@@ -16,6 +16,7 @@ import CardActions from "@mui/material/CardActions";
 import Card from "@mui/material/Card";
 import CheckCircleOutlineRounded from "@mui/icons-material/CheckCircleOutlineRounded";
 import Avatar from "@mui/material/Avatar";
+import Image from "next/image";
 
 import { useEffect, useRef } from "react";
 
@@ -58,11 +59,11 @@ export default function Home() {
                     <meta property="og:title" content="RestoreCord - The Recovery Service" />
                 </Head>
 
-                <Container maxWidth="xl" sx={{ mx: "auto", justifyContent: "center", alignItems: "center"}}>
+                <Container maxWidth="xl" sx={{ mx: "auto", justifyContent: "center", alignItems: "center" }}>
                     <NavBar />
 
                     <Box sx={{ my: 4, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-                        <Typography data-aos="fade-down" variant="h1" component="h1" sx={{ fontWeight: 900, textAlign: "center", fontSize: { xs: "1.5rem", md: "2.5rem", lg: "3.5rem" },  padding: 0, paddingLeft: { xs: "4px", sm: "40px" }, paddingRight: { xs: "4px", sm: "40px" } }}>
+                        {/* <Typography data-aos="fade-down" variant="h1" component="h1" sx={{ fontWeight: 900, textAlign: "center", fontSize: { xs: "1.5rem", md: "2.5rem", lg: "3.5rem" },  padding: 0, paddingLeft: { xs: "4px", sm: "40px" }, paddingRight: { xs: "4px", sm: "40px" } }}>
                             The <span style={{ color: theme.palette.secondary.main }} ref={typingElement}></span> way to<br/>backup your Discord servers.
                         </Typography>
                         <Typography data-aos="fade-down" color={theme.palette.grey[200]} variant="h5" component="h2" sx={{ fontWeight: 300, textAlign: "center", padding: 4, paddingLeft: { xs: "2rem", sm: "4rem", md: "12rem",  }, paddingRight: { xs: "2rem", sm: "4rem", md: "12rem",  } }}>
@@ -73,7 +74,28 @@ export default function Home() {
                             <Button variant="contained" color="primary" href="/login" size="large">
                                 Start Now
                             </Button>
-                        </Badge>
+                        </Badge> */}
+
+                        {/* show text on the top with a small description and 2 button, Get Started and Learn More then an dashboard image to the bottom "https://cdn.restorecord.com/static/images/homepage/dashboard_mu.png" */}
+                        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column" }} data-aos="zoom-in-down">
+                            <Typography data-aos="fade-down" variant="h1" component="h1" sx={{ fontWeight: 900, textAlign: "center", fontSize: { xs: "1.5rem", md: "2.5rem", lg: "3.5rem" },  padding: 0, paddingLeft: { xs: "4px", sm: "40px" }, paddingRight: { xs: "4px", sm: "40px" } }}>
+                                The <span style={{ color: theme.palette.secondary.main }} ref={typingElement}></span> way to<br/>backup your Discord servers.
+                            </Typography>
+
+                            <Typography data-aos="fade-down" color={theme.palette.grey[200]} variant="h5" component="h2" sx={{ fontWeight: 300, textAlign: "center", padding: 4, paddingLeft: { xs: "2rem", sm: "4rem", md: "12rem",  }, paddingRight: { xs: "2rem", sm: "4rem", md: "12rem" } }}>
+                                Backup your Discord server with RestoreCord
+                            </Typography>
+
+                            <Badge data-aos="fade-down" badgeContent={<>FOR FREE</>} color="success" sx={{ boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)", [`& .MuiBadge-badge`]: { backgroundColor: "rgb(52, 168, 83)", color: "#fff" } }}>
+                                <Button variant="contained" color="primary" href="/login" size="large">
+                                    Get Started
+                                </Button>
+                            </Badge>
+                        </Box>
+
+                        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column", mt: 10 }} data-aos="zoom-in-up">
+                            <Image src="https://cdn.restorecord.com/static/images/homepage/dashboard_mu.png" alt="Dashboard" width={1251} height={769} />
+                        </Box>  
 
                         {/* <Box sx={{ marginTop: 30 }} data-aos="fade-up">
                             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "auto", marginTop: "15px" }}>
@@ -111,12 +133,11 @@ export default function Home() {
                                 every day
                             </Typography>
                         </Box> */}
-                       
 
 
                         <Box id="features" sx={{ marginTop: 4 }} />
 
-                        <Card sx={{ width: "100%", height: "auto", display: "block", borderRadius: 12, marginTop: 10 }} data-aos="zoom-in-down">
+                        <Card sx={{ width: "100%", height: "auto", display: "block", borderRadius: 12 }} data-aos="zoom-in-down">
                             <Box sx={{ display: "flex", justifyContent: "flex-start", padding: "36px 50px", alignItems: "center" }}>
                                 <Box>
                                     <Typography sx={{ fontStyle: "normal", fontWeight: 500, fontSize: { sm: 10, md: 20, }, textTransform: "uppercase", color: theme.palette.text.primary, marginTop: 2 }}>
@@ -338,7 +359,7 @@ export default function Home() {
                                         </CardContent>
                                         <CardActions>
                                             <Button href={tier.name === "Free" ? `/register` : `https://restorecord.com/dashboard/upgrade`} fullWidth variant="contained" sx={{ fontWeight: "600" }}>
-                                                {tier.priceYearly === "0" ? "Sign Up" : "Purchase"}
+                                                {tier.priceYearly === "0" ? "Sign Up" : "Try 7 days for free"}
                                             </Button>
                                         </CardActions>
                                     </Card>

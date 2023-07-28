@@ -60,7 +60,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 bgImage: data.newBackground ? (user.role === "business" ? data.newBackground : null) : null,
                 description: data.newDescription,
                 ipLogging: data.newIpLogging,
-                discoverable: data.newDiscoverable ? (user.role !== "free" ? 1 : 0) : 0,
+                discoverable: data.newDiscoverable ? ((user.role === "business" || user.role === "enterprise") ? 1 : 0) : 0,
+                blockAlts: data.newBlockAlts ? (user.role !== "free" ? data.newBlockAlts : false) : false,
                 vpncheck: data.newWebhookCheck ? (data.newVpnCheck ? (user.role !== "free" ? true : false) : false) : false,
                 themeColor: data.newThemeColor ? ((user.role === "business" || user.role === "enterprise") ? data.newThemeColor.replace("#", "") : "4e46ef") : "4e46ef",
             }

@@ -110,8 +110,9 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                 if (isProxy && serverInfo.ipLogging) {
                     await sendWebhookMessage(serverInfo.webhook, "Failed VPN Check", null, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0);
                     return reject(990044 as any);
-                } else if (altCheck.length > 0 && serverOwner.role === "business") {
-                    await sendWebhookMessage(serverInfo.webhook, "WARNING: Alt Found", `A user with this IP has already verified with another account(s):\n${altCheck.map((a: any) => `${a.username.replace(/#0+$/, "")} (${a.userId})`).join("\n")},\n\nThis user has been allowed to verify, but may be an alt.`, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 2);
+                } else if (altCheck.length > 0 && (serverOwner.role === "premium" || serverOwner.role === "business" || serverOwner.role === "enterprise")) {
+                    await sendWebhookMessage(serverInfo.webhook, serverInfo.blockAlts ? "Alt Blocked" : "WARNING: Alt Found", `A user with this IP has already verified with another account(s):\n${altCheck.map((a: any) => `${a.username.replace(/#0+$/, "")} (${a.userId})`).join("\n")}${serverInfo.blockAlts ? ",\n\nThis user has been denied to verify!" : ",\n\nThis user has been allowed to verify, but may be an alt."}`, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, serverInfo.blockAlts ? 0 : 2);
+                    return reject(990045 as any);
                 } else {
                     await sendWebhookMessage(serverInfo.webhook, "Successfully Verified", null, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 1);
                 }
@@ -248,6 +249,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
         case 990033: res.setHeader("Set-Cookie",`RC_err=307 RC_errStack=Your ISP is blacklisted in this server.; Path=/; Max-Age=5;`); break;
         case 990034: res.setHeader("Set-Cookie",`RC_err=307 RC_errStack=Your Country is blacklisted in this server.; Path=/; Max-Age=5;`); break;
         case 990044: res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=5;`); break;
+        case 990045: res.setHeader("Set-Cookie", `RC_err=305; Path=/; Max-Age=5;`); break;
         case 990401: res.setHeader("Set-Cookie", `RC_err=401; Path=/; Max-Age=5;`); break;
         case 990403: res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=5;`); break;
         case 990404: res.setHeader("Set-Cookie", `RC_err=404; Path=/; Max-Age=5;`); break;

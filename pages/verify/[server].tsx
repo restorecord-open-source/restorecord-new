@@ -43,6 +43,7 @@ export default function Verify({ server, status, err, errStack }: any) {
             "403": "Seems like this server hasn't been set up correctly, please contact the owner and let them know: Missing Permission.",
             "401": "Seems like this bot hasn't been set up correctly, please contact the owner and let them know: Invalid Token.",
             "306": "VPN or Proxy detected, please disable it and try again.",
+            "305": "Alt Account detected, please use your main account and try again.",
             "307": `You're blacklisted in this server, please contact the owner.\n${errStack}`,
             "30001": "Seems like you have reached the 100 server limit, please leave a server and try again.",
         };
@@ -150,16 +151,18 @@ export default function Verify({ server, status, err, errStack }: any) {
                         ) : (
                             <>
                                 {server.success ? (
-                                    <Typography variant="body1" component="p" sx={{ textAlign: "center", fontSize: { xs: "1rem", md: "1.75rem" }, whiteSpace: "pre-line", overflowWrap: "break-word" }}>
-                                        {server.description}
-                                    </Typography>
-                                ) : ( <></> )}
-    
-                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", mt: "1rem" }}>
-                                    {server.success ? (
-                                        <Avatar src={server.icon} sx={{ width: { xs: "6rem", md: "8rem" }, height: { xs: "6rem", md: "8rem" } }} />
-                                    ) : ( <></> )}
-                                </Box>
+                                    <>
+                                        {server.description &&
+                                        <Typography variant="body1" component="p" sx={{ textAlign: "center", fontSize: { xs: "1rem", md: "1.75rem" }, whiteSpace: "pre-line", overflowWrap: "break-word" }}>
+                                            {server.description}
+                                        </Typography>}
+
+                                        {server.icon &&
+                                        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", mt: "1rem" }}>
+                                            <Avatar src={server.icon} sx={{ width: { xs: "6rem", md: "8rem" }, height: { xs: "6rem", md: "8rem" } }} />
+                                        </Box>}
+                                    </>
+                                ) : <></>}
 
                                 <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                                     {server.success ? (

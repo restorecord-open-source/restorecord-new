@@ -17,8 +17,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         return res.status(200).json({ 
             success: true,
             server: {
+                id: server.id,
                 name: server.name,
-                id: server.guildId,
+                guildId: server.guildId,
                 owner: server.ownerId,
             }
         });

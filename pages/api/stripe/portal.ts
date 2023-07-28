@@ -10,8 +10,6 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "
 
 async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts) {
     try {
-        const { plan } = req.body;
-        if (!plan) return res.status(400).json({ success: false, message: "Missing parameters" });
 
         const payments = await prisma.payments.findMany({ where: { accountId: user.id, OR: [{ payment_status: "trialing" }, { payment_status: "active" }] }, orderBy: { createdAt: "desc" } });
         if (payments.length === 0 || (payments[0].subscriptionId === null || payments[0].subscriptionId === undefined)) return res.status(400).json({ success: false, message: "Subscription not found." });
@@ -22,12 +20,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         const session = await stripe.billingPortal.sessions.create({
             return_url: `https://restorecord.com/dashboard/upgrade`,
             customer: subscription.customer as string,
-            flow_data: {
-                type: "subscription_update" as any,
-                subscription_update: {
-                    subscription: subscription.id,
-                }
-            } as any
         });
 
         return res.status(200).json({ success: true, redirect: session.url });

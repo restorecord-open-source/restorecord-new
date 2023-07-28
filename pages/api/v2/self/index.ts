@@ -54,6 +54,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     description: server.description,
                     webhook: server.webhook,
                     ipLogging: server.ipLogging,
+                    blockAlts: server.blockAlts,
                     discoverable: server.discoverable,
                     bgImage: server.bgImage,
                     themeColor: server.themeColor,

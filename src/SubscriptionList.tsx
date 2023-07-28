@@ -66,6 +66,12 @@ const SubscriptionList: Subscription[] = [
                 icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
             },
             {
+                name: "altDetection",
+                value: "Alt Detection",
+                description: "Detects if a member is an alt account and prevents them from verifying",
+                icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
+            },
+            {
                 name: "serverBackups",
                 value: "Server Backup",
                 description: "Backup all your Server Settings, Channels, Roles and more",
@@ -165,6 +171,12 @@ const SubscriptionList: Subscription[] = [
                 icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
+                name: "altDetection",
+                value: "Alt Detection",
+                description: "Detects if a member is an alt account and prevents them from verifying",
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
+            },
+            {
                 name: "serverBackups",
                 value: "Server Backup",
                 description: "Backup all your Server Settings, Channels, Roles and more",
@@ -261,6 +273,12 @@ const SubscriptionList: Subscription[] = [
                 name: "verificationLogging",
                 value: "Advanced Verification Logging",
                 description: "See more information about verified members",
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
+            },
+            {
+                name: "altDetection",
+                value: "Alt Detection",
+                description: "Detects if a member is an alt account and prevents them from verifying",
                 icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {

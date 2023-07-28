@@ -12,7 +12,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
     if (req.method !== "POST") return res.status(405).json({ code: 0, message: "Method not allowed" });
 
     try {
-        if (user.role !== "business" && user.role !== "enterprise") return res.status(400).json({ success: false, message: "You need to be a business user to export members" });
+        if (user.role !== "business" && user.role !== "enterprise") return res.status(400).json({ success: false, message: "Business Subscription is required" });
 
         const serverId: any = BigInt(req.query.serverid as any);
         const options = (req.query.options as string).split(",");

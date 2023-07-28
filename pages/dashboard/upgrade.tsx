@@ -35,6 +35,28 @@ import FormLabel from "@mui/material/FormLabel";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Radio from "@mui/material/Radio";
 import Badge from "@mui/material/Badge";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import TableContainer from "@mui/material/TableContainer";
+import Table from "@mui/material/Table";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import TableCell from "@mui/material/TableCell";
+import TableBody from "@mui/material/TableBody";
+
+function CustomTabPanel(props: any) {
+    const { children, value, index, ...other } = props;
+  
+    return (
+        <div role="tabpanel" hidden={value !== index} id={`custom-tabpanel-${index}`} aria-labelledby={`custom-tab-${index}`} {...other}>
+            {value === index && (
+                <Box sx={{ p: 3 }}>
+                    {children}
+                </Box>
+            )}
+        </div>
+    );
+}
 
 export default function Upgrade() {
     const [token]: any = useToken();
@@ -42,6 +64,7 @@ export default function Upgrade() {
     const alertRef: any = useRef();
 
     const [upgradeWindow, setUpgradeWindow] = useState(false);
+    const [downgradeWindow, setDowngradeWindow] = useState(false);
     const [purchaseWindow, setPurchaseWindow] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState("");
     const [selectedPlan, setSelectedPlan] = useState({
@@ -51,18 +74,24 @@ export default function Upgrade() {
         priceMonthly: 0,
     });
 
-
+    const [subTab, setSubTab] = useState(0);
 
     const { data: user, isError, isLoading } = useQuery("user", async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
     }), { retry: false, refetchOnWindowFocus: false });
 
+    const { data: payments, isError: paymentsIsError, isLoading: paymentsIsLoading } = useQuery("payments", async () => await axios.get("/api/v2/self/payments", {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+        },
+    }).then((res) => res.data), { retry: false, refetchOnWindowFocus: false });
 
-    if (isLoading) {
+    if (isLoading || paymentsIsLoading) {
         return <CircularProgress sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
     }
 
-    if (isError) {
+    if (isError || paymentsIsError) {
         return <div>Error</div>
     }
 
@@ -80,19 +109,19 @@ export default function Upgrade() {
         });
     }
 
-    function renderBillingCycleSelect() {
+    function renderBillingCycleSelect(trial?: boolean | undefined | null) {
         return (
             <FormControl component="fieldset">
                 <FormLabel component="legend" sx={{ color: theme.palette.primary.main, fontWeight: "bold", mb: 1 }}>Billing Cycle</FormLabel>
                 <RadioGroup aria-label="plan" name="plan" value={selectedPlan} onChange={handleRadioChange}>
                     <Stack direction="column" spacing={0} sx={{ textAlign: "center", textTransform: "none", mb: 1 }}>
                         <FormControlLabel value={selectedPlan.id.split("_")[0]} checked={selectedPlan.id.split("_")[1] !== "monthly"} control={<Radio />} label={
-                            <Badge badgeContent={<>Save {Math.round(((selectedPlan.priceMonthly - (selectedPlan.price / 12)) / selectedPlan.priceMonthly) * 100)}%</>} color="primary" sx={{ [`& .MuiBadge-badge`]: { color: "#fff", fontSize: "0.85rem", fontWeight: "bold", padding: "0.95rem", mt: "1.20rem", mr: "-3.5rem" } }}>
-                                <Typography variant="h6" color="white" sx={{ fontWeight: "500" }}>Yearly (${selectedPlan.price / 12}/mo)</Typography>
+                            <Badge badgeContent={<>Save {trial ? "100" : Math.round(((selectedPlan.priceMonthly - (selectedPlan.price / 12)) / selectedPlan.priceMonthly) * 100)}%</>} color="primary" sx={{ [`& .MuiBadge-badge`]: { color: "#fff", fontSize: "0.85rem", fontWeight: "bold", padding: "0.95rem", mt: "1.20rem", mr: "-3.5rem" } }}>
+                                <Typography variant="h6" color="white" sx={{ fontWeight: "500" }}>Yearly (${trial ? 0 : selectedPlan.price / 12}/mo)</Typography>
                             </Badge>
                         } />
                         <FormControlLabel value={`${selectedPlan.id.split("_")[0]}_monthly`} checked={selectedPlan.id.split("_")[1] === "monthly"} control={<Radio />} label={
-                            <Typography variant="h6" color="white" sx={{ fontWeight: "500" }}>Monthly (${selectedPlan.priceMonthly}/mo)</Typography>
+                            <Typography variant="h6" color="white" sx={{ fontWeight: "500" }}>Monthly (${trial ? 0 : selectedPlan.priceMonthly}/mo)</Typography>
                         } />
                     </Stack>
                 </RadioGroup>
@@ -157,7 +186,14 @@ export default function Upgrade() {
 
                     {(paymentMethod === "coinbase") && (
                         <>
-                            <Grid container spacing={2} sx={{ mt: 2, mb: 2 }}>
+                            <Grid container sx={{ mt: 2, mb: 2 }}>
+                                {payments.payments.length === 0 && (
+                                    <Alert severity="warning" sx={{ mb: 2 }}>
+                                        <AlertTitle>Warning</AlertTitle>
+                                        Crypto Payments do not support the 7 day free trial. If you want to use the 7 day free trial, please select Stripe as your payment method.
+                                    </Alert>
+                                )}
+
                                 {renderBillingCycleSelect()}
 
                                 <Button variant="contained" color="primary" fullWidth onClick={() => {
@@ -184,8 +220,8 @@ export default function Upgrade() {
                                 
                     {(paymentMethod === "stripe") && (
                         <>
-                            <Grid container spacing={2} sx={{ mt: 2, mb: 2 }}>
-                                {renderBillingCycleSelect()}
+                            <Grid container sx={{ mt: 2, mb: 2 }}>
+                                {renderBillingCycleSelect(payments.payments.length === 0)}
 
                                 <Button variant="contained" color="primary" fullWidth onClick={() => {
                                     axios.post("/api/stripe/checkout", {
@@ -204,7 +240,7 @@ export default function Upgrade() {
                                 }}>Go to checkout</Button>
                             </Grid>
                             <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center", fontSize: "0.75rem", mt: 1 }}>
-                                As soon as you subscribe you agree to our <MuiLink href="/terms">Terms of Service</MuiLink>, <MuiLink href="/privacy">Privacy Policy</MuiLink> and <MuiLink href="/refund-policy">Refund Policy</MuiLink>. <br/>Your card will be charged ${selectedPlan.id.split("_")[1] === "monthly" ? selectedPlan.priceMonthly : selectedPlan.price} every {selectedPlan.id.split("_")[1] === "monthly" ? "month" : "year"}.
+                                As soon as you subscribe you agree to our <MuiLink href="/terms">Terms of Service</MuiLink>, <MuiLink href="/privacy">Privacy Policy</MuiLink> and <MuiLink href="/refund-policy">Refund Policy</MuiLink>. <br/>Your card will be charged ${selectedPlan.id.split("_")[1] === "monthly" ? selectedPlan.priceMonthly : selectedPlan.price} every {selectedPlan.id.split("_")[1] === "monthly" ? "month" : "year"} {payments.payments.length === 0 && "after the 7 day free trial."}
                             </Typography>
                         </>
                     )}
@@ -217,8 +253,8 @@ export default function Upgrade() {
                         </Typography>
                     )} */}
 
-                    <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center", fontSize: "0.75rem", mt: 1 }}>
-                        Coinbase or Stripe accounts are not required to purchase.
+                    <Typography variant="body2" color="text.primary" sx={{ textAlign: "center", fontSize: "0.75rem", mt: 1 }}>
+                        <b>Coinbase and Stripe accounts are not required to purchase.</b>
                     </Typography>
                 </DialogContent>
             </Dialog>
@@ -281,18 +317,90 @@ export default function Upgrade() {
         )
     }
 
+    function renderDowngradeWindow() {
+        return (
+            <Dialog open={downgradeWindow} onClose={() => setDowngradeWindow(false)} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" fullWidth maxWidth="sm">
+                <DialogTitle id="alert-dialog-title">
+                    <Typography variant="h6" sx={{ fontWeight: "700" }}>
+                        Downgrade
+                    </Typography>
+
+                    <IconButton aria-label="close" onClick={() => setDowngradeWindow(false)} sx={{ position: "absolute", right: 8, top: 8, color: theme.palette.grey[500] }}>
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent>
+                    <Alert ref={alertRef} severity="error" sx={{ display: "none" }}>
+                        <AlertTitle>Error</AlertTitle>
+                        <Typography variant="body2" color="text.secondary" sx={{ textAlign: "left", fontSize: "0.75rem", mt: 1 }}></Typography>
+                    </Alert>
+
+                    {/* show a table with the upcharge if he upgrades */}
+                    <Typography component="h6" variant="body1" sx={{ fontWeight: "400", wordWrap: "break-word", whiteSpace: "pre-line" }}>
+                        You are currently on the <b>{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</b> plan.<br/>
+                        Downgrading to the <b>{selectedPlan.name}</b> plan will remove all features from <b>{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</b> and will cost you <b>${Number(SubscriptionList.find((plan: any) => plan.name.toLowerCase() === user.role.toLowerCase())?.priceYearly ?? 0) - Number(selectedPlan.price)}</b> less.<br/>
+                        This currently only works if you have paid via Stripe.
+                    </Typography>
+
+                    <Grid container spacing={2} sx={{ mt: 2, mb: 2 }}>
+                        {renderBillingCycleSelect()}
+                        <Button variant="contained" color="primary" fullWidth onClick={() => {
+                            axios.post("/api/stripe/update", {
+                                plan: selectedPlan.id,
+                            }, {
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                },
+                            }).then((res) => {
+                                alertRef.current.style.display = "none";
+
+                                document.location.href = res.data.redirect;
+                            }).catch((err) => {
+                                alertRef.current.style.display = "flex";
+                                alertRef.current.children[1].innerHTML = err.response.data.message;
+                                
+                                console.error(err);
+                            });
+                        }}>Go to checkout</Button>
+                    </Grid>
+
+                    <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center", fontSize: "0.75rem", mt: 1 }}>
+                        As soon as you subscribe you agree to our <MuiLink href="/terms">Terms of Service</MuiLink>, <MuiLink href="/privacy">Privacy Policy</MuiLink> and <MuiLink href="/refund-policy">Refund Policy</MuiLink>. <br/>Your card will be charged ${selectedPlan.id.split("_")[1] === "monthly" ? selectedPlan.priceMonthly : selectedPlan.price} every {selectedPlan.id.split("_")[1] === "monthly" ? "month" : "year"}.
+                    </Typography>
+                </DialogContent>
+            </Dialog>
+        )
+    }
+
     function renderSubscriptionStatus() {
         return (
             <>
                 <Typography component="h6" variant="h6" sx={{ fontWeight: "400" }}>
-                    Your current plan is <b>{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</b>.
+                    Your current plan is <b>{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</b>{payments.payments.length > 0 && payments.payments[payments.payments.length - 1].status === "trialing" && <Badge badgeContent="Trial" color="warning" sx={{ ml: 2.5, mb: 0.25 }} />}. 
                 </Typography>
                 <Typography component="h6" variant="h6" sx={{ fontWeight: "400" }}>
                     Expires on <b>{new Intl.DateTimeFormat(navigator.language, { year: "numeric", month: "long", day: "2-digit" }).format(new Date(user.expiry))}</b>.
                 </Typography>
-                <Typography component="span" variant="body2" sx={{ display: "block", mb: 2, }}>
+                {/* <Typography component="span" variant="body2" sx={{ display: "block", mb: 2, }}>
                     Click <MuiLink href="https://billing.stripe.com/p/login/eVa4jz31t0dHgsUfYY">here</MuiLink> to manage and cancel your subscription. <small>(If paid via Stripe)</small>
-                </Typography>
+                </Typography> */}
+
+                {/* if current user.role is not free and last payment is active or trialing, show Manage button */}
+                {(user.role !== "free" && payments.payments.length > 0 && (payments.payments[payments.payments.length - 1].status === "active" || payments.payments[payments.payments.length - 1].status === "trialing")) && (
+                    <Button variant="contained" color="primary" sx={{ mt: 2 }} onClick={() => {
+                        axios.get("/api/stripe/portal", {
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                            },
+                        }).then((res) => {
+                            document.location.href = res.data.redirect;
+                        }).catch((err) => {
+                            console.error(err);
+                        });
+                    }}>Manage</Button>
+                )}
             </>
         )
     }
@@ -349,7 +457,7 @@ export default function Upgrade() {
                                 ))}
                             </CardContent>
                             <CardActions>
-                                <Button fullWidth variant="contained" sx={{ fontWeight: "600" }} disabled={(tier.name.toLowerCase() === "free" || (tier.name.toLowerCase() === user.role) || ((user.role === "business" || user.role === "enterprise")))} onClick={() => {
+                                <Button fullWidth variant="contained" sx={{ fontWeight: "600" }} disabled={((tier.name.toLowerCase() === user.role) ? true : false) || (payments.payments.length > 0 && payments.payments[payments.payments.length - 1].status === "trialing")} onClick={() => {
                                     setSelectedPlan({
                                         id: tier.name.toLowerCase(),
                                         name: tier.name,
@@ -357,13 +465,19 @@ export default function Upgrade() {
                                         priceMonthly: Number(tier.priceMonthly) as number,
                                     });
 
-                                    if (tier.name.toLowerCase() !== user.role && user.role !== "free") {
+                                    // show downgrade, upgrade or purchase window
+                                    if (tier.id > SubscriptionList.findIndex((plan: any) => plan.name.toLowerCase() === user.role.toLowerCase()) && payments.payments.length > 0) {
                                         setUpgradeWindow(true);
-                                    } else {
+                                    } else if (tier.id < SubscriptionList.findIndex((plan: any) => plan.name.toLowerCase() === user.role.toLowerCase())) {
+                                        setDowngradeWindow(true);
+                                    } else if (payments.payments.length === 0) {
                                         setPurchaseWindow(true);
+                                    } else {
+                                        setUpgradeWindow(true);
                                     }
                                 }}>
-                                    {tier.name.toLowerCase() === user.role ? "Current Plan" : "Upgrade"}
+                                    {/* show "Current Plan" if tier.name matches user.role, show "Upgrade" if tier.id (number) is higher than user.role (tier.name) and payments.payments is not empty, show "Downgrade" if tier.id (number) is lower than user.role, if "payments.payments" is empty then show "Try 7 days for free" instead of "Upgrade" */}
+                                    {(tier.name.toLowerCase() === user.role) ? "Current Plan" : (tier.id > SubscriptionList.findIndex((plan: any) => plan.name.toLowerCase() === user.role.toLowerCase()) && payments.payments.length > 0) ? "Upgrade" : (tier.id < SubscriptionList.findIndex((plan: any) => plan.name.toLowerCase() === user.role.toLowerCase())) ? "Downgrade" : "Try 7 days for free"}
                                 </Button>
                             </CardActions>
                         </Paper>
@@ -378,24 +492,74 @@ export default function Upgrade() {
             <NavBar user={user}>
                 <Toolbar />
                 <Container maxWidth="xl">
+                    {user.role !== "free" &&
+                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
+                            <CardContent>
+                                <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
+                                    Current Subscription
+                                </Typography>
+
+                                <Tabs value={subTab} onChange={(e, newValue) => setSubTab(newValue)} aria-label="basic tabs example" sx={{ mb: 2 }}>
+                                    <Tab label="Subscription" id="sub-tabs-0" aria-controls="basic-tabs-0" />
+                                    <Tab label="Payment History" id="sub-tabs-1" aria-controls="basic-tabs-1" />
+                                </Tabs>
+
+                                <CustomTabPanel value={subTab} index={0}>
+                                    {renderSubscriptionStatus()}
+                                </CustomTabPanel>
+                                <CustomTabPanel value={subTab} index={1}>
+                                    <TableContainer component={Paper} sx={{ mt: 2, boxShadow: "none", border: `1px solid ${theme.palette.grey[800]}` }}>
+                                        <Table aria-label="simple table">
+                                            <TableHead>
+                                                <TableRow>
+                                                    <TableCell>Payment ID</TableCell>
+                                                    <TableCell>Amount</TableCell>
+                                                    <TableCell>Plan</TableCell>
+                                                    <TableCell>Status</TableCell>
+                                                    <TableCell>Date</TableCell>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {payments.payments.map((payment: any) => (
+                                                    <TableRow key={payment.id} sx={{ "&:last-child td, &:last-child th": { borderBottom: 0 } }}>
+                                                        <TableCell component="th" scope="row" sx={{ borderLeft: `3px solid ${payment.status === "active" ? theme.palette.success.main : payment.status === "cancelled" ? theme.palette.error.main : payment.status === "trialing" ? theme.palette.warning.main : theme.palette.grey[800]}`, paddingLeft: "0.5rem" }}>{payment.id}</TableCell>
+                                                        <TableCell>${Math.round(payment.amount / 100).toFixed(2)}</TableCell>
+                                                        <TableCell>{payment.plan.charAt(0).toUpperCase() + payment.plan.slice(1)}</TableCell>
+                                                        <TableCell>{payment.status === "active" ? "PAID" : payment.status === "cancelled" ? "CANCELLED" : payment.status === "trialing" ? "TRIAL" : payment.status}</TableCell>
+                                                        <TableCell>{new Intl.DateTimeFormat(navigator.language, { year: "numeric", month: "long", day: "2-digit" }).format(new Date(payment.createdAt))}</TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </TableContainer>
+                                    
+                                </CustomTabPanel>
+                            </CardContent>
+                        </Paper>
+                    }
+                   
                     <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
                         <CardContent>
                             <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
-                                    Upgrade
+                                Upgrade
                             </Typography>
 
                             {(router.query.s === "1") ? renderSuccessfulPayment() : null}
                             {(router.query.s === "2") ? renderPendingPayment() : null}
-                            {user.role !== "free" ? renderSubscriptionStatus() : null}
                             {purchaseWindow ? renderPaymentWindow() : null}
                             {upgradeWindow ? renderUpgradeWindow() : null}
+                            {downgradeWindow ? renderDowngradeWindow() : null}
                         
                             {renderSubscriptionList()}
                         
                         </CardContent>
                     </Paper>
+
+                    
+
                 </Container>
             </NavBar>
         </Box>
     )
 }
+

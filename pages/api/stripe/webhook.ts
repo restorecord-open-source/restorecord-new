@@ -43,7 +43,7 @@ async function postWebhook(subscription: any, account: any, status: string, desc
                     },
                     {
                         name: "Status",
-                        value: status === "active" ? `:white_check_mark: ${status}` : `:x: ${status}`,
+                        value: status === "active" ? `:white_check_mark: ${status}` : status === "trialing" ? `:hourglass: ${status}` : `:x: ${status}`,
                         inline: true
                     },
                     {
@@ -86,8 +86,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         let status: string;
 
         const buf = await buffer(req);
-        //const endpointSecret = "whsec_V36i82Fn70v9edAJHKeKwykhUI8bFLBt";
-        const endpointSecret = "whsec_J2ZCMxWPvKeaStSWl4r1RdSnvTu39Gix";
+        const endpointSecret = "whsec_V36i82Fn70v9edAJHKeKwykhUI8bFLBt";
+        //const endpointSecret = "whsec_J2ZCMxWPvKeaStSWl4r1RdSnvTu39Gix";
         if (endpointSecret) {
             const signature: any = req.headers["stripe-signature"];
             try {
@@ -99,29 +99,88 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
         if (!event) return res.status(400).json({ success: false, message: "Event not found." });
 
-
-        //console.log(`[${event.type}] ${JSON.stringify(event.data.object)}`);
+        console.log(`[${event.type}] ${JSON.stringify(event.data.object)}`);
 
         switch (event.type) {
         case "customer.subscription.created":
             subscription = event.data.object;
             status = subscription.status;
 
-            if (await prisma.payments.findUnique({ where: { subscriptionId: subscription.id } })) return;
+            var planFull = priceIds[subscription.items.data[0].price.id].plan;
+            var plan = planFull.replace("_monthly", "");
 
-            await prisma.payments.create({
-                data: {
-                    subscriptionId: subscription.id,
-                    accountId: Number(subscription.metadata.account_id) as number,
-                    type: subscription.metadata.plan,
-                    amount: subscription.plan.amount,
-                    payment_status: status,
+            console.log(event.type, subscription, status)
+
+            const payment = await prisma.payments.findUnique({ where: { subscriptionId: subscription.id } });
+            if (!payment) {
+                await prisma.payments.create({
+                    data: {
+                        subscriptionId: subscription.id,
+                        accountId: Number(subscription.metadata.account_id) as number,
+                        type: subscription.metadata.plan,
+                        amount: subscription.plan.amount,
+                        payment_status: status,
+                    }
+                });
+            }
+
+            if (status === "trialing") {
+                const payment = await prisma.payments.findUnique({
+                    where: {
+                        subscriptionId: subscription.id
+                    }
+                });
+
+                if (subscription.metadata.plan !== planFull) {
+                    await stripe.subscriptions.update(subscription.id, {
+                        metadata: {
+                            plan: planFull,
+                        }
+                    });
                 }
-            });
+
+                if (payment) {
+                    await prisma.payments.update({
+                        where: {
+                            id: payment.id
+                        },
+                        data: {
+                            payment_status: status,
+                            amount: subscription.plan.amount,
+                            type: planFull
+                        }
+                    });
+
+                    await prisma.accounts.update({
+                        where: {
+                            id: Number(payment.accountId) as number
+                        },
+                        data: {
+                            role: plan,
+                            expiry: new Date(subscription.current_period_end * 1000)
+                        }
+                    });
+
+                    await prisma.servers.updateMany({
+                        where: {
+                            ownerId: Number(payment.accountId) as number,
+                            pullTimeout: {
+                                gt: new Date()
+                            }
+                        },
+                        data: {
+                            pullTimeout: new Date()
+                        }
+                    });
+                }
+            }
+
             break;
         case "customer.subscription.deleted":
             subscription = event.data.object;
             status = subscription.status;
+
+            console.log(event.type, subscription, status)
 
             if (status === "canceled") {
                 let account;
@@ -138,15 +197,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         expiry: null
                     }
                 });
+
+                // reset all servers
+                await prisma.servers.updateMany({
+                    where: {
+                        ownerId: Number(subscription.metadata.account_id) as number,
+                    },
+                    data: {
+                        picture: "https://cdn.restorecord.com/logo512.png",
+                        vpncheck: false,
+                        webhook: "",
+                        bgImage: "",
+                        description: "Verify to view the rest of the server.",
+                        themeColor: "4f46e5",
+                    }
+                });
             }
             break;
         case "customer.subscription.updated":
             subscription = event.data.object;
             status = subscription.status;
 
-            const planFull = priceIds[subscription.items.data[0].price.id].plan;
-            // create plan so without _monthly
-            const plan = planFull.replace("_monthly", "");
+            console.log(event.type, subscription, status)
+
+            var planFull = priceIds[subscription.items.data[0].price.id].plan;
+            var plan = planFull.replace("_monthly", "");
 
             if (status !== "incomplete" && status !== "incomplete_expired") {
                 let account;
@@ -155,7 +230,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 await postWebhook(subscription, account, status);
             }
 
-            if (status === "active") {
+            if (status === "active" || status === "trialing") {
                 console.log(`[STRIPE] Subscription status is ${status}.`);
 
                 const payment = await prisma.payments.findUnique({
@@ -195,6 +270,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             expiry: new Date(subscription.current_period_end * 1000)
                         }
                     });
+
+                    await prisma.servers.updateMany({
+                        where: {
+                            ownerId: Number(payment.accountId) as number,
+                            pullTimeout: {
+                                gt: new Date()
+                            }
+                        },
+                        data: {
+                            pullTimeout: new Date()
+                        }
+                    });
                 } else {
                     console.error(`[STRIPE] Payment not found for subscription ${subscription.id}`);
 
@@ -221,47 +308,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
             break;
         }
-
-        // switch (event.type) {
-        // case "customer.subscription.updated":
-        //     subscription = event.data.object;
-        //     status = subscription.status;
-        //     if (status === "active") {
-        //         console.log(`Subscription status is ${status}.`);
-        //         // console.log(JSON.stringify(event));
-        //         const sub = await stripe.checkout.sessions.retrieve(subscription.latest_invoice.payment_intent);
-
-        //         const payment = await prisma.payments.findUnique({
-        //             where: {
-        //                 sessionId: sub.latest_invoice.payment_intent
-        //             }
-        //         })
-
-        //         console.log(payment)
-                
-        //         if (payment) {
-        //             await prisma.payments.update({
-        //                 where: {
-        //                     id: payment.id
-        //                 },
-        //                 data: {
-        //                     payment_status: sub.status
-        //                 }
-        //             });
-
-        //             await prisma.accounts.update({
-        //                 where: {
-        //                     id: payment.accountId
-        //                 },
-        //                 data: {
-        //                     expiry: new Date(sub.current_period_end * 1000),
-        //                     role: payment.type
-        //                 }
-        //             });
-        //         }
-        //     }
-        //     break;
-        // }
 
         return res.status(200).json({ success: true });
     } catch (err: any) {

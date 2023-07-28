@@ -3,7 +3,6 @@
 	"version": "1.0.0",
 	"private": true,
 	"scripts": {
-		"postinstall": "prisma generate",
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
@@ -18,7 +17,7 @@
 		"@mui/icons-material": "^5.11.16",
 		"@mui/lab": "^5.0.0-alpha.98",
 		"@mui/material": "^5.11.10",
-		"@prisma/client": "^4.15.0",
+		"@prisma/client": "^5.0.0",
 		"@sendgrid/mail": "^7.7.0",
 		"@types/aos": "^3.0.4",
 		"aos": "^2.3.4",
@@ -66,7 +65,7 @@
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-prettier": "^4.0.0",
 		"prettier": "^2.7.0",
-		"prisma": "^4.15.0",
+		"prisma": "^5.0.0",
 		"typescript": "^5.0.2"
 	}
 }
