@@ -158,7 +158,7 @@ export default function VerifiedMembers({ user }: any) {
                                 <Avatar alt={userInfo.username} src={userInfo.avatar.length < 5 ? `https://cdn.discordapp.com/embed/avatars/${userInfo.discriminator % 5}.png` : `https://cdn.discordapp.com/avatars/${userInfo.id}/${userInfo.avatar}?size=2048`} />
                                             
                                 <Tooltip title={`${userInfo.username}#${userInfo.discriminator}`} placement="top">
-                                    <Typography variant="h5" sx={{ fontWeight: "600", zIndex: 9999  }}>
+                                    <Typography variant="h5" sx={{ fontWeight: "600", zIndex: 9999 }}>
                                         {userInfo.username}#{userInfo.discriminator}
                                     </Typography>
                                 </Tooltip>
@@ -326,7 +326,7 @@ export default function VerifiedMembers({ user }: any) {
                             Warning
                         </Typography>
                         <Typography variant="body2">
-                            Exporting your members may result in them not being able to be used again on RestoreCord.
+                            We do not recommend using the members in your Application after exporting them, we don&apos;t gurantee that they will be able to be used again on RestoreCord.
                         </Typography>
                     </Alert>
 

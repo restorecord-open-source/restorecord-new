@@ -276,7 +276,7 @@ export default function Dashboard() {
                                                 <Avatar src={`https://cdn.discordapp.com/embed/avatars/${member.avatar}.png`} />
                                             )}
                                         </ListItemAvatar>
-                                        <ListItemText primary={`${member.username}`} secondary={
+                                        <ListItemText primary={`${member.username.endsWith("#0") ? `@${member.username.slice(0, -2)}` : member.username}`} secondary={
                                             <>
                                                 Id: {`${member.userId}`}<br/>
                                                 Verified: {`${new Date(member.createdAt).toLocaleDateString()}`}

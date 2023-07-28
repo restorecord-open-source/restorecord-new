@@ -58,6 +58,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 const memberData: { [key: string]: any } = {};
                 options.forEach((option) => {
                     memberData[option] = member[option as keyof typeof member];
+                    memberData.createdAt = member.createdAt.getTime();
                 });
                 return memberData;
             });
@@ -71,6 +72,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 const memberData: { [key: string]: any } = {};
                 options.forEach((option) => {
                     memberData[option] = member[option as keyof typeof member];
+                    memberData.createdAt = member.createdAt.getTime();
                     if (typeof memberData[option] === "bigint") memberData[option] = memberData[option].toString();
                 });
                 return memberData;
