@@ -59,9 +59,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             },
             // if previous customer exists add customer parameter if not use customer_email parameter
             ...(previousCustomer ? { customer: previousCustomer } : { customer_email: user.email }),
-            customer_update: {
+            ...(previousCustomer ? { customer_update: {
                 name: "auto",
-            },
+            }, } : {}),
             subscription_data: {
                 description: `RestoreCord Subscription`,
                 metadata: {

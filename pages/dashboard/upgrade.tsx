@@ -466,14 +466,12 @@ export default function Upgrade() {
                                     });
 
                                     // show downgrade, upgrade or purchase window
-                                    if (tier.id > SubscriptionList.findIndex((plan: any) => plan.name.toLowerCase() === user.role.toLowerCase()) && payments.payments.length > 0) {
+                                    if (tier.id > SubscriptionList.findIndex((plan: any) => plan.name.toLowerCase() === user.role.toLowerCase()) && payments.payments.length > 0 && user.role !== "free") {
                                         setUpgradeWindow(true);
                                     } else if (tier.id < SubscriptionList.findIndex((plan: any) => plan.name.toLowerCase() === user.role.toLowerCase())) {
                                         setDowngradeWindow(true);
-                                    } else if (payments.payments.length === 0) {
-                                        setPurchaseWindow(true);
                                     } else {
-                                        setUpgradeWindow(true);
+                                        setPurchaseWindow(true);
                                     }
                                 }}>
                                     {/* show "Current Plan" if tier.name matches user.role, show "Upgrade" if tier.id (number) is higher than user.role (tier.name) and payments.payments is not empty, show "Downgrade" if tier.id (number) is lower than user.role, if "payments.payments" is empty then show "Try 7 days for free" instead of "Upgrade" */}
