@@ -86,8 +86,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         let status: string;
 
         const buf = await buffer(req);
-        const endpointSecret = "whsec_V36i82Fn70v9edAJHKeKwykhUI8bFLBt";
-        //const endpointSecret = "whsec_J2ZCMxWPvKeaStSWl4r1RdSnvTu39Gix";
+        //const endpointSecret = "whsec_V36i82Fn70v9edAJHKeKwykhUI8bFLBt";
+        const endpointSecret = "whsec_J2ZCMxWPvKeaStSWl4r1RdSnvTu39Gix";
         if (endpointSecret) {
             const signature: any = req.headers["stripe-signature"];
             try {
