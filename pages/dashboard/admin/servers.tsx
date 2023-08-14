@@ -175,7 +175,7 @@ export default function AdminServer() {
                 {servers.map((server: any) => (
                     <Paper sx={{ background: "#000", mt: 2, p: 3, borderRadius: "1rem" }} key={server.id}>
                         <Stack direction={{ xs: "column", md: "row" }} spacing={2} justifyContent="space-between">
-                            <CardContent>
+                            <CardContent sx={{ pb: "1rem !important" }}>
                                 {Object.entries(server).map(([key, value]) => {
                                     if (typeof value === "string") {
                                         return (<Typography variant="body1" sx={{ mb: 1 }} key={key}>{key}: <code>{value}</code></Typography>);
@@ -188,7 +188,7 @@ export default function AdminServer() {
                                     }
                                 })}
                             </CardContent>
-                            <CardContent>
+                            <CardContent sx={{ pb: "1rem !important" }}>
                                 <Stack direction="column" spacing={2}>
                                     <Button variant="contained" color="info" onClick={async () => {
                                         getServerInfo(server.id);
@@ -257,7 +257,7 @@ export default function AdminServer() {
 
                     <Container maxWidth="xl">
                         <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
-                            <CardContent>
+                            <CardContent sx={{ pb: "1rem !important" }}>
                                 <Typography variant="h5" sx={{ mb: 2, fontWeight: "500" }}>
                                     Admin Server
                                 </Typography>

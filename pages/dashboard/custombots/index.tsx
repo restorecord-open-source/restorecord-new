@@ -159,8 +159,8 @@ export default function CustomBots() {
                                     </>
                                 ) : (
                                     <>
-                                        <Skeleton variant="rectangular" width={"115px"} height={"40px"} sx={{ borderRadius: "14px" }} />
-                                        <Skeleton variant="rectangular" width={"115px"} height={"40px"} sx={{ borderRadius: "14px" }} />
+                                        <Skeleton variant="rectangular" width={"100px"} height={"40px"} sx={{ borderRadius: "14px" }} />
+                                        <Skeleton variant="rectangular" width={"100px"} height={"40px"} sx={{ borderRadius: "14px" }} />
                                     </>
                                 )}
                             </Stack>

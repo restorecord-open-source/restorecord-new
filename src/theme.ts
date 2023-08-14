@@ -160,6 +160,16 @@ const theme = createTheme({
                 }),
             },
         },
+        MuiAlert: {
+            styleOverrides: {
+                root: ({ ownerState }: any) => ({
+                    borderRadius: 14,
+                    "& .MuiAlert-icon": {
+                        borderRadius: 14,
+                    },
+                }),
+            },
+        },
         MuiOutlinedInput: {
             styleOverrides: {
                 root: ({ ownerState }: any) => ({

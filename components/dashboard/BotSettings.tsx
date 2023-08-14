@@ -201,7 +201,7 @@ export default function DashBotSettings({ user, id }: any) {
         <>
             <Container maxWidth="xl">
                 <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
-                    <CardContent>
+                    <CardContent sx={{ pb: "1rem !important" }}>
                         <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
                             Edit Bot
                         </Typography>

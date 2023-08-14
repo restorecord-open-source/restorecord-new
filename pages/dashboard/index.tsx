@@ -230,7 +230,7 @@ export default function Dashboard() {
         return (
             <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "block" } }}>
                 <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%", border: "1px solid #18182e" }}>
-                    <CardContent>
+                    <CardContent sx={{ pb: "1rem !important" }}>
                         {isLoading2 ? ( <CircularProgress /> ) : (
                             <>
                                 <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>Verified Members</Typography>
@@ -255,7 +255,7 @@ export default function Dashboard() {
         return (
             <Grid item xs={12} md={6}>
                 <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%", border: "1px solid #18182e" }}>
-                    <CardContent>
+                    <CardContent sx={{ pb: "1rem !important" }}>
                         {recentVerifiedLoading && ( <CircularProgress /> )}
 
                         {!recentVerifiedLoading && (
@@ -307,7 +307,7 @@ export default function Dashboard() {
         return (
             <Grid item xs={12} md={6}>
                 <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%", border: "1px solid #18182e" }}>
-                    <CardContent>
+                    <CardContent sx={{ pb: "1rem !important" }}>
                         {topCountriesLoading && ( <CircularProgress /> )}
 
                         {!topCountriesLoading && (

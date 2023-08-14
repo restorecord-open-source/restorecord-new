@@ -31,6 +31,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Badge from "@mui/material/Badge";
 import LoadingButton from "../../components/misc/LoadingButton";
 import TextField from "@mui/material/TextField";
+import { grey } from "@mui/material/colors";
 
 export default function Backups() {
     const [ token ]: any = useToken()
@@ -98,7 +99,7 @@ export default function Backups() {
                     
                     <Container maxWidth="xl">
                         <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
-                            <CardContent>
+                            <CardContent sx={{ pb: "1rem !important" }}>
                                 <Badge badgeContent={<>BETA</>} color="primary" sx={{ [`& .MuiBadge-badge`]: { mt: "1.5rem", mr: "-2.5rem", color: "#fff", padding: "0.85rem", fontSize: "0.95rem", fontWeight: "bold" } }}>
                                     <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
                                         Backups
@@ -329,9 +330,12 @@ export default function Backups() {
                                     <Paper variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
                                         <CardContent>
                                             {(userData.role === "business" || userData.role === "enterprise") ? (
-                                                <Typography variant="h5" sx={{ mb: 2, fontWeight: "500" }}>
-                                                    Please create a backup first, you can do that by clicking the &quot;Backup&quot; button next to your server.
-                                                </Typography>
+                                                <Paper variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                                                    <CardContent>
+                                                        <Typography variant="body1" color={grey[200]} sx={{ fontWeight: "400", textAlign: "center" }}>You don&apos;t have any backups yet, :(</Typography>
+                                                        <Typography variant="body2" color={grey[400]} sx={{ fontWeight: "300", textAlign: "center" }}>Click the Backup button on the Servers page to create a backup.</Typography>
+                                                    </CardContent>
+                                                </Paper>
                                             ) : (
                                                 <>
                                                     {/* user needs to upgrade subscription to use backups */}

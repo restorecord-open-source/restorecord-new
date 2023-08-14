@@ -30,17 +30,13 @@ const withDiscordInteraction = (next: any) => async (
         const { type, application_id } = interaction
         if (!type || !application_id) { return res.status(401).end("invalid request signature") }
 
-        const cBot = await prisma.customBots.findFirst({
-            where: {
-                clientId: BigInt(application_id)
-            }
-        })
+        const customBot = await prisma.customBots.findFirst({ where: { clientId: BigInt(application_id) }, include: { owner: true} })
 
-        if (!cBot) return res.status(400).end("invalid application id")
+        if (!customBot) return res.status(400).end("invalid application id");
+        if (customBot.publicKey === null) return res.status(400).end("invalid public key");
+        if (customBot.owner.role !== "business" && customBot.owner.role !== "enterprise") return res.status(200).json({ type: 4, data: { content: "This feature is only available with the Business and Enterprise Subscriptions. Please [upgrade](https://restr.co/upgrade) your subscription to utilize this feature.", flags: 64 } });
 
-        if (cBot.publicKey === null) return res.status(400).end("invalid public key")
-
-        const isVerified = verifyHeaders(timestamp, rawBody, signature, cBot.publicKey)
+        const isVerified = verifyHeaders(timestamp, rawBody, signature, customBot.publicKey)
         if (!isVerified) {
             return res.status(401).end("Request does not come from Discord (invalid signature)")
         }
@@ -52,7 +48,7 @@ const withDiscordInteraction = (next: any) => async (
             return await next(req, res, interaction)
         }
     } catch (err) {
-        console.error(err)
+        console.error(`Error handling interaction: ${err}`)
         return res.status(500).json({
             statusCode: 500,
             message: "Oops, something went wrong parsing the request!",

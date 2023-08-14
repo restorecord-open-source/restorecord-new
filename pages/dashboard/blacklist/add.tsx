@@ -60,7 +60,7 @@ export default function Blacklist() {
 
                 <Container maxWidth="xl">
                     <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
-                        <CardContent>
+                        <CardContent sx={{ pb: "1rem !important" }}>
                             <Badge badgeContent={<>BETA</>} color="primary" sx={{ [`& .MuiBadge-badge`]: { mt: "1.5rem", mr: "-2.5rem", color: "#fff", padding: "0.85rem", fontSize: "0.95rem", fontWeight: "bold" } }}>
                                 <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
                                     Blacklist
@@ -86,7 +86,7 @@ export default function Blacklist() {
                             </Snackbar>
                            
                             <Paper variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
-                                <CardContent>
+                                <CardContent sx={{ pb: "1rem !important" }}>
                                     <form>
                                         <Stack spacing={1} direction="column" justifyContent={"space-between"}>
                                             {/* select: UserId, IP, ASN, Country */}

@@ -441,7 +441,7 @@ export default function Upgrade() {
                     <Grid item key={tier.name} xs={12} md={4}>
                         <Paper variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
                             <Typography variant="h6" sx={{ fontWeight: 800, fontSize: 32, color: theme.palette.text.primary, textAlign: "center", marginTop: 2 }}>{tier.name}</Typography>
-                            <CardContent>
+                            <CardContent sx={{ pb: "1rem !important" }}>
                                 <Box sx={{ display: "flex", justifyContent: "center", alignItems: "baseline", mb: 2 }}>
                                     <Typography component="h2" variant="h3" color="text.primary" sx={{ fontWeight: "600" }}>
                                         ${tier.priceMonthly}
@@ -492,7 +492,7 @@ export default function Upgrade() {
                 <Container maxWidth="xl">
                     {user.role !== "free" &&
                         <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
-                            <CardContent>
+                            <CardContent sx={{ pb: "1rem !important" }}>
                                 <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
                                     Current Subscription
                                 </Typography>
@@ -537,7 +537,7 @@ export default function Upgrade() {
                     }
                    
                     <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
-                        <CardContent>
+                        <CardContent sx={{ pb: "1rem !important" }}>
                             <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
                                 Upgrade
                             </Typography>

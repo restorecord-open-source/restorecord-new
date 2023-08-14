@@ -86,7 +86,7 @@ export default function Admin() {
 
                     <Container maxWidth="xl">
                         <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
-                            <CardContent>
+                            <CardContent sx={{ pb: "1rem !important" }}>
                                 <Typography variant="h5" sx={{ mb: 2, fontWeight: "500" }}>
                                     Admin Panel
                                 </Typography>
@@ -103,7 +103,7 @@ export default function Admin() {
                         {/* 2 split with stats and last purchases */}
                         <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={{ xs: 1, sm: 2 }} sx={{ mt: 1 }}>
                             <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", width: "100%" }}>
-                                <CardContent>
+                                <CardContent sx={{ pb: "1rem !important" }}>
                                     <Typography variant="h5" sx={{ mb: 2, fontWeight: "500" }}>
                                         Stats
                                     </Typography>
@@ -127,7 +127,7 @@ export default function Admin() {
                             </Paper>
 
                             <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", width: "100%" }}>
-                                <CardContent>
+                                <CardContent sx={{ pb: "1rem !important" }}>
                                     {statsLoading ? <CircularProgress /> : (
                                         <>
                                             <Typography variant="h5" sx={{ mb: 2, fontWeight: "500" }}>

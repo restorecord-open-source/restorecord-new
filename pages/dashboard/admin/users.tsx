@@ -327,7 +327,7 @@ export default function AdminUser() {
                 {users.map((user: any) => (
                     <Paper sx={{ background: "#000", mt: 2, p: 3, borderRadius: "1rem" }} key={user.id}>
                         <Stack direction={{ xs: "column", md: "row" }} spacing={2} justifyContent="space-between">
-                            <CardContent>
+                            <CardContent sx={{ pb: "1rem !important" }}>
                                 {Object.entries(user).map(([key, value]) => {
                                     if (typeof value === "string") {
                                         return (<Typography variant="body1" sx={{ mb: 1 }} key={key}>{key}: <code>{value}</code></Typography>);
@@ -340,7 +340,7 @@ export default function AdminUser() {
                                     }
                                 })}
                             </CardContent>
-                            <CardContent>
+                            <CardContent sx={{ pb: "1rem !important" }}>
                                 <Stack direction="column" spacing={2}>
                                     <Button variant="contained" color="info" onClick={async () => {
                                         getUserInfo(user.id);

@@ -370,7 +370,7 @@ export default function VerifiedMembers({ user }: any) {
         <>
             <Container maxWidth="xl">
                 <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
-                    <CardContent>
+                    <CardContent sx={{ pb: "1rem !important" }}>
                         <Stack direction="row" alignItems="center" justifyContent="space-between">
                             <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
                                 Verified Members

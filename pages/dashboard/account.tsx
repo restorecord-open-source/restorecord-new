@@ -180,7 +180,7 @@ export default function AccountSettings() {
                         
 
                         <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
-                            <CardContent>
+                            <CardContent sx={{ pb: "1rem !important" }}>
                                 <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
                                     Account
                                 </Typography>
@@ -205,7 +205,7 @@ export default function AccountSettings() {
                         </Paper>
 
                         <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
-                            <CardContent>
+                            <CardContent sx={{ pb: "1rem !important" }}>
                                 <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
                                     Security
                                 </Typography>
@@ -359,7 +359,7 @@ export default function AccountSettings() {
                         </Paper>
 
                         <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
-                            <CardContent>
+                            <CardContent sx={{ pb: "1rem !important" }}>
                                 <form method="POST">
                                     <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
                                         Change password
@@ -422,20 +422,20 @@ export default function AccountSettings() {
 
 
                         {/* <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #ff0000" }}>
-                    <CardContent>
-                        <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
-                            Delete account
-                        </Typography>
+                            <CardContent sx={{ pb: "1rem !important" }}>
+                                <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
+                                    Delete account
+                                </Typography>
 
-                        <Typography variant="body1" sx={{ mb: 2 }}>
-                            <b>Warning</b>: This action cannot be undone.
-                        </Typography>
+                                <Typography variant="body1" sx={{ mb: 2 }}>
+                                    <b>Warning</b>: This action cannot be undone.
+                                </Typography>
 
-                        <Button variant="contained" color="error" fullWidth onClick={(e: any) => { setOpenE(true); setNotiTextE("Account deleted"); }}>
-                            Delete account
-                        </Button>
-                    </CardContent>
-                </Paper> */}
+                                <Button variant="contained" color="error" fullWidth onClick={(e: any) => { setOpenE(true); setNotiTextE("Account deleted"); }}>
+                                    Delete account
+                                </Button>
+                            </CardContent>
+                        </Paper> */}
 
 
                     </Container>

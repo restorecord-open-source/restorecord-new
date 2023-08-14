@@ -55,6 +55,7 @@ export default function Server() {
     const router = useRouter();
     
     const [pullSettings, setPullSettings] = useState({
+        serverId: 0,
         pullWindow: false,
         giveRoleOnJoin: false,
         customPullCountCheck: false,
@@ -67,7 +68,6 @@ export default function Server() {
     const [guildId, setGuildId] = useState("");
     const [roleId, setRoleId] = useState("");
     const [customBot, setCustomBot] = useState("");
-    const [customBotToken, setCustomBotToken] = useState("");
 
     const [allServers, setAllServers] = useState([]);
     const [allRoles, setAllRoles]: any = useState([]);
@@ -82,11 +82,11 @@ export default function Server() {
 
     const [isRotating, setIsRotating] = useState(false);
 
-    function getAllGuilds() {
+    function getAllGuilds(botToken: string) {
         setAllServers([]);
         axios.get("/api/v2/users/guilds", {
             headers: {
-                "Authorization": `Bot ${customBotToken}`,
+                "Authorization": `Bot ${botToken}`,
             },
         }).then(res => {
             if (res.data.code || res.data.message) { setAllServers([]); setNotiTextE(res.data.message); setOpenE(true); }
@@ -97,11 +97,11 @@ export default function Server() {
         });
     }
 
-    function getGuildRoles(guildId: string) {
+    function getGuildRoles(guildId: string, botToken: string) {
         setAllRoles([]);
         axios.get(`/api/v2/users/guilds/${guildId}/roles`, {
             headers: {
-                "Authorization": `Bot ${customBotToken}`,
+                "Authorization": `Bot ${botToken}`,
             },
         }).then(res => {
             if (res.data.code || res.data.message) { setAllRoles([]); setNotiTextE(res.data.message); setOpenE(true); }
@@ -112,10 +112,10 @@ export default function Server() {
         });
     }
 
-    function getBotClient() {
+    function getBotClient(botToken: string) {
         axios.get(`/api/v2/users/@me`, {
             headers: {
-                "Authorization": `Bot ${customBotToken}`,
+                "Authorization": `Bot ${botToken}`,
             },
         }).then(res => {
             if (res.data.code || res.data.message) { setBotClient({}); setNotiTextE(res.data.message); setOpenE(true); }
@@ -126,17 +126,17 @@ export default function Server() {
         });
     }
 
-    useEffect(() => {
-        if (customBotToken) {
-            if (allServers.length === 0) getAllGuilds();
+    // useEffect(() => {
+    //     if (customBotToken) {
+    //         if (allServers.length === 0) getAllGuilds();
 
-            if (pullSettings.giveRoleOnJoin && pullSettings.selectedServer) {
-                if (!botClient.id) getBotClient();
-                if (allRoles.length === 0) getGuildRoles(pullSettings.selectedServer);
-            }
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [customBotToken, pullSettings.giveRoleOnJoin, pullSettings.selectedServer]);
+    //         if (pullSettings.giveRoleOnJoin && pullSettings.selectedServer) {
+    //             if (!botClient.id) getBotClient();
+    //             if (allRoles.length === 0) getGuildRoles(pullSettings.selectedServer);
+    //         }
+    //     }
+    // // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [customBotToken, pullSettings.giveRoleOnJoin, pullSettings.selectedServer]);
 
     const { data: user, isError, isLoading, refetch: reloadUser } = useQuery('user', async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
@@ -244,10 +244,12 @@ export default function Server() {
                                 Edit
                                 </Button>
                                 <Button variant="contained" color="success" onClick={() => {
-                                    setCustomBotToken(user.bots.find((bot: any) => bot.id === (user.servers.find((server: any) => server.guildId === server.guildId).customBotId)).botToken);
+                                    // setCustomBotToken(user.bots.find((bot: any) => bot.id === (user.servers.find((server: any) => server.guildId === server.guildId).customBotId)).botToken);
                                     setGuildId(server.guildId);
                                     reloadUser();
-                                    setPullSettings({ ...pullSettings, pullWindow: true });
+                                    getAllGuilds(user.bots.find((bot: any) => String(bot.id) === String(user.servers.find((serv: any) => serv.guildId === server.guildId).customBotId)).botToken);
+                                    getBotClient(user.bots.find((bot: any) => String(bot.id) === String(user.servers.find((serv: any) => serv.guildId === server.guildId).customBotId)).botToken);
+                                    setPullSettings({ ...pullSettings, serverId: server.id, pullWindow: true });
                                 }}>Migrate</Button>
                                 {(user.role === "business" || user.role === "enterprise") && (
                                     <LoadingButton variant="contained" color="yellow" event={() => {
@@ -306,7 +308,7 @@ export default function Server() {
                                 </DialogTitle>
                                 <DialogContent>
                                     <Typography variant="body1" sx={{ fontWeight: "400", mb: "1rem" }}>
-                                            Select the server you want to pull your members into, make sure you invited the bot to the server.
+                                        Select the server you want to pull your members into, make sure you invited the bot to the server.
                                     </Typography>
                                     {allServers.length === 0 ? (
                                         <CircularProgress />
@@ -324,7 +326,10 @@ export default function Server() {
                                     {/* give role on join checkbox */}
                                     {(allServers.length !== 0 && pullSettings.selectedServer) && (
                                         <>
-                                            <FormControlLabel control={<Checkbox checked={pullSettings.giveRoleOnJoin} onChange={(e) => setPullSettings({ ...pullSettings, giveRoleOnJoin: e.target.checked })} />} label="Give role on join" />
+                                            <FormControlLabel control={<Checkbox checked={pullSettings.giveRoleOnJoin} onChange={(e) => { 
+                                                if (e.target.checked === true) getGuildRoles(pullSettings.selectedServer, user.bots.find((bot: any) => String(bot.id) === String(user.servers.find((server: any) => server.id === pullSettings.serverId)?.customBotId))?.botToken);
+                                                setPullSettings({ ...pullSettings, giveRoleOnJoin: e.target.checked })
+                                            }} />} label="Give role on join" />
                                             <FormControlLabel control={<Checkbox checked={pullSettings.customPullCountCheck} onChange={(e) => setPullSettings({ ...pullSettings, customPullCountCheck: e.target.checked })} />} label="Custom Pull amount" />
                                         </>
                                     )}
@@ -394,8 +399,11 @@ export default function Server() {
                                 </DialogContent>
                                 <DialogActions>
                                     <Stack direction={{ sm: "column", md: "row" }} spacing={2} justifyContent="space-between" alignItems="center" width="100%">
-                                        <Button onClick={() => getAllGuilds()} color="primary" variant="contained" sx={{ width: "100%", mb: { sm: "1rem", md: "0" } }}>
-                                                Refresh Server List
+                                        <Button onClick={() => { 
+                                            getAllGuilds(user.bots.find((bot: any) => String(bot.id) === String(user.servers.find((server: any) => server.id === pullSettings.serverId)?.customBotId))?.botToken); 
+                                            getGuildRoles(pullSettings.selectedServer, user.bots.find((bot: any) => String(bot.id) === String(user.servers.find((server: any) => server.id === pullSettings.serverId)?.customBotId))?.botToken);
+                                        }} color="primary" variant="contained" sx={{ width: "100%", mb: { sm: "1rem", md: "0" } }}>
+                                            Refresh Server List
                                         </Button>
                                         {guildId !== "" && user.servers.find((item: any) => item.guildId === guildId).pulling ? (
                                             <LoadingButton event={() => (
