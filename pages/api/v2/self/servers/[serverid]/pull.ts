@@ -62,6 +62,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             validateStatus: () => true,
         }).then((resp) => {
             if (resp?.status !== 200 || resp?.status != 200) return res.status(400).json({ success: false, message: "Discord server not found, invite bot or try again." });
+            console.log(`[${server.name}] Pulling members into server: ${resp?.data?.name} (${resp?.data?.id})`);
         }).catch((err) => {
             console.error(err);
             return res.status(400).json({ success: false, message: "Something went wrong" });

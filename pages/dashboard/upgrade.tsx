@@ -457,7 +457,7 @@ export default function Upgrade() {
                                 ))}
                             </CardContent>
                             <CardActions>
-                                <Button fullWidth variant="contained" sx={{ fontWeight: "600" }} disabled={((tier.name.toLowerCase() === user.role) ? true : false) || (payments.payments.length > 0 && payments.payments[payments.payments.length - 1].status === "trialing")} onClick={() => {
+                                <Button fullWidth variant="contained" sx={{ fontWeight: "600" }} disabled={((tier.name.toLowerCase() === user.role) ? true : false) || (payments.payments.length > 0 && payments.payments[payments.payments.length - 1].status === "trialing" && user.role !== "free")} onClick={() => {
                                     setSelectedPlan({
                                         id: tier.name.toLowerCase(),
                                         name: tier.name,

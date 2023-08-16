@@ -131,7 +131,8 @@ export default function AccountSettings() {
                             password: password 
                         }, { 
                             headers: { 
-                                Authorization: (process.browser && window.localStorage.getItem("token")) ?? token
+                                Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
+                                "x-track": makeXTrack()
                             },
                             validateStatus: () => true
                         }).then((res) => {
