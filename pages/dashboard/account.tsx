@@ -42,7 +42,7 @@ export default function AccountSettings() {
     const [twoFASecret, setTwoFASecret] = useState("NULL");
     const [twoFAUrl, setTwoFAUrl] = useState("NULL");
 
-    const [userData, setUserData] = useState({ username: "", email: "" });
+    const [userData, setUserData] = useState({ username: "", email: "", userId: "" });
     const [options, setOptions] = useState({ twoFA: false, darkMode: false });
 
     const [password, setPassword] = useState("");
@@ -60,7 +60,7 @@ export default function AccountSettings() {
 
     useEffect(() => {
         if (data && data.username) {
-            setUserData({ ...userData, username: data.username });
+            setUserData({ ...userData, username: data.username, userId: data.userId });
         }
     }, [data]);
 
@@ -113,8 +113,9 @@ export default function AccountSettings() {
     function renderUserInfo() {
         return (
             <Stack spacing={2}>
-                <TextField label="User ID" variant="outlined" fullWidth value={data.id} disabled />
+                <TextField label="Account Number" variant="outlined" fullWidth value={data.id} disabled />
                 <TextField label="Username" variant="outlined" fullWidth value={userData.username} onChange={(e) => { setUserData({ ...userData, username: e.target.value }) }} />
+                <TextField label="Discord ID" variant="outlined" fullWidth value={userData.userId} onChange={(e) => { setUserData({ ...userData, userId: e.target.value }) }} />
                 {/* <TextField label="Email" variant="outlined" fullWidth value={user.email} disabled /> */}
 
                 <TextField sx={{ display: data.username === userData.username ? "none" : "block" }} label="Confirm Password" variant="outlined" fullWidth type="password" value={password} onChange={(e) => { setPassword(e.target.value) }} />
@@ -129,6 +130,38 @@ export default function AccountSettings() {
                         await axios.patch("/api/v2/self", { 
                             username: userData.username, 
                             password: password 
+                        }, { 
+                            headers: { 
+                                Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
+                                "x-track": makeXTrack()
+                            },
+                            validateStatus: () => true
+                        }).then((res) => {
+                            if (res.data.success) {
+                                refetch();
+                                setNotiTextS(res.data.message);
+                                setOpenS(true);
+                            } else {
+                                setNotiTextE(res.data.message);
+                                setOpenE(true);
+                            }
+                        });
+                    } catch (e) {
+                        setNotiTextE("An error occurred");
+                        setOpenE(true);
+                    }
+                }}>Save Changes</LoadingButton>
+
+                <LoadingButton sx={{ display: data.userId === userData.userId ? "none" : "block" }} event={async () => {
+                    if (userData.userId.length < 16 || userData.userId.length > 19) {
+                        setNotiTextE("Discord ID must be a valid ID");
+                        setOpenE(true);
+                        return;
+                    }
+
+                    try {
+                        await axios.patch("/api/v2/self", { 
+                            userId: userData.userId, 
                         }, { 
                             headers: { 
                                 Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
@@ -178,7 +211,6 @@ export default function AccountSettings() {
                         {openS ? renderSuccessNotificaton() : null}
                         {openE ? renderErrorNotificaton() : null}
                         {openI ? renderInfoNotificaton() : null}
-                        
 
                         <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
                             <CardContent sx={{ pb: "1rem !important" }}>

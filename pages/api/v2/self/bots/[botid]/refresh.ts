@@ -23,7 +23,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 dm_permission: false,
                 default_member_permissions: "8192",
                 version: ""
-            })
+            });
+
+            createGlobalCommand(cBot.botToken, cBot.clientId, {
+                name: "pull",
+                description: "Pull your members back into the server.",
+                options: [],
+                type: ApplicationCommandType.ChatInput,
+                dm_permission: false,
+                default_member_permissions: "8192",
+                version: ""
+            });
     
             createGlobalCommand(cBot.botToken, cBot.clientId, {
                 name: "verify-embed",
@@ -39,7 +49,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         name: "title",
                         description: "Embed title",
                         type: ApplicationCommandOptionType.String,
-                        required: false
+                        required: false,
                     },
                     {
                         name: "description",
@@ -49,7 +59,25 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     },
                     {
                         name: "image",
-                        description: "The image to use for the embed. (Please use direct link ending in .png, .jpg, .jpeg, .gif)",
+                        description: "(URL) The image to use for the embed. (Direct links ending in .png, .jpg, .jpeg, .gif are required)",
+                        type: ApplicationCommandOptionType.String,
+                        required: false
+                    },
+                    {
+                        name: "avatar",
+                        description: "(URL) The avatar of the embed sender. (Direct links ending in .png, .jpg, .jpeg, .gif are required)",
+                        type: ApplicationCommandOptionType.String,
+                        required: false
+                    },
+                    {
+                        name: "username",
+                        description: "The username of the embed sender.",
+                        type: ApplicationCommandOptionType.String,
+                        required: false
+                    },
+                    {
+                        name: "button_text",
+                        description: "The text of the \"Verify\" button.",
                         type: ApplicationCommandOptionType.String,
                         required: false
                     },

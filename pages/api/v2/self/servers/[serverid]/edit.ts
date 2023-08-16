@@ -59,6 +59,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 picture: data.newPicture,
                 bgImage: data.newBackground ? (user.role === "business" ? data.newBackground : null) : null,
                 description: data.newDescription,
+                theme: data.newTheme ? (user.role === "business" ? data.newTheme : "DEFAULT") : "DEFAULT",
                 ipLogging: data.newIpLogging,
                 discoverable: data.newDiscoverable ? ((user.role === "business" || user.role === "enterprise") ? 1 : 0) : 0,
                 blockAlts: data.newBlockAlts ? (user.role !== "free" ? data.newBlockAlts : false) : false,

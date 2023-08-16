@@ -45,6 +45,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 createdAt: user.createdAt,
                 expiry: user.expiry,
                 tfa: user.twoFactor,
+                userId: String(user.userId) as string,
                 servers: servers.map((server: servers) => ({
                     id: server.id,
                     name: server.name,
@@ -284,10 +285,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             if (!xTrack) return res.status(400).json({ success: false, message: "Invalid Request" });
             if (!user) return res.status(400).json({ success: false, message: "Account not found." });
 
-            const { username, password, code } = req.body;
+            const { userId, username, password, code } = req.body;
 
-            if (typeof password !== "string") return res.status(400).json({ success: false, message: "Missing password." });
-            if (!await compare(password, user.password)) return res.status(400).json({ success: false, message: "Password does not match" });
+            if (typeof password !== "string" && !userId) return res.status(400).json({ success: false, message: "Missing password." });
+            if (!userId && !await compare(password, user.password)) return res.status(400).json({ success: false, message: "Password does not match" });
 
             if (username && password && !code) {
                 // change username
@@ -312,6 +313,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 });
 
                 return res.status(200).json({ success: true, message: "Username changed.", username: username });
+            } else if (userId && !code && !username && !password) {
+                // check if userId is a correct discord id
+                if (userId.length < 16 || userId.length > 19) return res.status(400).json({ success: false, message: "Invalid Discord ID." });
+                if (!/^[0-9]+$/.test(userId)) return res.status(400).json({ success: false, message: "Invalid Discord ID." });
+
+                const alreadyExists = await prisma.accounts.findFirst({
+                    where: {
+                        userId: userId
+                    }
+                });
+
+                if (alreadyExists) return res.status(400).json({ success: false, message: "Discord ID already linked to another account." });
+
+                await prisma.accounts.update({
+                    where: {
+                        id: user.id
+                    },
+                    data: {
+                        userId: userId
+                    }
+                });
+
+                return res.status(200).json({ success: true, message: "Discord ID updated." });
             } else if (!code && !username && password) {
                 if (user.googleAuthCode) {
                     const qrcodeUrl = generateQRUrl(user.googleAuthCode, user.username);

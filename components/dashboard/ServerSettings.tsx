@@ -23,6 +23,9 @@ import DialogActions from "@mui/material/DialogActions";
 import CloseIcon from "@mui/icons-material/Close";
 import theme from "../../src/theme";
 import axios from "axios";
+import FormControl from "@mui/material/FormControl";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 
 export default function DashServerSettings({ user, id }: any) {
     const [token]: any = useToken();
@@ -39,6 +42,7 @@ export default function DashServerSettings({ user, id }: any) {
         webhook: "",
         background: "",
         description: "",
+        theme: "DEFAULT",
         webhookcheck: false,
         vpncheck: false,
         themeColor: "#4e46ef",
@@ -70,6 +74,7 @@ export default function DashServerSettings({ user, id }: any) {
                 picture: server.picture ? server.picture : "",
                 description: server.description ? server.description : "",
                 background: server.bgImage ? server.bgImage : "",
+                theme: server.theme ? server.theme : "DEFAULT",
                 vpncheck: server.vpncheck,
                 themeColor: server.themeColor ? `#${server.themeColor}` : "#4e46ef",
             });
@@ -98,6 +103,7 @@ export default function DashServerSettings({ user, id }: any) {
                 newPicture: newServer.picture,
                 newBackground: newServer.background,
                 newDescription: newServer.description,
+                newTheme: newServer.theme,
                 newThemeColor: newServer.themeColor,
                 
                 serverName: server.name,
@@ -167,6 +173,9 @@ export default function DashServerSettings({ user, id }: any) {
             break;
         case "description":
             setNewServer({ ...newServer, description: e.target.value });
+            break;
+        case "theme":
+            setNewServer({ ...newServer, theme: e.target.value });
             break;
         default:
             break;
@@ -373,6 +382,25 @@ export default function DashServerSettings({ user, id }: any) {
                                                     </Typography>
                                                     <TextField fullWidth variant="outlined" name="description" value={newServer.description} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Description" rows={3} multiline />
                                                 </Grid>
+                                                {/* <Grid item>
+                                                    <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                                        Server Theme
+                                                    </Typography>
+                                                    <FormControl fullWidth variant="outlined">
+                                                        <Select
+                                                            value={newServer.theme}
+                                                            onChange={handleChange}
+                                                            inputProps={{
+                                                                name: "theme",
+                                                                id: "theme",
+                                                            }}
+                                                        >
+                                                            <MenuItem value="DEFAULT">Default</MenuItem>
+                                                            <MenuItem value="DISCORD">Discord</MenuItem>
+                                                            <MenuItem value="TERMINAL">Terminal</MenuItem>
+                                                        </Select>
+                                                    </FormControl>
+                                                </Grid> */}
                                                 <Grid item>
                                                     <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
                                                         Server Background Image
