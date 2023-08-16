@@ -59,6 +59,7 @@ model servers {
     ipLogging    Boolean        @default(true)
     locked       Boolean        @default(false)
     discoverable Int            @default(0)
+    theme        Theme          @default(DEFAULT)
     createdAt    DateTime       @default(now())
     customBot    customBots     @relation(fields: [customBotId], references: [id])
     owner        accounts       @relation(fields: [ownerId], references: [id])
@@ -271,4 +272,11 @@ model payments {
     account        accounts @relation(fields: [accountId], references: [id])
 
     @@index([accountId])
+}
+
+
+enum Theme {
+    DEFAULT
+    DISCORD
+    TERMINAL
 }

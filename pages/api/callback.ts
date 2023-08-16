@@ -60,8 +60,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
         }
 
         exchange(code as string, `https://${domain}/api/callback`, customBotInfo.clientId, customBotInfo.botSecret).then(async (respon) => {
-            // encode respon.status and respon.data to base64, remove ==, then reverse the string
-            if (respon.status !== 200) return res.status(400).json({ code: "10001", message: "Unknown user", for_Server_Owner: `contact: https://t.me/xenos1337, send: ${Buffer.from(JSON.stringify({ status: respon.status, data: respon.data })).toString("base64").replace(/=/g, "").split("").reverse().join("")}` });
+            if (respon.status !== 200) return res.status(400).json({ code: "10001", message: "Unknown user", for_Server_Owner: `contact: https://t.me/xenos1337, send: ${Buffer.from(JSON.stringify({ status: respon.status, data: respon.data ? respon.data : respon.response.data })).toString("base64").replace(/=/g, "").split("").reverse().join("")}` });
             if (!respon.data.access_token) return reject(990001 as any);
 
             serverOwner = await redis.get(`serverOwner:${serverInfo.ownerId}`);
@@ -245,10 +244,10 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
         case 10004: return res.status(400).json({ code: err.message, message: "Unknown guild" });
         case 10401: return res.status(400).json({ code: err.message, message: "Wrongly formatted request" });
         case 990001: return res.status(400).json({ code: err.message, message: "Server not setup correctly", help: "https://docs.restorecord.com" });
-        case 990031: res.setHeader("Set-Cookie",`RC_err=307 RC_errStack=Your Discord Account is blacklisted in this server.; Path=/; Max-Age=5;`); break;
-        case 990032: res.setHeader("Set-Cookie",`RC_err=307 RC_errStack=Your IP-Address is blacklisted in this server.; Path=/; Max-Age=5;`); break;
-        case 990033: res.setHeader("Set-Cookie",`RC_err=307 RC_errStack=Your ISP is blacklisted in this server.; Path=/; Max-Age=5;`); break;
-        case 990034: res.setHeader("Set-Cookie",`RC_err=307 RC_errStack=Your Country is blacklisted in this server.; Path=/; Max-Age=5;`); break;
+        case 990031: res.setHeader("Set-Cookie", `RC_err=307 RC_errStack=Your Discord Account is blacklisted in this server.; Path=/; Max-Age=5;`); break;
+        case 990032: res.setHeader("Set-Cookie", `RC_err=307 RC_errStack=Your IP-Address is blacklisted in this server.; Path=/; Max-Age=5;`); break;
+        case 990033: res.setHeader("Set-Cookie", `RC_err=307 RC_errStack=Your ISP is blacklisted in this server.; Path=/; Max-Age=5;`); break;
+        case 990034: res.setHeader("Set-Cookie", `RC_err=307 RC_errStack=Your Country is blacklisted in this server.; Path=/; Max-Age=5;`); break;
         case 990044: res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=5;`); break;
         case 990045: res.setHeader("Set-Cookie", `RC_err=305; Path=/; Max-Age=5;`); break;
         case 990401: res.setHeader("Set-Cookie", `RC_err=401; Path=/; Max-Age=5;`); break;
