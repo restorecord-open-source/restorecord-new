@@ -265,7 +265,7 @@ export default function Verify({ server, status, err, errStack, captcha }: any) 
 export async function getServerSideProps({ req }: any) {
     if (req) {
         const cookies = req.headers.cookie ? req.headers.cookie : "";
-        const host = `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers['x-forwarded-host'] || req.headers.host}`;
+        const host = `${(req.headers['x-forwarded-proto'] || 'http')}://${(req.headers['x-forwarded-host'] || req.headers.host)}`;
 
         let serverName = req.url.split("/")[2];
         let type = 1;
