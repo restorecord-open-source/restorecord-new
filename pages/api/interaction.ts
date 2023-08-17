@@ -71,8 +71,11 @@ const handler = async(_: NextApiRequest, res: NextApiResponse, interaction: any)
             var serverInfo = await prisma.servers.findUnique({ where: { guildId: BigInt(interaction.guild_id) } });
             if (!serverInfo || serverInfo === null) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Server has not been found on dashboard", flags: InteractionResponseFlags.EPHEMERAL } });
 
-            var serverOwner = await prisma.accounts.findUnique({ where: { id: serverInfo.ownerId, userId: interaction.member.user.id }, include: { servers: true } });
+            var serverOwner = await prisma.accounts.findUnique({ where: { id: serverInfo.ownerId, userId: interaction.member.user.id } });
             if (!serverOwner) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Server owner does not exist", flags: InteractionResponseFlags.EPHEMERAL } });
+
+            var servers = await prisma.servers.findMany({ where: { AND: [ { ownerId: serverOwner.id }, { customBotId: customBot.id } ] } });
+            if (servers.length === 0) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "No servers found", flags: InteractionResponseFlags.EPHEMERAL } });
 
             if (serverInfo.ownerId !== customBot.ownerId) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Bot and server owners do not match", flags: InteractionResponseFlags.EPHEMERAL } });
             if (BigInt(serverOwner.userId as any) !== BigInt(interaction.member.user.id)) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "You are unable to run this command, contact an Administrator or add your Discord ID to [the dashboard](https://restr.co/account)", flags: InteractionResponseFlags.EPHEMERAL } });
@@ -93,7 +96,7 @@ const handler = async(_: NextApiRequest, res: NextApiResponse, interaction: any)
                         type: 3,
                         custom_id: "pull_server",
                         placeholder: "Select a server",
-                        options: serverOwner.servers.map(server => ({ label: `${server.name} (${server.guildId})`, value: server.guildId.toString() })),
+                        options: servers.map(server => ({ label: `${server.name} (${server.guildId})`, value: server.guildId.toString() })),
                         min_values: 1,
                         max_values: 1
                     }],
@@ -274,7 +277,7 @@ const handler = async(_: NextApiRequest, res: NextApiResponse, interaction: any)
             var serverInfo = await prisma.servers.findUnique({ where: { guildId: BigInt(guildId) as bigint } });
             if (!serverInfo || serverInfo === null) return res.status(200).json({ type: 4, data: { content: "Server not found", flags: InteractionResponseFlags.EPHEMERAL } });
 
-            var serverOwner = await prisma.accounts.findUnique({ where: { id: serverInfo.ownerId, userId: interaction.member.user.id }, include: { servers: true } });
+            var serverOwner = await prisma.accounts.findUnique({ where: { id: serverInfo.ownerId, userId: interaction.member.user.id } });
             if (!serverOwner) return res.status(200).json({ type: 4, data: { content: "You are not the owner of this server", flags: InteractionResponseFlags.EPHEMERAL } });
             if (BigInt(serverOwner.userId as any) !== BigInt(interaction.member.user.id)) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "You are unable to run this command, contact an Administrator or add your Discord ID to [the dashboard](https://restr.co/account)", flags: InteractionResponseFlags.EPHEMERAL } });
 
