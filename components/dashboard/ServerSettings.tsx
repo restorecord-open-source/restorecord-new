@@ -38,6 +38,7 @@ export default function DashServerSettings({ user, id }: any) {
         picture: "",
         ipLogging: false,
         discoverable: 0,
+        captcha: false,
         blockAlts: false,
         webhook: "",
         background: "",
@@ -71,6 +72,7 @@ export default function DashServerSettings({ user, id }: any) {
                 ipLogging: server.ipLogging,
                 blockAlts: server.blockAlts,
                 discoverable: server.discoverable,
+                captcha: server.captcha,
                 picture: server.picture ? server.picture : "",
                 description: server.description ? server.description : "",
                 background: server.bgImage ? server.bgImage : "",
@@ -99,6 +101,7 @@ export default function DashServerSettings({ user, id }: any) {
                 newIpLogging: newServer.ipLogging,
                 newBlockAlts: newServer.blockAlts,
                 newDiscoverable: newServer.discoverable,
+                newCaptcha: newServer.captcha,
                 newVpnCheck: newServer.vpncheck,
                 newPicture: newServer.picture,
                 newBackground: newServer.background,
@@ -161,6 +164,9 @@ export default function DashServerSettings({ user, id }: any) {
             break;
         case "discoverable":
             setNewServer({ ...newServer, discoverable: e.target.checked ? 1 : 0 });
+            break;
+        case "captcha":
+            setNewServer({ ...newServer, captcha: e.target.checked });
             break;
         case "vpncheck":
             setNewServer({ ...newServer, vpncheck: e.target.checked });
@@ -327,6 +333,14 @@ export default function DashServerSettings({ user, id }: any) {
                                                     IP Logging
                                                 </Typography>
                                                 <Switch onChange={handleChange} name="ipLogging" defaultChecked={server.ipLogging} />
+                                            </Stack>
+                                        </Grid>
+                                        <Grid item>
+                                            <Stack direction="row" spacing={1}>
+                                                <Typography variant="h6" sx={{ mb: 2, fontWeight: "500" }}>
+                                                    Captcha
+                                                </Typography>
+                                                <Switch onChange={handleChange} name="captcha" defaultChecked={server.captcha} />
                                             </Stack>
                                         </Grid>
                                         {(user.role !== "free") && (

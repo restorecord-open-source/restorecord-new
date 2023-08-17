@@ -57,6 +57,7 @@ model servers {
     pulling      Boolean        @default(false)
     pullTimeout  DateTime?      @default(now())
     ipLogging    Boolean        @default(true)
+    captcha      Boolean        @default(false)
     locked       Boolean        @default(false)
     discoverable Int            @default(0)
     theme        Theme          @default(DEFAULT)

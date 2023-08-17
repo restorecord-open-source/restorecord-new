@@ -1,6 +1,6 @@
 import Head from "next/head";
 import { prisma } from "../../src/db";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
@@ -9,7 +9,6 @@ import Paper from "@mui/material/Paper";
 import Avatar from "@mui/material/Avatar";
 import theme from "../../src/theme";
 import Button from "@mui/material/Button";
-import CheckCircle from "@mui/icons-material/CheckCircle";
 import Tooltip from "@mui/material/Tooltip";
 import Fade from "@mui/material/Fade";
 import Alert from "@mui/material/Alert";
@@ -17,25 +16,64 @@ import AlertTitle from "@mui/material/AlertTitle";
 import LockIcon from "@mui/icons-material/Lock";
 import PublicOffIcon from "@mui/icons-material/PublicOff";
 import Link from "next/link";
+import HCaptcha from "@hcaptcha/react-hcaptcha";
+import { CircularProgress, Stack } from "@mui/material";
 
-export default function Verify({ server, status, err, errStack }: any) {
-    const [rediUrl, setRediUrl] = useState("");
+export default function Verify({ server, status, err, errStack, captcha }: any) {
     const [disabled, setDisabled] = useState(false);
 
+    const [captchaToken, setCaptchaToken]: any = useState();
+    const [loading, setLoading] = useState(false);
+    const captchaRef: any = useRef();
+
+    const onExpire = () => {
+        console.log("Expired");
+        window.location.reload();
+    }
+
+    const onError = (err: any) => {
+        console.error(err);
+    }
+
     useEffect(() => {
-        if (server.success) {
-            document.title = `Verify in ${server.name}`;
-
-            setRediUrl(`https://discord.com/oauth2/authorize?client_id=${server.clientId}&redirect_uri=${server.domain ? `https://${server.domain}` : window.location.origin}/api/callback&response_type=code&scope=identify+guilds.join&state=${server.guildId}`);
-
-            if (status === "finished") {
-                setDisabled(true);
-                setTimeout(() => { setDisabled(false); }, 10000);
-            }
-
-            fetch("/api/fingerprint");
+        if (status === "finished") {
+            setDisabled(true);
+            setTimeout(() => { setDisabled(false); }, 10000);
         }
-    }, [server, status]);
+
+        if (captcha && server.success) {
+            document.cookie = "captcha=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            window.location.href = `https://discord.com/oauth2/authorize?client_id=${server.clientId}&redirect_uri=${server.domain}/api/callback&response_type=code&scope=identify+guilds.join&state=${server.guildId}&prompt=none`;
+        }
+
+        if (captchaToken) {
+            fetch("/api/verify", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    id: errStack,
+                    captcha: captchaToken,
+                }),
+            })
+                .then((res) => res.json())
+                .then((data) => {
+                    if (data.success && data.code === 200) {
+                        document.cookie = "RC_err=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                        document.cookie = "RC_errStack=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                        document.cookie = "captcha=true; path=/;";
+                        window.location.reload();
+                    } else {
+                        window.location.reload();
+                    }
+                })
+                .catch((err) => {
+                    console.error(err);
+                });
+        }
+
+    }, [server, status, captchaToken, errStack]);
 
     function ErrorAlert(err: string) {
         const errorMessages: { [key: string]: string } = {
@@ -46,6 +84,7 @@ export default function Verify({ server, status, err, errStack }: any) {
             "305": "Alt Account detected, please use your main account and try again.",
             "307": `You're blacklisted in this server, please contact the owner.\n${errStack}`,
             "30001": "Seems like you have reached the 100 server limit, please leave a server and try again.",
+            "777": "This server requires aditional verification, please try again.",
         };
       
         const errorMessage = errorMessages[err] || `Discord API error: ${errStack}`;
@@ -146,8 +185,24 @@ export default function Verify({ server, status, err, errStack }: any) {
                                             <Avatar src={server.icon} sx={{ width: { xs: "6rem", md: "8rem" }, height: { xs: "6rem", md: "8rem" } }} />
                                         </Box>}
 
+                                        {/* if RC_err is 777 then show captcha */}
+                                        {err === "777" && (
+                                            <>
+                                                <HCaptcha
+                                                    sitekey="748ea2c2-9a8d-4791-b951-af4c52dc1f0f"
+                                                    size="invisible"
+                                                    theme="dark"
+                                                    onVerify={setCaptchaToken}
+                                                    onError={onError}
+                                                    onExpire={onExpire}
+                                                    onClose={() => { setLoading(false); }}
+                                                    ref={captchaRef}
+                                                />
+                                            </>
+                                        )}
+
                                         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                            <Button variant="contained" color="primary" href={rediUrl} rel="noopener noreferrer"
+                                            <Button variant="contained" color="primary" href={err === "777" ? "#" : (`https://discord.com/oauth2/authorize?client_id=${server.clientId}&redirect_uri=${server.domain}/api/callback&response_type=code&scope=identify+guilds.join&state=${server.guildId}`)} rel="noopener noreferrer"
                                                 sx={{ 
                                                     width: "100%",
                                                     marginTop: "2rem",
@@ -167,9 +222,10 @@ export default function Verify({ server, status, err, errStack }: any) {
                                                         },
                                                     },
                                                 }}
-                                                disabled={disabled}
+                                                disabled={loading || disabled}
+                                                onClick={() => { if (err === "777") { setLoading(true); captchaRef.current.execute(); } }}
                                             >
-                                                Verify
+                                                {err === "777" ? (loading ? (<Stack direction={"row"} gap={1}><CircularProgress size={24} />Verifying...</Stack>) : ("Verify")) : ("Verify")}
                                             </Button>
                                         </Box>
                                     </>
@@ -209,6 +265,8 @@ export default function Verify({ server, status, err, errStack }: any) {
 export async function getServerSideProps({ req }: any) {
     if (req) {
         const cookies = req.headers.cookie ? req.headers.cookie : "";
+        const host = `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers['x-forwarded-host'] || req.headers.host}`;
+
         let serverName = req.url.split("/")[2];
         let type = 1;
 
@@ -229,8 +287,8 @@ export async function getServerSideProps({ req }: any) {
 
         if (isNaN(Number.parseInt(serverName as any))) type = 0;
         try {
-            if (isNaN(Number(serverName)) || isNaN(Number(serverName))) type = 0;
-            if (BigInt(serverName) > 18446744073709551615 || BigInt(serverName) > 18446744073709551615) type = 0;
+            if (isNaN(Number(serverName))) type = 0;
+            if (BigInt(serverName) > 18446744073709551615) type = 0;
             else type = 1;
         } catch (e) { type = 0; }
 
@@ -257,7 +315,7 @@ export async function getServerSideProps({ req }: any) {
                     color: `#${res.themeColor}`,
                     ipLogging: res.ipLogging,
                     clientId: customBot?.clientId.toString(),
-                    domain: customBot?.customDomain ? customBot.customDomain : "",
+                    domain: customBot?.customDomain ? `https://${customBot.customDomain}` : host,
                     locked: res.locked
                 }
             }
@@ -270,6 +328,7 @@ export async function getServerSideProps({ req }: any) {
                 // err: is cookies "RC_err" value get value until RC_errStack
                 err: cookies.includes("RC_err") ? cookies.split("RC_err=")[1].split("RC_errStack")[0].trim() : null, 
                 errStack: cookies.includes("RC_errStack=") ? cookies.split("RC_errStack=")[1].split(";")[0] : "",
+                captcha: cookies.includes("captcha=true") ? true : false,
             }
         }
 

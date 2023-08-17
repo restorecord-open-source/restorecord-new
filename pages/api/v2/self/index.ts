@@ -57,6 +57,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     ipLogging: server.ipLogging,
                     blockAlts: server.blockAlts,
                     discoverable: server.discoverable,
+                    captcha: server.captcha,
                     bgImage: server.bgImage,
                     themeColor: server.themeColor,
                     vpncheck: server.vpncheck,

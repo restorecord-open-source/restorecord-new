@@ -102,6 +102,15 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
 
             // res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
             // res.redirect(`https://${domain}/verify/${state}`);
+
+            if (serverInfo.captcha) {
+                const captcha = await redis.get(`captcha:${userId}`);
+                const alreadyVerified = await prisma.members.findUnique({ where: { userId_guildId: { userId: userId, guildId: guildId } } });
+                if (!captcha && !alreadyVerified) {
+                    res.setHeader("Set-Cookie", `RC_err=777 RC_errStack=${userId}; Path=/; Max-Age=120;`);
+                    return res.redirect(`https://${domain}/verify/${state}`);
+                }
+            }
                 
             if (serverInfo.webhook) {
                 const isProxy = serverInfo.vpncheck && pCheck[IPAddr].proxy === "yes";
