@@ -13,7 +13,7 @@ export const TokenProvider = ({children}: any) => {
                     setToken(savedToken)
                 }
             } catch (error) {
-                console.log(error)
+                console.error(error)
             }
         }
     }, [])

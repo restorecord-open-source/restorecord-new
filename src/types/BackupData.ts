@@ -1,4 +1,5 @@
 import { Snowflake } from "discord.js";
+import { MessageData } from "./MessageData";
 
 export interface channelData {
     channelId:            bigint; 
@@ -49,4 +50,5 @@ export interface BackupData {
     channels:     channelData[] | undefined;
     roles:        roleData[] | undefined;
     guildMembes:  MemberData[] | undefined;
+    messages:     MessageData[];
 }

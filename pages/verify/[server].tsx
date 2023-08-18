@@ -27,7 +27,7 @@ export default function Verify({ server, status, err, errStack, captcha }: any) 
     const captchaRef: any = useRef();
 
     const onExpire = () => {
-        console.log("Expired");
+        console.error("Expired");
         window.location.reload();
     }
 
@@ -72,7 +72,6 @@ export default function Verify({ server, status, err, errStack, captcha }: any) 
                     console.error(err);
                 });
         }
-
     }, [server, status, captchaToken, errStack]);
 
     function ErrorAlert(err: string) {
@@ -84,7 +83,7 @@ export default function Verify({ server, status, err, errStack, captcha }: any) 
             "305": "Alt Account detected, please use your main account and try again.",
             "307": `You're blacklisted in this server, please contact the owner.\n${errStack}`,
             "30001": "Seems like you have reached the 100 server limit, please leave a server and try again.",
-            "777": "This server requires aditional verification, please try again.",
+            "777": "This server requires you to solve a captcha.",
         };
       
         const errorMessage = errorMessages[err] || `Discord API error: ${errStack}`;
@@ -187,10 +186,10 @@ export default function Verify({ server, status, err, errStack, captcha }: any) 
 
                                         {/* if RC_err is 777 then show captcha */}
                                         {err === "777" && (
-                                            <>
+                                            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", mt: "1rem" }}>
                                                 <HCaptcha
                                                     sitekey="748ea2c2-9a8d-4791-b951-af4c52dc1f0f"
-                                                    size="invisible"
+                                                    size="normal"
                                                     theme="dark"
                                                     onVerify={setCaptchaToken}
                                                     onError={onError}
@@ -198,7 +197,7 @@ export default function Verify({ server, status, err, errStack, captcha }: any) 
                                                     onClose={() => { setLoading(false); }}
                                                     ref={captchaRef}
                                                 />
-                                            </>
+                                            </Box>
                                         )}
 
                                         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>

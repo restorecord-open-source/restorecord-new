@@ -246,6 +246,10 @@ export default function Home() {
                                             </Box>
                                         </Box>
 
+                                        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "row", mb: 4 }}>
+                                            <Image src="https://cdn.trustpilot.net/brand-assets/4.1.0/stars/stars-5.svg" alt="5 stars" width={128} height={24} />
+                                        </Box>
+
                                         <Typography sx={{ fontStyle: "normal", fontWeight: 300, fontSize: 20, color: theme.palette.text.primary, marginTop: 1, textAlign: "center",  padding: { xs: "0px 12px", sm: "0px 25px", md: "0px 50px" }, marginBottom: 2 }}>
                                             This was soo good this bot is the best and the support are just amazing answering all the questions you have and always have the best replies YALL SHOULD DEFINITELY USE THIS BOT
                                         </Typography>
@@ -261,6 +265,10 @@ export default function Home() {
                                             </Box>
                                         </Box>
 
+                                        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "row", mb: 4 }}>
+                                            <Image src="https://cdn.trustpilot.net/brand-assets/4.1.0/stars/stars-5.svg" alt="5 stars" width={128} height={24} />
+                                        </Box>
+
                                         <Typography sx={{ fontStyle: "normal", fontWeight: 300, fontSize: 20, color: theme.palette.text.primary, marginTop: 2, textAlign: "center",  padding: { xs: "0px 12px", sm: "0px 25px", md: "0px 50px" }, marginBottom: 2 }}>
                                             RestoreCord changed for the better. They now have custom bots, using rotating proxies, and custom domains. This is the best bot to evade Discord&apos;s tyrannical rules. Unlike other restore bots, RestoreCord can no longer be mass banned. Each custom bot has nothing similar to link them together with. Thank you RestoreCord for taking the time to improve your bot so a banwave couldn&apos;t occur again.
                                         </Typography>
@@ -269,16 +277,20 @@ export default function Home() {
                                 <Box sx={{ display: { xs: "none", md: "flex" }, justifyContent: "center", alignItems: "center", flexDirection: "column", mx: 2 }}>
                                     <Card sx={{ width: "100%", maxWidth: 600, height: "auto", display: "block", borderRadius: 12, marginTop: 5, mx: 2 }} data-aos="zoom-in">
                                         <Box sx={{ display: "flex", justifyContent: "center", padding: "36px 50px", alignItems: "center", flexDirection: "row" }}>
-                                            <Avatar sx={{ width: 80, height: 80, background: theme.palette.primary.main, color: theme.palette.getContrastText(theme.palette.primary.main), fontSize: 24, fontWeight: 900 }}>ZS</Avatar>
+                                            <Avatar sx={{ width: 80, height: 80, background: theme.palette.primary.main, color: theme.palette.getContrastText(theme.palette.primary.main), fontSize: 24, fontWeight: 900 }}>MZ</Avatar>
                                             <Box sx={{ marginLeft: "20px" }}>
                                                 <Typography sx={{ fontStyle: "normal", fontWeight: 700, fontSize: 24, color: theme.palette.text.primary, marginTop: 2 }}>
-                                                    ZsoZso
+                                                    Maik Z.
                                                 </Typography>
                                             </Box>
                                         </Box>
 
+                                        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "row", mb: 4 }}>
+                                            <Image src="https://cdn.trustpilot.net/brand-assets/4.1.0/stars/stars-5.svg" alt="5 stars" width={128} height={24} />
+                                        </Box>
+
                                         <Typography sx={{ fontStyle: "normal", fontWeight: 300, fontSize: 20, color: theme.palette.text.primary, marginTop: 2, textAlign: "center",  padding: { xs: "0px 12px", sm: "0px 25px", md: "0px 50px" }, marginBottom: 2 }}>
-                                            Perfect uptime, support and features. I&apos;ve been using RestoreCord since almost two months, it is working totally fine and the support is faster then light Really recommending it
+                                            Amazing and very fast customer support, the owner answers in a few Seconds/minutes and takes his time to solve my problem. Great product, working 100% as advertised.
                                         </Typography>
                                     </Card>
                                     <Card sx={{ width: "100%", maxWidth: 600, height: "auto", display: "block", borderRadius: 12, marginTop: 5 }} data-aos="zoom-in">
@@ -289,6 +301,10 @@ export default function Home() {
                                                     Daniel M.
                                                 </Typography>
                                             </Box>
+                                        </Box>
+
+                                        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "row", mb: 4 }}>
+                                            <Image src="https://cdn.trustpilot.net/brand-assets/4.1.0/stars/stars-5.svg" alt="5 stars" width={128} height={24} />
                                         </Box>
 
                                         <Typography sx={{ fontStyle: "normal", fontWeight: 300, fontSize: 20, color: theme.palette.text.primary, marginTop: 2, textAlign: "center",  padding: { xs: "0px 12px", sm: "0px 25px", md: "0px 50px" }, marginBottom: 2 }}>
@@ -307,6 +323,10 @@ export default function Home() {
                                             </Box>
                                         </Box>
 
+                                        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "row", mb: 4 }}>
+                                            <Image src="https://cdn.trustpilot.net/brand-assets/4.1.0/stars/stars-5.svg" alt="5 stars" width={128} height={24} />
+                                        </Box>
+
                                         <Typography sx={{ fontStyle: "normal", fontWeight: 300, fontSize: 20, color: theme.palette.text.primary, marginTop: 2, textAlign: "center",  padding: { xs: "0px 12px", sm: "0px 25px", md: "0px 50px" }, marginBottom: 2 }}>
                                             Had a good experience with restorecord support is super fast and fixes issues in several minutes
                                         </Typography>
@@ -319,6 +339,10 @@ export default function Home() {
                                                     Katy
                                                 </Typography>
                                             </Box>
+                                        </Box>
+
+                                        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "row", mb: 4 }}>
+                                            <Image src="https://cdn.trustpilot.net/brand-assets/4.1.0/stars/stars-5.svg" alt="5 stars" width={128} height={24} />
                                         </Box>
 
                                         <Typography sx={{ fontStyle: "normal", fontWeight: 300, fontSize: 20, color: theme.palette.text.primary, marginTop: 2, textAlign: "center",  padding: { xs: "0px 12px", sm: "0px 25px", md: "0px 50px" }, marginBottom: 2 }}>                                       
@@ -367,8 +391,6 @@ export default function Home() {
                             ))}
                         </Grid>
                     </Box>
-
-                    
 
                 </Container>
                 <div style={{ marginBottom: "5rem" }} />
