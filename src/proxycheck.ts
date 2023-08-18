@@ -67,8 +67,6 @@ class proxycheck {
         if(options.days) url += '&days=' + options.days;
         if(options.tag) url += '&tag=' + options.tag;
         if(Array.isArray(ip)) {
-            console.log(url);
-
             const params = new URLSearchParams();
             params.append('ips', ip.join(','));
 

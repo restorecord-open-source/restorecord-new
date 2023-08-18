@@ -144,7 +144,6 @@ export default function Server() {
         }).then((res) => {
             if (res.data) {
                 const roles = res.data.filter((role: any) => role.position < res.data.find((role: any) => role?.tags?.bot_id === selectedBot)?.position && !role.tags).map((role: any) => { if (role.name === "@everyone") role.name = "No role"; return role; }).sort((a: any, b: any) => b.position - a.position);
-                console.log(roles);
                 setAllRoles(roles);
             } else {
                 handleBack();

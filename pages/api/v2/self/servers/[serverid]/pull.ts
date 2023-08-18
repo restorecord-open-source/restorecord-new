@@ -357,7 +357,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             console.error(`[PULLING] 3 ${err}`);
         });
 
-        let esimatedTime: any = members.length * (1000 + delay); 
+        let esimatedTime: any = (pullCount ?? members.length) * (1000 + delay); 
         esimatedTime = formatEstimatedTime(esimatedTime);
             
         return res.status(200).json({ success: true, message: `Started Pull Process, this will take around ${esimatedTime}` });

@@ -109,8 +109,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             var planFull = priceIds[subscription.items.data[0].price.id].plan;
             var plan = planFull.replace("_monthly", "");
 
-            console.log(event.type, subscription, status)
-
             const payment = await prisma.payments.findUnique({ where: { subscriptionId: subscription.id } });
             if (!payment) {
                 await prisma.payments.create({
@@ -180,8 +178,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             subscription = event.data.object;
             status = subscription.status;
 
-            console.log(event.type, subscription, status)
-
             if (status === "canceled") {
                 let account;
                 if (subscription.metadata.account_id) account = await prisma.accounts.findUnique({ where: { id: Number(subscription.metadata.account_id) as number } });
@@ -217,8 +213,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         case "customer.subscription.updated":
             subscription = event.data.object;
             status = subscription.status;
-
-            console.log(event.type, subscription, status)
 
             var planFull = priceIds[subscription.items.data[0].price.id].plan;
             var plan = planFull.replace("_monthly", "");

@@ -40,7 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         })
             .then(res => res.json())
             .then(res => {
-                if (!res.success) { console.log(res); throw new Error("Invalid captcha"); }
+                if (!res.success) { console.error(res); throw new Error("Invalid captcha"); }
             });
 
         const accounts: accounts[] = await prisma.accounts.findMany({

@@ -22,8 +22,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             newRoleId = (Math.floor(Math.random() * 90000000000000000) + 10000000000000000).toString();
         }
 
-        console.log(newGuildId);
-
         await prisma.servers.update({
             where: { 
                 id: server.id,

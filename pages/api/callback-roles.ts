@@ -129,7 +129,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                     validateStatus: () => true,
                     proxy: false,
                     httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
-                }).catch((err) => { console.log(err); });
+                }).catch((err) => { console.error(err); });
 
                 return res.status(200).json({ error: false, message: "Successfully linked your account" });
                 break;
