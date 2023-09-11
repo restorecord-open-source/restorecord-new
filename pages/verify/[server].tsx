@@ -75,19 +75,29 @@ export default function Verify({ server, status, err, errStack, captcha }: any) 
     }, [server, status, captchaToken, errStack]);
 
     function ErrorAlert(err: string) {
-        const errorMessages: { [key: string]: string } = {
-            "404": "Seems like this server hasn't been set up correctly, please contact the owner and let them know: Unknown Role.",
-            "403": "Seems like this server hasn't been set up correctly, please contact the owner and let them know: Missing Permission.",
-            "401": "Seems like this bot hasn't been set up correctly, please contact the owner and let them know: Invalid Token.",
-            "306": "VPN or Proxy detected, please disable it and try again.",
-            "305": "Alt Account detected, please use your main account and try again.",
-            "307": `You're blacklisted in this server, please contact the owner.\n${errStack}`,
-            "30001": "Seems like you have reached the 100 server limit, please leave a server and try again.",
-            "777": "This server requires you to solve a captcha.",
+        const errorMessages: any = {
+            "404": "Sorry, we couldn't add the Verify role to your Account. Contact the server owner for assistance.",
+            "403": "Oops! The bot is missing permissions. contact the server owner to fix this issue.",
+            "401": "Oh no! The Bot Token is Invalid. Contact the server owner to fix this issue.",
+            "306": "Sorry, but you can't verify while using a VPN or proxy on this server. Please disable it and try again.",
+            "305": "Oops! This server doesn't allow verification with alt accounts. Please use your main account to verify.",
+            "307": "You're blacklisted in this server. Contact the server owner for more information.",
+            "30001": "You've reached Discord's 100-server limit. Leave a server before verifying again.",
+            "777": "Verification requires solving a captcha on this server. Please complete the captcha to proceed.",
         };
-      
-        const errorMessage = errorMessages[err] || `Discord API error: ${errStack}`;
-      
+          
+        const errorCodePrefix = err.match(/^\d+/);
+        let errorMessage = `Discord API error: ${errStack.split(";")[1]}`;
+        
+        if (errorCodePrefix) {
+            for (const key in errorMessages) {
+                if (key.startsWith(errorCodePrefix[0])) {
+                    errorMessage = errorMessages[key];
+                    break;
+                }
+            }
+        }
+
         return (
             <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
                 <AlertTitle>Error{err !== undefined ? `: ${err}` : ""}</AlertTitle>
@@ -190,7 +200,7 @@ export default function Verify({ server, status, err, errStack, captcha }: any) 
                                                 <HCaptcha
                                                     sitekey="748ea2c2-9a8d-4791-b951-af4c52dc1f0f"
                                                     size="normal"
-                                                    theme="dark"
+                                                    theme="light"
                                                     onVerify={setCaptchaToken}
                                                     onError={onError}
                                                     onExpire={onExpire}
