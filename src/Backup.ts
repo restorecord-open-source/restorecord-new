@@ -42,6 +42,7 @@ export const createBackup = async (guildId: bigint) => {
                 channels: Array<channelData>(),
                 roles: Array<roleData>(),
                 guildMembes: Array<MemberData>(),
+                messages: Array<any>(),
             };
 
             const guild = await axios.get(`${DISCORD_API_BASE}/guilds/${guildId}`, {
