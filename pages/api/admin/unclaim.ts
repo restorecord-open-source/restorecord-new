@@ -53,6 +53,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             }
         });
 
+        await prisma.migrations.updateMany({
+            where: { guildId: server.guildId },
+            data: {
+                guildId: BigInt(newGuildId as any),
+            }
+        });
+
         await prisma.guildMembers.updateMany({
             where: { guildId: server.guildId },
             data: {
