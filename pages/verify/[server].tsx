@@ -87,7 +87,7 @@ export default function Verify({ server, status, err, errStack, captcha }: any) 
         };
           
         const errorCodePrefix = err.match(/^\d+/);
-        let errorMessage = `Discord API error: ${errStack.split(";")[1]}`;
+        let errorMessage = `Discord API error: ${errStack}`;
         
         if (errorCodePrefix) {
             for (const key in errorMessages) {
@@ -334,9 +334,9 @@ export async function getServerSideProps({ req }: any) {
             props: {
                 server: JSON.parse(JSON.stringify(serverInfo)),
                 status: cookies.includes("verified=true") ? "finished" : "verifying",
-                // err: is cookies "RC_err" value get value until RC_errStack
                 err: cookies.includes("RC_err") ? cookies.split("RC_err=")[1].split("RC_errStack")[0].trim() : null, 
-                errStack: cookies.includes("RC_errStack=") ? cookies.split("RC_errStack=")[1].split(";")[0] : "",
+                // find RC_errStack="..." from the RC_err cookie and then split it to get the value of RC_errStack
+                errStack: cookies.includes("RC_errStack") ? cookies.split("RC_errStack=\"")[1].split("\"")[0] : null,
                 captcha: cookies.includes("captcha=true") ? true : false,
             }
         }

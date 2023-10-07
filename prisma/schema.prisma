@@ -1,13 +1,10 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
     provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "mysql"
-    url = env("DATABASE_URL")
+    provider     = "mysql"
+    url          = env("DATABASE_URL")
     relationMode = "prisma"
 }
 
@@ -68,11 +65,30 @@ model servers {
     blacklist    blacklist[]
     backups      backups[]
     guildMembers guildMembers[]
+    migrations   migrations[]
 
     @@index([name])
     @@index([guildId])
     @@index([customBotId])
     @@index([ownerId])
+}
+
+model migrations {
+    id               Int      @id @default(autoincrement())
+    guildId          BigInt   @db.UnsignedBigInt
+    status           Status   @default(PENDING)
+    successCount     Int      @default(0)
+    bannedCount      Int      @default(0)
+    maxGuildsCount   Int      @default(0)
+    invalidCount     Int      @default(0)
+    failedCount      Int      @default(0)
+    blacklistedCount Int      @default(0)
+    startedAt        DateTime @default(now())
+    updatedAt        DateTime @default(now())
+    createdAt        DateTime @default(now())
+    server           servers  @relation(fields: [guildId], references: [guildId])
+
+    @@index([guildId])
 }
 
 model backups {
@@ -101,7 +117,7 @@ model channels {
     bitrate          Int?
     userLimit        Int?
     parentId         BigInt?              @db.UnsignedBigInt
-    topic            String?              @db.VarChar(999)
+    topic            String?              @db.LongText()
     rateLimitPerUser Int?
     nsfw             Boolean
     createdAt        DateTime             @default(now())
@@ -280,4 +296,12 @@ enum Theme {
     DEFAULT
     DISCORD
     TERMINAL
+}
+
+enum Status {
+    PENDING
+    PULLING
+    SUCCESS
+    FAILED
+    STOPPED
 }

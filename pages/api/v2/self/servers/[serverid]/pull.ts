@@ -10,6 +10,32 @@ import { formatEstimatedTime } from "../../../../../../src/functions";
 import axios from "axios";
 import withAuthentication from "../../../../../../src/withAuthentication";
 
+type Status = "PENDING" | "PULLING" | "SUCCESS" | "FAILED" | "STOPPED";
+
+function updateMigration(id: number, status: Status, success: number, banned: number, maxGuild: number, invalid: number, failed: number, blacklisted: number) {
+    return new Promise<void>(async (resolve, reject) => {
+        await prisma.migrations.update({
+            where: {
+                id: id
+            },
+            data: {
+                status: status,
+                successCount: success,
+                bannedCount: banned,
+                maxGuildsCount: maxGuild,
+                invalidCount: invalid,
+                failedCount: failed,
+                blacklistedCount: blacklisted,
+                updatedAt: new Date()
+            }
+        }).then(() => {
+            resolve();
+        }).catch((err: Error) => {
+            reject(err);
+        });
+    });
+}
+
 async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts) {
     if (req.method !== "PUT") return res.status(405).json({ code: 0, message: "Method not allowed", });
 
@@ -120,6 +146,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             }
         }
 
+
         let delay: number = 500;
         let pullTimeout: Date = new Date(Date.now() + 1000 * 60 * 60 * 18);
 
@@ -149,9 +176,32 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
         await prisma.servers.update({ where: { id: server.id }, data: { pulling: true, pullTimeout: pullTimeout } });
 
+        const migration = await prisma.migrations.create({
+            data: {
+                guildId: server.guildId,
+            }
+        });
+
         let trysPulled: number = 0;
-        let succPulled: number = 0;
-        let erroPulled: number = 0;
+        let successCount: number = 0;
+        let bannedCount: number = 0;
+        let maxGuildsCount: number = 0;
+        let invalidCount: number = 0;
+        let blacklistedCount: number = 0;
+        let errorCount: number = 0;
+
+        await prisma.blacklist.findMany({ where: { type: 0, value: { in: members.map((m) => m.userId.toString()) } } }).then((blacklisted) => {
+            blacklisted.forEach((blacklistedMember) => {
+                const member = members.find((m) => m.userId === BigInt(blacklistedMember.value) as bigint);
+                if (member) {
+                    members.splice(members.indexOf(member), 1);
+                    blacklistedCount++;
+                }
+            });
+        });
+
+        await prisma.migrations.update({ where: { id: migration.id }, data: { startedAt: new Date() } });
+
         new Promise<void>(async (resolve, reject) => {
             let membersNew: members[] = await shuffle(members);
             console.log(`[${server.name}] Total members: ${members.length}, pulling: ${membersNew.length}`);
@@ -200,39 +250,44 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         }
                         break;
                     case 403:
-                        const refreshed = await refreshToken(member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString());
-                        if (refreshed?.data?.access_token && refreshed?.data?.refresh_token) {
-                            await prisma.members.update({
-                                where: {
-                                    id: Number(member.id as number),
-                                },
-                                data: {
-                                    accessToken: refreshed.data.access_token,
-                                    refreshToken: refreshed.data.refresh_token
-                                }
-                            });
+                        if (response?.code === 50025) { // "Invalid OAuth2 access token"
+                            const refreshed = await refreshToken(member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString());
+                            if (refreshed?.data?.access_token && refreshed?.data?.refresh_token) {
+                                await prisma.members.update({
+                                    where: {
+                                        id: Number(member.id as number),
+                                    },
+                                    data: {
+                                        accessToken: refreshed.data.access_token,
+                                        refreshToken: refreshed.data.refresh_token
+                                    }
+                                });
 
-                            console.log(`[${server.name}] [${member.username}] Refreshed (access_token: ${refreshed.data.access_token}, refresh_token: ${refreshed.data.refresh_token})`);
-                            await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, refreshed.data.access_token, roleId ? [BigInt(roleId).toString()] : []).then(async (respon: any) => {
-                                if ((respon?.status === 204 || respon?.status === 201) || (respon?.response?.status === 204 || respon?.response?.status === 201)) {
-                                    succPulled++;
-                                    console.log(`[${server.name}] [${member.username}] ${respon?.status || respon?.response?.status} Refresh PULLED`); 
-                                } else {
-                                    erroPulled++;
-                                    console.log(`[${server.name}] [${member.username}] ${respon?.status || respon?.response?.status} Refresh FAILED`);
-                                }
-                            });
-                        } else {
-                            await prisma.members.update({
-                                where: {
-                                    id: Number(member.id as number),
-                                },
-                                data: {
-                                    accessToken: "unauthorized"
-                                }
-                            });
-                            console.log(`[${server.name}] [${member.username}] 403 | Refresh Failed`);
-                            erroPulled++;
+                                console.log(`[${server.name}] [${member.username}] Refreshed (access_token: ${refreshed.data.access_token}, refresh_token: ${refreshed.data.refresh_token})`);
+                                await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, refreshed.data.access_token, roleId ? [BigInt(roleId).toString()] : []).then(async (respon: any) => {
+                                    if ((respon?.status === 204 || respon?.status === 201) || (respon?.response?.status === 204 || respon?.response?.status === 201)) {
+                                        successCount++;
+                                        console.log(`[${server.name}] [${member.username}] ${respon?.status || respon?.response?.status} Refresh PULLED`); 
+                                    } else {
+                                        invalidCount++;
+                                        console.log(`[${server.name}] [${member.username}] ${respon?.status || respon?.response?.status} Refresh FAILED`);
+                                    }
+                                });
+                            } else {
+                                await prisma.members.update({
+                                    where: {
+                                        id: Number(member.id as number),
+                                    },
+                                    data: {
+                                        accessToken: "unauthorized"
+                                    }
+                                });
+                                console.log(`[${server.name}] [${member.username}] 403 | Refresh Failed`);
+                                invalidCount++
+                            }
+                        } else if (response?.code === 40007) { // "The user is banned from this guild."
+                            console.error(`[${server.name}] [${member.username}] 403 | Banned`);
+                            bannedCount++;
                         }
                         break;
                     case 407:
@@ -240,20 +295,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         break;
                     case 204:
                         await addRole(guildId.toString(), member.userId.toString(), bot?.botToken, roleId ? BigInt(roleId).toString() : "");
-                        succPulled++;
+                        successCount++;
                         break;
                     case 201:
-                        succPulled++;                                
+                        successCount++;                                
                         break;
                     case 400:
-                        if (response?.code !== 30001) {
+                        if (response.code === 30001) { // "You are at the 100 server limit."
+                            console.error(`[${server.name}] [${member.username}] 400 | ${JSON.stringify(response)}`);
+                            maxGuildsCount++;
+                        } else {
                             console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 400 | ${JSON.stringify(response)}`);
+                            errorCount++;
                         }
-                        erroPulled++;
                         break;
                     case 404:
                         console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 404 | ${JSON.stringify(response)}`);
-                        erroPulled++;
+                        errorCount++;
                         break;
                     case 401:
                         console.error(`[${server.name}] [${member.id}]-[${member.username}] Bot token invalid stopped pulling...`);
@@ -261,13 +319,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         break;
                     default:
                         console.error(`[FATAL ERROR] [UNDEFINED STATUS] [${server.name}] [${member.id}]-[${member.username}] ${status} | ${JSON.stringify(response.message)} | ${JSON.stringify(resp.message)}`);
-                        erroPulled++;
+                        errorCount++;
                         break;
                     }
                 }).catch(async (err: Error) => {
                     clearTimeout(pullTimeout);
                     console.error(`[${server.name}] [addMember.catch] [${member.username}] ${err}`);
-                    erroPulled++;
+                    errorCount++;
                 }).finally(() => {
                     console.log(`[${server.name}] [${member.username}] Pulled`);
                     clearTimeout(pullTimeout);
@@ -296,7 +354,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                   
                 await pullPromise;
                   
-                if (Number(succPulled) >= Number(pullCount)) {
+                if (Number(successCount) >= Number(pullCount)) {
                     console.log(`[${server.name}] [${member.username}] ${pullCount} members have been pulled`);
                     console.log(`[${server.name}] Finished pulling`);
                     await prisma.servers.update({
@@ -318,8 +376,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 if (delay > 2000) delay -= 1000;
                 if (delay < 300) delay += 500;
 
-                console.log(`[${server.name}] [${member.username}] Success: ${succPulled}/${(pullCount !== Number.MAX_SAFE_INTEGER) ? pullCount : "∞"} (${trysPulled}/${membersNew.length}) | Errors: ${erroPulled} | Delay: ${delay}ms`);
-                
+                console.log(`[${server.name}] [${member.username}] Success: ${successCount}/${(pullCount !== Number.MAX_SAFE_INTEGER) ? pullCount : "∞"} (${trysPulled}/${membersNew.length}) | Errors: ${errorCount} | Delay: ${delay}ms`);
+
+                await updateMigration(migration.id, "PULLING", successCount, bannedCount, maxGuildsCount, invalidCount, errorCount, blacklistedCount);
+
                 await new Promise((resolve) => { setTimeout(resolve, delay); });
             }
 
@@ -337,10 +397,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 console.error(`[${server.name}] [PULLING] 5 ${err}`);
             });
 
-            console.log(`[${server.name}] [PULLING] Done with ${succPulled} members pulled`);
+            console.log(`[${server.name}] [PULLING] Done with ${successCount} members pulled`);
             resolve();
         }).then(async () => {
-            console.log(`[${server.name}] Pulling done with ${succPulled} members pulled`);
+            console.log(`[${server.name}] Pulling done with ${successCount} members pulled`);
+
+            await updateMigration(migration.id, "SUCCESS", successCount, bannedCount, maxGuildsCount, invalidCount, errorCount, blacklistedCount);
+
             await prisma.servers.update({
                 where: {
                     id: server.id
@@ -357,7 +420,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             console.error(`[PULLING] 3 ${err}`);
         });
 
-        let esimatedTime: any = (pullCount ?? members.length) * (1000 + delay); 
+        let esimatedTime: any = (pullCount !== Number.MAX_SAFE_INTEGER ? pullCount : members.length) * (1000 + delay); 
         esimatedTime = formatEstimatedTime(esimatedTime);
             
         return res.status(200).json({ success: true, message: `Started Pull Process, this will take around ${esimatedTime}` });
