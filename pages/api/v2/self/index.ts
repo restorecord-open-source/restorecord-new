@@ -22,6 +22,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 const channelCount = await prisma.channels.count({ where: { backupId: backup.backupId } });
                 const roleCount = await prisma.roles.count({ where: { backupId: backup.backupId } });
                 const guildMemberCount = await prisma.guildMembers.count({ where: { backupId: backup.backupId } });
+                const messageCount = await prisma.messages.count({ where: { backupId: backup.backupId } });
 
                 return {
                     id: backup.id,
@@ -31,6 +32,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     channels: channelCount,
                     roles: roleCount,
                     guildMembers: guildMemberCount,
+                    messages: messageCount,
                     createdAt: backup.createdAt
                 }
             })

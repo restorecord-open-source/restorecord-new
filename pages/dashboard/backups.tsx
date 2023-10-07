@@ -60,6 +60,7 @@ export default function Backups() {
         settings: false,
         channels: false,
         roles: false,
+        messages: false,
         invite: "",
         guildId: "",
         discordId: "",
@@ -230,6 +231,7 @@ export default function Backups() {
                                                     <FormControlLabel control={<Checkbox onChange={(e) => setRestoreOptions({ ...restoreOptions, settings: e.target.checked })} />} label="Server Settings" /><br/>
                                                     <FormControlLabel control={<Checkbox onChange={(e) => setRestoreOptions({ ...restoreOptions, channels: e.target.checked })} />} label="Channels" /><br/>
                                                     <FormControlLabel control={<Checkbox onChange={(e) => setRestoreOptions({ ...restoreOptions, roles: e.target.checked })} />} label="Roles" /><br/>
+                                                    <FormControlLabel control={<Checkbox onChange={(e) => setRestoreOptions({ ...restoreOptions, messages: e.target.checked })} />} label="Messages" /><br/>
                                                 </>
                                             )}
                                         </DialogContentText>
@@ -291,6 +293,9 @@ export default function Backups() {
                                                     </Typography>
                                                     <Typography variant="h6" sx={{ fontWeight: "400" }}>
                                                         Roles: <span style={{ fontWeight: "500" }}>{backup.roles}</span>
+                                                    </Typography>
+                                                    <Typography variant="h6" sx={{ fontWeight: "400" }}>
+                                                        Messages: <span style={{ fontWeight: "500" }}>{backup.messages}</span>
                                                     </Typography>
                                                 </CardContent>
                                                 <CardActions sx={{ justifyContent: "flex-start", ml: "0.5rem", mb: "0.75rem" }}>

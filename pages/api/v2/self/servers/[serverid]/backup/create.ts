@@ -14,7 +14,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         const server = await prisma.servers.findFirst({ where: { guildId: BigInt(serverId) as bigint, ownerId: user.id } });
         if (!server) return res.status(404).json({ success: false, message: "Server not found" });
 
-        const backup: any = await createBackup(BigInt(serverId) as bigint);
+        const backup: any = await createBackup(BigInt(serverId) as bigint, { channels: true, members: true, roles: true, messages: true });
 
         if (backup.success) {
             return res.status(200).json(backup);

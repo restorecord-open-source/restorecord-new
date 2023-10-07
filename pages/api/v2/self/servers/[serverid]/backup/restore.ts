@@ -4,7 +4,12 @@ import { prisma } from "../../../../../../../src/db";
 import { startRestore } from "../../../../../../../src/Restore";
 import withAuthentication from "../../../../../../../src/withAuthentication";
 import axios from "axios";
-import { iconUrlToBase64 } from "../../../../../../../src/functions";
+
+function iconUrlToBase64(url: string) {
+    return axios.get(url, {
+        responseType: "arraybuffer",
+    }).then((res) => Buffer.from(res.data, "binary").toString("base64"));
+}
 
 async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts) {
     if (req.method !== "POST") return res.status(405).json({ code: 0, message: "Method not allowed" });
@@ -13,12 +18,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         const data = { ...req.body };
         const serverId: any = String(req.query.serverid) as any;
 
-        if (data.clearGuild === undefined || data.settings === undefined || data.channels === undefined || data.roles === undefined || serverId === undefined) {
+        if (data.clearGuild === undefined || data.settings === undefined || data.channels === undefined || data.roles === undefined || data.messages === undefined || serverId === undefined) {
             let errors = [];
             if (!data.clearGuild) errors.push("clearGuild");
             if (!data.settings) errors.push("settings");
             if (!data.channels) errors.push("channels");
             if (!data.roles) errors.push("roles");
+            if (!data.messages) errors.push("messages");
 
             return res.status(400).json({ success: false, message: `Missing arguments ${errors}` });
         }
@@ -140,7 +146,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
             if (!(data.settings && data.channels && data.roles)) return res.status(400).json({ success: false, message: "Nothing to restore" });
 
-            const restore = await startRestore(server, bot, backup, data.clearGuild, data.settings, data.channels, data.roles);
+            const restore = await startRestore(server, bot, backup, data.clearGuild, data.settings, data.channels, data.roles, data.messages);
 
             return res.status(200).json({ success: true, message: restore });
         }

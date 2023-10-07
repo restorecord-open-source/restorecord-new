@@ -5,10 +5,11 @@ import {
     generateKey,
     getChannels,
     getMembers,
+    getMessages,
     getRoles,
 } from "./BackupUtils";
 import { prisma } from "./db";
-import { BackupData, channelData, MemberData, roleData } from "./types";
+import { BackupData, channelData, MemberData, MessageData, roleData } from "./types";
 
 const DISCORD_API_BASE = "https://discord.com/api/v10";
 
@@ -23,7 +24,7 @@ export const getBackupData = (backup_id: string) => {
     });
 };
 
-export const createBackup = async (guildId: bigint) => {
+export const createBackup = async (guildId: bigint, options: { roles: boolean, channels: boolean, members: boolean, messages: boolean }) => {
     return new Promise(async (resolve, reject) => {
         try {
             const server = await prisma.servers.findUnique({ where: { guildId: BigInt(guildId) }, });
@@ -42,7 +43,7 @@ export const createBackup = async (guildId: bigint) => {
                 channels: Array<channelData>(),
                 roles: Array<roleData>(),
                 guildMembes: Array<MemberData>(),
-                messages: Array<any>(),
+                messages: Array<MessageData>(),
             };
 
             const guild = await axios.get(`${DISCORD_API_BASE}/guilds/${guildId}`, {
@@ -57,12 +58,21 @@ export const createBackup = async (guildId: bigint) => {
                 validateStatus: () => true,
             });
 
+            if (guild.status === 401) return reject({ success: false, message: "Invalid Bot Token" });
+            if (guild.status !== 200) return reject({ success: false, message: "Discord Server not found" });
+
             if (guild.data.icon) backupData.iconURL = `https://cdn.discordapp.com/icons/${guildId}/${guild.data.icon}`;
             if (guild.data.name) backupData.serverName = guild.data.name;
 
-            backupData.roles = await getRoles(server, bot);
-            backupData.channels = await getChannels(server, bot);
-            backupData.guildMembes = await getMembers(server, bot);
+            if (options.roles) backupData.roles = await getRoles(server, bot);
+            if (options.channels) backupData.channels = await getChannels(server, bot);
+            if (options.members) backupData.guildMembes = await getMembers(server, bot);
+            if (options.messages && backupData.channels) {
+                for (const channel of backupData.channels) {
+                    const messages = await getMessages(channel.channelId, bot);
+                    if (messages) backupData.messages.push(...messages);
+                }
+            }
 
             if (backup) {
                 await deleteBackup(backup.backupId);
@@ -73,19 +83,21 @@ export const createBackup = async (guildId: bigint) => {
                     },
                 });
 
-                if (previousBackup) return reject("Another Backup already exists, probably on another account");
+                if (previousBackup) return reject({ success: false, message: "Another Backup already exists, probably on another account" });
 
                 await makeBackup(backupData);
                 return resolve({ success: true, message: "Backup Updated" });
             } else {
                 await makeBackup(backupData);
             }
-            resolve({ success: true, message: "Backup Created" });
+            return resolve({ success: true, message: "Backup Created" });
         } catch (e: any) {
             console.error(e);
             // check if e.response.data.message exists and if it does return that
             if (e.response && e.response.data && e.response.data.message) {
                 return reject({ success: false, message: e.response.data.message });
+            } else if (e.message) {
+                return reject({ success: false, message: e.message });
             } else {
                 return reject({ success: false, message: "Something went wrong, contact support." });
             }
@@ -99,6 +111,7 @@ export const deleteBackup = async (backup_id: string) => {
     for (const channel of channels) {
         await prisma.channelPermissions.deleteMany({ where: { channelId: channel.channelId } });
     }
+    await prisma.messages.deleteMany({ where: { backupId: backup_id } });
     await prisma.channels.deleteMany({ where: { backupId: backup_id } });
     await prisma.guildMembers.deleteMany({ where: { backupId: backup_id } });
     await prisma.backups.deleteMany({ where: { backupId: backup_id } });
@@ -115,7 +128,7 @@ const makeBackup = async(backupData: any) => {
             backupId: backupData.backupId as string,
             // serverId: backupData.serverId as number,
             iconURL: backupData.iconURL as string,
-            channels: {
+            ...(backupData.channels ? { channels: {
                 createMany: {
                     data: backupData.channels.map((channel: any) => ({
                         name: channel.name as any,
@@ -130,17 +143,30 @@ const makeBackup = async(backupData: any) => {
                         rateLimitPerUser: channel.rateLimitPerUser ? channel.rateLimitPerUser : null as any,
                     })) as any,
                 },
-            },
-            roles: { 
+            } } : {}),
+            ...(backupData.roles ? { roles: { 
                 createMany: {
                     data: [...backupData.roles] as any,
                 },
-            },
-            guildMembes: { 
+            } } : {}),
+            ...(backupData.members ? { guildMembes: { 
                 createMany: { 
                     data: [...backupData.guildMembes] as any,
                 },
-            },
+            } } : {}),
+            ...(backupData.messages ? { messages: {
+                createMany: {
+                    data: backupData.messages.map((message: any) => ({
+                        channelId: BigInt(message.channelId) as bigint,
+                        username: message.username as any,
+                        avatar: message.avatar as any,
+                        content: message.content ? message.content : null as any,
+                        // files: message.files ? message.files : null as any,
+                        files: null as any,
+                        messageDate: message.createdAt,
+                    })) as any,
+                },
+            } } : {}),
         },
     });
 

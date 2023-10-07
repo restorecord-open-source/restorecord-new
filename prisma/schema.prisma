@@ -102,9 +102,28 @@ model backups {
     channels    channels[]
     roles       roles[]
     guildMembes guildMembers[]
+    messages    messages[]
 
     @@index([backupId])
     @@index([guildId])
+}
+
+model messages {
+    id          Int      @id @default(autoincrement())
+    channelId   BigInt   @db.UnsignedBigInt
+    backupId    String
+    username    String   @db.LongText()
+    avatar      String   @db.LongText()
+    content     String?  @db.LongText()
+    embeds      String?  @db.LongText()
+    files       String?  @db.LongText()
+    messageDate DateTime @default(now())
+    createdAt   DateTime @default(now())
+    backup      backups  @relation(fields: [backupId], references: [backupId])
+    channel     channels @relation(fields: [channelId], references: [channelId])
+
+    @@index([channelId])
+    @@index([backupId])
 }
 
 model channels {
@@ -123,6 +142,7 @@ model channels {
     createdAt        DateTime             @default(now())
     permissions      channelPermissions[] @relation("channel_permissions")
     backup           backups              @relation(fields: [backupId], references: [backupId])
+    messages         messages[]
 
     @@index([channelId])
     @@index([backupId])
@@ -290,7 +310,6 @@ model payments {
 
     @@index([accountId])
 }
-
 
 enum Theme {
     DEFAULT

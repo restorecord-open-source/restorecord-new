@@ -1,4 +1,4 @@
-import { loadCategory, loadChannel } from "./BackupUtils";
+import { loadCategory } from "./BackupUtils";
 import { backups, channels, customBots, roles, servers } from "@prisma/client";
 import axios from "axios";
 import { prisma } from "./db";
@@ -91,7 +91,7 @@ export const loadRoles = async(server: servers, bot: customBots, backup: backups
 
         if (!roles.status.toString().startsWith("2")) {
             roles.data = [];
-            console.error(`[Restore] [Roles] ${roles.status} ${roles.statusText} ${JSON.stringify(roles.data)}`);
+            console.error(`[Restore] [Roles] [Everyone] ${roles.status} ${roles.statusText} ${JSON.stringify(roles.data)}`);
         }
 
         const everyoneRole = roles.data.find((r: any) => r.name === "@everyone") ?? server.guildId;
@@ -121,7 +121,7 @@ export const loadRoles = async(server: servers, bot: customBots, backup: backups
     const rolesArr = backupRoles.filter((role) => role.name !== "@everyone" && role.botId == null).sort((a, b) => b.position - a.position);
 
     for (const roleData of rolesArr) {
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 1800));
 
         const resp = await axios.post(`${DISCORD_API_BASE}/guilds/${server.guildId}/roles`, {
             name: roleData.name,
@@ -141,9 +141,11 @@ export const loadRoles = async(server: servers, bot: customBots, backup: backups
             validateStatus: () => true,
         });
 
-        if (resp.data.retry_after) {
-            await new Promise((resolve) => setTimeout(resolve, resp.data.retry_after));
-        }
+        rolePromises.push(resp.data);
+
+        if (!resp.status.toString().startsWith("2")) { console.error(`[Restore] [Roles] [Create] ${resp.status} ${resp.statusText} ${JSON.stringify(resp.data)}`); }
+        if (resp.data.retry_after) { await new Promise((resolve) => setTimeout(resolve, resp.data.retry_after)); }
+
     }
 
     return Promise.all(rolePromises);
@@ -152,7 +154,7 @@ export const loadRoles = async(server: servers, bot: customBots, backup: backups
 /**
  * Restore the guild channels
  */
-export const loadChannels = async(server: servers, bot: customBots, backup: backups) => {
+export const loadChannels = async(server: servers, bot: customBots, backup: backups, messages: boolean) => {
     // for each backup.channels create a channel
 
     const backupChannels = await prisma.channels.findMany({
@@ -193,11 +195,11 @@ export const loadChannels = async(server: servers, bot: customBots, backup: back
             permission_overwrites: permissions.map((permission) => {
                 // check if the role exists
                 if (!backupRoles.find((r) => r.roleId === permission.roleId)) {
-                    return null;
+                    return;
                 }
 
                 return {
-                    id: String(roles.data.find((r: any) => r.name === backupRoles.find((r) => r.roleId === permission.roleId)?.name)?.id) as string,
+                    id: String(roles.data.find((r: any) => r.name === backupRoles.find((r) => r.roleId === permission.roleId)?.name)?.id) as string ?? "" as string,
                     type: permission.type,
                     allow: String(permission.allow) as string,
                     deny: String(permission.deny) as string,
@@ -216,7 +218,6 @@ export const loadChannels = async(server: servers, bot: customBots, backup: back
         });
 
         if (!resp.status.toString().startsWith("2")) { console.error(`[Restore] [Channels] [Categories] ${resp.status} ${resp.statusText} ${JSON.stringify(resp.data)}`); }
-
         if (resp.data.retry_after) {
             await new Promise((resolve) => setTimeout(resolve, resp.data.retry_after));
         }
@@ -267,7 +268,7 @@ export const loadChannels = async(server: servers, bot: customBots, backup: back
             name: channelData.name,
             type: channelData.type,
             topic: channelData.topic,
-            bitrate: channelData.bitrate ? channelData.bitrate : undefined,
+            ...(channelData.bitrate ? { bitrate: channelData.bitrate > 96000 ? 96000 : channelData.bitrate } : {}),
             user_limit: channelData.userLimit ? channelData.userLimit : undefined,
             rate_limit_per_user: channelData.rateLimitPerUser ? channelData.rateLimitPerUser : undefined,
             position: channelData.position,
@@ -275,11 +276,13 @@ export const loadChannels = async(server: servers, bot: customBots, backup: back
             nsfw: channelData.nsfw ? channelData.nsfw : undefined,
             permission_overwrites: permissions.map((permission) => {
                 if (!backupRoles.find((r) => r.roleId === permission.roleId)) {
-                    return null;
+                    return;
                 }
 
+                console.log(String(roles.data.find((r: any) => r.name === backupRoles.find((r) => r.roleId === permission.roleId)?.name)?.id) as string ?? "" as string)
+
                 return {
-                    id: String(roles.data.find((r: any) => r.name === backupRoles.find((r) => r.roleId === permission.roleId)?.name)?.id) as string,
+                    id: String(roles.data.find((r: any) => r.name === backupRoles.find((r) => r.roleId === permission.roleId)?.name)?.id) as string ?? "" as string,
                     type: permission.type,
                     allow: String(permission.allow) as string,
                     deny: String(permission.deny) as string,
@@ -301,11 +304,109 @@ export const loadChannels = async(server: servers, bot: customBots, backup: back
 
         if (!resp.status.toString().startsWith("2")) { console.error(`[Restore] [Channels] [Create] ${resp.status} ${resp.statusText} ${JSON.stringify(resp.data)}`); }
         if (resp.data.retry_after) { await new Promise((resolve) => setTimeout(resolve, resp.data.retry_after)); }
+
+        if (resp.data.id && channelData.type === 0 && messages) {
+            await loadMessages(channelData, resp.data.id, bot, backup);
+        }
     }
     // });
 
 
     return Promise.all(channelPromises);
+};
+
+/**
+ * Restore server messages
+ */
+export const loadMessages = async(channel: channels, channelId: bigint, bot: customBots, backup: backups) => {
+
+    const backupMessages = await prisma.messages.findMany({
+        where: {
+            backupId: backup.backupId,
+            channelId: channel.channelId,
+        },
+    });
+
+    const messages = backupMessages.sort((a, b) => new Date(a.messageDate).getTime() - new Date(b.messageDate).getTime());
+
+    const webhook = await axios.post(`${DISCORD_API_BASE}/channels/${channelId}/webhooks`, {
+        name: "rc",
+    }, {
+        headers: {
+            "Authorization": `Bot ${bot.botToken}`,
+            "Content-Type": "application/json",
+            "X-RateLimit-Precision": "millisecond",
+            "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
+        },
+        proxy: false,
+        httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
+        validateStatus: () => true,
+    });
+
+    console.log(webhook?.data?.id ?? webhook.data);
+
+    const messagePromises: Promise<channels>[] = [];
+
+    for (const messageData of messages) {
+        await new Promise((resolve) => setTimeout(resolve, 150));
+
+        if (messageData?.content && messageData?.content.length > 2000) messageData.content = messageData?.content.slice(0, 2000);
+
+        const payload = {
+            content: messageData.content ?? "",
+            username: messageData.username ?? "Deleted User",
+            avatar_url: messageData.avatar,
+        };
+
+        // const formData = new FormData()
+
+        // if (messageData.files !== null) {
+        //     formData.append("payload_json", JSON.stringify(payload));
+
+        //     // split all files with "," then send a request to the file (link) and get the buffer
+        //     const files = messageData.files.split(",");
+        //     for (const file of files) {
+        //         const fileData = await axios.get(file, { headers: { "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)" }, responseType: "arraybuffer", proxy: false, httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`), validateStatus: () => true, });
+        //         const blob = new Blob([fileData.data], { type: "image/png" });
+
+        //         // add the file to the form data like so file[index], file, filename
+        //         formData.append(`file[${files.indexOf(file)}]`, blob, file.split("?")[0].split("/").pop());
+        //     }
+        // }
+
+        const resp = await axios.post(`${DISCORD_API_BASE}/webhooks/${webhook.data.id}/${webhook.data.token}`, payload, {
+            headers: {
+                "Authorization": `Bot ${bot.botToken}`,
+                "Content-Type": "application/json",
+                "X-RateLimit-Precision": "millisecond",
+                "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
+            },
+            proxy: false,
+            httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
+            validateStatus: () => true,
+        });
+
+        if (!resp.status.toString().startsWith("2")) { 
+            console.error(`[Restore] [Messages] ${resp.status} ${resp.statusText} ${JSON.stringify(resp.data)}`); 
+            if (resp.status === 404) break;
+        }
+        if (resp.data.retry_after) { await new Promise((resolve) => setTimeout(resolve, resp.data.retry_after)); }
+    }
+
+    // once done delete webhook
+    await axios.delete(`${DISCORD_API_BASE}/webhooks/${webhook.data.id}/${webhook.data.token}`, {
+        headers: {
+            "Authorization": `Bot ${bot.botToken}`,
+            "Content-Type": "application/json",
+            "X-RateLimit-Precision": "millisecond",
+            "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
+        },
+        proxy: false,
+        httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
+        validateStatus: () => true,
+    });
+
+    return Promise.all(messagePromises);
 };
 
 /**

@@ -172,6 +172,66 @@ export async function getRoles(guild: servers, bot: customBots) {
     return roles;
 }
 
+export async function getMessages(channelId: bigint, bot: customBots) {
+    const messages: MessageData[] = [];
+    let done;
+
+    const messagesData = await axios.get(`${DISCORD_API_BASE}/channels/${channelId}/messages?limit=50`, {
+        headers: {
+            "Authorization": `Bot ${bot.botToken}`,
+            "Content-Type": "application/json",
+            "X-RateLimit-Precision": "millisecond",
+            "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
+        },
+        proxy: false,
+        httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
+        validateStatus: () => true,
+    });
+
+    if (messagesData.status !== 200) return [];
+    if (!messagesData.data || messagesData.data.length === 0) return [];
+
+    // while (!done) {
+    //     const lastMessage = messagesData.data[messagesData.data.length - 1];
+    //     const moreMessages = await axios.get(`${DISCORD_API_BASE}/channels/${channelId}/messages?limit=50&before=${lastMessage.id}`, {
+    //         headers: {
+    //             "Authorization": `Bot ${bot.botToken}`,
+    //             "Content-Type": "application/json",
+    //             "X-RateLimit-Precision": "millisecond",
+    //             "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
+    //         },
+    //         proxy: false,
+    //         httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
+    //         validateStatus: () => true,
+    //     });
+
+    //     messagesData.data.push(...moreMessages.data);
+
+    //     if (moreMessages.data.length < 50) done = true;
+    // }
+
+    for (const message of messagesData.data) {
+        if (!message.author) continue;
+        if (message.type !== 0 && message.type !== 19) continue;
+
+        const messageData: MessageData = {
+            channelId: BigInt(channelId) as bigint,
+            username: message.author.username ? message.author.username : "Unknown",
+            avatar: message.author.avatar ? `https://cdn.discordapp.com/avatars/${message.author.id}/${message.author.avatar}` : `https://cdn.discordapp.com/embed/avatars/${Number(message.author.discriminator) % 5}.png`,
+            content: message.content ? message.content : null,
+            // embeds: message.embeds ? message.embeds : null,
+            files: message.attachments.length >= 1 ? (message.attachments.map((a: any) => a.url).join(",")) : null,
+            createdAt: new Date(message.timestamp),
+        };
+
+        if (!messageData.content && !messageData.files) continue;
+
+        messages.push(messageData);
+    }
+
+    return messages;
+}
+
 // export async function fetchChannelsMessages(channel: TextChannel | NewsChannel) {
 //     let messages: MessageData[] = [];
 //     const messageCount: number = isNaN(options.maxMessagesPerChannel) ? 10 : options.maxMessagesPerChannel;
@@ -220,6 +280,7 @@ export async function getRoles(guild: servers, bot: customBots) {
 //     return messages;
 // }
 
+
 export async function loadCategory(categoryData: { name: string; permissions: { roleName: string; allow: string; deny: string; }[]; children: Array<TextChannelData | VoiceChannelData>; }, guild: Guild) {
     return new Promise<CategoryChannel>((resolve) => {
         guild.channels.create(categoryData.name, {
@@ -251,54 +312,54 @@ export interface TextChannelData extends BaseChannelData {
     messages: MessageData[];
 }
 
-export async function loadChannel(channelData: TextChannelData | VoiceChannelData, guild: Guild,category?: CategoryChannel | null) {
-    return new Promise(async (resolve) => {
-        const createOptions: GuildChannelCreateOptions = {
-            type: undefined,
-            parent: category ? category : undefined,
-        };
+// export async function loadChannel(channelData: TextChannelData | VoiceChannelData, guild: Guild,category?: CategoryChannel | null) {
+//     return new Promise(async (resolve) => {
+//         const createOptions: GuildChannelCreateOptions = {
+//             type: undefined,
+//             parent: category ? category : undefined,
+//         };
 
-        if (channelData.type === "GUILD_TEXT" || channelData.type === "GUILD_NEWS" || channelData.type === "text") {
-            createOptions.topic = (channelData as TextChannelData).topic ?? undefined;
-            createOptions.nsfw = (channelData as TextChannelData).nsfw;
-            createOptions.rateLimitPerUser = (channelData as TextChannelData).rateLimitPerUser;
-            createOptions.type = (channelData as TextChannelData).isNews && guild.features.includes("NEWS") ? "GUILD_NEWS" : "GUILD_TEXT";
-        } else if (channelData.type === "GUILD_VOICE" || channelData.type === "voice" ) {
-            let bitrate = (channelData as VoiceChannelData).bitrate;
-            const bitrates = Object.values(MaxBitratePerTier);
-            while (bitrate > MaxBitratePerTier[guild.premiumTier]) {
-                bitrate = bitrates[Object.keys(MaxBitratePerTier).indexOf(guild.premiumTier) - 1];
-            }
-            createOptions.bitrate = bitrate;
-            createOptions.userLimit = (channelData as VoiceChannelData).userLimit;
-            createOptions.type = "GUILD_VOICE";
-        }
-        guild.channels.create(channelData.name, createOptions).then(async (channel) => {
-            const finalPermissions: OverwriteData[] = [];
-            channelData.permissions.forEach((perm: any) => {
-                const role = guild.roles.cache.find((r) => r.name === perm.roleName);
-                if (role) {
-                    finalPermissions.push({
-                        id: role.id,
-                        allow: BigInt(perm.allow),
-                        deny: BigInt(perm.deny),
-                    });
-                }
-            });
-            await channel.permissionOverwrites.set(finalPermissions);
+//         if (channelData.type === "GUILD_TEXT" || channelData.type === "GUILD_NEWS" || channelData.type === "text") {
+//             createOptions.topic = (channelData as TextChannelData).topic ?? undefined;
+//             createOptions.nsfw = (channelData as TextChannelData).nsfw;
+//             createOptions.rateLimitPerUser = (channelData as TextChannelData).rateLimitPerUser;
+//             createOptions.type = (channelData as TextChannelData).isNews && guild.features.includes("NEWS") ? "GUILD_NEWS" : "GUILD_TEXT";
+//         } else if (channelData.type === "GUILD_VOICE" || channelData.type === "voice" ) {
+//             let bitrate = (channelData as VoiceChannelData).bitrate;
+//             const bitrates = Object.values(MaxBitratePerTier);
+//             while (bitrate > MaxBitratePerTier[guild.premiumTier]) {
+//                 bitrate = bitrates[Object.keys(MaxBitratePerTier).indexOf(guild.premiumTier) - 1];
+//             }
+//             createOptions.bitrate = bitrate;
+//             createOptions.userLimit = (channelData as VoiceChannelData).userLimit;
+//             createOptions.type = "GUILD_VOICE";
+//         }
+//         guild.channels.create(channelData.name, createOptions).then(async (channel) => {
+//             const finalPermissions: OverwriteData[] = [];
+//             channelData.permissions.forEach((perm: any) => {
+//                 const role = guild.roles.cache.find((r) => r.name === perm.roleName);
+//                 if (role) {
+//                     finalPermissions.push({
+//                         id: role.id,
+//                         allow: BigInt(perm.allow),
+//                         deny: BigInt(perm.deny),
+//                     });
+//                 }
+//             });
+//             await channel.permissionOverwrites.set(finalPermissions);
 
-            if (channelData.type === "GUILD_TEXT" || channelData.type === "text") {
-                // let webhook: Webhook | void;
-                // if ((channelData as TextChannelData).messages.length > 0) {
-                //     webhook = await loadMessages(channel as TextChannel, (channelData as TextChannelData).messages).catch(() => {});
-                // }
-                return channel;
-            } else {
-                resolve(channel);
-            }
-        });
-    });
-}
+//             if (channelData.type === "GUILD_TEXT" || channelData.type === "text") {
+//                 // let webhook: Webhook | void;
+//                 // if ((channelData as TextChannelData).messages.length > 0) {
+//                 //     webhook = await loadMessages(channel as TextChannel, (channelData as TextChannelData).messages).catch(() => {});
+//                 // }
+//                 return channel;
+//             } else {
+//                 resolve(channel);
+//             }
+//         });
+//     });
+// }
 
 /**
  * Delete all roles, all channels, all emojis, etc... of a guild
@@ -307,10 +368,8 @@ export const clearGuild = async(server: servers, bot: customBots, channels: bool
     if (channels) {
         const channels = await getChannels(server, bot);
 
-        // channels.forEach(async (channel) => {
         for (const channel of channels) {
-            // console.log(`[Restore] Deleting channel ${channel.name} (${channel.channelId}) ${new Date().toLocaleTimeString()}`)
-            await new Promise((resolve) => setTimeout(resolve, 5));
+            await new Promise((resolve) => setTimeout(resolve, 500));
 
             const resp = await axios.delete(`${DISCORD_API_BASE}/channels/${channel.channelId}`, {
                 headers: {
@@ -324,7 +383,7 @@ export const clearGuild = async(server: servers, bot: customBots, channels: bool
                 validateStatus: () => true,
             });
 
-            if (!resp.status.toString().startsWith("2")) { console.error(`[Restore] [Clear] [Roles] ${resp.status} ${resp.statusText} ${JSON.stringify(resp.data)}`); return; }
+            if (!resp.status.toString().startsWith("2")) { console.error(`[Restore] [Clear] [Channels] ${resp.status} ${resp.statusText} ${JSON.stringify(resp.data)}`); }
 
             if (resp.data.retry_after) {
                 await new Promise((resolve) => setTimeout(resolve, ((resp.data.retry_after * 3) ?? 1000)));
@@ -341,7 +400,6 @@ export const clearGuild = async(server: servers, bot: customBots, channels: bool
                 });
             }
         }
-        // });
     }
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -349,10 +407,9 @@ export const clearGuild = async(server: servers, bot: customBots, channels: bool
     if (roles) {
         const roles = await getRoles(server, bot);
 
-        // roles.filter((role) => (role.isEveryone === false)).forEach(async (role) => {
-        for (const role of roles.filter((role) => (role.isEveryone === false))) {
-            // console.log(`[Restore] Deleting role ${role.name} (${role.roleId}) ${new Date().toLocaleTimeString()}`)
-            await new Promise((resolve) => setTimeout(resolve, 300));
+        for (const role of roles) {
+            if (role.isEveryone) continue;
+            await new Promise((resolve) => setTimeout(resolve, 750));
 
             const resp = await axios.delete(`${DISCORD_API_BASE}/guilds/${server.guildId}/roles/${role.roleId}`, {
                 headers: {
@@ -366,7 +423,7 @@ export const clearGuild = async(server: servers, bot: customBots, channels: bool
                 validateStatus: () => true,
             });
 
-            if (!resp.status.toString().startsWith("2")) { console.error(`[Restore] [Clear] [Roles] ${resp.status} ${resp.statusText} ${JSON.stringify(resp.data)}`); return; }
+            if (!resp.status.toString().startsWith("2")) { console.error(`[Restore] [Clear] [Roles] ${resp.status} ${resp.statusText} ${JSON.stringify(resp.data)}`); }
 
             if (resp.data.retry_after) {
                 await new Promise((resolve) => setTimeout(resolve, ((resp.data.retry_after * 3) ?? 1000)));
@@ -383,7 +440,6 @@ export const clearGuild = async(server: servers, bot: customBots, channels: bool
                 });
             }
         }
-        // });
     }
 
     await new Promise((resolve) => setTimeout(resolve, 10000));
