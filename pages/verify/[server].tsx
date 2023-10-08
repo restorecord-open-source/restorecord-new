@@ -334,18 +334,11 @@ export async function getServerSideProps({ req }: any) {
             props: {
                 server: JSON.parse(JSON.stringify(serverInfo)),
                 status: cookies.includes("verified=true") ? "finished" : "verifying",
-                err: cookies.includes("RC_err") ? cookies.split("RC_err=")[1].split("RC_errStack")[0].trim() : null, 
+                err: cookies.includes("RC_err") ? cookies.split("RC_err=")[1].split("RC_errStack")[0].trim() : "", 
                 // find RC_errStack="..." from the RC_err cookie and then split it to get the value of RC_errStack
-                errStack: cookies.includes("RC_errStack") ? cookies.split("RC_errStack=\"")[1].split("\"")[0] : null,
+                errStack: cookies.includes("RC_errStack") ? cookies.split("RC_errStack=\"")[1].split("\"")[0] : "",
                 captcha: cookies.includes("captcha=true") ? true : false,
             }
         }
-
-        // return {
-        //     props: {
-        //         status: cookies.includes("verified=true") ? "finished" : "verifying",
-        //         err: cookies.includes("RC_err=") ? cookies.split("RC_err=")[1].split(";")[0] : "",
-        //     }
-        // }
     }
 }
