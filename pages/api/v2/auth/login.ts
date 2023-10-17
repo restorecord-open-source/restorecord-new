@@ -53,7 +53,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         if (account.banned) return res.status(400).json({ message: "Account is Banned. Contact: admin@restorecord.com" });
 
-        const token = sign({ id: account.id }, `${process.env.JWT_SECRET}`, { expiresIn: tokenExpiry });
+        const token = sign({ id: account.id, time: Date.now() }, `${process.env.JWT_SECRET}`, { expiresIn: tokenExpiry });
 
         await prisma.sessions.deleteMany({ where: { accountId: account.id, token: token } });
 

@@ -27,8 +27,8 @@ export const getBackupData = (backup_id: string) => {
 export const createBackup = async (guildId: bigint, options: { roles: boolean, channels: boolean, members: boolean, messages: boolean }) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const server = await prisma.servers.findUnique({ where: { guildId: BigInt(guildId) }, });
-            const backup = await prisma.backups.findUnique({ where: { guildId: BigInt(guildId) } });
+            const server = await prisma.servers.findFirst({ where: { guildId: BigInt(guildId) }, });
+            const backup = await prisma.backups.findFirst({ where: { guildId: BigInt(guildId) } });
             const bot = await prisma.customBots.findUnique({ where: { id: server?.customBotId } });
 
             if (!server) return reject("Server not found in database");

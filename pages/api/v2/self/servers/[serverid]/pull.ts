@@ -190,14 +190,31 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         let blacklistedCount: number = 0;
         let errorCount: number = 0;
 
-        await prisma.blacklist.findMany({ where: { type: 0, value: { in: members.map((m) => m.userId.toString()) } } }).then((blacklisted) => {
-            blacklisted.forEach((blacklistedMember) => {
-                const member = members.find((m) => m.userId === BigInt(blacklistedMember.value) as bigint);
-                if (member) {
-                    members.splice(members.indexOf(member), 1);
-                    blacklistedCount++;
-                }
-            });
+        // await prisma.blacklist.findMany({ where: { type: 0, value: { in: members.map((m) => m.userId.toString()) } } }).then((blacklisted) => {
+        //     blacklisted.forEach((blacklistedMember) => {
+        //         const member = members.find((m) => m.userId === BigInt(blacklistedMember.value) as bigint);
+        //         if (member) {
+        //             members.splice(members.indexOf(member), 1);
+        //             blacklistedCount++;
+        //         }
+        //     });
+        // });
+
+        const blacklisted = await prisma.blacklist.findMany({
+            where: {
+                type: 0,
+                value: {
+                    in: members.map((m) => m.userId.toString()),
+                },
+            },
+        });
+
+        blacklisted.forEach((blacklistedMember) => {
+            const member = members.find((m) => m.userId === BigInt(blacklistedMember.value) as bigint);
+            if (member) {
+                members.splice(members.indexOf(member), 1);
+                blacklistedCount++;
+            }
         });
 
         await prisma.migrations.update({ where: { id: migration.id }, data: { startedAt: new Date() } });
