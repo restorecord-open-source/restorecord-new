@@ -37,6 +37,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         }
         
         await prisma.members.deleteMany({ where: { guildId: serverId } });
+        await prisma.migrations.deleteMany({ where: { guildId: serverId } });
         await prisma.blacklist.deleteMany({ where: { guildId: serverId } });
         
         await prisma.servers.delete({ where: { guildId: serverId, } });

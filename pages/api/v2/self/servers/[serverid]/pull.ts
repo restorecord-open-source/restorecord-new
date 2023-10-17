@@ -203,9 +203,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         const blacklisted = await prisma.blacklist.findMany({
             where: {
                 type: 0,
-                value: {
-                    in: members.map((m) => m.userId.toString()),
-                },
+                guildId: server.guildId
             },
         });
 
