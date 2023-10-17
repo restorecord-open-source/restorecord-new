@@ -153,6 +153,19 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                                 expiry: new Date(expiry)
                             }
                         });
+
+                        
+                        await prisma.servers.updateMany({
+                            where: {
+                                ownerId: Number(payment.accountId) as number ?? 1,
+                                pullTimeout: {
+                                    gt: new Date()
+                                }
+                            },
+                            data: {
+                                pullTimeout: new Date()
+                            }
+                        });
                     } else {
                         console.error(`[COINBASE] Payment not found for subscription ${event.data.id}`);
 
@@ -173,6 +186,19 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                             data: {
                                 role: event.data.metadata.plan.includes("_") ? event.data.metadata.plan.split("_")[0] : event.data.metadata.plan,
                                 expiry: new Date(expiry)
+                            }
+                        });
+
+                        
+                        await prisma.servers.updateMany({
+                            where: {
+                                ownerId: Number(event.data.metadata.account_id) as number ?? 1,
+                                pullTimeout: {
+                                    gt: new Date()
+                                }
+                            },
+                            data: {
+                                pullTimeout: new Date()
                             }
                         });
                     }
