@@ -21,7 +21,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             prisma.accounts.count({ where: { role: "premium" } }),
             prisma.servers.count(),
             prisma.servers.count({ where: { pulling: true } }),
-            prisma.members.count(),
+            // prisma.members.count(),
+            prisma.$queryRaw`SHOW TABLE STATUS WHERE Name = 'members'`.then((res: any) => Number(res[0].Rows)),
             prisma.customBots.count(),
             prisma.payments.findMany({
                 where: {

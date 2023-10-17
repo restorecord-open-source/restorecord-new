@@ -116,9 +116,9 @@ export default function Admin() {
                                                     {tableElement("Premium", stats.accountsPremium.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), <SavingsIcon sx={{ mr: 1, mb: -0.75 }} />)}
                                                     {tableElement("Business", stats.accountsBusiness.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), <PaymentsIcon sx={{ mr: 1, mb: -0.75 }} />)}
                                                     {tableElement("Servers", stats.servers.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), <StorageIcon sx={{ mr: 1, mb: -0.75 }} />)}
-                                                    {tableElement("Members", stats.members.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), <GroupsIcon sx={{ mr: 1, mb: -0.75 }} />)}
+                                                    {tableElement("Members", "~" + stats.members.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), <GroupsIcon sx={{ mr: 1, mb: -0.75 }} />)}
                                                     {tableElement("Bots", stats.customBots.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), <SmartToyIcon sx={{ mr: 1, mb: -0.75 }} />)}
-                                                    {tableElement("Revenue", `$${Math.round(stats.totalRevenue + (6289 + 16133 + 3731)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} (${stats.payments.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")})`, <AccountBalanceIcon sx={{ mr: 1, mb: -0.75 }} />)}
+                                                    {tableElement("Revenue", `$${Math.round(stats.totalRevenue + (6289 /* shoppy */ + 16133 /* sellix */ + 3731 /* sellapp */)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} (${stats.payments.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")})`, <AccountBalanceIcon sx={{ mr: 1, mb: -0.75 }} />)}
                                                 </TableBody>
                                             </Table>
                                         </TableContainer>
