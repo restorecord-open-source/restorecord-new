@@ -169,7 +169,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             		</div>
                                     <div style="text-align: center; margin-top: 1rem;">
                                         <em style="color: rb(190, 198, 213)">
-                                            Copyright © 2023 RestoreCord. All rights reserved.
+                                            Copyright &#169; 2023 RestoreCord. All rights reserved.
                                         </em>
                                     </div>
                             	</div>
@@ -233,7 +233,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                 					Hello ${user.username},
                                 					You password has been changed on ${new Date().toLocaleString()} (local time).
                                                     <br />
-                                					<b style="font-weight: 600">Location:</b> Near ${res.data.city}, ${res.data.region}, ${res.data.country}
+                                					<b style="font-weight: 600">Location:</b> Near ${res.data.city ?? "Unknown"}, ${res.data.region ?? "Unknown"}, ${res.data.country ?? "Unknown"}
                                                     <b style="font-weight: 600">Device:</b> ${getPlatform(req.headers["user-agent"] ?? "")} (${getBrowser(req.headers["user-agent"] ?? "")})
                                 					<b style="font-weight: 600">IP:</b> ${getIPAddress(req)} <br />
                                 					If this was not you, contact us immediately at <a style="color: rgb(56,189, 248);" href="mailto:contact@restorecord.com">contact@restorecord.com</a> or <a style="color: rgb(56,189, 248);" href="https://t.me/restorecord">RestoreCord Telegram</a>.
@@ -245,7 +245,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                 			</div>
                                             <div style="text-align: center; margin-top: 1rem;">
                                                 <em style="color: rb(190, 198, 213)">
-                                                    Copyright © 2023 RestoreCord. All rights reserved.
+                                                    Copyright &#169; 2023 RestoreCord. All rights reserved.
                                                 </em>
                                             </div>
                                 		</div>
@@ -400,7 +400,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                 					Hello ${user.username},
                                                     Two-Factor Authentication has been enabled on your account on ${new Date().toLocaleString()} (local time).
                                                     <br />
-                                					<b style="font-weight: 600">Location:</b> Near ${res.data.city}, ${res.data.region}, ${res.data.country}
+                                					<b style="font-weight: 600">Location:</b> Near ${res.data.city ?? "Unknown"}, ${res.data.region ?? "Unknown"}, ${res.data.country ?? "Unknown"}
                                                     <b style="font-weight: 600">Device:</b> ${getPlatform(req.headers["user-agent"] ?? "")} (${getBrowser(req.headers["user-agent"] ?? "")})
                                 					<b style="font-weight: 600">IP:</b> ${getIPAddress(req)} <br />
                                 					If this was not you, contact us immediately at <a style="color: rgb(56,189, 248);" href="mailto:contact@restorecord.com">contact@restorecord.com</a> or <a style="color: rgb(56,189, 248);" href="https://t.me/restorecord">RestoreCord Telegram</a>.
@@ -412,7 +412,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                 			</div>
                                             <div style="text-align: center; margin-top: 1rem;">
                                                 <em style="color: rb(190, 198, 213)">
-                                                    Copyright © 2023 RestoreCord. All rights reserved.
+                                                    Copyright &#169; 2023 RestoreCord. All rights reserved.
                                                 </em>
                                             </div>
                                 		</div>
@@ -488,7 +488,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                                 Hello ${user.username},
                                                 Two-Factor Authentication has been enabled on your account on ${new Date().toLocaleString()} (local time).
                                                 <br />
-                                                <b style="font-weight: 600">Location:</b> Near ${res.data.city}, ${res.data.region}, ${res.data.country}
+                                                <b style="font-weight: 600">Location:</b> Near ${res.data.city ?? "Unknown"}, ${res.data.region ?? "Unknown"}, ${res.data.country ?? "Unknown"}
                                                 <b style="font-weight: 600">Device:</b> ${getPlatform(req.headers["user-agent"] ?? "")} (${getBrowser(req.headers["user-agent"] ?? "")})
                                                 <b style="font-weight: 600">IP:</b> ${getIPAddress(req)} <br />
                                                 If this was not you, contact us immediately at <a style="color: rgb(56,189, 248);" href="mailto:contact@restorecord.com">contact@restorecord.com</a> or <a style="color: rgb(56,189, 248);" href="https://t.me/restorecord">RestoreCord Telegram</a>.
@@ -500,7 +500,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                         </div>
                                         <div style="text-align: center; margin-top: 1rem;">
                                             <em style="color: rb(190, 198, 213)">
-                                                Copyright © 2023 RestoreCord. All rights reserved.
+                                                Copyright &#169; 2023 RestoreCord. All rights reserved.
                                             </em>
                                         </div>
                                     </div>

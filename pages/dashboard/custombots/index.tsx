@@ -214,7 +214,7 @@ export default function CustomBots() {
                                 ) : (
                                     <Paper variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
                                         <CardContent>
-                                            <Typography variant="body1" color={grey[200]} sx={{ fontWeight: "400", textAlign: "center" }}>You don&apos;t have any bots yet, :(</Typography>
+                                            <Typography variant="body1" color={grey[200]} sx={{ fontWeight: "400", textAlign: "center" }}>You don&apos;t have any bots yet :(</Typography>
                                             <Typography variant="body2" color={grey[400]} sx={{ fontWeight: "300", textAlign: "center" }}>Click Create New Bot above to get started.</Typography>
                                         </CardContent>
                                     </Paper>

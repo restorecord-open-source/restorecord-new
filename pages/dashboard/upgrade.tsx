@@ -520,10 +520,10 @@ export default function Upgrade() {
                                             <TableBody>
                                                 {payments.payments.map((payment: any) => (
                                                     <TableRow key={payment.id} sx={{ "&:last-child td, &:last-child th": { borderBottom: 0 } }}>
-                                                        <TableCell component="th" scope="row" sx={{ borderLeft: `3px solid ${payment.status === "active" ? theme.palette.success.main : payment.status === "cancelled" ? theme.palette.error.main : payment.status === "trialing" ? theme.palette.warning.main : theme.palette.grey[800]}`, paddingLeft: "0.5rem" }}>{payment.id}</TableCell>
-                                                        <TableCell>${Math.round(payment.amount / 100).toFixed(2)}</TableCell>
+                                                        <TableCell component="th" scope="row" sx={{ borderLeft: `3px solid ${(payment.status === "active" || payment.status === "paid" || payment.status === "CONFIRMED") ? theme.palette.success.main : payment.status === "cancelled" ? theme.palette.error.main : payment.status === "trialing" ? theme.palette.warning.main : theme.palette.grey[800]}`, paddingLeft: "0.5rem" }}>{payment.id}</TableCell>
+                                                        <TableCell>${(payment.amount / 100).toFixed(2)}</TableCell>
                                                         <TableCell>{payment.plan.charAt(0).toUpperCase() + payment.plan.slice(1)}</TableCell>
-                                                        <TableCell>{payment.status === "active" ? "PAID" : payment.status === "cancelled" ? "CANCELLED" : payment.status === "trialing" ? "TRIAL" : payment.status}</TableCell>
+                                                        <TableCell>{(payment.status === "active" || payment.status === "paid") ? "PAID" : payment.status === "cancelled" ? "CANCELLED" : payment.status === "trialing" ? "TRIAL" : payment.status}</TableCell>
                                                         <TableCell>{new Intl.DateTimeFormat(navigator.language, { year: "numeric", month: "long", day: "2-digit" }).format(new Date(payment.createdAt))}</TableCell>
                                                     </TableRow>
                                                 ))}

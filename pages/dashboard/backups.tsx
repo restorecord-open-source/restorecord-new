@@ -337,7 +337,7 @@ export default function Backups() {
                                             {(userData.role === "business" || userData.role === "enterprise") ? (
                                                 <Paper variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
                                                     <CardContent>
-                                                        <Typography variant="body1" color={grey[200]} sx={{ fontWeight: "400", textAlign: "center" }}>You don&apos;t have any backups yet, :(</Typography>
+                                                        <Typography variant="body1" color={grey[200]} sx={{ fontWeight: "400", textAlign: "center" }}>You don&apos;t have any backups yet :(</Typography>
                                                         <Typography variant="body2" color={grey[400]} sx={{ fontWeight: "300", textAlign: "center" }}>Click the Backup button on the Servers page to create a backup.</Typography>
                                                     </CardContent>
                                                 </Paper>

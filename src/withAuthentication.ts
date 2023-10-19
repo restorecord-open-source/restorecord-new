@@ -57,7 +57,7 @@ const withAuthentication = (next: any) => async (req: NextApiRequest, res: NextA
                                 </div>
                                 <div style="text-align: center; margin-top: 1rem;">
                                     <em style="color: rb(190, 198, 213)">
-                                        Copyright © 2023 RestoreCord. All rights reserved.
+                                        Copyright &#169; 2023 RestoreCord. All rights reserved.
                                     </em>
                                 </div>
                             </div>

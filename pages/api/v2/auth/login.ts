@@ -111,7 +111,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                         Hello ${account.username},
                                         <br />
                                         We have noticed that you have logged in from a new location.
-                                        <b style="font-weight: 600">Location:</b> Near ${res.data.city}, ${res.data.region}, ${res.data.country}
+                                        <b style="font-weight: 600">Location:</b> Near ${res.data.city ?? "Unknown"}, ${res.data.region ?? "Unknown"}, ${res.data.country ?? "Unknown"}
                                         <b style="font-weight: 600">Device:</b> ${getPlatform(req.headers["user-agent"] ?? "")} (${getBrowser(req.headers["user-agent"] ?? "")})
                                         <b style="font-weight: 600">IP:</b> ${getIPAddress(req)} <br />
                                         If this was not you, please change your password immediately.
