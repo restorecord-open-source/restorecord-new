@@ -49,6 +49,7 @@ import Badge from "@mui/material/Badge";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import Checkbox from "@mui/material/Checkbox";
 import Tooltip from "@mui/material/Tooltip";
+import { countries } from "../blacklist";
 
 export default function Server() {
     const [ token ]: any = useToken()
@@ -59,9 +60,11 @@ export default function Server() {
         pullWindow: false,
         giveRoleOnJoin: false,
         customPullCountCheck: false,
+        specificCountry: false,
         customPullCount: 0,
         selectedServer: "",
         selectedRole: "",
+        countryCode: "",
     });
 
     const [serverName, setServerName] = useState("");
@@ -323,14 +326,25 @@ export default function Server() {
                                             </Select>
                                         </FormControl>
                                     )}
+
                                     {/* give role on join checkbox */}
                                     {(allServers.length !== 0 && pullSettings.selectedServer) && (
                                         <>
-                                            <FormControlLabel control={<Checkbox checked={pullSettings.giveRoleOnJoin} onChange={(e) => { 
-                                                if (e.target.checked === true) getGuildRoles(pullSettings.selectedServer, user.bots.find((bot: any) => String(bot.id) === String(user.servers.find((server: any) => server.id === pullSettings.serverId)?.customBotId))?.botToken);
-                                                setPullSettings({ ...pullSettings, giveRoleOnJoin: e.target.checked })
-                                            }} />} label="Give role on join" />
-                                            <FormControlLabel control={<Checkbox checked={pullSettings.customPullCountCheck} onChange={(e) => setPullSettings({ ...pullSettings, customPullCountCheck: e.target.checked })} />} label="Custom Pull amount" />
+                                            <Stack direction="column" spacing={2} alignItems="left">
+                                                <FormControlLabel control={<Checkbox checked={pullSettings.giveRoleOnJoin} onChange={(e) => { 
+                                                    if (e.target.checked === true) getGuildRoles(pullSettings.selectedServer, user.bots.find((bot: any) => String(bot.id) === String(user.servers.find((server: any) => server.id === pullSettings.serverId)?.customBotId))?.botToken);
+                                                    setPullSettings({ ...pullSettings, giveRoleOnJoin: e.target.checked })
+                                                }} />} label="Give role on join" />
+                                                <FormControlLabel control={<Checkbox checked={pullSettings.customPullCountCheck} onChange={(e) => setPullSettings({ ...pullSettings, customPullCountCheck: e.target.checked })} />} label="Custom Pull amount" />
+                                                {/* if no business or enterprise plan then show note */}
+                                                {(user.role !== "business" && user.role !== "enterprise") ? (
+                                                    <Tooltip title="This feature is only available for Business and Enterprise plans.">
+                                                        <FormControlLabel control={<Checkbox />} label="Specific Country" disabled={user.role !== "business" && user.role !== "enterprise"} />
+                                                    </Tooltip>
+                                                ) : (
+                                                    <FormControlLabel control={<Checkbox checked={pullSettings.specificCountry} onChange={(e) => setPullSettings({ ...pullSettings, specificCountry: e.target.checked })} />} label="Specific Country" />
+                                                )}     
+                                            </Stack>
                                         </>
                                     )}
                                     {/* role select */}
@@ -370,6 +384,28 @@ export default function Server() {
                                             )}
                                         </>
                                     )}
+                                    {/* country select */}
+                                    {(pullSettings.specificCountry && pullSettings.selectedServer) && (
+                                        <>
+                                            <Typography variant="body1" sx={{ fontWeight: "400", mb: "1rem", mt: "1rem" }}>Select the country you want to pull members from.</Typography>
+                                            <FormControl fullWidth variant="outlined" required>
+                                                <InputLabel id="country-select-label">Select Country</InputLabel>
+                                                <Select labelId="country-select-label" label="Select Country" value={pullSettings.countryCode} onChange={(e) => setPullSettings({ ...pullSettings, countryCode: e.target.value as string }) } required>
+                                                    {countries.map((country: any) => {
+                                                        return (
+                                                            <MenuItem key={country.code} value={country.code}>
+                                                                <Stack direction="row" alignItems="center">
+                                                                    <Avatar src={`https://cdn.ipregistry.co/flags/twemoji/${country.code.toLowerCase()}.svg`} sx={{ width: 20, height: 20, borderRadius: 0, mr: 1 }} />
+                                                                    {country.name}
+                                                                </Stack>
+                                                            </MenuItem>
+                                                        )
+                                                    })}
+                                                </Select>
+                                            </FormControl>
+                                        </>
+                                    )}
+
                                     {/* custom pull count */}
                                     {(pullSettings.customPullCountCheck && pullSettings.selectedServer) && (
                                         <>
@@ -434,7 +470,7 @@ export default function Server() {
                                             </LoadingButton>
                                         ) : (
                                             <LoadingButton event={() => (
-                                                axios.put(`/api/v2/self/servers/${guildId}/pull?server=${pullSettings.selectedServer}${pullSettings.giveRoleOnJoin ? `&role=${pullSettings.selectedRole}` : ""}${pullSettings.customPullCountCheck ? `&pullCount=${pullSettings.customPullCount}` : ""}`, {}, {
+                                                axios.put(`/api/v2/self/servers/${guildId}/pull?server=${pullSettings.selectedServer}${pullSettings.giveRoleOnJoin ? `&role=${pullSettings.selectedRole}` : ""}${pullSettings.customPullCountCheck ? `&pullCount=${pullSettings.customPullCount}` : ""}${pullSettings.specificCountry ? `&country=${pullSettings.countryCode}` : ""}`, {}, {
                                                     headers: {
                                                         "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
                                                         "x-track": makeXTrack()

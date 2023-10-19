@@ -9,6 +9,7 @@ import { formatEstimatedTime } from "../../../../../../src/functions";
 
 import axios from "axios";
 import withAuthentication from "../../../../../../src/withAuthentication";
+import { countries } from "../../../../../dashboard/blacklist";
 
 type Status = "PENDING" | "PULLING" | "SUCCESS" | "FAILED" | "STOPPED";
 
@@ -46,6 +47,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         const serverId: any = String(req.query.serverid) as any;
         const guildId = req.query.server as string;
         const roleId = req.query.role as string;
+        const countryCode = req.query.country as string;
         let pullCount = Number(req.query.pullCount) || Number.MAX_SAFE_INTEGER;
 
         if (!serverId) return res.status(400).json({ success: false, message: "Server ID not provided" });
@@ -58,7 +60,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         const bot = await prisma.customBots.findFirst({ where: { AND: [ { ownerId: user.id }, { id: server.customBotId } ] } });
         if (!bot) return res.status(400).json({ success: false, message: "Bot not found" });
 
-        const members = await prisma.members.findMany({ where: { AND: [ { guildId: BigInt(server.guildId) }, { accessToken: { not: "unauthorized" } } ] } });
+        const members = await prisma.members.findMany({ where: { AND: [ { guildId: BigInt(server.guildId) }, { accessToken: { not: "unauthorized" }, }, ((countryCode && (user.role === "business" || user.role === "enterprise")) ? { country: countries.find((c) => c.code === countryCode)?.name } : {}) ] }, take: 100000 });
         if (members.length === 0) return res.status(400).json({ success: false, message: "No members found" });
 
         await axios.get(`https://discord.com/api/v10/users/@me`, {
