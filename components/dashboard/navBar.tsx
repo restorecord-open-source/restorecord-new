@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/router";
-import { useTheme } from "@mui/material/styles";
+import { SxProps, useTheme } from "@mui/material/styles";
 import { ArrowDropDownRounded } from "@mui/icons-material";
 
 import Link from "next/link"
@@ -32,7 +32,6 @@ const drawerWidth = 250;
 
 const Main = styled("main", { shouldForwardProp: (prop: any) => prop !== "open" })<{
     open?: boolean;
-    sx?: any;
 }>(({ theme, open }: any) => ({
     flexGrow: 1,
     padding: theme.spacing(3),
@@ -196,7 +195,7 @@ export default function NavBar({ ...props }: any) {
                     </Box>
                 </Drawer>
             </Box>
-            <Main open={openDrawer} sx={{ flexGrow: 1, p: 3 }}>
+            <Main open={openDrawer}>
                 {props.children}
             </Main>
         </>
