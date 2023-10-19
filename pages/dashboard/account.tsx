@@ -48,11 +48,13 @@ export default function AccountSettings() {
     const [password, setPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [newPassword2, setNewPassword2] = useState("");
-    const [confirmCode, setConfirmCode] = useState("");
+
+    const [confirmCode, setConfirmCode] = useState<string | null>(null);
 
     const [twoFACode, setTwoFACode] = useState("");
 
     const codeRef: any = useRef<HTMLInputElement>();
+    const confirmEmailRef: any = useRef<HTMLInputElement>();
 
     const { data, isError, isLoading, refetch } = useQuery("user", async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
@@ -60,7 +62,7 @@ export default function AccountSettings() {
 
     useEffect(() => {
         if (data && data.username) {
-            setUserData({ ...userData, username: data.username, userId: data.userId });
+            setUserData({ ...userData, username: data.username, email: data.email, userId: data.userId });
         }
     }, [data]);
 
@@ -115,11 +117,19 @@ export default function AccountSettings() {
             <Stack spacing={2}>
                 <TextField label="Account Number" variant="outlined" fullWidth value={data.id} disabled />
                 <TextField label="Username" variant="outlined" fullWidth value={userData.username} onChange={(e) => { setUserData({ ...userData, username: e.target.value }) }} />
-                <TextField label="Discord ID" variant="outlined" fullWidth value={userData.userId} onChange={(e) => { setUserData({ ...userData, userId: e.target.value }) }} />
-                {/* <TextField label="Email" variant="outlined" fullWidth value={user.email} disabled /> */}
+                <TextField label="Email" variant="outlined" fullWidth value={userData.email} onChange={(e) => { setUserData({ ...userData, email: e.target.value }) }} />
+                <TextField label="Discord ID" variant="outlined" fullWidth value={userData.userId ?? ""} onChange={(e) => { setUserData({ ...userData, userId: e.target.value }) }} />
 
-                <TextField sx={{ display: data.username === userData.username ? "none" : "block" }} label="Confirm Password" variant="outlined" fullWidth type="password" value={password} onChange={(e) => { setPassword(e.target.value) }} />
-                <LoadingButton sx={{ display: data.username === userData.username ? "none" : "block" }} event={async () => {
+                {((data.username !== userData.username) || (data.email !== userData.email)) && (
+                    <Typography variant="body1" sx={{ mb: 2 }} color="text.secondary">
+                        Changing {data.username !== userData.username && "your username"}{data.username !== userData.username && data.email !== userData.email && " and "}{data.email !== userData.email && "your email"} requires you to confirm {data.email !== userData.email ? "your old email and " : ""}your password, {data.email !== userData.email ? <b>this will also change your billing email</b> : ""}.
+                    </Typography>
+                )}
+
+
+
+                <TextField sx={{ display: (data.username === userData.username && data.email === userData.email) ? "none" : "block" }} label="Confirm Password" variant="outlined" fullWidth type="password" value={password} onChange={(e) => { setPassword(e.target.value) }} required />
+                <LoadingButton sx={{ display: ((data.username === userData.username && data.email === userData.email) || confirmCode !== null) ? "none" : "block" }} event={async () => {
                     if (userData.username.length < 3) {
                         setNotiTextE("Username must be at least 3 characters long");
                         setOpenE(true);
@@ -128,8 +138,46 @@ export default function AccountSettings() {
 
                     try {
                         await axios.patch("/api/v2/self", { 
-                            username: userData.username, 
+                            ...((data.username !== userData.username) ? { username: userData.username } : {}),
+                            ...((data.email !== userData.email) ? { email: userData.email } : {}),
                             password: password 
+                        }, { 
+                            headers: { 
+                                Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
+                                "x-track": makeXTrack()
+                            },
+                            validateStatus: () => true
+                        }).then((res) => {
+                            if (res.data.success) {
+                                setNotiTextS(res.data.message);
+                                setOpenS(true);
+
+                                // if response code is 201 (created), then we need to confirm email so hide the fields and show the confirm code field
+                                if (res.status === 201) {
+                                    setConfirmCode("");
+                                    setPassword("");
+                                    confirmEmailRef.current.style.display = "block";
+                                    confirmEmailRef.current.focus();
+                                }
+                            } else {
+                                setNotiTextE(res.data.message);
+                                setOpenE(true);
+                            }
+                        });
+                    } catch (e) {
+                        console.error(e);
+                        setNotiTextE("An error occurred");
+                        setOpenE(true);
+                    }
+                }}>Save Changes</LoadingButton>
+
+                <TextField sx={{ display: "none" }} label="Email Confirmation Code" variant="outlined" fullWidth type="text" value={confirmCode} onChange={(e) => { setConfirmCode(e.target.value) }} required ref={confirmEmailRef} />
+                <LoadingButton sx={{ display: confirmCode === null ? "none" : "block" }} event={async () => {
+                    try {
+                        await axios.patch("/api/v2/self", { 
+                            password: password,
+                            email: userData.email,
+                            code: confirmCode 
                         }, { 
                             headers: { 
                                 Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
@@ -141,16 +189,23 @@ export default function AccountSettings() {
                                 refetch();
                                 setNotiTextS(res.data.message);
                                 setOpenS(true);
+
+                                setPassword("");
+                                setConfirmCode(null);
+
+                                confirmEmailRef.current.style.display = "none";
                             } else {
                                 setNotiTextE(res.data.message);
                                 setOpenE(true);
                             }
                         });
                     } catch (e) {
+                        console.error(e);
                         setNotiTextE("An error occurred");
                         setOpenE(true);
                     }
-                }}>Save Changes</LoadingButton>
+                }}>Confirm Email</LoadingButton>
+
 
                 <LoadingButton sx={{ display: data.userId === userData.userId ? "none" : "block" }} event={async () => {
                     if (userData.userId.length < 16 || userData.userId.length > 19) {
@@ -179,6 +234,7 @@ export default function AccountSettings() {
                             }
                         });
                     } catch (e) {
+                        console.error(e);
                         setNotiTextE("An error occurred");
                         setOpenE(true);
                     }
@@ -297,6 +353,7 @@ export default function AccountSettings() {
                                                                 }
                                                             });
                                                         } catch (e) {
+                                                            console.error(e);
                                                             setNotiTextE("An error occurred");
                                                             setOpenE(true);
                                                         }

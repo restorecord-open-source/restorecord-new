@@ -8,7 +8,11 @@ import Email from "../../../../src/email";
 import { getBrowser, getIPAddress, getPlatform, getXTrack } from "../../../../src/getIPAddress";
 import { generateQRUrl } from "../../../../src/functions";
 import withAuthentication from "../../../../src/withAuthentication";
+import Stripe from "stripe";
 
+
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2022-11-15", typescript: true });
+// const stripe = new Stripe("sk_test_51LntpRIDsTail4YBlix309uMRctzdtJaNiTRMNgncRs6KPmeQJGIMeJKXSeCbosHRBTaGnaySMgbtfzJFqEUiUHL002RZTmipV", { apiVersion: "2022-11-15", typescript: true, });
 
 async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts) {
     switch (req.method) {
@@ -41,13 +45,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 success: true,
                 id: user.id,
                 username: user.username,
+                email: user.email,
                 role: user.role,
                 icon: user.pfp,
                 ...(user.admin === true && { admin: true }),
                 createdAt: user.createdAt,
                 expiry: user.expiry,
                 tfa: user.twoFactor,
-                userId: String(user.userId) as string,
+                userId: user.userId ? String(user.userId) as string : null,
                 servers: servers.map((server: servers) => ({
                     id: server.id,
                     name: server.name,
@@ -288,7 +293,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             if (!xTrack) return res.status(400).json({ success: false, message: "Invalid Request" });
             if (!user) return res.status(400).json({ success: false, message: "Account not found." });
 
-            const { userId, username, password, code } = req.body;
+            const { userId, username, password, code, email } = req.body;
 
             if (typeof password !== "string" && !userId) return res.status(400).json({ success: false, message: "Missing password." });
             if (!userId && !await compare(password, user.password)) return res.status(400).json({ success: false, message: "Password does not match" });
@@ -316,12 +321,209 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 });
 
                 return res.status(200).json({ success: true, message: "Username changed.", username: username });
+            } else if (email && password && !code && !username && !userId) {
+                // send email to confirm email change
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ success: false, message: "Invalid email." });
+
+                var alreadyExists = await prisma.accounts.findFirst({
+                    where: {
+                        email: email
+                    }
+                });
+
+                if (alreadyExists) return res.status(400).json({ success: false, message: "Email already linked to another account." });
+
+                // expire all old emails
+                await prisma.emails.updateMany({
+                    where: {
+                        accountId: user.id,
+                        title: "Email Change",
+                        used: false
+                    },
+                    data: {
+                        expires: new Date(Date.now() - 1),
+                    }
+                });
+
+                await axios.get(`https://ipinfo.io/${getIPAddress(req)}/json?token=${process.env.IPINFO_TOKEN}`).then(async (res) => {
+                    const code = Math.floor(Math.random() * 1000000).toString().padStart(6, "0");
+
+                    await prisma.emails.create({
+                        data: {
+                            accountId: user.id,
+                            title: "Email Change",
+                            code: code,
+                            expires: new Date(Date.now() + 30 * 60 * 1000)
+                        }
+                    });
+
+                    await Email.send({
+                        to: user.email,
+                        from: {
+                            email: "no-reply@restorecord.com",
+                            name: "RestoreCord"
+                        },
+                        subject: "RestoreCord Email Change Confirmation",
+                        html: `
+                            <!DOCTYPE html>
+                            <html>
+                            	<head>
+                            		<title>RestoreCord</title>
+                            	</head>
+                            	<body>
+                            		<h1 style="text-align: center; margin-top: 1.5rem; line-height: 2rem; font-size: 2.25rem; font-weight: 600; margin-bottom: 1rem; color: rgb(79, 70, 229);">
+                            			RestoreCord
+                            		</h1>
+                            		<div style="padding: 1rem; max-width: 30rem; margin-left: auto;margin-right: auto; width: 100%; border-radius: 0.75rem; border-width: 1px; background: rgb(250, 250, 250);">
+                                        <h2 style="color: rgb(0, 0, 0); font-size: 1.75rem; line-height: 2rem; font-weight: 600; line-height: 1.25; margin-bottom: 1rem">
+                                            Email Change Confirmation
+                                        </h2>
+                            			<div>
+                                            <p style="white-space: pre-line; color: rgb(0, 0, 0); font-weight: 400; margin-bottom: 0.75rem; overflow-wrap: break-word; font-size: 1rem;">
+                            					Hello ${user.username},
+                                                To confirm that you want to change your email from ${user.email} to ${email}, please enter the following code into the RestoreCord website (The code will expire in 30 minutes):
+                                                <br />
+                                                <b><code>${code}</code></b>
+                                                <br />
+                            					<b style="font-weight: 600">Location:</b> Near ${res.data.city ?? "Unknown"}, ${res.data.region ?? "Unknown"}, ${res.data.country ?? "Unknown"}
+                                                <b style="font-weight: 600">Device:</b> ${getPlatform(req.headers["user-agent"] ?? "")} (${getBrowser(req.headers["user-agent"] ?? "")})
+                            					<b style="font-weight: 600">IP:</b> ${getIPAddress(req)} <br />
+                            					If this was not you, simply ignore this email or <a style="color: rgb(56,189, 248);" href="https://restorecord.com/forgot">reset your password</a>.
+                                                If you have any questions, please contact us at <a style="color: rgb(56,189, 248);" href="mailto:contact@restorecord.com">contact@restorecord.com</a>.
+                                                <br />
+                                                Sincerely,
+                                                RestoreCord
+                            				</p>
+                            			</div>
+                                        <div style="text-align: center; margin-top: 1rem;">
+                                            <em style="color: rb(190, 198, 213)">
+                                                Copyright &#169; 2023 RestoreCord. All rights reserved.
+                                            </em>
+                                        </div>
+                            		</div>
+                            	</body>
+                            </html>
+                        `,
+                        text: `Hello ${user.username},\nTo confirm that you want to change your email from ${user.email} to ${email}, enter the following code:\n${code}`,
+                    }).then(() => {
+                        console.log(`[EMAIL] [${new Date().toLocaleString()}] Confirmation code sent to ${user.email}.`);
+                    }).catch((err: any) => {
+                        console.error(err);
+                    })
+                });
+
+                return res.status(201).json({ success: true, message: "Confirmation code sent to your old email." });
+            } else if (password && email && code && !username && !userId) {
+                // confirm email change
+                var verifyCode = await prisma.emails.findFirst({
+                    where: {
+                        accountId: user.id,
+                        code: code,
+                    },
+                });
+
+                if (!verifyCode || verifyCode.expires < new Date()) return res.status(400).json({ success: false, message: "Confirmation code expired." });
+                if (verifyCode.used) return res.status(400).json({ success: false, message: "Confirmation code already used." });
+
+                await prisma.emails.update({
+                    where: {
+                        id: verifyCode.id
+                    },
+                    data: {
+                        used: true
+                    }
+                });
+
+                await prisma.accounts.update({
+                    where: {
+                        id: user.id
+                    },
+                    data: {
+                        email: email
+                    }
+                });
+
+                await axios.get(`https://ipinfo.io/${getIPAddress(req)}/json?token=${process.env.IPINFO_TOKEN}`).then(async (res) => {
+                    await Email.send({
+                        to: [user.email, email],
+                        from: {
+                            email: "no-reply@restorecord.com",
+                            name: "RestoreCord"
+                        },
+                        subject: "RestoreCord Email Changed",
+                        html:
+                        `
+                            <!DOCTYPE html>
+                            <html>
+                                <head>
+                                    <title>RestoreCord</title>
+                                </head>
+                                <body>
+                                    <h1 style="text-align: center; margin-top: 1.5rem; line-height: 2rem; font-size: 2.25rem; font-weight: 600; margin-bottom: 1rem; color: rgb(79, 70, 229);">
+                                        RestoreCord
+                                    </h1>
+                                    <div style="padding: 1rem; max-width: 30rem; margin-left: auto;margin-right: auto; width: 100%; border-radius: 0.75rem; border-width: 1px; background: rgb(250, 250, 250);">
+                                        <h2 style="color: rgb(0, 0, 0); font-size: 1.75rem; line-height: 2rem; font-weight: 600; line-height: 1.25; margin-bottom: 1rem">
+                                            Your email has been changed
+                                        </h2>
+                                        <div>
+                                            <p style="white-space: pre-line; color: rgb(0, 0, 0); font-weight: 400; margin-bottom: 0.75rem; overflow-wrap: break-word; font-size: 1rem;">
+                                                Hello ${user.username},
+                                                You email has been changed from ${user.email} to ${email} on ${new Date().toLocaleString()} (local time).
+                                                <br />
+                                                <b style="font-weight: 600">Location:</b> Near ${res.data.city ?? "Unknown"}, ${res.data.region ?? "Unknown"}, ${res.data.country ?? "Unknown"}
+                                                <b style="font-weight: 600">Device:</b> ${getPlatform(req.headers["user-agent"] ?? "")} (${getBrowser(req.headers["user-agent"] ?? "")})
+                                                <b style="font-weight: 600">IP:</b> ${getIPAddress(req)} <br />
+                                                If this was <b style="color: red">NOT</b> you, contact us immediately at <a style="color: rgb(56,189, 248);" href="mailto:contact@restorecord.com</a>!
+                                                If you have any questions, please contact us at <a style="color: rgb(56,189, 248);" href="mailto:contact@restorecord.com">contact@restorecord.com</a>.
+                                                <br />
+                                                Sincerely,
+                                                RestoreCord
+                                            </p>
+                                        </div>
+                                        <div style="text-align: center; margin-top: 1rem;">
+                                            <em style="color: rb(190, 198, 213)">
+                                                Copyright &#169; 2023 RestoreCord. All rights reserved.
+                                            </em>
+                                        </div>
+                                    </div>
+                                </body>
+                            </html>
+                        `,
+                        text: `Hello ${user.username},\nYou email has been changed from ${user.email} to ${email}.`
+                    }).then(() => {
+                        console.log(`[EMAIL] [${new Date().toLocaleString()}] Email changed for ${user.username} (${user.email})`);
+                    }).catch((err: any) => {
+                        console.error(err);
+                    })
+                });
+
+                var payments = await prisma.payments.findMany({
+                    where: {
+                        accountId: user.id,
+                        subscriptionId: {
+                            startsWith: "sub_"
+                        },
+                    }
+                });
+
+                for (const payment of payments) {
+                    await stripe.subscriptions.retrieve(payment.subscriptionId).then(async (subscription) => {
+                        await stripe.customers.update(subscription.customer as string, {
+                            email: email
+                        });
+                    }).catch((err: any) => {
+                        console.error(err);
+                    });
+                }
+
+                return res.status(200).json({ success: true, message: "Email changed." });
             } else if (userId && !code && !username && !password) {
                 // check if userId is a correct discord id
                 if (userId.length < 16 || userId.length > 19) return res.status(400).json({ success: false, message: "Invalid Discord ID." });
                 if (!/^[0-9]+$/.test(userId)) return res.status(400).json({ success: false, message: "Invalid Discord ID." });
 
-                const alreadyExists = await prisma.accounts.findFirst({
+                var alreadyExists = await prisma.accounts.findFirst({
                     where: {
                         userId: userId
                     }
