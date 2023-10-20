@@ -112,8 +112,27 @@ const handler = async(_: NextApiRequest, res: NextApiResponse, interaction: any)
                 return res.status(200).json(INVALID_COMMAND_OPTIONS)
             }
 
-            let server = await axios.get(`https://discord.com/api/v10/guilds/${interaction.guild_id}`, { headers: { Authorization: `Bot ${customBot.botToken}` }, proxy: false, httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) })
-            let nWebhook = await axios.post(`https://discord.com/api/v10/channels/${options[0].value}/webhooks`, { name: "Verification" }, { headers: { Authorization: `Bot ${customBot.botToken}` }, proxy: false, httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) })
+            let server = await axios.get(`https://discord.com/api/v10/guilds/${interaction.guild_id}`, { headers: { Authorization: `Bot ${customBot.botToken}` }, validateStatus: () => true, proxy: false, httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) });
+            let nWebhook = await axios.post(`https://discord.com/api/v10/channels/${options[0].value}/webhooks`, { name: "Verification" }, { headers: { Authorization: `Bot ${customBot.botToken}` }, validateStatus: () => true, proxy: false, httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) });
+
+            if (nWebhook.status !== 200) {
+                await axios.patch(`https://discord.com/api/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`, {
+                    content: null,
+                    embeds: [{
+                        title: "❌ Error",
+                        description: nWebhook.data.message ?? "An error occured while trying to create the webhook, please try again later. and [contact support](https://t.me/restorecord) if the issue persists.",
+                        color: 0xff0000
+                    }],
+                    flags: InteractionResponseFlags.EPHEMERAL
+                }, {
+                    validateStatus: () => true,
+                    headers: { "Content-Type": "application/json" },
+                    proxy: false,
+                    httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) 
+                });
+
+                return;
+            }
 
             webhook = nWebhook.data;
 
@@ -124,14 +143,46 @@ const handler = async(_: NextApiRequest, res: NextApiResponse, interaction: any)
             const username =     options.find((o: any) => o.name == "username")?.value;
             const button_text =  options.find((o: any) => o.name == "button_text")?.value;
 
+            var blacklistedWords = [
+                "restorecord",
+                "restore cord",
+                "restore-cord",
+                "banned",
+                "tapped",
+                "termed",
+                "terminated",
+                "disabled",
+                "ban",
+            ];
+
+            if (title || description || username || button_text) {
+                for (const word of blacklistedWords) {
+                    if (title?.toLowerCase().includes(word) || description?.toLowerCase().includes(word) || username?.toLowerCase().includes(word) || button_text?.toLowerCase().includes(word)) {
+                        await axios.patch(`https://discord.com/api/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`, {
+                            content: null,
+                            embeds: [{
+                                title: "❌ Error",
+                                description: `You are not allowed to use the word \`${word}\`\n\nThis is to protect your bot from being disabled by Discord.`,
+                                color: 0xff0000
+                            }],
+                            flags: InteractionResponseFlags.EPHEMERAL
+                        }, {
+                            validateStatus: () => true,
+                            headers: { "Content-Type": "application/json" },
+                            proxy: false,
+                            httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) 
+                        });
+                        return;
+                    }
+                }
+            }
+
 
             await axios.post(`https://discord.com/api/webhooks/${webhook.id}/${webhook.token}`, {
                 content: null,
                 embeds: [
                     {
                         title: title ?? `**Verify in ${server.data.name}**`,
-                        // description: description ?? "To get **access** to the rest of the server, click on the **verify** button.",
-                        // use description or choose random from verify_description
                         description: description ?? verify_description[Math.floor(Math.random() * verify_description.length)],
                         color: 3092790,
                         image: {
@@ -151,10 +202,11 @@ const handler = async(_: NextApiRequest, res: NextApiResponse, interaction: any)
                     }]
                 }]
             }, {
+                validateStatus: () => true,
                 headers: { "Content-Type": "application/json" },
                 proxy: false, 
                 httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) 
-            }).then(async (res) => {
+            }).then(async (resp) => {
                 await axios.patch(`https://discord.com/api/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`, {
                     content: null,
                     embeds: [{
@@ -164,6 +216,7 @@ const handler = async(_: NextApiRequest, res: NextApiResponse, interaction: any)
                     }],
                     flags: InteractionResponseFlags.EPHEMERAL
                 }, {
+                    validateStatus: () => true,
                     headers: { "Content-Type": "application/json" },
                     proxy: false,
                     httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) 
@@ -178,6 +231,7 @@ const handler = async(_: NextApiRequest, res: NextApiResponse, interaction: any)
                     }],
                     flags: InteractionResponseFlags.EPHEMERAL
                 }, {
+                    validateStatus: () => true,
                     headers: { "Content-Type": "application/json" },
                     proxy: false,
                     httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) 
