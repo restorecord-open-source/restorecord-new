@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import { useQuery } from "react-query"
 import { useToken } from "../../src/token";
 import { countries } from "./blacklist";
+import { useState, useEffect } from "react";
 import { getMemberList, getMemberStats } from "../../src/dashboard/getMembers";
 
 import NavBar from "../../components/dashboard/navBar";
@@ -31,12 +32,18 @@ import Table from "@mui/material/Table";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import Stack from "@mui/material/Stack";
+import FormControl from "@mui/material/FormControl";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import Skeleton from "@mui/material/Skeleton";
 
 const ApexChart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 export default function Dashboard() {
     const [ token ]: any = useToken()
     const router = useRouter();
+
+    const [statType, setStatType] = useState<"isp" | "country" | "state" | "city" | "server">("country");
 
     const { data, isError, isLoading } = useQuery("user", async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
@@ -50,14 +57,18 @@ export default function Dashboard() {
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
     }, "recent", 6), { retry: false });
 
-    const { data: topCountries, isError: topCountriesError, isLoading: topCountriesLoading } = useQuery("topCountries", async () => await getMemberStats({
+    const { data: topAnalytics, isError: topAnalyticsError, isLoading: topAnalyticsLoading, refetch: refetchTopAnalytics } = useQuery("topAnalytics", async () => await getMemberStats({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
-    }, "country", 10), { retry: false });
+    }, statType, 10), { retry: true, refetchOnWindowFocus: false, enabled: process.browser, refetchInterval: 10000, refetchOnMount: false, refetchOnReconnect: false });
 
     const { data: newsData, isError: newsError, isLoading: newsLoading } = useQuery("news", async () => await fetch("/api/v2/news").then(res => res.json()), { retry: false });
 
-    if (isLoading || isLoading2 || newsLoading || recentVerifiedLoading || topCountriesLoading) return <CircularProgress sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
-    if (isError || isError2 || newsError || recentVerifiedError || topCountriesError) return <div>Error</div>
+    useEffect(() => {
+        refetchTopAnalytics();
+    }, [statType]);
+
+    if (isLoading || isLoading2 || newsLoading || recentVerifiedLoading || topAnalyticsLoading) return <CircularProgress sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
+    if (isError || isError2 || newsError || recentVerifiedError || topAnalyticsError) return <div>Error</div>
 
     if (!data || !data.username) {
         router.push(`/login?redirect_to=${encodeURIComponent(router.pathname)}`);
@@ -236,7 +247,6 @@ export default function Dashboard() {
                                 <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>Verified Members</Typography>
                                 <Typography variant="body1" color="grey.200">Verified members over the past 30 days</Typography>
 
-
                                 <ApexChart
                                     options={apexChart.options}
                                     series={apexChart.series}
@@ -287,6 +297,24 @@ export default function Dashboard() {
                             )
                         })}
 
+                        {!recentVerifiedLoading && recentVerified.content.length === 0 && (
+                            <List sx={{ width: "100%", maxWidth: 360 }}>
+                                {Array.from({ length: 6 }, (_, i) => (
+                                    <ListItem key={i} sx={{ wordBreak: "break-all" }} disablePadding={true}>
+                                        <ListItemAvatar>
+                                            <Avatar sx={{ width: "40px", height: "40px" }} />
+                                        </ListItemAvatar>
+                                        <ListItemText primary={<Skeleton color="white" width={Math.floor(Math.random() * 150) + 50} height={"24px"} />} secondary={
+                                            <>
+                                                <Skeleton width={Math.floor(Math.random() * 150) + 50} height={"20px"} />
+                                                <Skeleton width={Math.floor(Math.random() * 150) + 50} height={"20px"} />
+                                            </>
+                                        } />
+                                    </ListItem>
+                                ))}
+                            </List>
+                        )}
+
                         {!recentVerifiedLoading && ( 
                             <Link href="/dashboard/members">
                                 <Button variant="filled" color="white" sx={{ width: "100%" }}>
@@ -302,41 +330,77 @@ export default function Dashboard() {
     }
 
 
-    function renderTopCountries() {
-        // show a table like list of the top 10 countries with the most verified members
+    function rendertopAnalytics() {
         return (
             <Grid item xs={12} md={6}>
                 <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%", border: "1px solid #18182e" }}>
                     <CardContent sx={{ pb: "1rem !important" }}>
-                        {topCountriesLoading && ( <CircularProgress /> )}
+                        {topAnalyticsLoading && ( <CircularProgress /> )}
 
-                        {!topCountriesLoading && (
+
+                        {/* stack with text left and select button on right */}
+                        {!topAnalyticsLoading && (
                             <>
-                                <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>Top Countries</Typography>
-                                <Typography variant="body1" color="grey.200">Countries with the most verified members</Typography>
+                                <Stack direction="row" spacing={1} sx={{ mb: 2 }} alignItems="center" justifyContent={"space-between"}>
+                                    <Typography variant="h4" sx={{ fontWeight: "700" }}>Top Analytics</Typography>
+                                    <FormControl sx={{ minWidth: 120 }}>
+                                        <Select
+                                            value={statType}
+                                            onChange={(e) => {
+                                                setStatType(e.target.value as any);
+                                            }}
+                                            displayEmpty
+                                            inputProps={{ "aria-label": "Without label" }}
+                                        >
+                                            <MenuItem value="country">Country</MenuItem>
+                                            <MenuItem value="state">State</MenuItem>
+                                            <MenuItem value="city">City</MenuItem>
+                                            <MenuItem value="isp">ISP</MenuItem>
+                                            <MenuItem value="server">Server</MenuItem>
+                                        </Select>
+
+                                    </FormControl>
+                                </Stack>
                             </>
                         )}
 
                         <Table>
-                            {!topCountriesLoading && topCountries.content.map((country: any) => {
+                            {!topAnalyticsLoading && topAnalytics.content.map((analytic: any) => {
                                 return (
-                                    <TableRow key={country.country} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                                    <TableRow key={analytic.country} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
                                         <TableCell>
                                             {/* look up country code from countries via name */}
                                             <Stack direction="row" spacing={1} alignItems="center">
-                                                {countries.find((c: any) => c.name === country.country) && (
-                                                    <Avatar alt="Country" src={`https://cdn.ipregistry.co/flags/twemoji/${countries.find((c: any) => c.name === country.country)?.code.toLowerCase()}.svg`} sx={{ width: 20, height: 20, borderRadius: 0 }} />
+                                                {statType === "country" && (
+                                                    countries.find((c: any) => c.name === analytic.name) && (<Avatar alt="Country" src={`https://cdn.ipregistry.co/flags/twemoji/${countries.find((c: any) => c.name === analytic.name)?.code.toLowerCase()}.svg`} sx={{ width: 20, height: 20, borderRadius: 0 }} />)
                                                 )}
-                                                <Typography variant="body1" color="grey.200">{country.country}</Typography>
+                                                <Typography variant="body1" color="grey.200">
+                                                    {analytic.link ? <a href={analytic.link} target="_blank" rel="noopener noreferrer">{analytic.name}</a> : analytic.name}
+                                                </Typography>
                                             </Stack>
                                         </TableCell>
                                         <TableCell>
-                                            <Typography variant="body1" color="grey.200">{country.count}</Typography>
+                                            <Typography variant="body1" color="grey.200">{analytic.count}</Typography>
                                         </TableCell>
                                     </TableRow>
                                 )
-                            }
-                            )}
+                            })}
+
+                            {!topAnalyticsLoading && topAnalytics.content.length === 0 && countries.slice(0, 10).map((country: any) => {
+                                return (
+                                    <TableRow key={country.name} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                                        <TableCell>
+                                            <Stack direction="row" spacing={1} alignItems="center">
+                                                <Avatar alt="Country" src={`https://cdn.ipregistry.co/flags/twemoji/${country.code.toLowerCase()}.svg`} sx={{ width: 20, height: 20, borderRadius: 0 }} />
+                                                <Typography variant="body1" color="grey.200">{country.name}</Typography>
+                                            </Stack>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Typography variant="body1" color="grey.200">0</Typography>
+                                        </TableCell>
+                                    </TableRow>
+                                )
+                            })}
                         </Table>
 
                     </CardContent>
@@ -377,7 +441,7 @@ export default function Dashboard() {
                         <Grid container spacing={3} sx={{ mt: 3 }}>
                             {renderLastVerified()}
                           
-                            {renderTopCountries()}
+                            {rendertopAnalytics()}
                         </Grid>
                     </Container>
                 </NavBar>

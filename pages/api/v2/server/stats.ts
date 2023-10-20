@@ -62,7 +62,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             const uniqueIsps: Set<string | null> = new Set(isps);
               
             let ispCount = Array.from(uniqueIsps).map(isp => ({
-                isp,
+                name: isp,
                 count: isps.filter(i => i === isp).length,
             }));
             
@@ -91,7 +91,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             const uniqueStates: Set<string | null> = new Set(states);
 
             let stateCount = Array.from(uniqueStates).map(state => ({
-                state,
+                name: state,
                 count: states.filter(s => s === state).length,
             }));
 
@@ -120,7 +120,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             const uniqueCities: Set<string | null> = new Set(cities);
 
             let cityCount = Array.from(uniqueCities).map(city => ({
-                city,
+                name: city,
                 count: cities.filter(c => c === city).length,
             }));
 
@@ -149,7 +149,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             const uniqueCountries: Set<string | null> = new Set(countries);
 
             let countryCount = Array.from(uniqueCountries).map(country => ({
-                country,
+                name: country,
                 count: countries.filter(c => c === country).length,
             }));
 
@@ -157,6 +157,28 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             countryCount = countryCount.slice(0, Number(limit) || 10);
 
             return res.status(200).json({ success: true, content: countryCount });
+            break;
+        case "server":
+            // the server with the most verified members
+            var memberCount = await prisma.servers.findMany({
+                where: {
+                    ownerId: user.id,
+                },
+                select: {
+                    name: true,
+                    guildId: true,
+                    customBotId: true,
+                },
+            }) as any[];
+
+
+            memberCount = await Promise.all(memberCount.map(async (server) => {
+                var customBot = await prisma.customBots.findUnique({ where: { id: server.customBotId } });
+                var count = await prisma.members.count({ where: { guildId: server.guildId } });
+                return { name: server.name, count: count, link: `https://${customBot?.customDomain || req.headers.host}/verify/${server.guildId}` };
+            }));
+
+            return res.status(200).json({ success: true, content: memberCount });
             break;
         case "vpn":
             break;
