@@ -42,6 +42,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             return res.status(200).json({ success: true, content: members });
             break;
         case "isp":
+            if (user.role !== "business" && user.role !== "enterprise") return res.status(403).json({ success: false, message: "You must be a Business subscriber to use this feature." });
+            
             members = await prisma.members.findMany({
                 where: {
                     guildId: {
@@ -72,6 +74,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             return res.status(200).json({ success: true, content: ispCount });
             break;
         case "state":
+            if (user.role !== "business" && user.role !== "enterprise") return res.status(403).json({ success: false, message: "You must be a Business subscriber to use this feature." });
+            
             members = await prisma.members.findMany({
                 where: {
                     guildId: {
@@ -101,6 +105,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             return res.status(200).json({ success: true, content: stateCount });
             break;
         case "city":
+            if (user.role !== "business" && user.role !== "enterprise") return res.status(403).json({ success: false, message: "You must be a Business subscriber to use this feature." });
+
             members = await prisma.members.findMany({
                 where: {
                     guildId: {
@@ -159,7 +165,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             return res.status(200).json({ success: true, content: countryCount });
             break;
         case "server":
-            // the server with the most verified members
             var memberCount = await prisma.servers.findMany({
                 where: {
                     ownerId: user.id,

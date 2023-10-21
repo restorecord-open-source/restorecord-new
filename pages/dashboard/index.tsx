@@ -363,9 +363,11 @@ export default function Dashboard() {
                                                 </>
                                             ) : (
                                                 <Tooltip title="Upgrade to Business plan to unlock this feature" arrow>
-                                                    <MenuItem value="state" disabled>State</MenuItem>
-                                                    <MenuItem value="city" disabled>City</MenuItem>
-                                                    <MenuItem value="isp" disabled>ISP</MenuItem>
+                                                    <Box>
+                                                        <MenuItem value="state" disabled>State</MenuItem>
+                                                        <MenuItem value="city" disabled>City</MenuItem>
+                                                        <MenuItem value="isp" disabled>ISP</MenuItem>
+                                                    </Box>
                                                 </Tooltip>
                                             )}
                                         </Select>
