@@ -82,16 +82,16 @@ export function getPlatform(userAgent: string) {
     else if (userAgent.indexOf("iPhone") > -1) platform = "iOS";
     else if (userAgent.indexOf("Windows") > -1) platform = "Windows";
     else if (userAgent.indexOf("Macintosh") > -1) platform = "Mac";
+    else if (userAgent.indexOf("Linux") > -1) platform = "Linux";
     else if (userAgent.indexOf("crOS") > -1) platform = "Chrome OS";
     else if (userAgent.indexOf("Symbian") > -1) platform = "Nokia";
-    else if (userAgent.indexOf("Linux") > -1) platform = "Linux";
+    else if (userAgent.indexOf("SMART-TV") > -1 && userAgent.indexOf("Tizen") > -1) platform = "Samsung Smart TV";
     else platform = "Unknown";
 
     return platform;
 }
 
 export function getBrowserName(userAgent: string) {
-    // get browser name
     const browser = userAgent.match(/\b(?:MSIE |Trident\/7\.0;.*?rv:|Edge\/|OPR\/|Chrome\/|Firefox\/|DuckDuckGo\/|Instagram)(\d+)/);
     if (browser) return browser[1];
 
@@ -99,7 +99,6 @@ export function getBrowserName(userAgent: string) {
 }
 
 export function getBrowser(userAgent: string) {
-    // get browser and version
     const browser = userAgent.match(/\b(?:MSIE |Trident\/7\.0;.*?rv:|Edge\/)(\d+)/);
     if (browser) return `IE ${browser[1]}`;
 
