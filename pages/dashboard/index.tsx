@@ -36,6 +36,7 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Skeleton from "@mui/material/Skeleton";
+import Tooltip from "@mui/material/Tooltip";
 
 const ApexChart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
@@ -353,10 +354,20 @@ export default function Dashboard() {
                                             inputProps={{ "aria-label": "Without label" }}
                                         >
                                             <MenuItem value="country">Country</MenuItem>
-                                            <MenuItem value="state">State</MenuItem>
-                                            <MenuItem value="city">City</MenuItem>
-                                            <MenuItem value="isp">ISP</MenuItem>
                                             <MenuItem value="server">Server</MenuItem>
+                                            {(data.plan === "business" || data.plan === "enterprise") ? (
+                                                <>
+                                                    <MenuItem value="state">State</MenuItem>
+                                                    <MenuItem value="city">City</MenuItem>
+                                                    <MenuItem value="isp">ISP</MenuItem>
+                                                </>
+                                            ) : (
+                                                <Tooltip title="Upgrade to Business plan to unlock this feature" arrow>
+                                                    <MenuItem value="state" disabled>State</MenuItem>
+                                                    <MenuItem value="city" disabled>City</MenuItem>
+                                                    <MenuItem value="isp" disabled>ISP</MenuItem>
+                                                </Tooltip>
+                                            )}
                                         </Select>
 
                                     </FormControl>
