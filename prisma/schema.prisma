@@ -76,7 +76,9 @@ model servers {
 model migrations {
     id               Int      @id @default(autoincrement())
     guildId          BigInt   @db.UnsignedBigInt
+    migrationGuildId BigInt   @db.UnsignedBigInt @default(0)
     status           Status   @default(PENDING)
+    totalCount       Int      @default(0)
     successCount     Int      @default(0)
     bannedCount      Int      @default(0)
     maxGuildsCount   Int      @default(0)

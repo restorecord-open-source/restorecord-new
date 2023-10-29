@@ -119,7 +119,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         if (server.pulling === true) return res.status(400).json({ success: false, message: "You are already pulling" });
         if (server.pullTimeout !== null) if (server.pullTimeout > new Date()) return res.status(400).json({ success: false, message: "You're on cooldown, you can pull again in", pullTimeout: server.pullTimeout });
 
-
         // let done;
         const serverMemberList = await axios.get(`https://discord.com/api/v10/guilds/${guildId}/members?limit=1000`, {
             headers: {
@@ -181,6 +180,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         const migration = await prisma.migrations.create({
             data: {
                 guildId: server.guildId,
+                migrationGuildId: BigInt(guildId) as bigint,
+                totalCount: members.length,
             }
         });
 
@@ -365,6 +366,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     }).catch(async (err: Error) => {
                         console.error(`[${server.name}] [PULLING] 5 ${err}`);
                     });
+
+                    await updateMigration(migration.id, "FAILED", successCount, bannedCount, maxGuildsCount, invalidCount, errorCount, blacklistedCount);
                   
                     resolve();
                 }, MAX_PULL_TIME);
@@ -387,6 +390,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         console.error(`[${server.name}] [PULLING] 5 ${err}`);
                     });
 
+
+                    await updateMigration(migration.id, "SUCCESS", successCount, bannedCount, maxGuildsCount, invalidCount, errorCount, blacklistedCount);
+                   
                     resolve();
                 }
 
@@ -415,6 +421,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             });
 
             console.log(`[${server.name}] [PULLING] Done with ${successCount} members pulled`);
+            
+            await updateMigration(migration.id, "SUCCESS", successCount, bannedCount, maxGuildsCount, invalidCount, errorCount, blacklistedCount);
+
             resolve();
         }).then(async () => {
             console.log(`[${server.name}] Pulling done with ${successCount} members pulled`);
