@@ -8,8 +8,8 @@ const theme = createTheme({
             // main: "#0090ff",
         },
         secondary: {
-            // main: "#433add",
-            main: "#9747FF"
+            main: "#433add",
+            // main: "#9747FF"
         },
         info: {
             main: "#3f84f6",
