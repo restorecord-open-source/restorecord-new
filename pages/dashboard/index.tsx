@@ -355,7 +355,7 @@ export default function Dashboard() {
                                         >
                                             <MenuItem value="country">Country</MenuItem>
                                             <MenuItem value="server">Server</MenuItem>
-                                            {(data.plan === "business" || data.plan === "enterprise") ? (
+                                            {(data.role === "business" || data.role === "enterprise") ? (
                                                 <>
                                                     <MenuItem value="state">State</MenuItem>
                                                     <MenuItem value="city">City</MenuItem>
