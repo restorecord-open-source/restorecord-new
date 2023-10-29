@@ -39,15 +39,14 @@ export async function addMember(guildId: string, userId: string, botToken: any, 
   
 
 export async function addRole(guildId: string, userId: string, botToken: any, roleId: string) {
-    return await axios.put(`https://discord.com/api/v10/guilds/${guildId}/members/${userId}/roles/${roleId}`, {
-        ValidateStatus: () => true
-    }, {
+    return await axios.put(`https://discord.com/api/v10/guilds/${guildId}/members/${userId}/roles/${roleId}`, {}, {
         headers: {
             "Authorization": `Bot ${botToken}`,
             "Content-Type": "application/json",
             "X-RateLimit-Precision": "millisecond",
             "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
         },
+        validateStatus: () => true,
         proxy: false,
         httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
     })
@@ -200,7 +199,7 @@ export async function exchange(code: string, redirectUri: string, clientId: any,
         .catch(async (err: any) => { return err; });
 }
 
-export async function resolveUser(token: string): Promise<User> {
+export async function resolveUser(token: string) {
     // const request = await fetch("https://discord.com/api/users/@me", {
     //     headers: {
     //         Authorization: `Bearer ${token}`,
@@ -226,6 +225,20 @@ export async function resolveUser(token: string): Promise<User> {
         proxy: false,
         httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
     }).then(async (res: any) => { return res.data; } );
+}
+
+export async function resolveOAuth2User(token: string) {
+    return await axios.get("https://discord.com/api/oauth2/@me", {
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "X-RateLimit-Precision": "millisecond",
+            "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
+        },
+        proxy: false,
+        httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
+    })
+        .then(async (res: any) => { return res; })
+        .catch(async (err: any) => { return err; });
 }
 
 

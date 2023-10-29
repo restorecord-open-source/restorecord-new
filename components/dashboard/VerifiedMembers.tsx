@@ -40,6 +40,8 @@ import ListItemText from "@mui/material/ListItemText";
 import Checkbox from "@mui/material/Checkbox";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import Chip from "@mui/material/Chip";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import FormControlLabel from "@mui/material/FormControlLabel";
 
 export default function VerifiedMembers({ user }: any) {
     const [token]: any = useToken();
@@ -69,6 +71,13 @@ export default function VerifiedMembers({ user }: any) {
             { label: "Created At", value: "createdAt" },
         ],
         selectedOptions: []
+    });
+
+    const [importOptions, setImportOptions] = useState<any>({
+        open: false,
+        serverId: "",
+        format: "json",
+        file: null
     });
 
     const [loading, setLoading] = useState(false);
@@ -366,6 +375,104 @@ export default function VerifiedMembers({ user }: any) {
         )   
     }
 
+    function renderImportModal() {
+        return (
+            <Dialog open={importOptions.open} onClose={() => setImportOptions({ ...importOptions, open: false })} maxWidth="sm" fullWidth>
+                <DialogTitle sx={{ backgroundColor: "grey.900" }}>
+                    <Stack spacing={1} direction="row" alignItems="center" justifyContent="space-between">
+                        <Typography variant="h5" sx={{ fontWeight: "500" }}>
+                            Import
+                        </Typography>
+                        <IconButton onClick={() => setImportOptions({ ...importOptions, open: false })}>
+                            <CloseIcon />
+                        </IconButton>
+                    </Stack>
+                </DialogTitle>
+
+                <DialogContent sx={{ marginTop: 2 }}>
+                    <Stack spacing={1} direction="row" alignItems="center">
+                        <Typography variant="body1" sx={{ fontWeight: "500" }}>
+                            Options
+                        </Typography>
+                        <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} title="Select what you want to import" placement="top">
+                            <HelpOutlineOutlinedIcon sx={{ color: "grey.500", fontSize: "1rem" }} />
+                        </Tooltip>
+                    </Stack>
+
+                    <FormControl fullWidth sx={{ mt: 1 }}>
+                        <InputLabel id="server-select-label">Server</InputLabel>
+                        <Select labelId="server-select-label" id="server-select" label="Server" value={importOptions.serverId} onChange={(event: any) => setImportOptions({ ...importOptions, serverId: event.target.value })}>
+                            {user.servers.map((server: any) => (
+                                <MenuItem key={server.id} value={server.guildId}>{server.name}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
+                    <FormControl fullWidth sx={{ mt: 1 }}>
+                        <InputLabel id="format-select-label">Format</InputLabel>
+                        <Select labelId="format-select-label" id="format-select" label="Format" value={importOptions.format} onChange={(event: any) => setImportOptions({ ...importOptions, format: event.target.value })}>
+                            <MenuItem value="json">JSON</MenuItem>
+                            <MenuItem value="csv" disabled>CSV</MenuItem>
+                        </Select>
+                    </FormControl>
+
+                    {/* <Button fullWidth variant="contained" component="label" sx={{ mt: 2 }} startIcon={<CloudUploadIcon />} disabled={importOptions.serverId.length === 0}>
+                        <input
+                            type="file"
+                            onChange={(e) => setImportOptions({ ...importOptions, file: e.target.files })}
+                            accept=".txt,.csv,.json"
+                            style={{ display: "none" }}
+                        />
+                        {importOptions.file ? `Selected: "${importOptions.file[0].name}"` : "Select File"}
+                    </Button> */}
+
+                    <TextField fullWidth label="File" id="file" name="file" value={importOptions.file ? importOptions.file[0].name : "Select File"} sx={{ mt: 1 }} InputProps={{endAdornment: (<input type="file" accept="application/json, text/csv" onChange={(e) => setImportOptions({ ...importOptions, file: e.target.files })} tabIndex={ -1 } style={{ position: "absolute", top: 0, right: 0, bottom: 0, left: 0, opacity: 0 }} />) }} />
+                        
+                    {/* warning when u export ur members they prob wont be able to be used again on restorecord */}
+                    <Alert severity="error" sx={{ my: 2 }}>
+                        <Typography variant="body1" sx={{ fontWeight: "500" }}>
+                            Warning
+                        </Typography>
+                        <Typography variant="body2">
+                            THIS CAN NOT BE STOPPED OR PAUSED,
+                            Once Imported you may not be able to use the members in your Application again.
+                        </Typography>
+                    </Alert>
+
+                    <LoadingButton variant="contained" color="success" fullWidth={true} disabled={importOptions.serverId.length === 0 || !importOptions.file} event={() => {
+                        const data = new FormData();
+                        data.append("file", importOptions.file[0]);
+
+                        axios.post(`/api/v2/self/servers/${importOptions.serverId}/import?format=${importOptions.format}`, data, {
+                            headers: {
+                                "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                "Content-Type": "multipart/form-data"
+                            },
+                            validateStatus: () => true
+                        }).then((res: any) => {
+                            if (!res.data.success) {
+                                setNotiTextE(res.data.message);
+                                setOpenE(true);
+                            }
+                            else {
+                                setNotiTextS(res.data.message);
+                                setOpenS(true);
+                                setImportOptions({ ...importOptions, open: false });
+                                setTimeout(() => { refetch(); }, 100);
+                            }
+                        }).catch((err): any => {
+                            setNotiTextE(err.message);
+                            setOpenE(true);
+                            console.error(err);
+                        });
+                    }}>Start Import</LoadingButton>
+
+                </DialogContent>
+
+            </Dialog>
+        )
+    }
+
     return (
         <>
             <Container maxWidth="xl">
@@ -376,8 +483,13 @@ export default function VerifiedMembers({ user }: any) {
                                 Verified Members
                             </Typography>
 
-                            {/* export button, opens modal */}
-                            <Button variant="contained" color="success" onClick={() => setExportOptions({ ...exportOptions, open: true })}>Export</Button>
+                            <Box>
+                                {/* if localstorage beta = 7728 then show import button */}
+                                {window.localStorage.getItem("beta") === "728" && (
+                                    <Button variant="contained" color="success" onClick={() => setImportOptions({ ...importOptions, open: true })} sx={{ mr: 1 }}>Import</Button>
+                                )}
+                                <Button variant="contained" color="yellow" onClick={() => setExportOptions({ ...exportOptions, open: true })} sx={{ ml: 1 }}>Export</Button>
+                            </Box>
                         </Stack>
 
                         <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
@@ -394,6 +506,7 @@ export default function VerifiedMembers({ user }: any) {
 
                         {open && renderMoreInfo()}
                         {exportOptions.open && renderExportModal()}
+                        {importOptions.open && renderImportModal()}
 
                         {isLoading ? ( <CircularProgress /> ) : (
                             <>
