@@ -4,6 +4,7 @@ import { accounts } from "@prisma/client";
 import { prisma } from "../../../../../../src/db";
 
 import withAuthentication from "../../../../../../src/withAuthentication";
+import { chunk } from "./edit";
 
 async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts) {
     if (req.method !== "DELETE") return res.status(405).json({ code: 0, message: "Method not allowed" });
@@ -36,7 +37,21 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             await prisma.backups.deleteMany({ where: { backupId: backup.backupId } });
         }
         
-        await prisma.members.deleteMany({ where: { guildId: serverId } });
+        let memberCount = await prisma.members.count({ where: { guildId: serverId } });
+        
+        while (memberCount >= 100000) {
+            const members = await prisma.members.findMany({ where: { guildId: serverId }, take: 100000 });
+        
+            const memberChunks = chunk(members, 50000);
+        
+            for (const chunk of memberChunks) {
+                await prisma.members.deleteMany({ where: { id: { in: chunk.map(m => m.id) } } });
+            }
+
+            memberCount = await prisma.members.count({ where: { guildId: serverId } });
+        }
+        
+
         await prisma.migrations.deleteMany({ where: { guildId: serverId } });
         await prisma.blacklist.deleteMany({ where: { guildId: serverId } });
         

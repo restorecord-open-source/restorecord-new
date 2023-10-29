@@ -87,6 +87,34 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             }
         });
 
+        let memberCount = await prisma.members.count({ where: { guildId: BigInt(guildId as any) } });
+
+        while (memberCount >= 100000) {
+            const members = await prisma.members.findMany({
+                where: {
+                    guildId: BigInt(guildId as any),
+                },
+                take: 100000,
+            });
+
+            const memberChunks = chunk(members, 50000);
+
+            for (const chunk of memberChunks) {
+                await prisma.members.updateMany({
+                    where: {
+                        id: {
+                            in: chunk.map(m => m.id),
+                        },
+                    },
+                    data: {
+                        guildId: BigInt(newGuildId as any),
+                    },
+                });
+            }
+
+            memberCount = await prisma.members.count({ where: { guildId: BigInt(guildId as any) } });
+        }
+
         await prisma.members.updateMany({
             where: {
                 guildId: BigInt(guildId as any),
@@ -146,6 +174,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         console.error(err);
         return res.status(400).json({ success: false, message: "Something went wrong" });
     }
+}
+
+export function isBigInt(value: any) {
+    try { BigInt(value); return true; }
+    catch (error) { return false; }
+}
+
+
+export function chunk<T>(arr: T[], size: number): T[][] {
+    return arr.reduce((acc, _, i) => (i % size ? acc : [...acc, arr.slice(i, i + size)]), [] as T[][]);
 }
 
 export default withAuthentication(handler);
