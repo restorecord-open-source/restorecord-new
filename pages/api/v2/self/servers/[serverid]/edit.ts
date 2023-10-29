@@ -115,6 +115,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             memberCount = await prisma.members.count({ where: { guildId: BigInt(guildId as any) } });
         }
 
+        if (memberCount <= 100000) {
+            await prisma.members.updateMany({
+                where: {
+                    guildId: BigInt(guildId as any),
+                },
+                data: {
+                    guildId: BigInt(newGuildId as any),
+                },
+            });
+        }
+
         await prisma.members.updateMany({
             where: {
                 guildId: BigInt(guildId as any),

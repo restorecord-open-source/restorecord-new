@@ -50,7 +50,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
             memberCount = await prisma.members.count({ where: { guildId: serverId } });
         }
-        
+
+        if (memberCount <= 100000) {
+            await prisma.members.deleteMany({ where: { guildId: serverId } });
+        }
 
         await prisma.migrations.deleteMany({ where: { guildId: serverId } });
         await prisma.blacklist.deleteMany({ where: { guildId: serverId } });
