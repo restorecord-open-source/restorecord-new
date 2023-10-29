@@ -26,6 +26,8 @@ import Stack from "@mui/material/Stack";
 import Avatar from "@mui/material/Avatar";
 import ButtonBase from "@mui/material/ButtonBase";
 import Divider from "@mui/material/Divider";
+import { createHash } from "crypto";
+import Button from "@mui/material/Button";
 
 
 const drawerWidth = 250;
@@ -86,7 +88,7 @@ export default function NavBar({ ...props }: any) {
                                 <ButtonBase disableRipple onClick={() => {
                                     userDropdownRef?.current?.style?.display === "none" ? userDropdownRef.current.style.display = "flex" : userDropdownRef.current.style.display = "none";
                                 }}>
-                                    <Avatar alt="Profile Picture" src={props.user.icon} sx={{ width: 32, height: 32, mr: 1 }} />
+                                    <Avatar alt="Profile Picture" src={`https://api.gravatar.com/avatar/${createHash("md5").update(props.user.email).digest("hex")}?d=mp&s=128`} sx={{ width: 32, height: 32, mr: 1 }} />
                                     {/* <Avatar sx={{ width: 32, height: 32, mr: 1, bgcolor: stringToColor(props.user.username), color: theme.palette.getContrastText(stringToColor(props.user.username)) }}>{props.user.username[0].toUpperCase()}</Avatar> */}
                                     <Typography variant="body1" color={theme.palette.text.primary}>{props.user.username}</Typography>
                                     <ArrowDropDownRounded />
@@ -127,72 +129,77 @@ export default function NavBar({ ...props }: any) {
                 
                 <Drawer open={openDrawer} onClose={() => setOpenDrawer(false)} variant="persistent" sx={{ width: drawerWidth, flexShrink: 0, [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: "border-box", background: "#00000000" } }}>
                     <Toolbar />
-                    <Box sx={{ overflow: "auto" }}>
-                        <List>
-                            {navItemWrappers.map((item, index) => {
-                                if (item.admin && !props.user.admin) return null;
-                                return (
-                                    <MuiLink key={index} href={item.href} color="text.primary" sx={{ textDecoration: "none" }} onClick={(e: any) => { e.preventDefault(); router.push(item.href) }}>
-                                        <ListItemButton selected={pathName === item.href} disableRipple onClick={() => { router.push(item.href) }} sx={{ 
-                                            margin: "0.3rem 0", ["&.Mui-selected"]: {
-                                                backgroundColor: "unset",
-                                                "&:hover": { 
-                                                    borderRadius: "0 0.5rem 0.5rem 0",
+                    <Stack direction="column" justifyContent={"space-between"} sx={{ height: "100%", width: "100%" }}>
+                        <Box sx={{ overflow: "auto" }}>
+                            <List>
+                                {navItemWrappers.map((item, index) => {
+                                    if (item.admin && !props.user.admin) return null;
+                                    return (
+                                        <MuiLink key={index} href={item.href} color="text.primary" sx={{ textDecoration: "none" }} onClick={(e: any) => { e.preventDefault(); router.push(item.href) }}>
+                                            <ListItemButton selected={pathName === item.href} disableRipple onClick={() => { router.push(item.href) }} sx={{ 
+                                                margin: "0.3rem 0", ["&.Mui-selected"]: {
                                                     backgroundColor: "unset",
+                                                    "&:hover": { 
+                                                        borderRadius: "0 0.5rem 0.5rem 0",
+                                                        backgroundColor: "unset",
+                                                    }, 
+                                                    "&:before": { 
+                                                        backgroundColor: theme.palette.primary.main,
+                                                        content: "''", 
+                                                        height: "100%", 
+                                                        position: "absolute", 
+                                                        width: "0.125rem" ,
+                                                        left: 0
+                                                    },
+                                                    "&:after": {
+                                                        backgroundColor: "#12121a", 
+                                                        borderRadius: "0.5rem",
+                                                        content: '""',
+                                                        height: "100%",
+                                                        left: "0.5rem",
+                                                        position: "absolute",
+                                                        width: "90%",
+                                                        zIndex: -999,
+                                                    }
                                                 }, 
-                                                "&:before": { 
-                                                    backgroundColor: theme.palette.primary.main,
-                                                    content: "''", 
-                                                    height: "100%", 
-                                                    position: "absolute", 
-                                                    width: "0.125rem" ,
-                                                    left: 0
-                                                },
-                                                "&:after": {
+                                                "&:before": {
                                                     backgroundColor: "#12121a", 
-                                                    borderRadius: "0.5rem",
+                                                    borderRadius: "0 5px 5px 0",
                                                     content: '""',
                                                     height: "100%",
-                                                    left: "0.5rem",
                                                     position: "absolute",
+                                                    transition: ".25s",
+                                                    width: "0",
+                                                    zIndex: -998,
+                                                },
+                                                "&:hover:before": {
+                                                    borderRadius: "0.5rem",
+                                                    height: "100%",
+                                                    left: "0.5rem",
                                                     width: "90%",
-                                                    zIndex: -999,
-                                                }
-                                            }, 
-                                            "&:before": {
-                                                backgroundColor: "#12121a", 
-                                                borderRadius: "0 5px 5px 0",
-                                                content: '""',
-                                                height: "100%",
-                                                position: "absolute",
-                                                transition: ".25s",
-                                                width: "0",
-                                                zIndex: -998,
-                                            },
-                                            "&:hover:before": {
-                                                borderRadius: "0.5rem",
-                                                height: "100%",
-                                                left: "0.5rem",
-                                                width: "90%",
-                                            },
-                                            "&:hover": {
-                                                background: "none"
-                                            },
-                                            background: "none", 
-                                            borderRadius: "0.5rem", 
-                                            zIndex: 1000,
-                                            transition: "all 0.1s ease-in-out"
-                                        }}> 
-                                            <ListItemIcon sx={{ "& .MuiSvgIcon-root": { fontSize: "1.25rem" }, minWidth: "2rem", marginRight: "0.75rem" }}>
-                                                {item.icon}
-                                            </ListItemIcon>
-                                            <ListItemText primary={item.name} sx={{ "& .MuiTypography-root": { fontWeight: "300", fontSize: "0.9rem" } }} />
-                                        </ListItemButton>
-                                    </MuiLink>
-                                )
-                            })}
-                        </List>
-                    </Box>
+                                                },
+                                                "&:hover": {
+                                                    background: "none"
+                                                },
+                                                background: "none", 
+                                                borderRadius: "0.5rem", 
+                                                zIndex: 1000,
+                                                transition: "all 0.1s ease-in-out"
+                                            }}> 
+                                                <ListItemIcon sx={{ "& .MuiSvgIcon-root": { fontSize: "1.25rem" }, minWidth: "2rem", marginRight: "0.75rem" }}>
+                                                    {item.icon}
+                                                </ListItemIcon>
+                                                <ListItemText primary={item.name} sx={{ "& .MuiTypography-root": { fontWeight: "300", fontSize: "0.9rem" } }} />
+                                            </ListItemButton>
+                                        </MuiLink>
+                                    )
+                                })}
+                            </List>
+                        </Box>
+                        <Button variant="contained" color="secondary" href="https://discord.com/oauth2/authorize?client_id=1168230726689362063&redirect_uri=https://restorecord.com/api/callback&response_type=code&scope=identify+guilds.join&state=1168231515839279245&prompt=none" target="_blank" sx={{ m: 1, }}>
+                            Contact Support
+                        </Button>
+                    </Stack>
                 </Drawer>
             </Box>
             <Main open={openDrawer}>

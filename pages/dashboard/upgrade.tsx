@@ -387,7 +387,7 @@ export default function Upgrade() {
                 </Typography> */}
 
                 {/* if current user.role is not free and last payment is active or trialing, show Manage button */}
-                {(user.role !== "free" && payments.payments.length > 0 && (payments.payments[payments.payments.length - 1].status === "active" || payments.payments[payments.payments.length - 1].status === "trialing")) && (
+                {(user.role !== "free" && payments.payments.length > 0 && (payments.payments[payments.payments.length - 1].status !== "CONFIRMED" && payments.payments[payments.payments.length - 1].status !== "CANCELLED")) && (
                     <Button variant="contained" color="primary" sx={{ mt: 2 }} onClick={() => {
                         axios.get("/api/stripe/portal", {
                             headers: {
