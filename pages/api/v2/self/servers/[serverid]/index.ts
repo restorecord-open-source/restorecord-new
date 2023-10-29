@@ -11,7 +11,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
     try {
         const serverId: any = String(req.query.serverid) as any;
 
-        const server = await prisma.servers.findFirst({ where: { guildId: BigInt(serverId) } });
+        const server = await prisma.servers.findFirst({ where: { guildId: BigInt(serverId), ownerId: user.id } });
         if (!server) return res.status(400).json({ success: false, message: "Server not found." });
 
         return res.status(200).json({ 
@@ -19,7 +19,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             server: {
                 id: server.id,
                 name: server.name,
-                guildId: server.guildId,
+                guildId: String(server.guildId) as string,
                 owner: server.ownerId,
             }
         });

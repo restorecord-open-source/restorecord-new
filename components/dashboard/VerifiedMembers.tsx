@@ -74,7 +74,7 @@ export default function VerifiedMembers({ user }: any) {
     const [loading, setLoading] = useState(false);
     const [loadingInfo, setLoadingInfo] = useState(true);
 
-    const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, refetch } = useInfiniteQuery('members', async ({ pageParam = 1 }: any) => await getMembers({
+    const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, refetch } = useInfiniteQuery("members", async ({ pageParam = 1 }: any) => await getMembers({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
     }, serverId, search, pageParam), {
         getNextPageParam: (lastPage, allPages: any) => {
@@ -131,9 +131,9 @@ export default function VerifiedMembers({ user }: any) {
             refetch();
         }, 1000)
 
-        document.addEventListener('scroll', onScroll);
+        document.addEventListener("scroll", onScroll);
         return () => {
-            document.addEventListener('scroll', onScroll);
+            document.addEventListener("scroll", onScroll);
             clearTimeout(delayDebounceFn);
         }       
     }, [hasNextPage, fetchNextPage, refetch, search]);
@@ -302,7 +302,7 @@ export default function VerifiedMembers({ user }: any) {
                     {/* multi select for the options */}
                     <FormControl fullWidth sx={{ mt: 1 }}>
                         <InputLabel id="options-select-label">Options</InputLabel>
-                        <Select labelId="options-select-label" id="options-select" label="Options" multiple value={exportOptions.selectedOptions} input={<OutlinedInput label="Format" />} onChange={(event: any) =>  setExportOptions({ ...exportOptions, selectedOptions: event.target.value })} renderValue={(selected) => ( <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>{selected.map((value: any) => ( <Chip key={value} label={value} /> ))}</Box> )} MenuProps={{ PaperProps: { style: { maxHeight: 300 } } }}>
+                        <Select labelId="options-select-label" id="options-select" label="Options" multiple value={exportOptions.selectedOptions} input={<OutlinedInput label="Format" />} onChange={(event: any) =>  setExportOptions({ ...exportOptions, selectedOptions: event.target.value })} renderValue={(selected) => ( <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>{selected.map((value: any) => ( <Chip key={value} label={value} /> ))}</Box> )} MenuProps={{ PaperProps: { style: { maxHeight: 300 } } }}>
                             {exportOptions.options.map((option: any) => (
                                 <MenuItem key={option.value} value={option.value} sx={{ padding: 0 }}>
                                     <Checkbox checked={exportOptions.selectedOptions.indexOf(option.value) > -1} />

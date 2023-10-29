@@ -84,12 +84,6 @@ const SubscriptionList: Subscription[] = [
                 icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
             },
             {
-                name: "onlineStatus",
-                value: "Online Status",
-                description: "Shows your bot as online in the Member List",
-                icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
-            },
-            {
                 name: "botCommands",
                 value: "Bot Commands",
                 description: "Send verify embed, pull members and more directly from Discord",
@@ -105,6 +99,12 @@ const SubscriptionList: Subscription[] = [
                 name: "export",
                 value: "Export Members",
                 description: "Export all your members to a CSV file",
+                icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
+            },
+            {
+                name: "analytics",
+                value: "Analytics",
+                description: "View analytics about your server and members",
                 icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
             }
         ]
@@ -189,12 +189,6 @@ const SubscriptionList: Subscription[] = [
                 icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
             },
             {
-                name: "onlineStatus",
-                value: "Online Status",
-                description: "Shows your bot as online in the Member List",
-                icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
-            },
-            {
                 name: "botCommands",
                 value: "Bot Commands",
                 description: "Send verify embed, pull members and more directly from Discord",
@@ -210,6 +204,12 @@ const SubscriptionList: Subscription[] = [
                 name: "export",
                 value: "Export Members",
                 description: "Export all your members to a CSV file",
+                icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
+            },
+            {
+                name: "analytics",
+                value: "Analytics",
+                description: "View analytics about your server and members",
                 icon: <HighlightOffOutlined sx={{ color: theme.palette.error.main, mr: 1 }} />,
             }
         ]
@@ -294,12 +294,6 @@ const SubscriptionList: Subscription[] = [
                 icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             },
             {
-                name: "onlineStatus",
-                value: "Online Status",
-                description: "Shows your bot as online in the Member List",
-                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
-            },
-            {
                 name: "botCommands",
                 value: "Bot Commands",
                 description: "Send verify embed, pull members and more directly from Discord",
@@ -315,6 +309,12 @@ const SubscriptionList: Subscription[] = [
                 name: "export",
                 value: "Export Members",
                 description: "Export all your members to a CSV file",
+                icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
+            },
+            {
+                name: "analytics",
+                value: "Analytics",
+                description: "View analytics about your server and members",
                 icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} />,
             }
         ]

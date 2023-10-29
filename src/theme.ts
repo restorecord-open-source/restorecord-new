@@ -8,18 +8,24 @@ const theme = createTheme({
             // main: "#0090ff",
         },
         secondary: {
-            main: "#433add",
+            // main: "#433add",
+            main: "#9747FF"
         },
         info: {
             main: "#3f84f6",
+            // main: "#00A9FF"
         },
         success: {
             main: "#43a047",
+            // main: "#0CC477"
         },
         yellow: {
-            light: "#fbd67c",
-            main: "#fbc02d",
-            dark: "#9b6e00",
+            // light: "#fbd67c",
+            // main: "#fbc02d",
+            // dark: "#9b6e00",
+            light: "#ff9957",
+            main: "#ff990a",
+            dark: "#995c06",
         },
         background: {
             paper: "#0a0a12",

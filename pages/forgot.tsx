@@ -38,13 +38,11 @@ export default function Login() {
     const onExpire = () => {
         setNotiTextE("Captcha expired");
         setOpenE(true);
-        // functions.ToastAlert("Captcha expired", "error");
     }
 
     const onError = (err: any) => {
         setNotiTextE(err);
         setOpenE(true);
-        // functions.ToastAlert(err, "error");
     }
 
     const onReset = async (e: any) => {

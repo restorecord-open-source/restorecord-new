@@ -1,10 +1,10 @@
 import { useRouter } from "next/router";
-import { useToken } from "../../../src/token";
+import { useToken } from "../../../../src/token";
 import { useQuery } from "react-query";
 
-import NavBar from "../../../components/dashboard/navBar";
-import DashServerSettings from "../../../components/dashboard/ServerSettings";
-import getUser from "../../../src/dashboard/getUser";
+import NavBar from "../../../../components/dashboard/navBar";
+import DashServerSettings from "../../../../components/dashboard/ServerSettings";
+import getUser from "../../../../src/dashboard/getUser";
 
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";

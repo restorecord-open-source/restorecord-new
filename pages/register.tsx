@@ -40,14 +40,12 @@ export default function Register() {
         setNotiTextE("Captcha expired");
         setOpenE(true);
         setLoadingBtn(false);
-        // functions.ToastAlert("Captcha expired", "error");
     }
 
     const onError = (err: any) => {
         setNotiTextE(err);
         setOpenE(true);
         setLoadingBtn(false);
-        // functions.ToastAlert(err, "error");
     }
 
     const onSubmit = (e: any) => {
@@ -104,7 +102,6 @@ export default function Register() {
                         else {
                             setNotiTextE(res.message);
                             setOpenE(true);
-                        // functions.ToastAlert(res.message, "error");
                         }
                     });
             }

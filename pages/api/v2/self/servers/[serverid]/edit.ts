@@ -6,6 +6,7 @@ import { createRedisInstance } from "../../../../../../src/Redis";
 
 const redis = createRedisInstance();
 
+
 async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts) {
     if (req.method !== "PATCH") return res.status(405).json({ code: 0, message: "Method not allowed" });
 
@@ -16,37 +17,54 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         if (!serverName || !guildId || !roleId || !newServerName || !newGuildId || !newRoleId) return res.status(400).json({ success: false, message: "Missing required fields" });
 
         const trimmedServerName = newServerName.trim();
+        
+
         const serverCheck = await prisma.servers.findFirst({
             where: {
                 OR: [
                     { name: trimmedServerName },
-                    { guildId: BigInt(newGuildId as any) },
-                    { roleId: BigInt(newRoleId as any) },
+                    { guildId: isBigInt(newGuildId) ? BigInt(newGuildId) : 0 },
+                    { roleId: isBigInt(newRoleId) ? BigInt(newRoleId) : 0 },
                 ],
+                NOT: {
+                    AND: [
+                        { name: serverName },
+                        { guildId: isBigInt(guildId) ? BigInt(guildId) : 0 },
+                        { roleId: isBigInt(roleId) ? BigInt(roleId) : 0 },
+                    ],
+                },
             },
         });
-
+          
         if (serverCheck) {
-            if (serverCheck.name === newServerName && serverCheck.name !== serverName) return res.status(400).json({ success: false, message: "Server name is already in use" });
-            if (serverCheck.guildId === BigInt(newGuildId as any) && serverCheck.guildId !== BigInt(guildId as any)) return res.status(400).json({ success: false, message: "Guild ID is already in use" });
-            if (serverCheck.roleId === BigInt(newRoleId as any) && serverCheck.roleId !== BigInt(roleId as any)) return res.status(400).json({ success: false, message: "Role ID is already in use" });
+            const errorMessages = [
+                { condition: serverCheck.name === newServerName, message: "Server name is already in use" },
+                { condition: serverCheck.guildId === BigInt(newGuildId), message: "Guild ID is already in use" },
+                { condition: serverCheck.roleId === BigInt(newRoleId), message: "Role ID is already in use" },
+            ];
+          
+            for (const { condition, message } of errorMessages) {
+                if (condition) return res.status(400).json({ success: false, message });
+            }
         }
 
         const server = await prisma.servers.findFirst({
             where: {
                 AND: [
-                    { name: serverName },
-                    { ownerId: user.id },
-                    { guildId: BigInt(guildId as any) },
-                    { roleId: BigInt(roleId as any) },
+                    { 
+                        name: serverName, 
+                        ownerId: user.id, 
+                        guildId: BigInt(guildId), 
+                        roleId: BigInt(roleId)
+                    }
                 ],
             },
         });
-
+          
         if (!server) return res.status(400).json({ success: false, message: "Server not found" });
         if (data?.newWebhook && !/^.*(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-zA-Z0-9_-]+)$/.test(data.newWebhook)) return res.status(400).json({ success: false, message: "Invalid Webhook" });
-        if (data?.newThemeColor && !/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(data?.newThemeColor)) return res.status(400).json({ success: false, message: "Invalid Theme Color" });
-
+        if (data?.newThemeColor && !/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(data.newThemeColor)) return res.status(400).json({ success: false, message: "Invalid Theme Color" });
+        
         const newServer = await prisma.servers.update({
             where: {
                 id: server.id,

@@ -3,7 +3,7 @@ import { useQuery } from "react-query";
 import { useEffect, useState } from "react";
 import { darken } from "@mui/material/styles";
 import { grey } from "@mui/material/colors";
-import { stringAvatar } from "../../../src/functions";
+import { formatEstimatedTime, stringAvatar } from "../../../src/functions";
 import { useToken } from "../../../src/token";
 import { makeXTrack } from "../../../src/getIPAddress";
 
@@ -224,11 +224,22 @@ export default function Server() {
                                 ) : (
                                     <Avatar src={server.picture} alt={server.serverName} sx={{ mr: "0.5rem" }} />
                                 )}
-                                <Badge badgeContent={new Date(server.pullTimeout).getTime() - new Date().getTime() > 0 ? "Cooldown" : (server.pulling ? "Pulling" : "Idle")} color={new Date(server.pullTimeout).getTime() - new Date().getTime() > 0 ? "warning" : "info"} sx={{ [`& .MuiBadge-badge`]: { mt: "0.95rem", mr: "-3rem", color: "#fff", padding: "0.75rem", fontSize: "0.75rem", fontWeight: "bold", display: (server.pulling || new Date(server.pullTimeout).getTime() - new Date().getTime() > 0) ? "flex" : "none" } }}>
-                                    <Typography variant="h6" sx={{ fontWeight: "500", wordBreak: "break-all" }}>
-                                        {server.name}
-                                    </Typography>
-                                </Badge>
+                                {/* if on cooldown then show tooltip with remaining time ticking down */}
+                                {new Date(server.pullTimeout).getTime() - new Date().getTime() > 0 ? (
+                                    <Tooltip title={`Cooldown: ${formatEstimatedTime(new Date(server.pullTimeout).getTime() - new Date().getTime())}`} placement="top" arrow>
+                                        <Badge badgeContent={server.pulling ? "Pulling" : (new Date(server.pullTimeout).getTime() - new Date().getTime() > 0 ? "Cooldown" : "Idle")} color={new Date(server.pullTimeout).getTime() - new Date().getTime() > 0 ? "warning" : "info"} sx={{ [`& .MuiBadge-badge`]: { mt: "0.95rem", mr: "-3rem", color: "#fff", padding: "0.75rem", fontSize: "0.75rem", fontWeight: "bold", display: (server.pulling || new Date(server.pullTimeout).getTime() - new Date().getTime() > 0) ? "flex" : "none" } }}>
+                                            <Typography variant="h6" sx={{ fontWeight: "500", wordBreak: "break-all" }}>
+                                                {server.name}
+                                            </Typography>
+                                        </Badge>
+                                    </Tooltip>
+                                ) : (
+                                    <Badge badgeContent={server.pulling ? "Pulling" : (new Date(server.pullTimeout).getTime() - new Date().getTime() > 0 ? "Cooldown" : "Idle")} color={new Date(server.pullTimeout).getTime() - new Date().getTime() > 0 ? "warning" : "info"} sx={{ [`& .MuiBadge-badge`]: { mt: "0.95rem", mr: "-3rem", color: "#fff", padding: "0.75rem", fontSize: "0.75rem", fontWeight: "bold", display: (server.pulling || new Date(server.pullTimeout).getTime() - new Date().getTime() > 0) ? "flex" : "none" } }}>
+                                        <Typography variant="h6" sx={{ fontWeight: "500", wordBreak: "break-all" }}>
+                                            {server.name}
+                                        </Typography>
+                                    </Badge>
+                                )}
                             </Box>
                             <Typography variant="body2" color="textSecondary">
                                 {server.description}
@@ -416,11 +427,15 @@ export default function Server() {
                                     )}
 
                                     {/* small arrow down icon with the text "advanced options" */}
-                                    <Accordion sx={{ mt: "1rem" }}>
+                                    <Accordion sx={{ my: "1rem" }}>
                                         <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
                                             <Typography variant="body1" sx={{ fontWeight: "400" }}>Advanced Options</Typography>
                                         </AccordionSummary>
                                         <AccordionDetails>
+                                            <Alert severity="warning" sx={{ width: "100%", mb: "1rem" }}>
+                                                <Typography variant="body1" sx={{ fontWeight: "400" }}>These options are for advanced users only, please do not change these settings unless you know what you are doing.</Typography>
+                                            </Alert>
+
                                             <Typography variant="body1" sx={{ mb: "1rem" }}>Enter Server ID manually</Typography>
                                             <TextField fullWidth label="Server ID" variant="outlined" value={pullSettings.selectedServer} onChange={(e) => setPullSettings({ ...pullSettings, selectedServer: e.target.value }) } />
                                             {(pullSettings.giveRoleOnJoin && pullSettings.selectedServer) && (
@@ -432,6 +447,11 @@ export default function Server() {
                                         </AccordionDetails>
                                     </Accordion>
 
+                                    {(guildId !== "" && new Date(user.servers.find((item: any) => item.guildId === guildId).pullTimeout).getTime() - new Date().getTime() > 0) && (
+                                        <Alert severity="info" sx={{ width: "100%" }}>
+                                            <Typography variant="body1" sx={{ fontWeight: "400" }}>This server is currently on cooldown, you can pull members again in {formatEstimatedTime(new Date(user.servers.find((item: any) => item.guildId === guildId).pullTimeout).getTime() - new Date().getTime())}.</Typography>
+                                        </Alert>
+                                    )}
                                 </DialogContent>
                                 <DialogActions>
                                     <Stack direction={{ sm: "column", md: "row" }} spacing={2} justifyContent="space-between" alignItems="center" width="100%">
@@ -503,7 +523,7 @@ export default function Server() {
                                                     setOpenE(true);
                                                     console.error(err);
                                                 })
-                                            )} color="success" sx={{ width: "100%", mt: { sm: "1rem", md: "0" } }}>
+                                            )} color="success" sx={{ width: "100%", mt: { sm: "1rem", md: "0" } }} disabled={guildId !== "" && new Date(user.servers.find((item: any) => item.guildId === guildId).pullTimeout).getTime() - new Date().getTime() > 0}>
                                                     Pull Members
                                             </LoadingButton>
                                         )}

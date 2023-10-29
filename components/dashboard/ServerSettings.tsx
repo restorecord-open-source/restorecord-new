@@ -119,7 +119,6 @@ export default function DashServerSettings({ user, id }: any) {
                 if (!res.success) {
                     setNotiTextE(res.message);
                     setOpenE(true);
-                    // functions.ToastAlert(res.message, "error");
                 }
                 else {
                     setNotiTextS(res.message);
@@ -127,14 +126,11 @@ export default function DashServerSettings({ user, id }: any) {
                     setTimeout(() => {
                         router.push("/dashboard/server");
                     }, 1250);
-                    // functions.ToastAlert(res.message, "success");
-                    // router.push("/dashboard/server");
                 }
             })
             .catch(err => {
                 setNotiTextE(err.message);
                 setOpenE(true);
-                // functions.ToastAlert(err, "error");
             });
 
     }
