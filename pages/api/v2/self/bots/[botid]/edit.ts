@@ -147,40 +147,57 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     validateStatus: () => true,
                 });
 
-                if (hn_check.data.result.find((d: any) => d.hostname === domain) && hn_check.data.result.find((d: any) => d.hostname === domain).status === "pending") {
-                    return res.status(200).json({ success: true, warning: true, message: "Verification pending, add the following DNS records to your domain. It may take up to 24 hours for the records to update.", status: hn_check.data.result.find((d: any) => d.hostname === domain).status, verification: { type: hn_check.data.result.find((d: any) => d.hostname === domain).ownership_verification.type, name: hn_check.data.result.find((d: any) => d.hostname === domain).ownership_verification.name, value: hn_check.data.result.find((d: any) => d.hostname === domain).ownership_verification.value }, validation: { name: hn_check.data.result.find((d: any) => d.hostname === domain).ssl.txt_name, value: hn_check.data.result.find((d: any) => d.hostname === domain).ssl.txt_value } });
-                } else if (hn_check.data.result.find((d: any) => d.hostname === domain) && hn_check.data.result.find((d: any) => d.hostname === domain).ssl.status === "pending_validation") {
-                    return res.status(200).json({ success: true, warning: true, message: "Verification pending, add the following DNS records to your domain. It may take up to 24 hours for the records to update.", status: hn_check.data.result.find((d: any) => d.hostname === domain).status, validation: { name: hn_check.data.result.find((d: any) => d.hostname === domain).ssl.txt_name, value: hn_check.data.result.find((d: any) => d.hostname === domain).ssl.txt_value } });
-                } else if (hn_check.data.result.find((d: any) => d.hostname === domain) && hn_check.data.result.find((d: any) => d.hostname === domain).ssl.status === "active" && hn_check.data.result.find((d: any) => d.hostname === domain).status === "active") {
-                    await prisma.customBots.update({
-                        where: {
-                            id: bot.id,
-                        },
-                        data: {
-                            customDomain: domain,
-                        }
-                    });
+                const matchingDomain = hn_check.data.result.find((d) => d.hostname === domain);
 
-                    return res.status(200).json({ success: true, message: "Sucessfully verified domain", status: hn_check.data.result.find((d: any) => d.hostname === domain).status });
-                } else {
-                    const response = await axios.post(`https://api.cloudflare.com/client/v4/zones/${process.env.CLOUDFLARE_ZONE_ID}/custom_hostnames`, {
-                        hostname: domain,
-                        ssl: {
-                            method: "txt",
-                            type: "dv",
-                        }
-                    }, {
-                        headers: {
-                            Authorization: `Bearer ${process.env.CF_API_TOKEN}`,
-                        },
-                        validateStatus: () => true,
-                    });
+                if (matchingDomain) {
+                    if (matchingDomain.status === "pending") {
+                        const ownership_verification = matchingDomain.ownership_verification;
+                        const ssl = matchingDomain.ssl;
 
-                    if (response.data.success === false) return res.status(400).json({ success: false, message: "Something went wrong" });
-                    if (response.data.result.ssl.status === "initializing") return res.status(200).json({ success: true, message: `Verification requested, add the following DNS records to your domain. It may take up to 24 hours for the records to update.`, status: response.data.result.ssl.status, verification: { type: response.data.result.ownership_verification.type, name: response.data.result.ownership_verification.name, value: response.data.result.ownership_verification.value } });
+                        return res.status(200).json({ success: true, warning: true, message: "Verification pending, add the following DNS records to your domain. It may take up to 24 hours for the records to update.", status: matchingDomain.status, verification: { type: ownership_verification.type, name: ownership_verification.name, value: ownership_verification.value, }, validation: { name: ssl.txt_name, value: ssl.txt_value }, });
+                    } else if (matchingDomain.ssl.status === "pending_validation") {
+                        const ssl = matchingDomain.ssl;
 
-                    return res.status(200).json({ success: true, message: "Verification required", verification: { type: response.data.result.ownership_verification.type, name: response.data.result.ownership_verification.name, value: response.data.result.ownership_verification.value }, validation: { name: response.data.result.ssl.txt_name, value: response.data.result.ssl.txt_value } });
+                        return res.status(200).json({ success: true, warning: true, message: "Verification pending, add the following DNS records to your domain. It may take up to 24 hours for the records to update.", status: matchingDomain.status, validation: { name: ssl.txt_name, value: ssl.txt_value }, });
+                    } else if (matchingDomain.status === "active" && matchingDomain.ssl.status === "active") {
+                        await prisma.customBots.update({
+                            where: {
+                                id: bot.id,
+                            },
+                            data: {
+                                customDomain: domain,
+                            },
+                        });
+
+                        return res.status(200).json({ success: true, message: "Successfully verified domain", status: matchingDomain.status, });
+                    }
                 }
+
+                const response = await axios.post(`https://api.cloudflare.com/client/v4/zones/${process.env.CLOUDFLARE_ZONE_ID}/custom_hostnames`, {
+                    hostname: domain,
+                    ssl: {
+                        method: "txt",
+                        type: "dv",
+                    },
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${process.env.CF_API_TOKEN}`,
+                    },
+                    validateStatus: () => true,
+                });
+
+                if (!response.data.success) {
+                    return res.status(400).json({ success: false, message: "Something went wrong" });
+                }
+
+                const ownership_verification = response.data.result.ownership_verification;
+                const ssl = response.data.result.ssl;
+
+                if (ssl.status === "initializing") {
+                    return res.status(200).json({ success: true, message: `Verification requested, add the following DNS records to your domain. It may take up to 24 hours for the records to update.`,status: ssl.status, verification: { type: ownership_verification.type, name: ownership_verification.name, value: ownership_verification.value, }, });
+                }
+
+                return res.status(200).json({ success: true, message: "Verification required", verification: { type: ownership_verification.type, name: ownership_verification.name, value: ownership_verification.value, }, validation: { name: ssl.txt_name, value: ssl.txt_value }, });
             } catch (err: any) {
                 console.error(err);
                 return res.status(400).json({ success: false, message: "Something went wrong" });
