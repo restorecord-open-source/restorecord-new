@@ -22,6 +22,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import theme from "../../src/theme";
 import AlertTitle from "@mui/material/AlertTitle";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import LoadingButton from "../misc/LoadingButton";
+import CodeCopy from "../misc/codeCopy";
 
 export default function DashBotSettings({ user, id }: any) {
     const [token]: any = useToken();
@@ -37,6 +39,23 @@ export default function DashBotSettings({ user, id }: any) {
     const [errorText, setErrorText] = useState("");
     const [serverList, setServerList] = useState([]);
     const [confirmDelete, setConfirmDelete] = useState(false);
+    const [customDomainSettings, setCustomDomainSettings]: any = useState({
+        open: false,
+        domain: "",
+        error: "",
+        warning: "",
+        success: "",
+        status: "",
+        verification: {
+            type: "",
+            name: "",
+            value: "",
+        },
+        validation: {
+            name: "",
+            value: "",
+        },
+    });
     
     const [openS, setOpenS] = useState(false);
     const [openE, setOpenE] = useState(false);
@@ -195,7 +214,118 @@ export default function DashBotSettings({ user, id }: any) {
         )
     }
 
+    function renderCustomDomainSettings() {
+        return (
+            <Dialog open={customDomainSettings.open} onClose={() => setCustomDomainSettings({ ...customDomainSettings, open: false })} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" fullWidth maxWidth="sm">
+                <DialogTitle id="alert-dialog-title">
+                    Custom Domain Settings
+                    <IconButton aria-label="close" onClick={() => setCustomDomainSettings({ ...customDomainSettings, open: false })} sx={{ position: "absolute", right: 8, top: 8, color: theme.palette.grey[500] }}>
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent>
+                    {customDomainSettings.error && (
+                        <Alert severity="error" sx={{ mb: "1rem" }}>
+                            <AlertTitle>Error</AlertTitle>
+                            <Typography variant="body1">
+                                {customDomainSettings.error}
+                            </Typography>
+                        </Alert>
+                    )}
+                    
+                    {customDomainSettings.warning && (
+                        <Alert severity="warning" sx={{ mb: "1rem" }}>
+                            <AlertTitle>Warning</AlertTitle>
+                            <Typography variant="body1">
+                                {customDomainSettings.warning}
+                            </Typography>
+                        </Alert>
+                    )}
+                    
+                    {customDomainSettings.success && (
+                        <Alert severity="success" sx={{ mb: "1rem" }}>
+                            <AlertTitle>Success</AlertTitle>
+                            <Typography variant="body1">
+                                {customDomainSettings.success}
+                            </Typography>
+                        </Alert>
+                    )}
 
+
+
+                    {user.bots.find((bot: any) => bot.clientId === id).customDomain ? (
+                        <>
+                            <DialogContentText id="alert-dialog-description">
+                                <Typography variant="body1">
+                                    Your custom domain is currently set to <b>{user.bots.find((bot: any) => bot.clientId === id).customDomain}</b>.
+                                </Typography>
+                            </DialogContentText>
+                            <DialogContentText id="alert-dialog-description">
+                                <Typography variant="body1">
+                                    To change your custom domain, you must first remove your current custom domain.
+                                </Typography>
+                            </DialogContentText>
+                        </>
+                    ) : (
+                        <>
+                            <DialogContentText id="alert-dialog-description">
+                                <Typography variant="body1">
+                                    You can set a custom domain to your bot. This will allow you to use your own domain for your bot, instead of using restorecord.com.
+                                </Typography>
+                                <TextField fullWidth variant="outlined" name="domain" value={customDomainSettings.domain} onChange={(e) => setCustomDomainSettings({ ...customDomainSettings, domain: e.target.value })} placeholder="example.com" sx={{ mt: 1 }} disabled={(customDomainSettings.verification.name || customDomainSettings.validation.name) ? true : false} />
+
+                                {(customDomainSettings.verification.name || customDomainSettings.validation.name || customDomainSettings.status === "pending") && (
+                                    <>
+                                        <Typography variant="body1" sx={{ mt: 2 }}><b>Verification</b></Typography>
+                                        <Typography variant="body1" sx={{ mt: 1 }}>To verify your domain, and add SSL to your domain, add the following DNS records to your domain.</Typography>
+                                        {customDomainSettings.verification.name && (<>
+                                            <Typography variant="body1" sx={{ mt: 2 }}><b>Type:</b> <CodeCopy>{customDomainSettings.verification.type}</CodeCopy></Typography>
+                                            <Typography variant="body1" sx={{ mt: 1 }}><b>Name:</b> <CodeCopy>{customDomainSettings.verification.name}</CodeCopy></Typography>
+                                            <Typography variant="body1" sx={{ mt: 1 }}><b>Value:</b> <CodeCopy>{customDomainSettings.verification.value}</CodeCopy></Typography>
+                                        </>)}
+
+                                        {customDomainSettings.validation.name && (<>
+                                            <Typography variant="body1" sx={{ mt: 2 }}><b>Type:</b> <CodeCopy>TXT</CodeCopy></Typography>
+                                            <Typography variant="body1" sx={{ mt: 1 }}><b>Name:</b> <CodeCopy>{customDomainSettings.validation.name}</CodeCopy></Typography>
+                                            <Typography variant="body1" sx={{ mt: 1 }}><b>Value:</b> <CodeCopy>{customDomainSettings.validation.value}</CodeCopy></Typography>
+                                        </>)}
+
+                                        <Typography variant="body1" sx={{ mt: 2 }}><b>Type:</b> <CodeCopy>CNAME</CodeCopy></Typography>
+                                        <Typography variant="body1" sx={{ mt: 1 }}><b>Name:</b> <CodeCopy>{customDomainSettings.domain}</CodeCopy></Typography>
+                                        <Typography variant="body1" sx={{ mt: 1 }}><b>Value:</b> <CodeCopy>fallback.restorecord.com</CodeCopy></Typography>
+                                    </>
+                                )}
+                            </DialogContentText>
+                            <DialogActions>
+                                <LoadingButton fullWidth variant="contained" color="primary" event={async () => {
+                                    if (!customDomainSettings.domain) {
+                                        setCustomDomainSettings({ ...customDomainSettings, error: "Please enter a domain." });
+                                        return;
+                                    }
+
+                                    setCustomDomainSettings({ ...customDomainSettings, error: "", warning: "", success: "" });
+
+                                    const res = await axios.post(`/api/v2/self/bots/${bot.clientId}/edit`, {
+                                        domain: customDomainSettings.domain,
+                                    }, {
+                                        headers: {
+                                            "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                        },
+                                        validateStatus: () => true,
+                                    });
+
+                                    // setCustomDomainSettings({ ...customDomainSettings, verification: res.data.verification, validation: res.data.validation, ...(res.data.warning ? { warning: res.data.warning } : {}), ...(res.data.success ? { success: res.data.success } : {}) });
+                                    setCustomDomainSettings({ ...customDomainSettings, ...(res.data.verification ? { verification: res.data.verification } : {}), ...(res.data.validation ? { validation: res.data.validation } : {}), ...((res.data.success && res.data.warning !== true) ? { success: res.data.message } : {}), ...(res.data.warning ? { warning: res.data.message } : {}), ...(!res.data.success && !res.data.warning ? { error: res.data.message } : {}) });
+                                }}>
+                                    {customDomainSettings.verification.type === "" ? "Set Domain" : "Verify Domain"}
+                                </LoadingButton>
+                            </DialogActions>
+                        </>
+                    )}
+                </DialogContent>
+            </Dialog>
+        )
+    }
 
     return (
         <>
@@ -219,10 +349,14 @@ export default function DashBotSettings({ user, id }: any) {
                         </Snackbar>
 
                         {deleteDialog()}
+                        {renderCustomDomainSettings()}
 
                         {(user.bots.find((bot: any) => bot.clientId === id)) ? (
                             <>
                                 <Stack direction="row" spacing={2} sx={{ mb: 2, "@media screen and (max-width: 600px)": { flexDirection: "column", alignItems: "center", "& > *": { mb: 1 } } }}>
+                                    <Button variant="contained" onClick={() => setCustomDomainSettings({ ...customDomainSettings, open: true })}>
+                                        Custom Domain
+                                    </Button>
                                     <Button variant="contained" onClick={() => {
                                         axios.get(`/api/v2/self/bots/${bot.clientId}/refresh`, {
                                             headers: {

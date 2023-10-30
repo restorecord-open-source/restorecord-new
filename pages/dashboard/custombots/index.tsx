@@ -23,6 +23,7 @@ import Typography from "@mui/material/Typography";
 import CardContent from "@mui/material/CardContent";
 import Paper from "@mui/material/Paper";
 import Container from "@mui/material/Container";
+import { Dialog } from "@mui/material";
 
 export default function CustomBots() {
     const [ token ]: any = useToken()

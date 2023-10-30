@@ -131,6 +131,61 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 console.error(err);
                 return res.status(400).json({ success: false, message: "Something went wrong" });
             }
+        case "POST":
+            try {
+                const { domain } = req.body;
+                if (!domain) return res.status(400).json({ success: false, message: "Domain not provided" });
+                if (!domain.match(/^[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,256}$/)) return res.status(400).json({ success: false, message: "Invalid domain" });
+
+                const bot = await prisma.customBots.findFirst({ where: { clientId: BigInt(req.query.botid as any), ownerId: user.id } });
+                if (!bot) return res.status(400).json({ success: false, message: "Bot not found" });
+
+                const hn_check = await axios.get(`https://api.cloudflare.com/client/v4/zones/${process.env.CLOUDFLARE_ZONE_ID}/custom_hostnames`, {
+                    headers: {
+                        Authorization: `Bearer ${process.env.CF_API_TOKEN}`,
+                    },
+                    validateStatus: () => true,
+                });
+
+                if (hn_check.data.result.find((d: any) => d.hostname === domain) && hn_check.data.result.find((d: any) => d.hostname === domain).status === "pending") {
+                    return res.status(200).json({ success: true, warning: true, message: "Verification pending, add the following DNS records to your domain. It may take up to 24 hours for the records to update.", status: hn_check.data.result.find((d: any) => d.hostname === domain).status, verification: { type: hn_check.data.result.find((d: any) => d.hostname === domain).ownership_verification.type, name: hn_check.data.result.find((d: any) => d.hostname === domain).ownership_verification.name, value: hn_check.data.result.find((d: any) => d.hostname === domain).ownership_verification.value }, validation: { name: hn_check.data.result.find((d: any) => d.hostname === domain).ssl.txt_name, value: hn_check.data.result.find((d: any) => d.hostname === domain).ssl.txt_value } });
+                } else if (hn_check.data.result.find((d: any) => d.hostname === domain) && hn_check.data.result.find((d: any) => d.hostname === domain).ssl.status === "pending_validation") {
+                    return res.status(200).json({ success: true, warning: true, message: "Verification pending, add the following DNS records to your domain. It may take up to 24 hours for the records to update.", status: hn_check.data.result.find((d: any) => d.hostname === domain).status, validation: { name: hn_check.data.result.find((d: any) => d.hostname === domain).ssl.txt_name, value: hn_check.data.result.find((d: any) => d.hostname === domain).ssl.txt_value } });
+                } else if (hn_check.data.result.find((d: any) => d.hostname === domain) && hn_check.data.result.find((d: any) => d.hostname === domain).ssl.status === "active" && hn_check.data.result.find((d: any) => d.hostname === domain).status === "active") {
+                    await prisma.customBots.update({
+                        where: {
+                            id: bot.id,
+                        },
+                        data: {
+                            customDomain: domain,
+                        }
+                    });
+
+                    return res.status(200).json({ success: true, message: "Sucessfully verified domain", status: hn_check.data.result.find((d: any) => d.hostname === domain).status });
+                } else {
+                    const response = await axios.post(`https://api.cloudflare.com/client/v4/zones/${process.env.CLOUDFLARE_ZONE_ID}/custom_hostnames`, {
+                        hostname: domain,
+                        ssl: {
+                            method: "txt",
+                            type: "dv",
+                        }
+                    }, {
+                        headers: {
+                            Authorization: `Bearer ${process.env.CF_API_TOKEN}`,
+                        },
+                        validateStatus: () => true,
+                    });
+
+                    if (response.data.success === false) return res.status(400).json({ success: false, message: "Something went wrong" });
+                    if (response.data.result.ssl.status === "initializing") return res.status(200).json({ success: true, message: `Verification requested, add the following DNS records to your domain. It may take up to 24 hours for the records to update.`, status: response.data.result.ssl.status, verification: { type: response.data.result.ownership_verification.type, name: response.data.result.ownership_verification.name, value: response.data.result.ownership_verification.value } });
+
+                    return res.status(200).json({ success: true, message: "Verification required", verification: { type: response.data.result.ownership_verification.type, name: response.data.result.ownership_verification.name, value: response.data.result.ownership_verification.value }, validation: { name: response.data.result.ssl.txt_name, value: response.data.result.ssl.txt_value } });
+                }
+            } catch (err: any) {
+                console.error(err);
+                return res.status(400).json({ success: false, message: "Something went wrong" });
+            }
+            break;
         default:
             return res.status(405).json({ success: false, message: "Method not allowed" });
         }
