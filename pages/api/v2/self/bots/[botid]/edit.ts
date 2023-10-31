@@ -147,7 +147,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     validateStatus: () => true,
                 });
 
-                const matchingDomain = hn_check.data.result.find((d) => d.hostname === domain);
+                const matchingDomain = hn_check.data.result.find((d: any) => d.hostname === domain);
 
                 if (matchingDomain) {
                     if (matchingDomain.status === "pending") {

@@ -349,14 +349,14 @@ export default function DashBotSettings({ user, id }: any) {
                         </Snackbar>
 
                         {deleteDialog()}
-                        {renderCustomDomainSettings()}
+                        {/* {renderCustomDomainSettings()} */}
 
                         {(user.bots.find((bot: any) => bot.clientId === id)) ? (
                             <>
                                 <Stack direction="row" spacing={2} sx={{ mb: 2, "@media screen and (max-width: 600px)": { flexDirection: "column", alignItems: "center", "& > *": { mb: 1 } } }}>
-                                    <Button variant="contained" onClick={() => setCustomDomainSettings({ ...customDomainSettings, open: true })}>
+                                    {/* <Button variant="contained" onClick={() => setCustomDomainSettings({ ...customDomainSettings, open: true })}>
                                         Custom Domain
-                                    </Button>
+                                    </Button> */}
                                     <Button variant="contained" onClick={() => {
                                         axios.get(`/api/v2/self/bots/${bot.clientId}/refresh`, {
                                             headers: {

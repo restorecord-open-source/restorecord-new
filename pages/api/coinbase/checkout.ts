@@ -37,7 +37,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             break;
         }
 
-        if (user.referrer === (25555 || 38)) {
+        if ((new Date().getMonth() + 1 === 10 && new Date().getDate() >= 30) || (new Date().getMonth() + 1 === 11 && new Date().getDate() <= 5)) {
+            amount = (Number(amount) - (Number(amount) * 0.20)).toFixed(2);
+        } else if (user.referrer === (25555 || 38)) {
             amount = (Number(amount) - (Number(amount) * 0.15)).toFixed(2);
         } else if (user.referrer !== null) {
             amount = (Number(amount) - (Number(amount) * 0.05)).toFixed(2);
