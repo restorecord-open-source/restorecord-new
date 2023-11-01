@@ -60,6 +60,9 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
         }
 
         exchange(code as string, `https://${domain}/api/callback`, customBotInfo.clientId, customBotInfo.botSecret).then(async (respon) => {
+            let data = respon.data ? respon.data : respon.response.data;
+            if (data.error === "invalid_grant") return res.redirect(`https://${domain}/verify/${state}`);
+
             if (respon.status !== 200) return res.status(400).json({ code: "10001", message: "Unknown user", for_Server_Owner: `contact: https://t.me/xenos1337, send: ${Buffer.from(JSON.stringify({ status: respon.status, data: respon.data ? respon.data : respon.response.data })).toString("base64").replace(/=/g, "").split("").reverse().join("")}` });
             if (!respon.data.access_token) return reject(990001 as any);
 
