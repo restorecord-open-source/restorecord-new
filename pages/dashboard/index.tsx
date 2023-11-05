@@ -348,28 +348,41 @@ export default function Dashboard() {
                                         <Select
                                             value={statType}
                                             onChange={(e) => {
-                                                setStatType(e.target.value as any);
+                                                const selectedValue = e.target.value as any;
+                                                if (data.role === "business" || data.role === "enterprise") {
+                                                    setStatType(selectedValue);
+                                                } else {
+                                                    // Handle the case when the user doesn't have the required role.
+                                                    // You can show a tooltip or any other appropriate message.
+                                                    console.log("You need to upgrade to access this feature.");
+                                                }
                                             }}
                                             displayEmpty
                                             inputProps={{ "aria-label": "Without label" }}
                                         >
                                             <MenuItem value="country">Country</MenuItem>
                                             <MenuItem value="server">Server</MenuItem>
-                                            {(data.role === "business" || data.role === "enterprise") ? (
-                                                <>
-                                                    <MenuItem value="state">State</MenuItem>
-                                                    <MenuItem value="city">City</MenuItem>
-                                                    <MenuItem value="isp">ISP</MenuItem>
-                                                </>
-                                            ) : (
-                                                <Tooltip title="Upgrade to Business plan to unlock this feature" arrow>
-                                                    <Box>
-                                                        <MenuItem value="state" disabled>State</MenuItem>
-                                                        <MenuItem value="city" disabled>City</MenuItem>
-                                                        <MenuItem value="isp" disabled>ISP</MenuItem>
-                                                    </Box>
-                                                </Tooltip>
-                                            )}
+                                            <MenuItem value="state" disabled={data.role !== "business" && data.role !== "enterprise"}>
+                                                {data.role === "business" || data.role === "enterprise" ? (
+                                                    "State"
+                                                ) : (
+                                                    <Tooltip title="Upgrade to Business plan to unlock this feature" arrow><>State</></Tooltip>
+                                                )}
+                                            </MenuItem>
+                                            <MenuItem value="city" disabled={data.role !== "business" && data.role !== "enterprise"}>
+                                                {data.role === "business" || data.role === "enterprise" ? (
+                                                    "City"
+                                                ) : (
+                                                    <Tooltip title="Upgrade to Business plan to unlock this feature" arrow><>City</></Tooltip>
+                                                )}
+                                            </MenuItem>
+                                            <MenuItem value="isp" disabled={data.role !== "business" && data.role !== "enterprise"}>
+                                                {data.role === "business" || data.role === "enterprise" ? (
+                                                    "ISP"
+                                                ) : (
+                                                    <Tooltip title="Upgrade to Business plan to unlock this feature" arrow><>ISP</></Tooltip>
+                                                )}
+                                            </MenuItem>
                                         </Select>
 
                                     </FormControl>
