@@ -2,6 +2,8 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "../../../../src/db";
 import withAuthentication from "../../../../src/withAuthentication";
 import { accounts } from "@prisma/client";
+import axios from "axios";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts) {
     return new Promise(async resolve => {
@@ -81,7 +83,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             try {
                 const { reason, type, value, guildId }: any = req.body;
 
-                if (!type || !value || !guildId) return res.status(400).json({ success: false, message: `Missing ${!type ? "Blacklist Type" : !value ? "Blacklist Value" : "Server"}` });
+                if (!type || (!value && type != "server") || !guildId) return res.status(400).json({ success: false, message: `Missing ${!type ? "Blacklist Type" : !value ? "Blacklist Value" : "Server"}` });
 
                 const servers = await prisma.servers.findMany({ where: { ownerId: user.id } });
                 if (!servers) return res.status(400).json({ success: false, message: "No servers found." });
@@ -170,6 +172,48 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         console.error(err);
                         return res.status(400).json({ success: false, message: "Could not blacklist Country." });
                     });
+                    break;
+                case "server":
+                    // get all bans from the discord server then add all user Id's with the reason "Imported from Discord" to the blacklist
+
+                    var server = await prisma.servers.findFirst({ where: { guildId: BigInt(guildId) as bigint } });
+                    if (!server) return res.status(400).json({ success: false, message: "Server not found." });
+
+                    var bot = await prisma.customBots.findFirst({ where: { id: server.customBotId } });
+                    if (!bot) return res.status(400).json({ success: false, message: "Bot not found." });
+
+                    await axios.get(`https://discord.com/api/guilds/${guildId}/bans`, { 
+                        headers: { 
+                            Authorization: `Bot ${bot.botToken}`
+                        },
+                        proxy: false,
+                        httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`) 
+                    }).then(async (response: any) => {
+                        if (response.data) {
+                            var bans = response.data;
+                            await prisma.blacklist.createMany({
+                                data: bans.map((ban: any) => {
+                                    return {
+                                        type: 0,
+                                        value: ban.user.id,
+                                        reason: "Imported from Discord",
+                                        guildId: BigInt(guildId)
+                                    }
+                                })
+                            }).then(() => {
+                                return res.status(200).json({ success: true, message: `${bans.length} Users have been blacklisted.` });
+                            }).catch((err: any) => {
+                                console.error(err);
+                                return res.status(400).json({ success: false, message: "Could not blacklist Users." });
+                            });
+                        }
+                        else {
+                            return res.status(400).json({ success: false, message: "No bans found." });
+                        }
+                    }).catch((err: any) => {
+                        return res.status(400).json({ success: false, message: "Could not get bans." });
+                    });
+                    break;
                 default:
                     return res.status(400).json({ success: false, message: "Invalid type." });
                 }

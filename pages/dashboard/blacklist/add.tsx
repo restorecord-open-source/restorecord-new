@@ -89,6 +89,13 @@ export default function Blacklist() {
                                 <CardContent sx={{ pb: "1rem !important" }}>
                                     <form>
                                         <Stack spacing={1} direction="column" justifyContent={"space-between"}>
+                                            {/* if server blacklist type then show text that it'll get all discord bans and automatically <b>remove</b> and blacklist them */}
+                                            {blacklistType === "server" && (
+                                                <Alert severity="warning" sx={{ mb: 2 }}>
+                                                    This will get all Discord bans from the server and automatically <b>remove</b> and blacklist the User Ids.
+                                                </Alert>
+                                            )}
+
                                             {/* select: UserId, IP, ASN, Country */}
                                             <FormControl fullWidth variant="outlined" required>
                                                 <InputLabel htmlFor="blacklist-type">Blacklist Type</InputLabel>
@@ -97,6 +104,7 @@ export default function Blacklist() {
                                                     <MenuItem value="ip">IP</MenuItem>
                                                     <MenuItem value="iso">Country</MenuItem>
                                                     <MenuItem value="asn">ASN (Business)</MenuItem>
+                                                    <MenuItem value="server">Import from Discord</MenuItem>
                                                 </Select>
                                             </FormControl>
                                             {/* input: UserId, IP Address, ASN Number, Country */}
@@ -124,9 +132,13 @@ export default function Blacklist() {
                                             ) : blacklistType === "asn" ? (
                                                 <TextField required fullWidth label="ASN Number" placeholder="15169" variant="outlined" value={blacklist} onChange={(e) => setBlacklist(e.target.value)} inputProps={{ minLength: 1, maxLength: 10, pattern: "[0-9]{1,10}" }} />
                                             ) : null}
-                                            {/* input: Reason */}
-                                            <TextField fullWidth label="Reason" variant="outlined" value={blacklistReason} onChange={(e) => setBlacklistReason(e.target.value)} />
-                                            {/* server  select */}
+
+                                            {blacklistType !== "server" && <TextField fullWidth label="Reason" variant="outlined" value={blacklistReason} onChange={(e) => setBlacklistReason(e.target.value)} />}
+
+                                            
+
+                                            {/* select: Server */}
+
                                             {userLoading ? (
                                                 <>
                                                     <Skeleton animation="wave" variant="rectangular" width="100%" height={56} sx={{ borderRadius: "14px" }} /> 
