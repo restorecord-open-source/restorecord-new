@@ -6,6 +6,7 @@ import { IncomingForm } from "formidable";
 import { PassThrough } from "stream";
 import { promises as fs } from "fs"
 import { resolveOAuth2User, refreshToken as RFToken } from "../../../../../../src/Migrate";
+import { formatEstimatedTime } from "../../../../../../src/functions";
 
 export const config = {
     api: {
@@ -23,6 +24,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
         const server = await prisma.servers.findFirst({ where: { AND: [ { guildId: serverId }, { ownerId: user.id } ] } });
         if (!server) return res.status(400).json({ success: false, message: "Server not found" });
+        if (server.importing) return res.status(400).json({ success: false, message: "Server is already importing, please wait or contact support" });
 
         const bot = await prisma.customBots.findFirst({ where: { AND: [ { id: server.customBotId }, { ownerId: user.id } ] } });
         if (!bot) return res.status(400).json({ success: false, message: "Bot not found" });
@@ -73,6 +75,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     }
                 }
 
+                // check for invalid values, eg. accessToken is too short/long etc
+                for (let i = 0; i < memberData.length; i++) {
+                    const element = memberData[i];
+                    if (String(element.id || element.userId).length < 16 || String(element.id || element.userId).length > 20) return res.status(400).json({ success: false, message: "Invalid JSON, make sure all IDs are valid" });
+                    if (String((element.accessToken || element.access_token || element.access || element.token) || (element.refreshToken || element.refresh_token || element.refresh)).length !== 30) return res.status(400).json({ success: false, message: "Invalid JSON, make sure all access tokens are correctly formatted" });
+                    if (String((element.accessToken || element.access_token || element.access || element.token) || (element.refreshToken || element.refresh_token || element.refresh)).match(/[^a-zA-Z0-9]/g)) return res.status(400).json({ success: false, message: "Invalid JSON, make sure all access tokens are correctly formatted" });
+                }
+
                 const dupeCheck: any[] = [];
                 for (let i = 0; i < memberData.length; i++) {
                     const element = memberData[i];
@@ -91,6 +101,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
                 let trysImported: number = 0;
                 let successImported: number = 0;
+
+                await prisma.servers.update({ where: { id: server.id }, data: { importing: true } });
+
                 new Promise<void>(async (resolve, reject) => {
                     for (const member of memberData) {
                         trysImported++;
@@ -202,13 +215,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     }
 
                     console.log(`[IMPORT] [${server.name}] ${successImported}/${trysImported}/${memberData.length} members imported`);
+                    await prisma.servers.update({ where: { id: server.id }, data: { importing: false } });
                     resolve();
                 }).then(() => {
                     console.log(`[IMPORT] [${server.name}] ${successImported}/${trysImported}/${memberData.length} members imported`);
                 }).catch((err) => console.error(err));
 
-                return res.status(200).json({ success: true, message: `Importing ${memberData.length} members` });
+                const estimateTime = formatEstimatedTime((memberData.length * 1.25) * 1000);
 
+                return res.status(200).json({ success: true, message: `Importing ${memberData.length} members, estimated time: ${estimateTime}` });
                 break;
             }
             catch (err) {

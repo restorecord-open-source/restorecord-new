@@ -58,6 +58,9 @@ export default function VerifiedMembers({ user }: any) {
     const [userInfo, setUserInfo]: any = useState({});
     const [userInfoID, setUserInfoID]: any = useState("");
 
+    const [importRisk, setImportRisk] = useState(false);
+    const [usageTerms, setUsageTerms] = useState(false);
+
     const [exportOptions, setExportOptions] = useState<any>({
         open: false,
         serverId: "",
@@ -428,8 +431,7 @@ export default function VerifiedMembers({ user }: any) {
 
                     <TextField fullWidth label="File" id="file" name="file" value={importOptions.file ? importOptions.file[0].name : "Select File"} sx={{ mt: 1 }} InputProps={{endAdornment: (<input type="file" accept="application/json, text/csv" onChange={(e) => setImportOptions({ ...importOptions, file: e.target.files })} tabIndex={ -1 } style={{ position: "absolute", top: 0, right: 0, bottom: 0, left: 0, opacity: 0 }} />) }} />
                         
-                    {/* warning when u export ur members they prob wont be able to be used again on restorecord */}
-                    <Alert severity="error" sx={{ my: 2 }}>
+                    <Alert severity="error" sx={{ mt: 1 }}>
                         <Typography variant="body1" sx={{ fontWeight: "500" }}>
                             Warning
                         </Typography>
@@ -439,7 +441,13 @@ export default function VerifiedMembers({ user }: any) {
                         </Typography>
                     </Alert>
 
-                    <LoadingButton variant="contained" color="success" fullWidth={true} disabled={importOptions.serverId.length === 0 || !importOptions.file} event={() => {
+                    {/* checkbox to accept the risk */}
+                    <FormControlLabel control={<Checkbox checked={importRisk} onChange={(event: any) => setImportRisk(event.target.checked)} />} label="I understand the risk of importing members" />
+
+                    {/* checkbox to if i abuse i get banned etc */}
+                    <FormControlLabel control={<Checkbox checked={usageTerms} onChange={(event: any) => setUsageTerms(event.target.checked)} />} label={<>I agree to the <a href="/terms" target="_blank">Terms of Service</a></>} sx={{ mb: 1 }} />
+
+                    <LoadingButton variant="contained" color="success" fullWidth={true} disabled={importOptions.serverId.length === 0 || !importOptions.file || !importRisk || !usageTerms} event={() => {
                         const data = new FormData();
                         data.append("file", importOptions.file[0]);
 
@@ -485,9 +493,9 @@ export default function VerifiedMembers({ user }: any) {
 
                             <Box>
                                 {/* if localstorage beta = 7728 then show import button */}
-                                {window.localStorage.getItem("beta") === "728" && (
-                                    <Button variant="contained" color="success" onClick={() => setImportOptions({ ...importOptions, open: true })} sx={{ mr: 1 }}>Import</Button>
-                                )}
+                                {/* {window.localStorage.getItem("beta") === "728" && ( */}
+                                <Button variant="contained" color="success" onClick={() => setImportOptions({ ...importOptions, open: true })} sx={{ mr: 1 }}>Import</Button>
+                                {/* )} */}
                                 <Button variant="contained" color="yellow" onClick={() => setExportOptions({ ...exportOptions, open: true })} sx={{ ml: 1 }}>Export</Button>
                             </Box>
                         </Stack>

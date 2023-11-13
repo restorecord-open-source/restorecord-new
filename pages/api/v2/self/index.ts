@@ -72,6 +72,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     customBotId: server.customBotId,
                     pullTimeout: server.pullTimeout,
                     pulling: server.pulling,
+                    importing: server.importing,
                 })),
                 backups: await Promise.all(allBackups),
                 bots: customBots.map((bot: customBots) => ({
