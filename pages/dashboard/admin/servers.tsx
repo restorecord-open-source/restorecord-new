@@ -40,7 +40,7 @@ export default function AdminServer() {
 
     const [servers, setServers]: any = useState({});
     const [Modals, setModals]: any = useState({ info: false, });
-    const [ModalData, setModalData]: any = useState({ info: {}, });
+    const [ModalData, setModalData]: any = useState({ info: {}, query: { rows: 0, time: 0 } });
 
     const { data, isError, isLoading } = useQuery('user', async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
@@ -149,6 +149,7 @@ export default function AdminServer() {
                 e.preventDefault();
                 setServers({});
                 setErrorMessages("");
+
                 await axios.post("/api/admin/server", { query: searchQuery }, {
                     headers: {
                         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
@@ -156,6 +157,10 @@ export default function AdminServer() {
                 }).then((res: any) => {
                     console.log(res.data.user);
                     setServers(res.data.servers);
+
+                    // rows = res.data.rows;
+                    // time = res.data.time;
+                    setModalData({ ...ModalData, query: { rows: res.data.rows, time: res.data.time } });
                 }).catch((err) => {
                     console.error(err);
                     setErrorMessages(JSON.stringify(err.response.data));
@@ -164,6 +169,7 @@ export default function AdminServer() {
                 <Stack direction="column" spacing={2}>
                     <TextField label="Search" variant="outlined" placeholder="ID/Guild Id/Name" onChange={(e) => setSearchQuery(e.target.value)} />
                     <Button variant="contained" type="submit">Get server info</Button>
+                    <Alert severity="info" sx={{ bgcolor: "#000", color: "#fff" }}>{ModalData.query.rows} servers in {ModalData.query.time} sec</Alert>
                 </Stack>
             </form>
         );
@@ -184,6 +190,7 @@ export default function AdminServer() {
                                     } else if (typeof value === "boolean") {
                                         return (<Typography variant="body1" sx={{ mb: 1 }} key={key}>{key}: <code>{value ? "Yes" : "No"}</code></Typography>);
                                     } else {
+                                        // if key is 
                                         return (<Typography variant="body1" sx={{ mb: 1 }} key={key}>{key}: <code>{JSON.stringify(value)}</code></Typography>);
                                     }
                                 })}
@@ -272,8 +279,6 @@ export default function AdminServer() {
 
                                 {servers.length > 0 && renderSearchResult()}
                             </CardContent>
-                        
-                           
                         </Paper>
                     </Container>
                 

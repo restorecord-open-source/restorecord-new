@@ -56,7 +56,7 @@ export default function AdminUser() {
         ban: {},
     });
 
-    const { data, isError, isLoading } = useQuery('user', async () => await getUser({
+    const { data, isError, isLoading } = useQuery("user", async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
     }), { retry: false,  refetchOnWindowFocus: false });
 
@@ -137,7 +137,7 @@ export default function AdminUser() {
                             Username: <code>{ModalData.info.username}</code><br />
                             Current Plan: <code>{ModalData.info.role}</code><br />
                             {/* Expires at: <code>{new Date(ModalData.info.expiry).toLocaleDateString()}</code><br /> */}
-                            Expiry: <code>{new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(ModalData.info.expiry ?? "0"))}</code><br />
+                            Expiry: <code>{new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" }).format(new Date(ModalData.info.expiry ?? "0"))}</code><br />
                         </Typography>
                     ) : ( <CircularProgress /> )}
 
