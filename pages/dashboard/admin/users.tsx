@@ -115,6 +115,45 @@ export default function AdminUser() {
                                 return (<Typography variant="body1" sx={{ mb: 1 }} key={key}>{key}: <code>{JSON.stringify(value)}</code></Typography>);
                             }
                         })}
+
+                        {/* login button */}
+                        <Button variant="contained" color="primary" onClick={async () => {
+                            var orgToken = (process.browser && window.localStorage.getItem("token")) ?? token;
+                            window.localStorage.setItem("org_token", orgToken);
+
+                            var newToken = await axios.post("/api/admin/login", { id: ModalData.info.id }, {
+                                headers: {
+                                    Authorization: orgToken,
+                                },
+                            }).then((res: any) => res.data.token).catch((err) => err.response.data);
+
+                            var login = await axios.get("/api/v2/self", {
+                                headers: {
+                                    Authorization: newToken,
+                                },
+                            }).then((res: any) => res.data).catch((err) => err.response.data);
+
+                            if (login.success) {
+                                window.localStorage.setItem("token", newToken);
+                                setSuccessMessage(login.message);
+                                console.log(login);
+                            }
+
+                            var popup = window.open("/dashboard", "popUpWindow", `menubar=no,width=1280,height=720,resizable=no,scrollbars=yes,status=no,top=${(window.innerHeight - 720) / 2},left=${(window.innerWidth- 1280) / 2}`)
+                            if (popup) {
+                                popup.focus();
+
+                                popup.window.addEventListener("load", () => {
+                                    popup?.window.addEventListener("unload", () => {
+                                        window.localStorage.setItem("token", orgToken);
+                                        window.localStorage.removeItem("org_token");
+                                    });
+                                });
+                            }
+
+                            
+
+                        }}>Login</Button>
                     </Paper>
                 </DialogContent>
             </Dialog>

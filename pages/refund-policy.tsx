@@ -27,8 +27,10 @@ export default function Terms() {
                         </Typography>
 
                         <Typography variant="body1" component="div" sx={{ textAlign: "left", wordBreak: "break-word", mb: "4rem" }}>
-                            <Typography variant="h6" component="h2" sx={{ mt: "1rem", mb: "1rem" }} id="agreement-to-terms">REFUNDS</Typography>
+                            <Typography variant="h6" component="h2" sx={{ mt: "1rem", mb: "1rem" }} id="refunds">REFUNDS</Typography>
                             <br/>You are eligible for a full refund within 7 days from the date of purchase. After 7 days have passed, we can no longer offer you a refund. 
+                            <Typography variant="h6" component="h2" sx={{ mt: "1rem", mb: "1rem" }} id="gifts">GIFTS</Typography>
+                            <br/>Gifts purchased on RestoreCord are non-refundable.
                         </Typography>
                     </Box>
                 </Container>

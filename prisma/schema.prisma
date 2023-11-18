@@ -308,6 +308,8 @@ model payments {
     type           String
     subscriptionId String   @unique @db.VarChar(500)
     payment_status String
+    gift           Boolean  @default(false)
+    gifterId       Int?
     createdAt      DateTime @default(now())
     account        accounts @relation(fields: [accountId], references: [id])
 
