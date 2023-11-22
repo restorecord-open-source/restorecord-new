@@ -31,6 +31,7 @@ model accounts {
     sessions       sessions[]
     emails         emails[]
     payments       payments[]
+    gifter         payments[]   @relation("gifter")
 
     @@index([username])
     @@index([createdAt])
@@ -312,8 +313,11 @@ model payments {
     gifterId       Int?
     createdAt      DateTime @default(now())
     account        accounts @relation(fields: [accountId], references: [id])
+    gifter         accounts? @relation("gifter", fields: [gifterId], references: [id])
 
     @@index([accountId])
+    @@index([gifterId])
+    @@index([subscriptionId])
 }
 
 enum Theme {
