@@ -92,7 +92,7 @@ export const countries: { code: string; name: string }[] = [
     { code: "CU", name: "Cuba" },
     { code: "CW", name: "Curaçao" },
     { code: "CY", name: "Cyprus" },
-    { code: "CZ", name: "Czech Republic" },
+    { code: "CZ", name: "Czechia" },
     { code: "DK", name: "Denmark" },
     { code: "DJ", name: "Djibouti" },
     { code: "DM", name: "Dominica" },
