@@ -241,7 +241,7 @@ export default function Home() {
                                             <Avatar sx={{ width: 80, height: 80, background: theme.palette.primary.main, color: theme.palette.getContrastText(theme.palette.primary.main), fontSize: 24, fontWeight: 900 }}>I</Avatar>
                                             <Box sx={{ marginLeft: "20px" }}>
                                                 <Typography sx={{ fontStyle: "normal", fontWeight: 700, fontSize: 24, color: theme.palette.text.primary, marginTop: 2 }}>
-                                                    Imran A.
+                                                    Imran
                                                 </Typography>
                                             </Box>
                                         </Box>
@@ -279,7 +279,7 @@ export default function Home() {
                                             <Avatar sx={{ width: 80, height: 80, background: theme.palette.primary.main, color: theme.palette.getContrastText(theme.palette.primary.main), fontSize: 24, fontWeight: 900 }}>MZ</Avatar>
                                             <Box sx={{ marginLeft: "20px" }}>
                                                 <Typography sx={{ fontStyle: "normal", fontWeight: 700, fontSize: 24, color: theme.palette.text.primary, marginTop: 2 }}>
-                                                    Maik Z.
+                                                    Maik
                                                 </Typography>
                                             </Box>
                                         </Box>
@@ -297,7 +297,7 @@ export default function Home() {
                                             <Avatar sx={{ width: 80, height: 80, background: theme.palette.primary.main, color: theme.palette.getContrastText(theme.palette.primary.main), fontSize: 24, fontWeight: 900 }}>DM</Avatar>
                                             <Box sx={{ marginLeft: "20px" }}>
                                                 <Typography sx={{ fontStyle: "normal", fontWeight: 700, fontSize: 24, color: theme.palette.text.primary, marginTop: 2 }}>
-                                                    Daniel M.
+                                                    Daniel
                                                 </Typography>
                                             </Box>
                                         </Box>

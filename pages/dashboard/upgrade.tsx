@@ -642,7 +642,7 @@ export default function Upgrade() {
                                         {(tier.name.toLowerCase() === user.role) ? "Current Plan" : (tier.id > SubscriptionList.findIndex((plan: any) => plan.name.toLowerCase() === user.role.toLowerCase()) && payments.payments.length > 0) ? "Upgrade" : (tier.id < SubscriptionList.findIndex((plan: any) => plan.name.toLowerCase() === user.role.toLowerCase())) ? "Downgrade" : "Try 7 days for free"}
                                     </LoadingButton>
 
-                                    <IconButton aria-label="info" disabled={tier.name.toLowerCase() === "free"} onClick={() => {
+                                    {/* <IconButton aria-label="info" disabled={tier.name.toLowerCase() === "free"} onClick={() => {
                                         setSelectedPlan({
                                             id: tier.name.toLowerCase(),
                                             name: tier.name,
@@ -653,7 +653,7 @@ export default function Upgrade() {
                                         setGiftWindow({ open: true, user: "", months: 1 });
                                     }}>
                                         <RedeemIcon />
-                                    </IconButton>
+                                    </IconButton> */}
                                 </Stack>
                             </CardActions>
                         </Paper>
