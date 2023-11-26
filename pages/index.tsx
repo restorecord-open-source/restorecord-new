@@ -79,14 +79,14 @@ export default function Home() {
                         {/* show text on the top with a small description and 2 button, Get Started and Learn More then an dashboard image to the bottom "https://cdn.restorecord.com/static/images/homepage/dashboard_mu.png" */}
                         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column" }} data-aos="zoom-in-down">
                             <Typography data-aos="fade-down" variant="h1" component="h1" sx={{ fontWeight: 900, textAlign: "center", fontSize: { xs: "1.5rem", md: "2.5rem", lg: "3.5rem" },  padding: 0, paddingLeft: { xs: "4px", sm: "40px" }, paddingRight: { xs: "4px", sm: "40px" } }}>
-                                The <span style={{ color: theme.palette.secondary.main }} ref={typingElement}></span> way to<br/>backup your Discord servers.
+                                The <span style={{ color: "#6c63ff" }} ref={typingElement}></span> way to<br/>backup your Discord servers.
                             </Typography>
 
                             <Typography data-aos="fade-down" color={theme.palette.grey[200]} variant="h5" component="h2" sx={{ fontWeight: 300, textAlign: "center", padding: 4, paddingLeft: { xs: "2rem", sm: "4rem", md: "12rem",  }, paddingRight: { xs: "2rem", sm: "4rem", md: "12rem" } }}>
                                 Backup your Discord server with RestoreCord
                             </Typography>
 
-                            <Badge data-aos="fade-down" badgeContent={<>FOR FREE</>} color="success" sx={{ boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)", [`& .MuiBadge-badge`]: { backgroundColor: "rgb(52, 168, 83)", color: "#fff" } }}>
+                            <Badge data-aos="fade-down" badgeContent={<>FOR FREE</>} color="success" sx={{ boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)", [`& .MuiBadge-badge`]: { backgroundColor: "rgb(52, 168, 83)", color: "#2b2b2b" } }}>
                                 <Button variant="contained" color="primary" href="/login" size="large">
                                     Get Started
                                 </Button>

@@ -208,7 +208,7 @@ export default function Upgrade() {
 
                                 {renderBillingCycleSelect()}
 
-                                <Button variant="contained" color="primary" fullWidth onClick={() => {
+                                <LoadingButton variant="contained" color="primary" fullWidth event={() => {
                                     axios.post("/api/coinbase/checkout", {
                                         plan: selectedPlan.id,
                                         id: user.id,
@@ -222,7 +222,7 @@ export default function Upgrade() {
                                     }).catch((err) => {
                                         console.error(err);
                                     });
-                                }}>Go to checkout</Button>
+                                }}>Go to checkout</LoadingButton>
                             </Grid>
                             <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center", fontSize: "0.75rem", mt: 1 }}>
                                 As soon as you pay you agree to our <MuiLink href="/terms">Terms of Service</MuiLink>, <MuiLink href="/privacy">Privacy Policy</MuiLink> and <MuiLink href="/refund-policy">Refund Policy</MuiLink>.
@@ -235,7 +235,7 @@ export default function Upgrade() {
                             <Grid container sx={{ mt: 2, mb: 2 }}>
                                 {renderBillingCycleSelect(payments.payments.length === 0)}
 
-                                <Button variant="contained" color="primary" fullWidth onClick={() => {
+                                <LoadingButton variant="contained" color="primary" fullWidth event={() => {
                                     axios.post("/api/stripe/checkout", {
                                         plan: selectedPlan.id,
                                         id: user.id,
@@ -249,7 +249,7 @@ export default function Upgrade() {
                                     }).catch((err) => {
                                         console.error(err);
                                     });
-                                }}>Go to checkout</Button>
+                                }}>Go to checkout</LoadingButton>
                             </Grid>
                             <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center", fontSize: "0.75rem", mt: 1 }}>
                                 As soon as you subscribe you agree to our <MuiLink href="/terms">Terms of Service</MuiLink>, <MuiLink href="/privacy">Privacy Policy</MuiLink> and <MuiLink href="/refund-policy">Refund Policy</MuiLink>. <br/>Your card will be charged ${selectedPlan.id.split("_")[1] === "monthly" ? selectedPlan.priceMonthly : selectedPlan.price} every {selectedPlan.id.split("_")[1] === "monthly" ? "month" : "year"} {payments.payments.length === 0 && "after the 7 day free trial."}
@@ -356,7 +356,7 @@ export default function Upgrade() {
 
                     <Grid container spacing={2} sx={{ mt: 2, mb: 2 }}>
                         {renderBillingCycleSelect()}
-                        <Button variant="contained" color="primary" fullWidth onClick={() => {
+                        <LoadingButton variant="contained" color="primary" fullWidth event={() => {
                             axios.post("/api/stripe/update", {
                                 plan: selectedPlan.id,
                             }, {
@@ -374,7 +374,7 @@ export default function Upgrade() {
                                 
                                 console.error(err);
                             });
-                        }}>Go to checkout</Button>
+                        }}>Go to checkout</LoadingButton>
                     </Grid>
 
                     <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center", fontSize: "0.75rem", mt: 1 }}>
@@ -484,7 +484,7 @@ export default function Upgrade() {
                                 onChange={(e) => setGiftWindow({ ...giftWindow, user: e.target.value })}
                             />
                             {paymentMethod === "coinbase" && (
-                                <Button variant="contained" color="primary" fullWidth sx={{ mt: 2 }} disabled={giftWindow.user.length === 0} onClick={() => {
+                                <LoadingButton variant="contained" color="primary" fullWidth sx={{ mt: 2 }} disabled={giftWindow.user.length === 0} event={() => {
                                     axios.post("/api/coinbase/gift", {
                                         plan: selectedPlan.id,
                                         id: user.id,
@@ -505,7 +505,7 @@ export default function Upgrade() {
                                         
                                         console.error(err);
                                     });
-                                }}>Go to checkout</Button>
+                                }}>Go to checkout</LoadingButton>
                             )}
                             {paymentMethod === "stripe" && (
                                 <LoadingButton variant="contained" color="primary" fullWidth sx={{ mt: 2 }} disabled={giftWindow.user.length === 0} event={() => {
