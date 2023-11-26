@@ -72,7 +72,7 @@ export default function NavBar({ ...props }: any) {
     return (
         <>
             <Box sx={{ display: "flex" }}>
-                <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, background: "#09090d", borderBottomLeftRadius: "0rem", borderBottomRightRadius: "0rem", boxShadow: "none", borderBottom: "1px solid rgb(38, 38, 42)" }}>
+                <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, background: "#09090d", boxShadow: "none", borderBottom: "1px solid rgb(38, 38, 42)" }}>
                     <Toolbar>
                         {isMobile && (
                             <IconButton onClick={() => setOpenDrawer(!openDrawer)} edge="start" sx={{ marginRight: (theme) => theme.spacing(2) }} color="inherit" aria-label="menu">
