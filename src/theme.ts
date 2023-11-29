@@ -173,6 +173,30 @@ const theme = createTheme({
                     "& .MuiAlert-icon": {
                         borderRadius: 14,
                     },
+                    ...(ownerState?.severity === "primary" && {
+                        border: `1px solid ${theme.palette.primary.main}`,
+                    }),
+                    ...(ownerState?.severity === "secondary" && {
+                        border: `1px solid ${theme.palette.secondary.main}`,
+                    }),
+                    ...(ownerState?.severity === "info" && {
+                        border: `1px solid ${theme.palette.info.main}`,
+                    }),
+                    ...(ownerState?.severity === "default" && {
+                        border: `1px solid ${theme.palette.text.primary}`,
+                    }),
+                    ...(ownerState?.severity === "error" && {
+                        border: `1px solid ${theme.palette.error.main}`,
+                    }),
+                    ...(ownerState?.severity === "warning" && {
+                        border: `1px solid ${theme.palette.warning.main}`,
+                    }),
+                    ...(ownerState?.severity === "success" && {
+                        border: `1px solid ${theme.palette.success.main}`,
+                    }),
+                    ...(ownerState?.severity === "yellow" && {
+                        border: `1px solid ${theme.palette.yellow.main}`,
+                    }),
                 }),
             },
         },

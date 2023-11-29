@@ -125,7 +125,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             if (status === "trialing") {
                 const payment = await prisma.payments.findUnique({
                     where: {
-                        subscriptionId: subscription.id
+                        subscriptionId: subscription.id,
+                        accountId: Number(subscription.metadata.account_id) as number
                     }
                 });
 
@@ -229,7 +230,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 const payment = await prisma.payments.findUnique({
                     where: {
-                        subscriptionId: subscription.id
+                        subscriptionId: subscription.id ,
+                        accountId: Number(subscription.metadata.account_id) as number 
                     }
                 });
 

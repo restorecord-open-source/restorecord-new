@@ -55,7 +55,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                 email: acc.email,
                                 role: acc.role,
                                 expiry: acc.expiry,
-                                twoFactor: acc.twoFactor,
+                                twoFactor: Boolean(acc.twoFactor) as boolean,
                                 admin: acc.admin,
                                 lastIp: acc.lastIp,
                                 createdAt: acc.createdAt,

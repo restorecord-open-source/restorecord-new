@@ -100,8 +100,17 @@ export default function Verify({ server, status, err, errStack, captcha }: any) 
 
         return (
             <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
-                <AlertTitle>Error{err !== undefined ? `: ${err}` : ""}</AlertTitle>
-                {errorMessage}
+                {(err !== undefined && err === "403") ? (
+                    <>
+                        <AlertTitle>Error{err !== undefined ? `: ${err}` : ""}</AlertTitle>
+                        {errorMessage} <Link href={`https://restr.co/perms`}>Click here</Link> to fix this issue.
+                    </>
+                ) : (
+                    <>
+                        <AlertTitle>Error{err !== undefined ? `: ${err}` : ""}</AlertTitle>
+                        {errorMessage}
+                    </>
+                )}
             </Alert>
         );
     }

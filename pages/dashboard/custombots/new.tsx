@@ -34,6 +34,8 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import TextField from "@mui/material/TextField";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
 
 const steps = [
     "Create a Discord Bot", 
@@ -54,6 +56,8 @@ export default function CustomBots() {
     const [botToken, setBotToken] = useState<string | null>(null);
     const [botSecret, setBotSecret] = useState<string | null>(null);
     const [botInfo, setBotInfo] = useState<any>(null); // [id, username, avatar, discriminator
+
+    const [securedBot, setSecuredBot] = useState(false);
 
     const [response, setResponse] = useState({
         loading: false,
@@ -184,9 +188,28 @@ export default function CustomBots() {
             return (
                 <>
                     <Typography variant="h5" sx={{ fontWeight: "500" }}>Create a Discord Bot</Typography>
-                    <Typography variant="body1" sx={{ mb: 2, color: "text.secondary" }}>Head over to the <Link href="https://discord.com/developers/applications" target="_blank">Discord Developer Portal</Link> and create a new application, then create a bot for that application.</Typography>
+                    <Typography variant="body1" sx={{ color: "text.secondary" }}>Head over to the <Link href="https://discord.com/developers/applications" target="_blank">Discord Developer Portal</Link>, <b>Login to your Discord alt account</b> and create a new application, then create a bot for that application.</Typography>
                     
                     <img src="https://mintlify.s3-us-west-1.amazonaws.com/restorecord/images/setup_create_bot.png" alt="Create a bot" style={{ width: isMobile ? "100%" : "45%", borderRadius: "1rem", display: "flex", margin: "auto" }} />
+
+
+                    <Alert severity="warning" sx={{ mt: 2 }}>
+                        <Typography variant="body1" sx={{ color: "text.secondary" }}>It is recommended to create a new Discord account for your bot. This is in case your Main account gets banned, your bot will still be able to run.</Typography>
+                        <Link href="https://restr.co/secure" target="_blank" rel="noopener noreferrer">
+                            {!isMobile ?
+                                <Alert severity="info" sx={{ mt: 2, cursor: "pointer", "&:hover": { borderColor: "#ffffff" }, transition: "0.2s" }}>
+                                    <Typography variant="body1" sx={{ color: "text.primary" }}>Secure your Bot: A step-by-step guide</Typography>
+                                    {!isMobile && <Typography variant="body1" sx={{ color: "text.secondary" }}>Follow the instructions given to minimize the risk of your bot being disabled.</Typography>}
+                                </Alert>
+                                : 
+                                <Alert severity="info" sx={{ mt: 2, cursor: "pointer", "&:hover": { borderColor: "#ffffff" }, transition: "0.2s" }} icon={null}>
+                                    <Typography variant="body1" sx={{ color: "text.primary" }}>Secure your Bot: A step-by-step guide</Typography>
+                                    {!isMobile && <Typography variant="body1" sx={{ color: "text.secondary" }}>Follow the instructions given to minimize the risk of your bot being disabled.</Typography>}
+                                </Alert>
+                            }
+                        </Link>
+                        <FormControlLabel control={<Checkbox checked={securedBot} onChange={(event: any) => setSecuredBot(event.target.checked)} />} label="I have secured my bot" color="#ffffff" sx={{ mt: 2 }} />
+                    </Alert>
                 </>
             )
             break;
@@ -303,14 +326,7 @@ export default function CustomBots() {
                                             {renderStep(activeStep)}
                                         </Box>
 
-                                        <Button fullWidth variant="contained" 
-                                            disabled={activeStep === 1 && (!botToken || !botSecret) || activeStep === 3 && (!botInfo || !botInfo.username)}
-                                            onClick={() => {
-                                                const newCompleted = completedSteps;
-                                                newCompleted[activeStep] = true;
-                                                setCompletedSteps(newCompleted);
-                                                handleNext();
-                                            }} sx={{ mt: 2 }}>next</Button>
+                                        <Button fullWidth variant="contained"  disabled={activeStep === 0 && !securedBot || activeStep === 1 && (!botToken || !botSecret) || activeStep === 3 && (!botInfo || !botInfo.username)} onClick={() => { const newCompleted = completedSteps; newCompleted[activeStep] = true; setCompletedSteps(newCompleted); handleNext(); }} sx={{ mt: 2 }}>next</Button>
 
                                         {/* <Button fullWidth variant="outlined" disabled={activeStep === 0} onClick={handleBack} sx={{ mt: 2 }}>back</Button> */}
                                     </CardContent>

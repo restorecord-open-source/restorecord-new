@@ -90,7 +90,7 @@ export default function Server() {
             const interval = setInterval(async () => {
                 const { data } = await axios.get(`/api/v2/self/servers/${guildId}/status`, { headers: { Authorization: (process.browser && window.localStorage.getItem("token")) ?? token } });
                 setMigrationStatus(data.migration);
-            }, 500);
+            }, 2500);
 
             return () => clearInterval(interval);
         }

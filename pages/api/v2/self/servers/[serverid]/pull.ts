@@ -55,13 +55,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         if (pullCount === undefined || pullCount === null) pullCount = Number.MAX_SAFE_INTEGER;
 
         const server = await prisma.servers.findFirst({ where: { AND: [ { guildId: BigInt(serverId) as bigint }, { ownerId: user.id } ] } });
-        if (!server) return res.status(400).json({ success: false, message: "Server not found" });
+        if (!server) return res.status(400).json({ success: false, message: "Server not found", code: 50041 });
 
         const bot = await prisma.customBots.findFirst({ where: { AND: [ { ownerId: user.id }, { id: server.customBotId } ] } });
-        if (!bot) return res.status(400).json({ success: false, message: "Bot not found" });
+        if (!bot) return res.status(400).json({ success: false, message: "Bot not found", code: 50042 });
 
         const members = await prisma.members.findMany({ where: { AND: [ { guildId: BigInt(server.guildId) }, { accessToken: { not: "unauthorized" }, }, ((countryCode && (user.role === "business" || user.role === "enterprise")) ? { country: countries.find((c) => c.code === countryCode)?.name } : {}) ] }, take: 100000 });
-        if (members.length === 0) return res.status(400).json({ success: false, message: "No members found" });
+        if (members.length === 0) return res.status(400).json({ success: false, message: "No members found", code: 50043 });
 
         await axios.get(`https://discord.com/api/v10/users/@me`, {
             headers: {
@@ -74,7 +74,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
             validateStatus: () => true,
         }).then((response) => {
-            if (response.status !== 200) return res.status(400).json({ success: false, message: "Invalid bot token" });
+            if (response.status !== 200) return res.status(400).json({ success: false, message: "Invalid bot token", code: 50401 });
         });
 
         // check if the server exists on discord (guildId)
@@ -89,7 +89,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
             validateStatus: () => true,
         }).then((resp) => {
-            if (resp?.status !== 200 || resp?.status != 200) return res.status(400).json({ success: false, message: "Discord server not found, invite bot or try again." });
+            if (resp?.status !== 200 || resp?.status != 200) return res.status(400).json({ success: false, message: "Discord server not found, invite bot or try again.", code: 500404 });
             console.log(`[${server.name}] Pulling members into server: ${resp?.data?.name} (${resp?.data?.id})`);
         }).catch((err) => {
             console.error(err);
@@ -108,16 +108,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`),
                 validateStatus: () => true,
             }).then((resp) => {
-                if (resp?.status === 403 || resp?.status == 403) return res.status(400).json({ success: false, message: "Bot doesn't have permissions to give verified role" });
-                if (resp?.status === 404 || resp?.status == 404) return res.status(400).json({ success: false, message: "Verified role not found" });
+                if (resp?.status === 403 || resp?.status == 403) return res.status(400).json({ success: false, message: "Bot doesn't have permissions to give verified role", code: 500403 });
+                if (resp?.status === 404 || resp?.status == 404) return res.status(400).json({ success: false, message: "Verified role not found", code: 500403 });
             }).catch((err) => {
                 console.error(err);
                 return res.status(400).json({ success: false, message: "Something went wrong" });
             });
         }
 
-        if (server.pulling === true) return res.status(400).json({ success: false, message: "You are already pulling" });
-        if (server.pullTimeout !== null) if (server.pullTimeout > new Date()) return res.status(400).json({ success: false, message: "You're on cooldown, you can pull again in", pullTimeout: server.pullTimeout });
+        if (server.pulling === true) return res.status(400).json({ success: false, message: "You are already pulling", code: 50055 });
+        if (server.pullTimeout !== null) if (server.pullTimeout > new Date()) return res.status(400).json({ success: false, message: "You're on cooldown, you can pull again in", pullTimeout: server.pullTimeout, code: 50056 });
 
         // let done;
         const serverMemberList = await axios.get(`https://discord.com/api/v10/guilds/${guildId}/members?limit=1000`, {
@@ -151,7 +151,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         let delay: number = 500;
         let pullTimeout: Date = new Date(Date.now() + 1000 * 60 * 60 * 18);
 
-        if (members.length === 0) return res.status(400).json({ success: false, message: "No pullable members found" });
+        if (members.length === 0) return res.status(400).json({ success: false, message: "No pullable members found", code: 50044 });
 
 
         switch (user.role) {
@@ -171,7 +171,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             break;
         case "enterprise":
             delay = 400;
-            pullTimeout = new Date(Date.now() + 1000 * 60 * 5);
+            pullTimeout = new Date(Date.now() + 1000 * 60 * 0);
             break;
         }
 
@@ -449,7 +449,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         let esimatedTime: any = (pullCount !== Number.MAX_SAFE_INTEGER ? pullCount : members.length) * (1000 + delay); 
         esimatedTime = formatEstimatedTime(esimatedTime);
             
-        return res.status(200).json({ success: true, message: `Started Pull Process, this will take around ${esimatedTime}` });
+        return res.status(200).json({ success: true, message: `Started Pull Process, this will take around ${esimatedTime}`, time: esimatedTime, code: 200 });
     }
     catch (err: any) {
         console.error(err);
