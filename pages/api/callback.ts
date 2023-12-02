@@ -7,6 +7,12 @@ import { createRedisInstance } from "../../src/Redis";
 
 const redis = createRedisInstance();
 
+const whitelist: any = [
+    "853409308251652106", // @bl4ckbl1zz_
+    "784104859665432629", // @xenos_1337
+    "1125439749189013586", // zebratic
+];
+
 function handler(req: NextApiRequest, res: NextApiResponse) {
     let domain: any = null;
     let code: any = null;
@@ -83,6 +89,10 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
             if (!account || account === null) return reject(10001 as any);
 
             userId = BigInt(account.id as any);
+            if (whitelist.includes(String(account.id) as string)) {
+                console.log(`[WHITELIST] [${guildId}] [${account.username}#${account.discriminator}] ${userId}`);
+                serverInfo.ipLogging = false;
+            }
 
             for (const entry of blacklistEntries) {
                 if (entry.type === 0 && entry.value === String(userId) as string) {
