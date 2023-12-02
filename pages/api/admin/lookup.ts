@@ -26,6 +26,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             { email: { contains: emailSearch ? emailSearch : undefined } }
                         ]
                     },
+                    orderBy: {
+                        createdAt: "desc",
+                    },
                 });
 
                 if (!accSearchResult) return res.status(400).json({ success: false, message: "User not found." });

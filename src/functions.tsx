@@ -3,6 +3,7 @@ import { createHash } from "crypto";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import axios from "axios";
 import crypto from "crypto";
+import { useEffect, useState } from "react";
 
 export function stringToColor(string: string): string {
     let hash = 0;
@@ -13,7 +14,7 @@ export function stringToColor(string: string): string {
         hash = string.charCodeAt(i) + ((hash << 5) - hash);
     }
   
-    let color = '#';
+    let color = "#";
   
     for (i = 0; i < 3; i += 1) {
         const value = (hash >> (i * 8)) & 0xff;
@@ -30,7 +31,7 @@ export function stringAvatar(name: string, props: { sx: SxProps }) {
             bgcolor: stringToColor(name),
             ...props.sx
         },
-        children: `${name.split(' ')[0][0]}`,
+        children: `${name.split(" ")[0][0]}`,
     };
 }
 
@@ -40,14 +41,14 @@ export function generateQRUrl(secret: string, username: string, issuer: string =
 }
 
 export async function isBreached(pw: string) {
-    const hash = createHash('sha1').update(pw).digest('hex').toUpperCase();
+    const hash = createHash("sha1").update(pw).digest("hex").toUpperCase();
     const prefix = hash.slice(0, 5);
     const suffix = hash.slice(5);
 
     try {
         const response = await axios.get(`https://api.pwnedpasswords.com/range/${prefix}`);
         const data = response.data.toString();
-        const lines = data.split('\n');
+        const lines = data.split("\n");
         for (const line of lines) {
             if (line.startsWith(suffix)) {
                 return true;

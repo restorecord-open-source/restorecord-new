@@ -33,6 +33,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             ]),
                         ],
                     },
+                    orderBy: {
+                        createdAt: "desc",
+                    },
                 });
                 const endTime = performance.now();
 

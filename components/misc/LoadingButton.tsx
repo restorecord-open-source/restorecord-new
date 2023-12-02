@@ -12,6 +12,7 @@ interface LoadingButtonProps {
     children: React.ReactNode;
     disabled?: boolean;
     fullWidth?: boolean;
+    type?: "button" | "submit" | "reset";
 }
 
 export default function LoadingButton(props: LoadingButtonProps) {
@@ -26,6 +27,7 @@ export default function LoadingButton(props: LoadingButtonProps) {
             disabled={loading || props.disabled}
             fullWidth={props.fullWidth}
             ref={ref}
+            type={props.type}
             onClick={async () => {
                 setLoading(true);
                 await event();

@@ -218,9 +218,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             var planFull = priceIds[subscription.items.data[0].price.id].plan;
             var plan = planFull.replace("_monthly", "");
 
-            if (status !== "incomplete" && status !== "incomplete_expired") {
+            if (status !== "incomplete" && status !== "incomplete_expired" && status !== "draft") {
                 let account;
                 if (subscription.metadata.account_id) account = await prisma.accounts.findUnique({ where: { id: Number(subscription.metadata.account_id) as number } });
+                else {
+                    console.error(`[STRIPE] Account not found for subscription ${subscription.id}`);
+                    return res.status(200).json({ success: false, message: "Account not found for subscription." });
+                }
 
                 await postWebhook(subscription, account, status);
             }
@@ -307,7 +311,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         return res.status(200).json({ success: true });
     } catch (err: any) {
-        console.error(err);
-        return res.status(200).json({ success: false, message: "Something went wrong" });
+        console.error(`[STRIPE] ⚠️ ${err}`);
+        return res.status(200).json({ success: false, message: "Something went wrong", error: err });
     }
 }

@@ -19,8 +19,8 @@ async function buffer(readable: Readable) {
     return Buffer.concat(chunks);
 }
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-    return new Promise(async (resolve, reject) => {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+    try {
         let CBEvent: CBEvent;
 
         const rawBody = await buffer(req).then((buf) => buf.toString());
@@ -238,6 +238,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         }
 
         return res.status(200).json({ success: true });
-    });
+    } catch (err) {
+        console.error(`[COINBASE] ⚠️ ${err}`);
+        return res.status(500).json({ success: false });
+    }
 }
 
