@@ -155,11 +155,7 @@ export default function AdminServer() {
                         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
                     },
                 }).then((res: any) => {
-                    console.log(res.data.user);
                     setServers(res.data.servers);
-
-                    // rows = res.data.rows;
-                    // time = res.data.time;
                     setModalData({ ...ModalData, query: { rows: res.data.rows, time: res.data.time } });
                 }).catch((err) => {
                     console.error(err);

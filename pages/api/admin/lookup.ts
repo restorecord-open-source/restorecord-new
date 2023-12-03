@@ -17,6 +17,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
                 if ((search === undefined || search === null || search === "") && (fullId == undefined || fullId == null || fullId == "")) return res.status(400).json({ success: false, message: "No search query provided." });
 
+                const startTime = performance.now();
                 const accSearchResult = await prisma.accounts.findMany({
                     where: {
                         AND: [
@@ -30,10 +31,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         createdAt: "desc",
                     },
                 });
+                const endTime = performance.now();
 
                 if (!accSearchResult) return res.status(400).json({ success: false, message: "User not found." });
 
                 return res.status(200).json({ success: true,
+                    rows: accSearchResult.length,
+                    time: ((endTime - startTime) / 1000).toFixed(3),
                     users: accSearchResult.map((acc: accounts) => {
                         if (acc.id === fullId) {
                             return {

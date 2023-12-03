@@ -94,7 +94,7 @@ export default function Admin() {
                                 <Stack direction={{ xs: "column", sm: "row" }} justifyContent="flex-start" alignItems="center" spacing={{ xs: 1, sm: 2 }}>
                                     <Link href="/dashboard/admin/users"><Button fullWidth={true} variant="contained" href="/dashboard/admin/user"><GroupIcon sx={{ mr: 1 }} />User</Button></Link>
                                     <Link href="/dashboard/admin/servers"><Button fullWidth={true} variant="contained" href="/dashboard/admin/servers"><StorageIcon sx={{ mr: 1 }} />Servers</Button></Link>
-                                    <Link href="/dashboard/admin/bots"><Button fullWidth={true} variant="contained" href="/dashboard/admin/bots"><SmartToyIcon sx={{ mr: 1 }} />Bots</Button></Link>
+                                    <Link href="/dashboard/admin/members"><Button fullWidth={true} variant="contained" href="/dashboard/admin/members"><SmartToyIcon sx={{ mr: 1 }} />Members</Button></Link>
                                     <Link href="/dashboard/admin/stats"><Button fullWidth={true} variant="contained" href="/dashboard/admin/stats"><TimelineIcon sx={{ mr: 1 }} />Graphs</Button></Link>
                                 </Stack>
                             </CardContent>

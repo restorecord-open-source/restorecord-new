@@ -1,4 +1,4 @@
-import { SxProps } from "@mui/material";
+import { Avatar, SxProps } from "@mui/material";
 import { createHash } from "crypto";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import axios from "axios";
@@ -87,6 +87,89 @@ export function verifyFingerprint(fingerprint: string): boolean {
     if (signature !== alphanumericExpectedSignature) return false;
 
     return true;
+}
+
+
+const avatarCache: Record<string, string> = {};
+
+export function AvatarFallback({ url, fallback, username, sx, ...props }: { url: string, fallback: string, username: string, sx: SxProps | null | undefined, props?: any | null | undefined }) {
+    const [avatarUrl, setAvatarUrl] = useState<string>("");
+    const [imageLoaded, setImageLoaded] = useState(false);
+
+    useEffect(() => {
+        const fetchAvatar = async () => {
+            if (avatarCache[url]) {
+                setAvatarUrl(avatarCache[url]);
+                setImageLoaded(true);
+            } else {
+                try {
+                    await axios.get(url);
+                    setAvatarUrl(url);
+                    avatarCache[url] = url;
+                } catch {
+                    if (avatarCache[fallback]) {
+                        setAvatarUrl(avatarCache[fallback]);
+                        setImageLoaded(true);
+                    } else {
+                        try {
+                            await axios.get(fallback);
+                            setAvatarUrl(fallback);
+                            avatarCache[fallback] = fallback;
+                        } catch {
+                            setAvatarUrl(`https://ui-avatars.com/api/?background=${stringToColor(username)}&color=fff&name=${username}`);
+                        }
+                    }
+                }
+            }
+        };
+
+        if (!imageLoaded) {
+            fetchAvatar();
+        }
+    }, [url, fallback, username, imageLoaded]);
+
+    const handleImageLoad = () => {
+        setImageLoaded(true);
+    };
+
+    return (
+        <Avatar
+            alt={username}
+            src={avatarUrl}
+            sx={sx}
+            onLoad={handleImageLoad}
+            {...props}
+        >
+            {username[0]}
+        </Avatar>
+    );
+}
+
+export function IntlRelativeTime(time: number) {
+    const intlRelativeTimeFormat = new Intl.RelativeTimeFormat("en", { style: "long" });
+    const now = new Date(Date.now()).getTime();
+
+    const fixedTime = time - now;
+
+    if (time === null || time === undefined || isNaN(time) || time === 0) {
+        return null;
+    } else if ((fixedTime < 0 && fixedTime > -60000) || (fixedTime > 0 && fixedTime < 60000)) {
+        return "just now";
+    } else if ((fixedTime < 0 && fixedTime > -3600000) || (fixedTime > 0 && fixedTime < 3600000)) {
+        return intlRelativeTimeFormat.format(Math.round(fixedTime / 60000), "minutes");
+    } else if ((fixedTime < 0 && fixedTime > -86400000) || (fixedTime > 0 && fixedTime < 86400000)) {
+        return intlRelativeTimeFormat.format(Math.round(fixedTime / 3600000), "hours");
+    } else if ((fixedTime < 0 && fixedTime > -604800000) || (fixedTime > 0 && fixedTime < 604800000)) {
+        return intlRelativeTimeFormat.format(Math.round(fixedTime / 86400000), "days");
+    } else if ((fixedTime < 0 && fixedTime > -2629800000) || (fixedTime > 0 && fixedTime < 2629800000)) {
+        return intlRelativeTimeFormat.format(Math.round(fixedTime / 604800000), "weeks");
+    } else if ((fixedTime < 0 && fixedTime > -31557600000) || (fixedTime > 0 && fixedTime < 31557600000)) {
+        return intlRelativeTimeFormat.format(Math.round(fixedTime / 2629800000), "months");
+    } else if ((fixedTime < 0 && fixedTime > -3155760000000) || (fixedTime > 0 && fixedTime < 3155760000000)) {
+        return intlRelativeTimeFormat.format(Math.round(fixedTime / 31557600000), "years");
+    } else {
+        return "a long time";
+    }
 }
 
 export function formatEstimatedTime(estimatedTime: any) {
