@@ -1,7 +1,22 @@
-import { accounts, members } from "@prisma/client";
+import { accounts } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "../../../src/db";
 import withAuthentication from "../../../src/withAuthentication";
+
+type members = { 
+    isp: string | null; 
+    id: number; 
+    userId: bigint; 
+    guildId: bigint; 
+    ip: string | null; 
+    username: string; 
+    avatar: string; 
+    state: string | null; 
+    city: string | null; 
+    country: string | null; 
+    vpn: boolean; 
+    createdAt: Date;
+}
 
 async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts) {
     return new Promise(async resolve => {
@@ -20,13 +35,24 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
                 const startTime = performance.now();
                 let membersList = await prisma.members.findMany({
+                    select: {
+                        id: true,
+                        username: true,
+                        userId: true,
+                        guildId: true,
+                        avatar: true,
+                        ip: true,
+                        isp: true,
+                        state: true,
+                        city: true,
+                        country: true,
+                        vpn: true,
+                        createdAt: true
+                    },
                     where: {
                         OR: [
                             ...(fullId ? [{ id: parseInt(fullId) }] : []),
-                            ...(fullId ? [] : [
-                                { username: query ? { contains: query } : undefined },
-                                { userId: discordIdSearch ? discordIdSearch : undefined },
-                            ]),
+                            ...(discordIdSearch ? [{ userId: discordIdSearch }] : []),
                         ],
                     },
                     orderBy: {
@@ -37,10 +63,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 let uniqueMembers: members[] = [];
 
                 if (discordIdSearch) {
-                    // Show all members if discordIdSearch matches
                     uniqueMembers = membersList.filter(member => member.userId === discordIdSearch);
                 } else {
-                    // Show only one unique member for other cases
                     const uniqueUserIds = Array.from(new Set(membersList.map(member => member.userId)));
                     uniqueMembers = uniqueUserIds.map(userId => membersList.find(member => member.userId === userId) as members);
                 }
@@ -48,7 +72,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 const endTime = performance.now();
 
                 if (!uniqueMembers || uniqueMembers.length === 0) {
-                    return res.status(400).json({ success: false, message: "User not found." });
+                    return res.status(400).json({ success: false, message: "Member not found, enter valid discord id (784104859665432629)" });
                 }
 
                 return res.status(200).json({ success: true,
