@@ -1,4 +1,14 @@
 {
     "cmake.configureOnOpen": true,
-    "prisma.fileWatcher": true
+    "prisma.fileWatcher": true,
+    "cSpell.words": [
+        "clickaway",
+        "cooldown",
+        "cybercriminals",
+        "didn",
+        "hitz",
+        "noti",
+        "otpauth",
+        "totp"
+    ]
 }

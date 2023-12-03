@@ -13,7 +13,7 @@ export const banReasons = [
     { 
         id: 2,
         reason: "ddos or account cracking",
-        message: "Your account was involved in fraud, account or creditcard cracking, and/or attempting to damage a computer network or machine." 
+        message: "Your account was involved in fraud, account or credit card cracking, and/or attempting to damage a computer network or machine." 
     },
     { 
         id: 3,

@@ -146,7 +146,7 @@ export default function AdminMember() {
                 });
             }}>
                 <Stack direction="column" spacing={2}>
-                    <TextField label="Search" variant="outlined" placeholder="Discod ID/Username" onChange={(e) => setSearchQuery(e.target.value)} />
+                    <TextField label="Search" variant="outlined" placeholder="Discord ID/Username" onChange={(e) => setSearchQuery(e.target.value)} />
                     <Button variant="contained" type="submit">Get member info</Button>
                     <Alert severity="info" sx={{ bgcolor: "#000", color: "#fff" }}>{ModalData.query.rows} members in {ModalData.query.time} sec</Alert>
                 </Stack>

@@ -36,8 +36,7 @@ export function stringAvatar(name: string, props: { sx: SxProps }) {
 }
 
 export function generateQRUrl(secret: string, username: string, issuer: string = "RestoreCord") {
-    const otpauth = `otpauth://totp/${username}?secret=${secret}&issuer=${issuer}`;
-    return otpauth;
+    return `otpauth://totp/${username}?secret=${secret}&issuer=${issuer}`;
 }
 
 export async function isBreached(pw: string) {

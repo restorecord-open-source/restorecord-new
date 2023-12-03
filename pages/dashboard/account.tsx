@@ -81,7 +81,7 @@ export default function AccountSettings() {
         return <CircularProgress sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
     }
 
-    function renderSuccessNotificaton() {
+    function renderSuccessNotification() {
         return (
 
             <Snackbar open={openS} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenS(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
@@ -92,7 +92,7 @@ export default function AccountSettings() {
         )
     }
 
-    function renderErrorNotificaton() {
+    function renderErrorNotification() {
         return (
             <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
                 <Alert elevation={6} variant="filled" severity="error">
@@ -102,7 +102,7 @@ export default function AccountSettings() {
         )
     }
 
-    function renderInfoNotificaton() {
+    function renderInfoNotification() {
         return (
             <Snackbar open={openI} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenI(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
                 <Alert elevation={6} variant="filled" severity="info">
@@ -264,9 +264,9 @@ export default function AccountSettings() {
                     <Toolbar />
                     <Container maxWidth="xl">
 
-                        {openS ? renderSuccessNotificaton() : null}
-                        {openE ? renderErrorNotificaton() : null}
-                        {openI ? renderInfoNotificaton() : null}
+                        {openS ? renderSuccessNotification() : null}
+                        {openE ? renderErrorNotification() : null}
+                        {openI ? renderInfoNotification() : null}
 
                         <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
                             <CardContent sx={{ pb: "1rem !important" }}>
