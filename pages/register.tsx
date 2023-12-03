@@ -5,52 +5,40 @@ import NavBar from "../components/landing/NavBar"
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 import Link from "next/link";
 import Head from "next/head";
-import MuiLink from "@mui/material/Link";
 import Footer from "../components/landing/Footer";
 
 import Container from "@mui/material/Container";
-import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
-import { LoadingButton } from "@mui/lab";
 import { makeXTrack } from "../src/getIPAddress";
+import Stack from "@mui/material/Stack";
+import LoadingButton from "../components/misc/LoadingButton";
 
 export default function Register() {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [password2, setPassword2] = useState("");
 
-    const [openS, setOpenS] = useState(false);
-    const [openE, setOpenE] = useState(false);
-    const [notiTextS, setNotiTextS] = useState("X");
-    const [notiTextE, setNotiTextE] = useState("X");
+    const [error, setError] = useState({ status: false, message: "" });
 
     const [token, setToken]: any = useState();
     const captchaRef: any = useRef();
     const router = useRouter();
     
-    const [loadingBtn, setLoadingBtn] = useState(false);
-    
 
     const onExpire = () => {
-        setNotiTextE("Captcha expired");
-        setOpenE(true);
-        setLoadingBtn(false);
+        setError({ status: true, message: "Captcha expired" });
     }
 
     const onError = (err: any) => {
-        setNotiTextE(err);
-        setOpenE(true);
-        setLoadingBtn(false);
+        setError({ status: true, message: err });
     }
 
     const onSubmit = (e: any) => {
         e.preventDefault();
-        setLoadingBtn(true);
         captchaRef.current.execute();
     }
 
@@ -65,6 +53,9 @@ export default function Register() {
             break;
         case "password":
             setPassword(value);
+            break;
+        case "password2":
+            setPassword2(value);
             break;
         default:
             break;
@@ -90,18 +81,15 @@ export default function Register() {
                 })
                     .then(res => res.json())
                     .then(res => {
-                        setLoadingBtn(false);
                         setToken(null);
                         if (res.success && res.token) {
-                            setNotiTextS("Account created");
-                            setOpenS(true);
+                            setError({ status: false, message: "Account created" });
 
                             localStorage.setItem("token", res.token);
                             router.push("/dashboard");
                         } 
                         else {
-                            setNotiTextE(res.message);
-                            setOpenE(true);
+                            setError({ status: true, message: res.message });
                         }
                     });
             }
@@ -124,32 +112,25 @@ export default function Register() {
 
                     <NavBar />
 
-                    <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
-                        <Alert elevation={6} variant="filled" severity="error">
-                            {notiTextE}
-                        </Alert>
-                    </Snackbar>
-
-                    <Snackbar open={openS} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenS(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
-                        <Alert elevation={6} variant="filled" severity="success">
-                            {notiTextS}
-                        </Alert>
-                    </Snackbar>
-
                     <Box sx={{ width: "100%", maxWidth: "500px", mx: "auto", mt: "3rem" }}>
                         <Typography variant="h4" component="h1" align="center" sx={{ fontWeight: "bold" }} gutterBottom>
                             Register an Account
                         </Typography>
 
-                        {/* if ref is in url show alert */}
+                        {error.message && (
+                            <Alert severity={error.status ? "error" : "success"} sx={{ mb: "1rem" }}>
+                                {error.message}
+                            </Alert>
+                        )}
+
                         {router.query.r && (
                             <Alert severity="info" sx={{ mb: "1rem" }}>
                                 You were invited by <strong>{router.query.r}</strong>, save up to 15% on your subscription!
                             </Alert>
                         )}
 
-                        <form onSubmit={onSubmit}>
-                            <Box sx={{ width: "100%", maxWidth: "500px", mx: "auto", mt: "3rem" }}>
+                        <form onSubmit={(e) => e.preventDefault()}>
+                            <Box sx={{ width: "100%", maxWidth: "500px", mx: "auto", mt: "1rem" }}>
                                 <TextField
                                     variant="outlined"
                                     margin="normal"
@@ -192,6 +173,20 @@ export default function Register() {
                                     value={password}
                                     onChange={handleChange}
                                 />
+                                <TextField
+                                    variant="outlined"
+                                    margin="normal"
+                                    required
+                                    fullWidth
+                                    name="password2"
+                                    label="Confirm Password"
+                                    type="password"
+                                    id="password2"
+                                    InputProps={{ inputProps: { minLength: 6, maxLength: 45 } }}
+                                    autoComplete="password"
+                                    value={password2}
+                                    onChange={handleChange}
+                                />
                                 <HCaptcha
                                     sitekey="748ea2c2-9a8d-4791-b951-af4c52dc1f0f"
                                     size="invisible"
@@ -207,27 +202,35 @@ export default function Register() {
                                     variant="contained"
                                     color="primary"
                                     sx={{ mt: "1rem", mb: "0.5rem" }}
-                                    loading={loadingBtn}
-                                >
-                                    Register
-                                </LoadingButton>
-                                <Grid container>
-                                    <Grid item xs>
-                                        <Typography variant="body2" gutterBottom>
-                                            You agree to our{" "}
-                                            <Link href="/terms">
-                                                <MuiLink variant="body2" component="a" href="/terms">Terms of Service</MuiLink>
-                                            </Link>
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item>
-                                        <Link href="/login">
-                                            <MuiLink variant="body2" component="a" href="/login">
-                                                Already have an account? Sign In
-                                            </MuiLink>
+                                    event={() => {
+                                        setError({ status: false, message: "" });
+
+                                        if (!username || !email || !password || !password2) {
+                                            setError({ status: true, message: "Please fill out all fields" });
+                                            return;
+                                        }
+
+                                        if (password !== password2) {
+                                            setError({ status: true, message: "Passwords do not match" });
+                                            return;
+                                        }
+
+                                        captchaRef.current.execute();
+                                    }}
+                                >Register</LoadingButton>
+                                <Stack direction="row" spacing={2} justifyContent="space-between">
+                                    <Typography variant="body2" gutterBottom>
+                                        You agree to our{" "}
+                                        <Link href="/terms">
+                                            Terms of Service
                                         </Link>
-                                    </Grid>
-                                </Grid>
+                                    </Typography>
+                                    <Typography variant="body2" gutterBottom>
+                                        <Link href="/login">
+                                            Already have an account? Sign In
+                                        </Link>
+                                    </Typography>
+                                </Stack>
                             </Box>
                         </form>
                     </Box>

@@ -2,23 +2,18 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 
 import Link from "next/link";
-import MuiLink from "@mui/material/Link";
 import NavBar from "../components/landing/NavBar";
 import Footer from "../components/landing/Footer";
 
 import Container from "@mui/material/Container";
-import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import Head from "next/head";
-import theme from "../src/theme";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import { useTheme } from "@mui/material";
+import { Stack } from "@mui/material";
 import { makeXTrack } from "../src/getIPAddress";
+import LoadingButton from "../components/misc/LoadingButton";
 
 export default function Login() {
     const router = useRouter();
@@ -27,47 +22,10 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const [totp, setTotp] = useState("");
 
-    const [openS, setOpenS] = useState(false);
-    const [openE, setOpenE] = useState(false);
-    const [notiTextS, setNotiTextS] = useState("X");
-    const [notiTextE, setNotiTextE] = useState("X");
+    const [error, setError] = useState({ status: false, message: "" });
 
     const redirect_to: any = router.query.redirect_to;
     const username_query: any = router.query.username;
-
-
-    function onSubmit(e: any) {
-        e.preventDefault();
-        fetch(`/api/v2/auth/login`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "x-track": makeXTrack()
-            },
-            body: JSON.stringify({
-                username: username,
-                password: password,
-                totp: totp
-            })
-        })
-            .then(res => res.json())
-            .then(res => {
-                if (!res.success) {
-                    setNotiTextE(res.message);
-                    setOpenE(true);
-                }
-                else {
-                    setNotiTextS(res.message);
-                    setOpenS(true);
-                    localStorage.setItem("token", res.token);
-                    router.push(redirect_to ? redirect_to : "/dashboard");
-                }
-            })
-            .catch(err => {
-                setNotiTextE(err.message);
-                setOpenE(true);
-            });
-    }
     
     function handleChange(e: any) {
         const { name, value } = e.target;
@@ -101,12 +59,11 @@ export default function Login() {
                             router.push(redirect_to ? redirect_to : "/dashboard");
                         } else {
                             window.localStorage.removeItem("token");
-                            window.location.href = "/";
+                            router.push("/login");
                         }
                     })
                     .catch(err => {
-                        setNotiTextE(err);
-                        setOpenE(true);
+                        setError({ status: true, message: err });
                         console.error(err);
                     });
             }
@@ -126,24 +83,18 @@ export default function Login() {
                 <Container maxWidth="lg" sx={{ mx: "auto", justifyContent: "center", alignItems: "center" }}>
                     <NavBar />
 
-                    <Snackbar open={openE} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenE(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
-                        <Alert elevation={6} variant="filled" severity="error">
-                            {notiTextE}
-                        </Alert>
-                    </Snackbar>
-
-                    <Snackbar open={openS} autoHideDuration={3000} onClose={(event?: React.SyntheticEvent | Event, reason?: string) => { if (reason === "clickaway") { return; } setOpenS(false); }} anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
-                        <Alert elevation={6} variant="filled" severity="success">
-                            {notiTextS}
-                        </Alert>
-                    </Snackbar>
-
                     <Box sx={{ width: "100%", maxWidth: "500px", mx: "auto", mt: "3rem" }}>
                         <Typography variant="h4" component="h1" align="center" sx={{ fontWeight: "bold" }} gutterBottom>
                             Log into your Account
                         </Typography>
 
-                        <form onSubmit={onSubmit}>
+                        {error.message && (
+                            <Alert severity={error.status ? "error" : "success"} sx={{ mb: "1rem" }}>
+                                {error.message}
+                            </Alert>
+                        )}
+
+                        <form onSubmit={(e) => e.preventDefault()}>
                             <Box sx={{ width: "100%", maxWidth: "500px", mx: "auto", mt: "3rem" }}>
                                 <TextField
                                     variant="outlined"
@@ -157,7 +108,7 @@ export default function Login() {
                                     autoComplete="username"
                                     InputProps={{ inputProps: { minLength: 2, maxLength: 20 } }}
                                     autoFocus
-                                    value={username}
+                                    value={username === "" ? username_query : username}
                                     defaultValue={username_query}
                                     onChange={handleChange}
                                 />
@@ -189,31 +140,57 @@ export default function Login() {
                                     value={totp}
                                     onChange={handleChange}
                                 />
-                                <Button
+                                <LoadingButton
                                     type="submit"
                                     fullWidth
                                     variant="contained"
                                     color="primary"
                                     sx={{ mt: "2rem", mb: "0.5rem" }}
+                                    event={() => {
+                                        fetch(`/api/v2/auth/login`, {
+                                            method: "POST",
+                                            headers: {
+                                                "Content-Type": "application/json",
+                                                "x-track": makeXTrack()
+                                            },
+                                            body: JSON.stringify({
+                                                username: username,
+                                                password: password,
+                                                totp: totp
+                                            })
+                                        })
+                                            .then(res => res.json())
+                                            .then(res => {
+                                                if (!res.success) {
+                                                    // setNotiTextE(res.message);
+                                                    // setOpenE(true);
+                                                    setError({ status: true, message: res.message });
+                                                }
+                                                else {
+                                                    setError({ status: false, message: res.message });
+                                                    localStorage.setItem("token", res.token);
+                                                    router.push(redirect_to ? redirect_to : "/dashboard");
+                                                }
+                                            })
+                                            .catch(err => {
+                                                setError({ status: true, message: err.message });
+                                            });
+                                    }}
                                 >
                                     Login
-                                </Button>
-                                <Grid container>
-                                    <Grid item xs>
+                                </LoadingButton>
+                                <Stack direction="row" spacing={2} justifyContent="space-between">
+                                    <Typography variant="body2" gutterBottom>
                                         <Link href="/forgot">
-                                            <MuiLink variant="body2" component="a" href="/forgot">
-                                                Forgot password?
-                                            </MuiLink>
+                                            Forgot password?
                                         </Link>
-                                    </Grid>
-                                    <Grid item>
-                                        <Link href="/register">
-                                            <MuiLink variant="body2" component="a" href="/register">
-                                                {"Don't have an account? Sign Up"}
-                                            </MuiLink>
+                                    </Typography>
+                                    <Typography variant="body2" gutterBottom>
+                                        <Link href="/login">
+                                            {"Don't have an account? Sign Up"}
                                         </Link>
-                                    </Grid>
-                                </Grid>
+                                    </Typography>
+                                </Stack>
                             </Box>
                         </form>
                     </Box>

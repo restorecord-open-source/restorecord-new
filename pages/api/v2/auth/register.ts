@@ -4,7 +4,6 @@ import dotenv from "dotenv";
 import { prisma } from "../../../../src/db";
 import { accounts } from "@prisma/client";
 import { getIPAddress, getBrowser, getPlatform, getXTrack } from "../../../../src/getIPAddress";
-import { isBreached } from "../../../../src/functions";
 import { sign } from "jsonwebtoken";
 dotenv.config({ path: "../../" });
 
@@ -28,8 +27,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (data.username.length < 3 || data.username.length > 20) return res.status(400).json({ success: false, message: "Username must be between 3 and 20 characters" });
         if (data.password.length < 6 || data.password.length > 45) return res.status(400).json({ success: false, message: "Password must be between 6 and 45 characters" });
         if (data.email.length < 6 || data.email.length > 50) return res.status(400).json({ success: false, message: "Email must be between 6 and 50 characters" });
-        
-        if (await isBreached(data.password)) return res.status(400).json({ success: false, message: "Your password has been found in a data breach. For more info: https://haveibeenpwned.com/Passwords" });
         
         await fetch(`https://hcaptcha.com/siteverify`, {
             method: "POST",

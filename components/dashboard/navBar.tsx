@@ -100,26 +100,26 @@ export default function NavBar({ ...props }: any) {
                         <Box ref={userDropdownRef} sx={{ position: "absolute", background: theme.palette.background.paper, borderRadius: "0.5rem", top: "calc(100% + 0.5rem)", display: "none", right: "2rem", border: "1px solid rgb(40, 40, 47)", zIndex: 1000 }}>
                             <List>
                                 <ListItemButton sx={{ padding: "0.5rem 0.75rem" }}>
-                                    <ButtonBase disableRipple onClick={() => { router.push("/dashboard") }}>
-                                        <Link href="/dashboard" color="text.primary">
+                                    <Link href="/dashboard">
+                                        <ButtonBase disableRipple onClick={() => { router.push("/dashboard") }}>
                                             <Typography variant="body1">Dashboard</Typography>
-                                        </Link>
-                                    </ButtonBase>
+                                        </ButtonBase>
+                                    </Link>
                                 </ListItemButton>
                                 <ListItemButton sx={{ padding: "0.5rem 0.75rem" }}>
-                                    <ButtonBase disableRipple onClick={() => { router.push("/dashboard/account") }}>
-                                        <Link href="/dashboard/account" color="text.primary">
+                                    <Link href="/dashboard/account">
+                                        <ButtonBase disableRipple onClick={() => { router.push("/dashboard/account") }}>
                                             <Typography variant="body1">Settings</Typography>
-                                        </Link>
-                                    </ButtonBase>
+                                        </ButtonBase>
+                                    </Link>
                                 </ListItemButton>
                                 <Divider />
                                 <ListItemButton sx={{ padding: "0.5rem 0.75rem" }}>
-                                    <ButtonBase disableRipple onClick={() => { router.push("/logout") }}>
-                                        <Link href="/logout" color="text.primary">
+                                    <Link href="/logout">
+                                        <ButtonBase disableRipple onClick={() => { router.push("/logout") }}>
                                             <Typography variant="body1">Sign Out</Typography>
-                                        </Link>
-                                    </ButtonBase>
+                                        </ButtonBase>
+                                    </Link>
                                 </ListItemButton>
                             </List>
                         </Box>

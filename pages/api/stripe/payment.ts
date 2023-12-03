@@ -6,14 +6,7 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
-        const { session_id, success, canceled } = req.query;
-
-        console.log(session_id, success, canceled);
-
-        if (session_id) {
-            const checkout = await stripe.checkout.sessions.retrieve(session_id as string);
-            if (!checkout) return res.status(400).json({ success: false, message: "Checkout session not found." });
-        }
+        const { success, canceled } = req.query;
 
         return res.redirect(301, `/dashboard/upgrade${success ? "?s=1" : canceled ? "?c=1" : ""}`);
     } catch (err: any) {

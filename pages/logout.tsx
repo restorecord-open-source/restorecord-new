@@ -4,9 +4,12 @@ import { useToken } from "../src/token";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Head from "next/head";
+import Box from "@mui/material/Box";
+import { useRouter } from "next/router";
 
 export default function Logout() {
     const [token]: any = useToken();
+    const router = useRouter();
 
     useEffect(() => {
         try {
@@ -18,7 +21,8 @@ export default function Logout() {
                 .then(res => res.json())
                 .then(res => {
                     window.localStorage.removeItem("token");
-                    window.location.href = "/";
+                    window.localStorage.removeItem("org_token");
+                    router.push("/");
                 })
         } catch (error) {
             console.error(error);
@@ -34,9 +38,9 @@ export default function Logout() {
                     <meta property="og:title" content="RestoreCord - Logout" />
                 </Head>
 
-                <Typography variant="h4" sx={{ mb: 2, fontWeight: "500", justifyContent: "center", display: "flex", alignItems: "center" }}>
-                    Logging out...
-                </Typography>
+                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", height: "100vh" }}>
+                    <Typography variant="h4" component="h4" color={"grey.300"}>You have been logged out.</Typography>
+                </Box>
             </Container>
         </>
     )

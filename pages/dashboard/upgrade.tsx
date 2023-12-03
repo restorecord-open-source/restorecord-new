@@ -218,7 +218,7 @@ export default function Upgrade() {
                                             "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
                                         },
                                     }).then((res) => {
-                                        document.location.href = res.data.redirect;
+                                        router.push(res.data.redirect);
                                     }).catch((err) => {
                                         console.error(err);
                                     });
@@ -245,7 +245,7 @@ export default function Upgrade() {
                                             "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
                                         },
                                     }).then((res) => {
-                                        document.location.href = res.data.redirect;
+                                        router.push(res.data.redirect);
                                     }).catch((err) => {
                                         console.error(err);
                                     });
@@ -311,7 +311,7 @@ export default function Upgrade() {
                             }).then((res) => {
                                 alertRef.current.style.display = "none";
 
-                                document.location.href = res.data.redirect;
+                                router.push(res.data.redirect);
                             }).catch((err) => {
                                 alertRef.current.style.display = "flex";
                                 alertRef.current.children[1].innerHTML = err.response.data.message;
@@ -367,7 +367,7 @@ export default function Upgrade() {
                             }).then((res) => {
                                 alertRef.current.style.display = "none";
 
-                                document.location.href = res.data.redirect;
+                                router.push(res.data.redirect);
                             }).catch((err) => {
                                 alertRef.current.style.display = "flex";
                                 alertRef.current.children[1].innerHTML = err.response.data.message;
@@ -498,7 +498,7 @@ export default function Upgrade() {
                                     }).then((res) => {
                                         alertRef.current.style.display = "none";
         
-                                        document.location.href = res.data.redirect;
+                                        router.push(res.data.redirect);
                                     }).catch((err) => {
                                         alertRef.current.style.display = "flex";
                                         alertRef.current.children[1].innerHTML = err.response.data.message;
@@ -519,7 +519,7 @@ export default function Upgrade() {
                                             "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
                                         },
                                     }).then((res) => {
-                                        document.location.href = res.data.redirect;
+                                        router.push(res.data.redirect);
                                     }).catch((err) => {
                                         console.error(err);
                                     });
@@ -558,7 +558,7 @@ export default function Upgrade() {
                                 "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
                             },
                         }).then((res) => {
-                            document.location.href = res.data.redirect;
+                            router.push(res.data.redirect);
                         }).catch((err) => {
                             console.error(err);
                         });
