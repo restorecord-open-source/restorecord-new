@@ -20,15 +20,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const xTrack = getXTrack(req);
         if (!xTrack) return res.status(400).json({ success: false, message: "Invalid Request" });
 
-        let tokenExpiry: string = "90d";
+        let tokenExpiry: string = "30d";
         if (!data.username || !data.password) {
             return res.status(400).json({ message: "Missing username or password" });
         }
         
-        if (data.username.length < 3 || data.username.length > 30) {
-            return res.status(400).json({ message: "Username must be between 3 and 30 characters" });
-        }
-
         if (!data) return res.status(400).json({ message: "Please provide all fields" });
 
         const account = await prisma.accounts.findFirst({ where: { username: data.username.toLowerCase() } });
@@ -48,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             if (!totpVerify) return res.status(400).json({ message: "Invalid 2FA Code" });
 
-            tokenExpiry = "14d";
+            tokenExpiry = "90d";
         }
 
         if (account.banned) return res.status(400).json({ message: "Account is Banned. Contact: admin@restorecord.com" });
