@@ -39,7 +39,7 @@ export default function AdminServer() {
     const [successMessage, setSuccessMessage]: any = useState("");
 
     const [servers, setServers]: any = useState({});
-    const [Modals, setModals]: any = useState({ info: false, });
+    const [Modals, setModals]: any = useState({ info: false, unclaim: false });
     const [ModalData, setModalData]: any = useState({ info: {}, query: { rows: 0, time: 0 } });
 
     const { data, isError, isLoading } = useQuery('user', async () => await getUser({
@@ -122,6 +122,7 @@ export default function AdminServer() {
                         <Stack direction="column" spacing={2}>
                             <Typography variant="body1" sx={{ mb: 1 }}>Are you sure you want to unclaim this server?</Typography>
                             <Button variant="contained" color="error" onClick={async () => {
+                                setModals({ ...Modals, unclaim: false });
                                 setErrorMessages("");
                                 await axios.post("/api/admin/unclaim", { serverId: ModalData.info.id }, {
                                     headers: {

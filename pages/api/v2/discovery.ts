@@ -39,14 +39,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     {
                         discoverable: 1
                     },
+                    
                     ...(search && (search.length >= 3 && search.length <= 99)) ? [{
                         name: {
                             contains: search
                         }
                     }] : []
+                ],
+                NOT: [
+                    { name: { contains: "porn" } },
+                    { name: { contains: "nsfw" } },
+                    { name: { contains: "sex" } },
+                    { name: { contains: "s3x" } },
+                    { name: { contains: "p0rn" } },
+                    { name: { contains: "invites" } },
+                    { name: { contains: "= nitro" } },
                 ]
             },
-            take: 39
+            take: 39,
+            orderBy: {
+                createdAt: "desc"
+            }
         });
 
         servers.sort(() => Math.random() - 0.5);
@@ -58,7 +71,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
 
         // cache the servers for 1 hour
-        search ? null : await redis.set("discovery", JSON.stringify(servers), "EX", 3600);
+        search ? null : await redis.set("discovery", JSON.stringify(servers), "EX", 1800);
 
         return res.status(200).json({ success: true, servers });
     }

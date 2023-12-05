@@ -35,6 +35,7 @@ import FormLabel from "@mui/material/FormLabel";
 import Slider from "@mui/material/Slider";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
+import LoadingButton from "../../../components/misc/LoadingButton";
 
 export default function AdminUser() {
     const router = useRouter();
@@ -131,7 +132,7 @@ export default function AdminUser() {
                         })}
 
                         {/* login button */}
-                        <Button variant="contained" color="primary" onClick={async () => {
+                        <LoadingButton variant="contained" color="primary" event={async () => {
                             var orgToken = (process.browser && window.localStorage.getItem("token")) ?? token;
                             window.localStorage.setItem("org_token", orgToken);
 
@@ -166,7 +167,7 @@ export default function AdminUser() {
 
                             
 
-                        }}>Login</Button>
+                        }}>Login</LoadingButton>
                     </Paper>
                 </DialogContent>
             </Dialog>
