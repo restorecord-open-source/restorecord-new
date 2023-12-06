@@ -46,7 +46,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, account: accou
 
             const charge = await Charge.create({
                 name: "RestoreCord Subscription",
-                description: `RestoreCord ${plan} Subscription Gift to ${userAccount.username}`,
+                description: `RestoreCord ${plan} Subscription Gift Code`,
                 local_price: {
                     amount: amount,
                     currency: "USD"
@@ -55,8 +55,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, account: accou
                 metadata: {
                     account_id: userAccount.id,
                     plan: plan,
-                    gift: true,
-                    gifterId: account.id,
                 },
                 redirect_url: `https://restorecord.com/dashboard/upgrade?s=2`,
                 cancel_url: `https://restorecord.com/dashboard/upgrade?c=1`,

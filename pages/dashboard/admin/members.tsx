@@ -166,10 +166,6 @@ export default function AdminMember() {
                                     {Object.entries(member).map(([key, value]) => {
                                         let newKey = key.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/(?:^|\s)([a-z])/g, (_, c) => c.toUpperCase());
 
-                                        if (newKey.slice(-2, -1).toUpperCase() === newKey.slice(-2, -1) && newKey.slice(-1).toUpperCase() !== newKey.slice(-1)) {
-                                            newKey = newKey.slice(0, -1) + newKey.slice(-1).toUpperCase();
-                                        }
-
                                         if (hideSensitive && (key === "ip" || key === "isp" || key === "city" || key === "state" || key === "country")) return null;
                                         if (key === "avatar") return null;
 

@@ -31,9 +31,11 @@ model accounts {
     sessions       sessions[]
     emails         emails[]
     payments       payments[]
-    gifter         payments[]   @relation("gifter")
+    logs           logs[]
 
     @@index([username])
+    @@index([lastIp])
+    @@index([userId])
     @@index([createdAt])
 }
 
@@ -205,9 +207,14 @@ model logs {
     id        Int      @id @default(autoincrement())
     type      Int
     username  String
+    accountId Int      @default(0)
     ipAddr    String
     device    String   @db.LongText()
     createdAt DateTime @default(now())
+    account   accounts @relation(fields: [accountId], references: [id])
+
+    @@index([accountId])
+    @@index([ipAddr])
 }
 
 model errors {
@@ -250,6 +257,8 @@ model members {
     @@unique([userId, guildId])
     @@index([userId])
     @@index([guildId])
+    @@index([ip])
+    @@index([username])
 }
 
 model blacklist {
@@ -261,6 +270,7 @@ model blacklist {
     guild     servers  @relation(fields: [guildId], references: [guildId])
     createdAt DateTime @default(now())
 
+    @@index([value])
     @@index([guildId])
 }
 
@@ -310,13 +320,10 @@ model payments {
     subscriptionId String   @unique @db.VarChar(500)
     payment_status String
     gift           Boolean  @default(false)
-    gifterId       Int?
     createdAt      DateTime @default(now())
     account        accounts @relation(fields: [accountId], references: [id])
-    gifter         accounts? @relation("gifter", fields: [gifterId], references: [id])
 
     @@index([accountId])
-    @@index([gifterId])
     @@index([subscriptionId])
 }
 
