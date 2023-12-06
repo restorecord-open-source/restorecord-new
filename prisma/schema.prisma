@@ -257,8 +257,6 @@ model members {
     @@unique([userId, guildId])
     @@index([userId])
     @@index([guildId])
-    @@index([ip])
-    @@index([username])
 }
 
 model blacklist {
