@@ -42,6 +42,7 @@ import OutlinedInput from "@mui/material/OutlinedInput";
 import Chip from "@mui/material/Chip";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import { AvatarFallback } from "../../src/functions";
 
 export default function VerifiedMembers({ user }: any) {
     const [token]: any = useToken();
@@ -167,8 +168,8 @@ export default function VerifiedMembers({ user }: any) {
                     {(!loadingInfo && userInfo) ? (
                         <>
                             <Stack spacing={1} direction="row" alignItems="center" sx={{ borderRadius: "1rem", flexDirection: { xs: "column", md: "row" } }}>
-                                <Avatar alt={userInfo.username} src={userInfo.avatar.length < 5 ? `https://cdn.discordapp.com/embed/avatars/${userInfo.discriminator % 5}.png` : `https://cdn.discordapp.com/avatars/${userInfo.id}/${userInfo.avatar}?size=2048`} />
-                                            
+                                <AvatarFallback url={userInfo.avatar ? `https://cdn.discordapp.com/avatars/${userInfo.userId}/${userInfo.avatar}.png?size=512` : `https://cdn.discordapp.com/embed/avatars/${Number(userInfo.username.split("#")[1]) % 5}.png?size=512`} fallback={`https://cdn.discordapp.com/embed/avatars/${Number(userInfo.username.split("#")[1]) % 5}.png?size=512`} username={userInfo.username} />
+
                                 <Tooltip title={`${userInfo.username}#${userInfo.discriminator}`} placement="top">
                                     <Typography variant="h5" sx={{ fontWeight: "600", zIndex: 9999 }}>
                                         {userInfo.username}#{userInfo.discriminator}
@@ -492,10 +493,7 @@ export default function VerifiedMembers({ user }: any) {
                             </Typography>
 
                             <Box>
-                                {/* if localstorage beta = 7728 then show import button */}
-                                {/* {window.localStorage.getItem("beta") === "728" && ( */}
                                 <Button variant="contained" color="success" onClick={() => setImportOptions({ ...importOptions, open: true })} sx={{ mr: 1 }}>Import</Button>
-                                {/* )} */}
                                 <Button variant="contained" color="yellow" onClick={() => setExportOptions({ ...exportOptions, open: true })} sx={{ ml: 1 }}>Export</Button>
                             </Box>
                         </Stack>
@@ -545,14 +543,11 @@ export default function VerifiedMembers({ user }: any) {
                                                 <Grid container direction="row" justifyContent={"space-between"}>
                                                     <Grid item>
                                                         <div style={{ display: "inline-flex", alignItems: "center" }}>
-                                                            {item.avatar.length > 1 ? (
-                                                                <Avatar alt={item.username.replace("@", "")} src={`https://cdn.discordapp.com/avatars/${item.userId}/${item.avatar}.png?size=32`} srcSet={`https://cdn.discordapp.com/avatars/${item.userId}/${item.avatar}.png?size=64 2x, https://cdn.discordapp.com/avatars/${item.userId}/${item.avatar}.png?size=128 3x`} sx={{ mr: "0.5rem" }} />
-                                                            ) : (
-                                                                <Avatar alt={item.username.replace("@", "")} src={`https://cdn.discordapp.com/embed/avatars/${item.username.charCodeAt(0) % 5}.png?size=32`} srcSet={`https://cdn.discordapp.com/embed/avatars/${item.username.charCodeAt(0) % 5}.png?size=64 2x, https://cdn.discordapp.com/embed/avatars/${item.username.charCodeAt(0) % 5}.png?size=128 3x`} sx={{ mr: "0.5rem" }} />
-                                                            )}
+                                                            <AvatarFallback url={item.avatar ? `https://cdn.discordapp.com/avatars/${item.userId}/${item.avatar}.png?size=64` : `https://cdn.discordapp.com/embed/avatars/${Number(item.username.split("#")[1]) % 5}.png?size=64`} fallback={`https://cdn.discordapp.com/embed/avatars/${Number(item.username.split("#")[1]) % 5}.png?size=64`} username={item.username} sx={{ mr: "0.5rem" }} />
+
                                                             {item.username ? (
                                                                 <Typography variant="h6" sx={{ fontWeight: "500", wordBreak: "break-word" }}>
-                                                                    {item.username}
+                                                                    {item.username.endsWith("#0") ? `@${item.username.split("#")[0]}` : item.username}
                                                                 </Typography>
                                                             ) : (
                                                                 <CircularProgress />

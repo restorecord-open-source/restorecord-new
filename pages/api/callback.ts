@@ -82,8 +82,6 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
             }
             if (!serverOwner) return res.status(400).json({ success: false, message: "No server owner found" });
 
-            const blacklistEntries = await prisma.blacklist.findMany({ where: { guildId: guildId } });
-            const pCheck = await ProxyCheck.check(IPAddr, { vpn: true, asn: true });
 
             const account: User = await resolveUser(respon.data.access_token);
             if (!account || account === null) return reject(10001 as any);
@@ -94,23 +92,32 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                 serverInfo.ipLogging = false;
             }
 
+            const pCheck = await ProxyCheck.check(IPAddr, { vpn: true, asn: true });
+            const blacklistEntries = await prisma.blacklist.findMany({
+                where: {
+                    guildId: guildId,
+                    OR: [
+                        { type: 0, value: String(userId) },
+                        { type: 1, value: String(IPAddr) },
+                        { type: 2, value: serverOwner.role === "business" ? String(pCheck[IPAddr].asn).replace("AS", "") : undefined },
+                        { type: 3, value: String(pCheck[IPAddr].isocode) },
+                    ].filter(entry => entry.value !== undefined),
+                },
+            });
+
+            const errorMessages: any = {
+                0: "This user attempted to verify, but is blacklisted in this server.",
+                1: "This user attempted to verify, but their IP is blacklisted in this server.",
+                2: "This user attempted to verify, but their ISP is blacklisted in this server.",
+                3: "This user attempted to verify, but their Country is blacklisted in this server.",
+            };
+              
             for (const entry of blacklistEntries) {
-                if (entry.type === 0 && entry.value === String(userId) as string) {
-                    await sendWebhookMessage(serverInfo.webhook, "Attempted Blacklist", `This user attempted to verify, but is blacklisted in this server.`, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0);
-                    return reject(990031 as any);
-                } 
-                else if (entry.type === 1 && entry.value === String(IPAddr) as string) {
-                    await sendWebhookMessage(serverInfo.webhook, "Attempted Blacklist", `This user attempted to verify, but their IP is blacklisted in this server.`, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0);
-                    return reject(990032 as any);
-                } 
-                else if (entry.type === 2 && entry.value === String(pCheck[IPAddr].asn).replace("AS", "") as string && serverOwner.role === "business") {
-                    await sendWebhookMessage(serverInfo.webhook, "Attempted Blacklist", `This user attempted to verify, but their ISP is blacklisted in this server.`, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0);
-                    return reject(990033 as any);
-                } 
-                else if (entry.type === 3 && entry.value === String(pCheck[IPAddr].isocode)) {
-                    await sendWebhookMessage(serverInfo.webhook, "Attempted Blacklist", `This user attempted to verify, but their Country is blacklisted in this server.`, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0);
-                    return reject(990034 as any);
-                }
+                const { type } = entry;
+                const errorMessage = errorMessages[type];
+              
+                await sendWebhookMessage(serverInfo.webhook, "Attempted Blacklist", errorMessage, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0);
+                return reject(990031 + type as any);
             }
 
             // res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);

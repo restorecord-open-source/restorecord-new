@@ -50,10 +50,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         createdAt: true
                     },
                     where: {
-                        OR: [
-                            ...(fullId ? [{ id: parseInt(fullId) }] : []),
-                            ...(discordIdSearch ? [{ userId: discordIdSearch }] : []),
-                        ],
+                        ...(fullId ? { id: parseInt(fullId) } : undefined),
+                        ...(discordIdSearch ? { userId: discordIdSearch } : undefined),
                     },
                     orderBy: {
                         createdAt: "desc",

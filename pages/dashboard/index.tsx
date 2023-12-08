@@ -37,6 +37,7 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Skeleton from "@mui/material/Skeleton";
 import Tooltip from "@mui/material/Tooltip";
+import { AvatarFallback } from "../../src/functions";
 
 const ApexChart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
@@ -281,11 +282,7 @@ export default function Dashboard() {
                                 <List key={member.id} sx={{ width: "100%", maxWidth: 360 }}>
                                     <ListItem key={member.id} sx={{ wordBreak: "break-all" }} disablePadding={true}>
                                         <ListItemAvatar>
-                                            {member.avatar.length > 1 ? (
-                                                <Avatar src={`https://cdn.discordapp.com/avatars/${member.userId}/${member.avatar}?size=128`} />
-                                            ) : (
-                                                <Avatar src={`https://cdn.discordapp.com/embed/avatars/${member.avatar}.png`} />
-                                            )}
+                                            <AvatarFallback url={member.avatar ? `https://cdn.discordapp.com/avatars/${member.userId}/${member.avatar}.png?size=128` : `https://cdn.discordapp.com/embed/avatars/${Number(member.username.split("#")[1]) % 5}.png?size=128`} fallback={`https://cdn.discordapp.com/embed/avatars/${Number(member.username.split("#")[1]) % 5}.png?size=128`} username={member.username} />
                                         </ListItemAvatar>
                                         <ListItemText primary={`${member.username.endsWith("#0") ? `@${member.username.slice(0, -2)}` : member.username}`} secondary={
                                             <>
