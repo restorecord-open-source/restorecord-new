@@ -19,11 +19,15 @@ import Avatar from "@mui/material/Avatar";
 import Image from "next/image";
 
 import { useEffect, useRef } from "react";
+import { useMediaQuery } from "@mui/material";
 
 
 export default function Home() {
     const typingElement: any = useRef(null);
     const typed: any = useRef(null);
+
+    const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+    const isSmallDesktop = useMediaQuery(theme.breakpoints.down("lg"));
   
     useEffect(() => {
         AOS.init({
@@ -93,8 +97,9 @@ export default function Home() {
                             </Badge>
                         </Box>
 
-                        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column", mt: 10 }} data-aos="zoom-in-up">
-                            <Image src="https://cdn.restorecord.com/static/images/homepage/dashboard_mu.png" alt="Dashboard" width={1251} height={769} />
+                        <Box sx={{ display: { xs: "none", md: "flex" } , justifyContent: "center", alignItems: "center", flexDirection: "column", mt: 10 }} data-aos="zoom-in-up">
+                            {/* <Image src="https://cdn.restorecord.com/static/images/homepage/dashboard_mu.png" alt="Dashboard" width={1251} height={769} /> */}
+                            <Image src="https://cdn.restorecord.com/static/images/homepage/dashboard_mu.png" alt="Dashboard" width={Number(isMobile ? 600 : isSmallDesktop ? 800 : 1251)} height={Number(isMobile ? 369 : isSmallDesktop ? 492 : 769)} />
                         </Box>  
 
                         {/* <Box sx={{ marginTop: 30 }} data-aos="fade-up">
@@ -225,11 +230,11 @@ export default function Home() {
                         <Box id="reviews" sx={{ marginTop: 8 }}/>
 
                         <Box>
-                            <Typography variant="h6" sx={{ fontStyle: "normal", fontWeight: 900, fontSize: { sm: 19, md: 38 }, textAlign: "center", color: theme.palette.text.primary, my: 4, mt: 10 }}>
+                            <Typography variant="h6" sx={{ fontStyle: "normal", fontWeight: 900, fontSize: { sm: 19, md: 38 }, textAlign: "center", color: theme.palette.text.primary, my: 4, mx: 2, mt: 10 }}>
                                 What our customers say
                             </Typography>
 
-                            <Typography variant="body1" sx={{ fontStyle: "normal", fontWeight: 400, fontSize: { sm: 10, md: 20 }, textAlign: "center", color: theme.palette.text.primary, my: 4, wordWrap: "break-word" }}>
+                            <Typography variant="body1" sx={{ fontStyle: "normal", fontWeight: 400, fontSize: { sm: 10, md: 20 }, textAlign: "center", color: theme.palette.text.primary, my: 4, mx: 2, wordWrap: "break-all" }}>
                                 We are proud to have helped thousands of businesses grow their sales and increase their revenue.
                             </Typography>
 

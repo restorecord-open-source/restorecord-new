@@ -182,11 +182,11 @@ export default function Login() {
                                 <Stack direction="row" spacing={2} justifyContent="space-between">
                                     <Typography variant="body2" gutterBottom>
                                         <Link href="/forgot">
-                                            Forgot password?
+                                            Forgot password or username?
                                         </Link>
                                     </Typography>
                                     <Typography variant="body2" gutterBottom>
-                                        <Link href="/login">
+                                        <Link href="/register">
                                             {"Don't have an account? Sign Up"}
                                         </Link>
                                     </Typography>

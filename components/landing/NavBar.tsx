@@ -90,7 +90,7 @@ export default function NavBar() {
                                     RestoreCord
                                 </MuiLink>
                             </Typography>
-                            <Box sx={{ display: { xs: "block", md: "none" }, flexGrow: 1 }}>
+                            <Box sx={{ display: { xs: "flex", md: "none" }, flexGrow: 1 }}>
                                 <IconButton id="menu-btn" edge="start" color="inherit" aria-label="menu" aria-controls={open ? "menu" : undefined} aria-haspopup="true" aria-expanded={open ? "true" : undefined} onClick={handleClick}>
                                     <MenuIcon />
                                 </IconButton>
@@ -116,11 +116,6 @@ export default function NavBar() {
                                     </MenuItem>
                                 </Menu>
                             </Box>
-                            <Link href="/">
-                                <Typography variant="h6" component="div" sx={{ display: { xs: "block", md: "none" }, cursor: "pointer", flexGrow: 1 }}>
-                                    RestoreCord
-                                </Typography>
-                            </Link>
                             <Box sx={{ display: { xs: "none", md: "block" }}}>
                                 <Stack direction="row" spacing={1}>
                                     <Button href="/#pricing">

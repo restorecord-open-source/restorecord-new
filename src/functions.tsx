@@ -70,7 +70,7 @@ export function verifyFingerprint(fingerprint: string): boolean {
 
 const avatarCache: Record<string, string> = {};
 
-export function AvatarFallback({ url, fallback, username, sx, ...props }: { url: string, fallback: string, username: string, sx: SxProps | null | undefined, props?: any | null | undefined }) {
+export function AvatarFallback({ url, fallback, username, sx, ...props }: { url: string, fallback: string, username: string, sx?: SxProps | null | undefined, props?: any | null | undefined }) {
     const [avatarUrl, setAvatarUrl] = useState<string>("");
     const [imageLoaded, setImageLoaded] = useState(false);
 
