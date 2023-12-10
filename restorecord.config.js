@@ -1,8 +1,10 @@
 module.exports = {
     apps : [{
         name: "restorecord",
-        script: 'npx next start',
+        script: "npx next start",
         max_restarts: 100,
-        autorestart: true
+        autorestart: true,
+        instances: "max",
+        exec_mode: "cluster",
     }],
 };
