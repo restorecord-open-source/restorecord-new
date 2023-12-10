@@ -131,8 +131,10 @@ export function IntlRelativeTime(time: number) {
 
     if (time === null || time === undefined || isNaN(time) || time === 0) {
         return null;
-    } else if ((fixedTime < 0 && fixedTime > -60000) || (fixedTime > 0 && fixedTime < 60000)) {
+    } else if ((fixedTime < 0 && fixedTime > -1000) || (fixedTime > 0 && fixedTime < 1000)) {
         return "just now";
+    } else if ((fixedTime < 0 && fixedTime > -60000) || (fixedTime > 0 && fixedTime < 60000)) {
+        return intlRelativeTimeFormat.format(Math.round(fixedTime / 1000), "seconds");
     } else if ((fixedTime < 0 && fixedTime > -3600000) || (fixedTime > 0 && fixedTime < 3600000)) {
         return intlRelativeTimeFormat.format(Math.round(fixedTime / 60000), "minutes");
     } else if ((fixedTime < 0 && fixedTime > -86400000) || (fixedTime > 0 && fixedTime < 86400000)) {

@@ -12,6 +12,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
         const formatted = servers.map(async (server: any) => {
             const members = await prisma.members.findMany({
+                select: {
+                    id: true,
+                    createdAt: true
+                },
                 where: {
                     guildId: server.guildId,
                     createdAt: {

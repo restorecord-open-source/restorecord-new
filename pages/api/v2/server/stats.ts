@@ -15,11 +15,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
         if (limit && Number(limit) > 100) limit = 100;
 
-        let members: members[] = [];
-
         switch (query) {
         case "recent":
-            members = await prisma.members.findMany({
+            const members = await prisma.members.findMany({
                 where: {
                     guildId: {
                         in: servers.map(server => server.guildId),
@@ -33,18 +31,21 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     createdAt: true,
                 },
                 orderBy: { id: "desc" },
-                take: 99999,
-            }) as members[];
-
-            members = members.map(member => ({ ...member, userId: String(member.userId) })) as any;
-            members = members.slice(0, Number(limit) || 10);
-
-            return res.status(200).json({ success: true, content: members });
+                take: Number(limit) || 10,
+            });
+              
+            const formattedMembers = members.map(member => ({
+                ...member,
+                userId: String(member.userId),
+            }));
+              
+            return res.status(200).json({ success: true, content: formattedMembers });              
             break;
         case "isp":
             if (user.role !== "business" && user.role !== "enterprise") return res.status(403).json({ success: false, message: "You must be a Business subscriber to use this feature." });
-            
-            members = await prisma.members.findMany({
+
+            const ispCount = await prisma.members.groupBy({
+                by: ["isp"],
                 where: {
                     guildId: {
                         in: servers.map(server => server.guildId),
@@ -53,30 +54,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         not: null,
                     },
                 },
-                select: {
+                _count: {
                     isp: true,
                 },
-                take: 99999,
-            }) as members[];
-
-
-            const isps = members.map(member => member.isp);
-            const uniqueIsps: Set<string | null> = new Set(isps);
+                orderBy: {
+                    _count: {
+                        isp: "desc",
+                    },
+                },
+                take: Number(limit) || 10,
+            });
               
-            let ispCount = Array.from(uniqueIsps).map(isp => ({
-                name: isp,
-                count: isps.filter(i => i === isp).length,
+            const formattedIspCount = ispCount.map(entry => ({
+                name: entry.isp,
+                count: entry._count.isp,
             }));
-            
-            ispCount = ispCount.sort((a, b) => b.count - a.count);
-            ispCount = ispCount.slice(0, Number(limit) || 10);
-
-            return res.status(200).json({ success: true, content: ispCount });
+              
+            return res.status(200).json({ success: true, content: formattedIspCount });
             break;
         case "state":
             if (user.role !== "business" && user.role !== "enterprise") return res.status(403).json({ success: false, message: "You must be a Business subscriber to use this feature." });
-            
-            members = await prisma.members.findMany({
+              
+            const stateCount = await prisma.members.groupBy({
+                by: ["state"],
                 where: {
                     guildId: {
                         in: servers.map(server => server.guildId),
@@ -85,29 +85,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         not: null,
                     },
                 },
-                select: {
+                _count: {
                     state: true,
                 },
-                take: 99999,
-            }) as members[];
-
-            const states = members.map(member => member.state);
-            const uniqueStates: Set<string | null> = new Set(states);
-
-            let stateCount = Array.from(uniqueStates).map(state => ({
-                name: state,
-                count: states.filter(s => s === state).length,
+                orderBy: {
+                    _count: {
+                        state: "desc",
+                    },
+                },
+                take: Number(limit) || 10,
+            });
+              
+            const formattedStateCount = stateCount.map(entry => ({
+                name: entry.state,
+                count: entry._count.state,
             }));
-
-            stateCount = stateCount.sort((a, b) => b.count - a.count);
-            stateCount = stateCount.slice(0, Number(limit) || 10);
-
-            return res.status(200).json({ success: true, content: stateCount });
+              
+            return res.status(200).json({ success: true, content: formattedStateCount });
             break;
         case "city":
             if (user.role !== "business" && user.role !== "enterprise") return res.status(403).json({ success: false, message: "You must be a Business subscriber to use this feature." });
-
-            members = await prisma.members.findMany({
+              
+            const cityCount = await prisma.members.groupBy({
+                by: ["city"],
                 where: {
                     guildId: {
                         in: servers.map(server => server.guildId),
@@ -116,27 +116,27 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         not: null,
                     },
                 },
-                select: {
+                _count: {
                     city: true,
                 },
-                take: 99999,
-            }) as members[];
-
-            const cities = members.map(member => member.city);
-            const uniqueCities: Set<string | null> = new Set(cities);
-
-            let cityCount = Array.from(uniqueCities).map(city => ({
-                name: city,
-                count: cities.filter(c => c === city).length,
+                orderBy: {
+                    _count: {
+                        city: "desc",
+                    },
+                },
+                take: Number(limit) || 10,
+            });
+              
+            const formattedCityCount = cityCount.map(entry => ({
+                name: entry.city,
+                count: entry._count.city,
             }));
-
-            cityCount = cityCount.sort((a, b) => b.count - a.count);
-            cityCount = cityCount.slice(0, Number(limit) || 10);
-
-            return res.status(200).json({ success: true, content: cityCount });
+              
+            return res.status(200).json({ success: true, content: formattedCityCount });
             break;
         case "country":
-            members = await prisma.members.findMany({
+            const countryCount = await prisma.members.groupBy({
+                by: ["country"],
                 where: {
                     guildId: {
                         in: servers.map(server => server.guildId),
@@ -145,24 +145,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         not: null,
                     },
                 },
-                select: {
+                _count: {
                     country: true,
                 },
-                take: 99999,
-            }) as members[];
-
-            const countries = members.map(member => member.country);
-            const uniqueCountries: Set<string | null> = new Set(countries);
-
-            let countryCount = Array.from(uniqueCountries).map(country => ({
-                name: country,
-                count: countries.filter(c => c === country).length,
+                orderBy: {
+                    _count: {
+                        country: "desc",
+                    },
+                },
+                take: Number(limit) || 10,
+            });
+              
+            const formattedCountryCount = countryCount.map(entry => ({
+                name: entry.country,
+                count: entry._count.country,
             }));
-
-            countryCount = countryCount.sort((a, b) => b.count - a.count);
-            countryCount = countryCount.slice(0, Number(limit) || 10);
-
-            return res.status(200).json({ success: true, content: countryCount });
+              
+            return res.status(200).json({ success: true, content: formattedCountryCount });
             break;
         case "server":
             var memberCount = await prisma.servers.findMany({
@@ -175,15 +174,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     customBotId: true,
                 },
             }) as any[];
-
-
+              
             memberCount = await Promise.all(memberCount.map(async (server) => {
                 var customBot = await prisma.customBots.findUnique({ where: { id: server.customBotId } });
                 var count = await prisma.members.count({ where: { guildId: server.guildId } });
                 return { name: server.name, count: count, link: `https://${customBot?.customDomain || req.headers.host}/verify/${server.guildId}` };
             }));
-
-            return res.status(200).json({ success: true, content: memberCount });
+              
+            return res.status(200).json({ success: true, content: memberCount });              
             break;
         case "vpn":
             break;

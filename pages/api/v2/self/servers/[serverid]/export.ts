@@ -9,12 +9,12 @@ import { prisma } from "../../../../../../src/db";
 import withAuthentication from "../../../../../../src/withAuthentication";
 
 const respVarity: { [key: string]: string[] } = {
-    id: ["id", "Id", "ID", "iD", "#", "memberId", "member_id", "Member_id", "Member_Id", "member_Id", "member_Id"],
-    userId: ["userId", "user_id", "User_id", "User_Id", "user_Id", "user_Id", "discord_id", "Discord_id", "Discord_Id", "discord_Id", "discord_Id", "discordId", "DiscordId", "discordid", "Discordid", "discord", "Discord"],
-    accessToken: ["accessToken", "access_token", "Access_token", "Access_Token", "access_Token", "access_Token", "access", "Access", "token", "Token", "oAuth2Token", "oAuth2token", "oauth2Token", "oauth2token", "oAuth2", "oAuth2", "oauth2", "oauth2"],
-    refreshToken: ["refreshToken", "refresh_token", "Refresh_token", "Refresh_Token", "refresh_Token", "refresh_Token", "refresh", "Refresh"],
-    username: ["username", "Username", "user_name", "user_Name", "user-name", "user-Name", "user_Name", "user_Name", "name", "Name"],
-    createdAt: ["createdAt", "created_at", "Created_at", "Created_At", "created_At", "created_At", "created", "Created", "creation", "date"],
+    id: ["id"],
+    userId: ["userId"],
+    accessToken: ["accessToken", "access_token"],
+    refreshToken: ["refreshToken", "refresh_token"],
+    username: ["username", "user_name", "name"],
+    createdAt: ["createdAt", "created_at"],
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts) {

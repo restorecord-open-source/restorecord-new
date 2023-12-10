@@ -30,7 +30,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     },
                     data: {
                         role: plan,
-                        expiry: new Date(expiry),
+                        expiry: plan === "free" ? null : new Date(expiry),
                     },
                 });
 
