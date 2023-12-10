@@ -66,7 +66,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             });
 
             if ((user.role === "free" && accountBot.length >= 1) || (user.role === "premium" && accountBot.length >= 5)) {
-                return res.status(400).json({ success: false, message: `Your Subscription is limited to ${user.role === 'free' ? 1 : 5} bots.` });
+                return res.status(400).json({ success: false, message: `Your Subscription is limited to ${user.role === "free" ? 1 : 5} bots.` });
             }
 
             if (publicKey && (user.role !== "business" && user.role !== "enterprise")) {

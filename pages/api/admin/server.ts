@@ -12,8 +12,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
                 const { query, serverId } = req.body;
 
-                let search: any = query ?? '';
-                let fullId: any = serverId ?? '';
+                let search: any = query ?? "";
+                let fullId: any = serverId ?? "";
                 let idSearch: any = search ? (isNaN(search) ? undefined : (search.length > 16 ? undefined : parseInt(search))) : undefined;
                 let guildIdSearch: any = search ? (isNaN(search) ? undefined : (search.length >= 17 && search.length <= 19 ? BigInt(search) : undefined)) : undefined;
                 

@@ -15,10 +15,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 let guildIds: any = servers.map((server: any) => server.guildId);
 
                 const limit: any = req.query.max ? req.query.max : 50;
-                const page = req.query.page ?? '';
+                const page = req.query.page ?? "";
 
 
-                let search: any = req.query.search ?? '';
+                let search: any = req.query.search ?? "";
                 const count = await prisma.blacklist.count({ 
                     where: { 
                         guildId: { in: guildIds },

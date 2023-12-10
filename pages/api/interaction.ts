@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { InteractionResponseFlags, } from 'discord-interactions';
+import { InteractionResponseFlags, } from "discord-interactions";
 import { APIEmbed, APIInteractionResponse, ApplicationCommandType } from "discord-api-types/v10"
 import withDiscordInteraction from "../../src/withDiscordInteraction";
 import withErrorHandler from "../../src/withErrorHandler";

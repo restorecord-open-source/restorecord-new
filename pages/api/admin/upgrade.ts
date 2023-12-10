@@ -12,8 +12,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             try {
                 if (!user.admin) return res.status(400).json({ success: false, message: "Account is not an admin." });
 
-                const fullId: any = req.body.userId ?? '';
-                const plan: string = req.body.plan ?? '';
+                const fullId: any = req.body.userId ?? "";
+                const plan: string = req.body.plan ?? "";
                 const expiry: string = req.body.expiry ?? null;
 
                 const account = await prisma.accounts.findUnique({

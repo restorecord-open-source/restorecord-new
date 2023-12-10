@@ -30,6 +30,31 @@ export const banReasons = [
         reason: "other",
         message: "Your account has been banned for unspecified reasons. Our team has determined that your behavior is a risk to our community's safety and well-being."
     },
+    {
+        id: 6,
+        reason: "nsfw, gore or violence",
+        message: "Your account has been banned for posting extreme NSFW, gore or violence."
+    },
+    {
+        id: 7,
+        reason: "multiple accounts",
+        message: "Your account has been banned for having multiple accounts."
+    },
+    {
+        id: 8,
+        reason: "hate speech or harassment",
+        message: "Your account has been banned for hate speech or harassment."
+    },
+    {
+        id: 9,
+        reason: "illegal activity",
+        message: "Your account has been banned for illegal activity."
+    },
+    {
+        id: 10,
+        reason: "impersonation",
+        message: "Your account has been banned for impersonation."
+    },
 ];
 
 async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts) {
@@ -39,8 +64,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             try {
                 if (!user.admin) return res.status(400).json({ success: false, message: "Account is not an admin." });
 
-                const fullId: any = req.body.userId ?? '';
-                const reason: number = req.body.reason ?? '';
+                const fullId: any = req.body.userId ?? "";
+                const reason: number = req.body.reason ?? "";
 
                 const account = await prisma.accounts.findUnique({
                     where: {
@@ -123,7 +148,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             try {
                 if (!user.admin) return res.status(400).json({ success: false, message: "Account is not an admin." });
 
-                const help: any = req.query.h ?? '';
+                const help: any = req.query.h ?? "";
                 if (help === "1") {
                     return res.status(200).json({ status: 200, reasons: banReasons });
                 }

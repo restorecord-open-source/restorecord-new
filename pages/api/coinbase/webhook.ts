@@ -24,8 +24,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         let CBEvent: CBEvent;
 
         const rawBody = await buffer(req).then((buf) => buf.toString());
-        const signature: any = req.headers['x-cc-webhook-signature'] as any;
-        const sharedSecret = '6c2c9cc1-c804-4932-a16c-a5be44258d1d';
+        const signature: any = req.headers["x-cc-webhook-signature"] as any;
+        const sharedSecret = "6c2c9cc1-c804-4932-a16c-a5be44258d1d";
 
         try {
             Webhook.verifySigHeader(rawBody, signature, sharedSecret);

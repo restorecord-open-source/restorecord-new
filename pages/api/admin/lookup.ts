@@ -10,8 +10,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             try {
                 if (!user.admin) return res.status(400).json({ success: false, message: "Account is not an admin." });
 
-                let search: any = req.body.query ?? '';
-                let fullId: any = req.body.userId ?? '';
+                let search: any = req.body.query ?? "";
+                let fullId: any = req.body.userId ?? "";
                 let idSearch: any = search ? (isNaN(search) ? undefined : parseInt(search)) : undefined;
                 let emailSearch: any = search ? (search.includes("@") ? search : undefined) : undefined;
 
@@ -23,7 +23,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         AND: [
                             ...(!fullId ? [] : [{ id: { equals: parseInt(fullId) as number } }]),
                             { id: { equals: idSearch ? parseInt(idSearch) as number : undefined } },
-                            { username: { contains: search ? (idSearch ? '' : (emailSearch ? '' : search)) : undefined } },
+                            { username: { contains: search ? (idSearch ? "" : (emailSearch ? "" : search)) : undefined } },
                             { email: { contains: emailSearch ? emailSearch : undefined } }
                         ]
                     },

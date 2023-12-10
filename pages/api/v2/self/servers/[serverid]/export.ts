@@ -25,7 +25,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         const options = (req.query.options as string).split(",");
         const format = (req.query.format as string) || "csv";
         if (!serverId) return res.status(400).json({ success: false, message: "Server ID not provided" });
-        if (options === null || options === undefined || options[0] === '') return res.status(400).json({ success: false, message: "No options selected" });
+        if (options === null || options === undefined || options[0] === "") return res.status(400).json({ success: false, message: "No options selected" });
 
         if (user.role !== "business" && user.role !== "enterprise") return res.status(400).json({ success: false, message: "You must be a Business subscriber to use this feature." });
 

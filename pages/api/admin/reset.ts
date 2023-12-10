@@ -10,7 +10,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             try {
                 if (!user.admin) return res.status(400).json({ success: false, message: "Account is not an admin." });
 
-                let serverId: any = req.body.serverId ?? '';
+                let serverId: any = req.body.serverId ?? "";
                 if (serverId === undefined || serverId === null || serverId === "") return res.status(400).send("No server provided.");
 
                 const server = await prisma.servers.findUnique({ where: { id: parseInt(serverId) as number } });

@@ -11,7 +11,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             try {
                 if (!user.admin) return res.status(400).json({ success: false, message: "Account is not an admin." });
 
-                let id: any = req.body.id ?? '';
+                let id: any = req.body.id ?? "";
 
                 if (id == undefined || id == null || id == "") return res.status(400).json({ success: false, message: "No search query provided." });
 
