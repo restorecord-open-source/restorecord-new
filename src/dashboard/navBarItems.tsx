@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 
-import Home from '@mui/icons-material/Home';
+import Home from "@mui/icons-material/Home";
 import Dns from "@mui/icons-material/Dns";
 import Backup from "@mui/icons-material/Backup";
 import Code from "@mui/icons-material/Code";
@@ -8,9 +8,8 @@ import VerifiedUser from "@mui/icons-material/VerifiedUser";
 import AdminPanelSettings from "@mui/icons-material/AdminPanelSettings";
 import AccountBalanceWallet from "@mui/icons-material/AccountBalanceWallet";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
-import Help from "@mui/icons-material/HelpOutline";
-import FindInPage from "@mui/icons-material/FindInPage";
 import PersonOffIcon from "@mui/icons-material/PersonOff";
+import HistoryIcon from "@mui/icons-material/History";
 
 const navItemWrappers: navItemWrapper[] = [
     {
@@ -22,6 +21,11 @@ const navItemWrappers: navItemWrapper[] = [
         name: "Servers",
         icon: <Dns />,
         href: "/dashboard/server",
+    },
+    {
+        name: "Migrations",
+        icon: <HistoryIcon />,
+        href: "/dashboard/migration",
     },
     {
         name: "Backups",

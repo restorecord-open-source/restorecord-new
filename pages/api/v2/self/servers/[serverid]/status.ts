@@ -9,6 +9,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
     if (req.method !== "GET") return res.status(405).json({ code: 0, message: "Method not allowed" });
 
     try {
+        if (user.role !== "business" && user.role !== "enterprise") return res.status(400).json({ success: false, message: "You must be a Business subscriber to use this feature." });
+
         const serverId: any = String(req.query.serverid) as any;
 
         const server = await prisma.servers.findFirst({ where: { guildId: BigInt(serverId), ownerId: user.id } });
@@ -31,8 +33,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 invalid: migration.invalidCount,
                 failed: migration.failedCount,
                 blacklisted: migration.blacklistedCount,
-                startedAt: migration.startedAt,
-                updatedAt: migration.updatedAt,
                 createdAt: migration.createdAt,
             }
         });
