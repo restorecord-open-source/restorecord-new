@@ -253,6 +253,7 @@ export const countries: { code: string; name: string }[] = [
     { code: "TJ", name: "Tajikistan" },
     { code: "TZ", name: "Tanzania" },
     { code: "TH", name: "Thailand" },
+    { code: "NL", name: "Netherlands" },
     { code: "NL", name: "The Netherlands" },
     { code: "TL", name: "Timor Leste" },
     { code: "TG", name: "Togo" },
