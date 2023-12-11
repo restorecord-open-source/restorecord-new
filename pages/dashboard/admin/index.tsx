@@ -34,6 +34,7 @@ import PaymentsIcon from "@mui/icons-material/Payments";
 import TableHead from "@mui/material/TableHead";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import theme from "../../../src/theme";
+import { IntlRelativeTime } from "../../../src/functions";
 
 export default function Admin() {
     const router = useRouter();
@@ -64,10 +65,10 @@ export default function Admin() {
 
     if (!data.admin) return <ErrorPage statusCode={404} /> 
 
-    function relativeTime(date: Date): string {
-        const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
-        return seconds < 60 ? `${seconds}s` : seconds < 3600 ? `${Math.floor(seconds / 60)}m` : seconds < 86400 ? `${Math.floor(seconds / 3600)}h` : seconds < 604800 ? `${Math.floor(seconds / 86400)}d` : seconds < 2629800 ? `${Math.floor(seconds / 604800)}w` : seconds < 31557600 ? `${Math.floor(seconds / 2629800)}mo` : `${Math.floor(seconds / 31557600)}y`;
-    }
+    // function relativeTime(date: Date): string {
+    // const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+    // return seconds < 60 ? `${seconds}s` : seconds < 3600 ? `${Math.floor(seconds / 60)}m` : seconds < 86400 ? `${Math.floor(seconds / 3600)}h` : seconds < 604800 ? `${Math.floor(seconds / 86400)}d` : seconds < 2629800 ? `${Math.floor(seconds / 604800)}w` : seconds < 31557600 ? `${Math.floor(seconds / 2629800)}mo` : `${Math.floor(seconds / 31557600)}y`;
+    // }
 
     function tableElement(name: string, value: string, icon?: any) {
         return (
@@ -85,7 +86,7 @@ export default function Admin() {
                     <Toolbar />
 
                     <Container maxWidth="xl">
-                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
                             <CardContent sx={{ pb: "1rem !important" }}>
                                 <Typography variant="h5" sx={{ mb: 2, fontWeight: "500" }}>
                                     Admin Panel
@@ -100,9 +101,8 @@ export default function Admin() {
                             </CardContent>
                         </Paper>
                         
-                        {/* 2 split with stats and last purchases */}
                         <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={{ xs: 1, sm: 2 }} sx={{ mt: 1 }}>
-                            <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", width: "100%" }}>
+                            <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", width: "100%", border: "1px solid #18182e" }}>
                                 <CardContent sx={{ pb: "1rem !important" }}>
                                     <Typography variant="h5" sx={{ mb: 2, fontWeight: "500" }}>
                                         Stats
@@ -116,6 +116,7 @@ export default function Admin() {
                                                     {tableElement("Premium", stats.accountsPremium.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), <SavingsIcon sx={{ mr: 1, mb: -0.75 }} />)}
                                                     {tableElement("Business", stats.accountsBusiness.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), <PaymentsIcon sx={{ mr: 1, mb: -0.75 }} />)}
                                                     {tableElement("Servers", stats.servers.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), <StorageIcon sx={{ mr: 1, mb: -0.75 }} />)}
+                                                    {tableElement("Migrations", `${stats.activeMigrations.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} (${stats.migrations.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")})`, <StorageIcon sx={{ mr: 1, mb: -0.75 }} />)}
                                                     {tableElement("Members", "~" + stats.members.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), <GroupsIcon sx={{ mr: 1, mb: -0.75 }} />)}
                                                     {tableElement("Bots", stats.customBots.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), <SmartToyIcon sx={{ mr: 1, mb: -0.75 }} />)}
                                                     {tableElement("Revenue", `~$${Math.round(stats.totalRevenue + (6289 /* shoppy */ + 16133 /* sellix */ + 3731 /* sellapp */)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} (${stats.payments.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")})`, <AccountBalanceIcon sx={{ mr: 1, mb: -0.75 }} />)}
@@ -126,7 +127,7 @@ export default function Admin() {
                                 </CardContent>
                             </Paper>
 
-                            <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", width: "100%" }}>
+                            <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", width: "100%", border: "1px solid #18182e" }}>
                                 <CardContent sx={{ pb: "1rem !important" }}>
                                     {statsLoading ? <CircularProgress /> : (
                                         <>
@@ -154,8 +155,7 @@ export default function Admin() {
                                                                 {isMobile ? ( <></> ) : ( <TableCell component="th" scope="row"><Typography variant="body1">{purchase.id}</Typography></TableCell> )}
                                                                 <TableCell><Typography variant="body1">{purchase.plan}</Typography></TableCell>
                                                                 {/* <TableCell><Typography variant="body1">{purchase.date}</Typography></TableCell> */}
-                                                                {/* convert date to relative time like 7s ago etc */}
-                                                                <TableCell><Typography variant="body1">{relativeTime(new Date(purchase.date))}</Typography></TableCell>
+                                                                <TableCell><Typography variant="body1">{IntlRelativeTime(new Date(purchase.date).getTime())}</Typography></TableCell>
                                                             </TableRow>
                                                         ))}
                                                     </TableBody>

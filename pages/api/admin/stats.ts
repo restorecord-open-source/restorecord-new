@@ -15,15 +15,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             return res.status(200).json(JSON.parse(cached));
         }
 
-        const [ accountsCount, accountsBusinessCount, accountsPremiumCount, serversCount, serversPullingCount, membersCount, customBotsCount, payments ] = await Promise.all([
+        const [accountsCount, accountsBusinessCount, accountsPremiumCount, serversCount, serversPullingCount, membersCount, customBotsCount, migrations, activeMigrations, payments] = await Promise.all([
             prisma.accounts.count(),
             prisma.accounts.count({ where: { role: "business" } }),
             prisma.accounts.count({ where: { role: "premium" } }),
             prisma.servers.count(),
             prisma.servers.count({ where: { pulling: true } }),
-            // prisma.members.count(),
             prisma.$queryRaw`SHOW TABLE STATUS WHERE Name = 'members'`.then((res: any) => Number(res[0].Rows)),
             prisma.customBots.count(),
+            prisma.migrations.count(),
+            prisma.migrations.count({
+                where: {
+                    status: "PULLING",
+                    updatedAt: {
+                        gte: new Date(new Date().getTime() - 15 * 60000),
+                    }
+                }
+            }),
             prisma.payments.findMany({
                 where: {
                     OR: [{ payment_status: "CONFIRMED" }, { payment_status: "active" }],
@@ -32,17 +40,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             }),
         ]);
 
-        const formattedLastPurchases = payments.slice(0, 5).map(payment => ({
+        const paymentsCompleted = payments.filter(payment => payment.payment_status === "CONFIRMED" || payment.payment_status === "active");
+
+        const formattedLastPurchases = paymentsCompleted.slice(0, 5).map(payment => ({
             id: payment.id,
             plan: getFormattedPlan(payment.type),
             date: new Date(payment.createdAt),
         }));
 
-        const paymentsCompleted = payments.filter(payment => payment.payment_status === "CONFIRMED" || payment.payment_status === "active");
-        const totalRevenue = calculateTotalRevenue(paymentsCompleted);
-        const totalRevenueToday = calculateTotalRevenueToday(paymentsCompleted);
-        const totalRevenue7d = calculateTotalRevenue7d(paymentsCompleted);
-        const totalRevenue30d = calculateTotalRevenue30d(paymentsCompleted);
+        const totalRevenue = paymentsCompleted.reduce((total, payment) => total + payment.amount, 0) / 100;
+        const totalRevenueToday = calcRevenue(paymentsCompleted, new Date());
+        const totalRevenue7d = calcRevenue(paymentsCompleted, new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000));
+        const totalRevenue30d = calcRevenue(paymentsCompleted, new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000));
 
         const response = {
             accounts: accountsCount,
@@ -50,6 +59,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             accountsPremium: accountsPremiumCount,
             servers: serversCount,
             serversPulling: serversPullingCount,
+            migrations: migrations,
+            activeMigrations: activeMigrations,
             members: membersCount,
             customBots: customBotsCount,
             payments: payments.length,
@@ -79,26 +90,9 @@ function getFormattedPlan(type: string): string {
         return type.charAt(0).toUpperCase() + type.slice(1);
     }
 }
-function calculateTotalRevenue(payments: any[]): number {
-    return payments.reduce((total, payment) => total + payment.amount, 0) / 100;
+
+function calcRevenue(payments: any[], startDate: Date): number {
+    return payments.filter(payment => new Date(payment.createdAt) >= startDate).reduce((total, payment) => total + payment.amount, 0) / 100;
 }
-  
-function calculateTotalRevenueToday(payments: any[]): number {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return payments.filter(payment => new Date(payment.createdAt) >= today).reduce((total, payment) => total + payment.amount, 0) / 100;
-}
-  
-function calculateTotalRevenue7d(payments: any[]): number {
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    return payments.filter(payment => new Date(payment.createdAt) >= sevenDaysAgo).reduce((total, payment) => total + payment.amount, 0) / 100;
-}
-  
-function calculateTotalRevenue30d(payments: any[]): number {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    return payments.filter(payment => new Date(payment.createdAt) >= thirtyDaysAgo).reduce((total, payment) => total + payment.amount, 0) / 100;
-}
-  
+
 export default withAuthentication(handler);
