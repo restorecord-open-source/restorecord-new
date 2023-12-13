@@ -65,9 +65,13 @@ export default function NavBar({ ...props }: any) {
         userDropdownRef.current.style.display = "none";
         setPathName(router.pathname);
 
-        if (isMobile) setOpenDrawer(false);
-        else setOpenDrawer(true);
-    }, [router.pathname, isMobile]);
+        if (isMobile) {
+            setOpenDrawer(false);
+            document.body.style.overflow = "auto";
+        } else { 
+            setOpenDrawer(true);
+        }
+    }, [router.pathname, isMobile])
 
     return (
         <>
@@ -75,11 +79,11 @@ export default function NavBar({ ...props }: any) {
                 <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, background: "#09090d", boxShadow: "none", borderBottom: "1px solid rgb(38, 38, 42)" }}>
                     <Toolbar>
                         {isMobile && (
-                            <IconButton onClick={() => setOpenDrawer(!openDrawer)} edge="start" sx={{ marginRight: (theme) => theme.spacing(2) }} color="inherit" aria-label="menu">
+                            <IconButton onClick={() => { setOpenDrawer(!openDrawer); document.body.style.overflow = openDrawer ? "auto" : "hidden"; }} edge="start" sx={{ marginRight: (theme) => theme.spacing(2) }} color="inherit" aria-label="menu">
                                 <MenuIcon />
                             </IconButton>
                         )}
-                        <Typography variant="h6" noWrap component="div" sx={{  flexGrow: 0, cursor: "pointer" }} onClick={() => { router.push("/dashboard") }}>
+                        <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 0, cursor: "pointer", fontWeight: "600" }} onClick={() => { router.push("/dashboard") }}>
                             RestoreCord
                         </Typography>
 
