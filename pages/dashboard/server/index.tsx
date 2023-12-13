@@ -228,14 +228,14 @@ export default function Server() {
                                 {new Date(server.pullTimeout).getTime() - new Date().getTime() > 0 ? (
                                     <Tooltip title={`Cooldown: ${formatEstimatedTime(new Date(server.pullTimeout).getTime() - new Date().getTime())}`} placement="top" arrow>
                                         <Badge badgeContent={server.pulling ? "Pulling" : (new Date(server.pullTimeout).getTime() - new Date().getTime() > 0 ? "Cooldown" : "Idle")} color={new Date(server.pullTimeout).getTime() - new Date().getTime() > 0 ? "warning" : "info"} sx={{ [`& .MuiBadge-badge`]: { mt: "0.95rem", mr: "-3rem", color: "#fff", padding: "0.75rem", fontSize: "0.75rem", fontWeight: "bold", display: (server.pulling || new Date(server.pullTimeout).getTime() - new Date().getTime() > 0) ? "flex" : "none" } }}>
-                                            <Typography variant="h6" sx={{ fontWeight: "500", wordBreak: "break-all" }}>
+                                            <Typography variant="h6" sx={{ fontWeight: "500", wordBreak: "break-word" }}>
                                                 {server.name}
                                             </Typography>
                                         </Badge>
                                     </Tooltip>
                                 ) : (
                                     <Badge badgeContent={server.pulling ? "Pulling" : (new Date(server.pullTimeout).getTime() - new Date().getTime() > 0 ? "Cooldown" : "Idle")} color={new Date(server.pullTimeout).getTime() - new Date().getTime() > 0 ? "warning" : "info"} sx={{ [`& .MuiBadge-badge`]: { mt: "0.95rem", mr: "-3rem", color: "#fff", padding: "0.75rem", fontSize: "0.75rem", fontWeight: "bold", display: (server.pulling || new Date(server.pullTimeout).getTime() - new Date().getTime() > 0) ? "flex" : "none" } }}>
-                                        <Typography variant="h6" sx={{ fontWeight: "500", wordBreak: "break-all" }}>
+                                        <Typography variant="h6" sx={{ fontWeight: "500", wordBreak: "break-word" }}>
                                             {server.name}
                                         </Typography>
                                     </Badge>

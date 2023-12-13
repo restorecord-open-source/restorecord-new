@@ -280,7 +280,7 @@ export default function Dashboard() {
                         {!recentVerifiedLoading && recentVerified.content.map((member: any) => { 
                             return (
                                 <List key={member.id} sx={{ width: "100%", maxWidth: 360 }}>
-                                    <ListItem key={member.id} sx={{ wordBreak: "break-all" }} disablePadding={true}>
+                                    <ListItem key={member.id} sx={{ wordBreak: "break-word" }} disablePadding={true}>
                                         <ListItemAvatar>
                                             <AvatarFallback url={member.avatar ? `https://cdn.discordapp.com/avatars/${member.userId}/${member.avatar}.png?size=128` : `https://cdn.discordapp.com/embed/avatars/${Number(member.username.split("#")[1]) % 5}.png?size=128`} fallback={`https://cdn.discordapp.com/embed/avatars/${Number(member.username.split("#")[1]) % 5}.png?size=128`} username={member.username} />
                                         </ListItemAvatar>
@@ -298,7 +298,7 @@ export default function Dashboard() {
                         {!recentVerifiedLoading && recentVerified.content.length === 0 && (
                             <List sx={{ width: "100%", maxWidth: 360 }}>
                                 {Array.from({ length: 6 }, (_, i) => (
-                                    <ListItem key={i} sx={{ wordBreak: "break-all" }} disablePadding={true}>
+                                    <ListItem key={i} sx={{ wordBreak: "break-word" }} disablePadding={true}>
                                         <ListItemAvatar>
                                             <Avatar sx={{ width: "40px", height: "40px" }} />
                                         </ListItemAvatar>
@@ -333,30 +333,14 @@ export default function Dashboard() {
             <Grid item xs={12} md={6}>
                 <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%", border: "1px solid #18182e" }}>
                     <CardContent sx={{ pb: "1rem !important" }}>
-                        {topAnalyticsLoading && ( <CircularProgress /> )}
+                        {topAnalyticsLoading && <CircularProgress />}
 
-
-                        {/* stack with text left and select button on right */}
                         {!topAnalyticsLoading && (
                             <>
                                 <Stack direction="row" spacing={1} sx={{ mb: 2 }} alignItems="center" justifyContent={"space-between"}>
-                                    <Typography variant="h4" sx={{ fontWeight: "700" }}>Top Analytics</Typography>
+                                    <Typography variant="h4" sx={{ fontWeight: "700", wordBreak: "break-word" }}>Top Analytics</Typography>
                                     <FormControl sx={{ minWidth: 120 }}>
-                                        <Select
-                                            value={statType}
-                                            onChange={(e) => {
-                                                const selectedValue = e.target.value as any;
-                                                if (data.role === "business" || data.role === "enterprise") {
-                                                    setStatType(selectedValue);
-                                                } else {
-                                                    // Handle the case when the user doesn't have the required role.
-                                                    // You can show a tooltip or any other appropriate message.
-                                                    console.log("You need to upgrade to access this feature.");
-                                                }
-                                            }}
-                                            displayEmpty
-                                            inputProps={{ "aria-label": "Without label" }}
-                                        >
+                                        <Select value={statType} onChange={(e) => { if (data.role === "business" || data.role === "enterprise") setStatType(e.target.value as any)}} displayEmpty={true} inputProps={{ "aria-label": "Without label" }}>
                                             <MenuItem value="country">Country</MenuItem>
                                             <MenuItem value="server">Server</MenuItem>
                                             <MenuItem value="state" disabled={data.role !== "business" && data.role !== "enterprise"}>
@@ -392,11 +376,8 @@ export default function Dashboard() {
                                 return (
                                     <TableRow key={analytic.country} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
                                         <TableCell>
-                                            {/* look up country code from countries via name */}
                                             <Stack direction="row" spacing={1} alignItems="center">
-                                                {statType === "country" && (
-                                                    countries.find((c: any) => c.name === analytic.name) && (<Avatar alt="Country" src={`https://cdn.ipregistry.co/flags/twemoji/${countries.find((c: any) => c.name === analytic.name)?.code.toLowerCase()}.svg`} sx={{ width: 20, height: 20, borderRadius: 0 }} />)
-                                                )}
+                                                {statType === "country" && countries.find((c: any) => c.name === analytic.name) && (<Avatar alt="Country" src={`https://cdn.ipregistry.co/flags/twemoji/${countries.find((c: any) => c.name === analytic.name)?.code.toLowerCase()}.svg`} sx={{ width: 20, height: 20, borderRadius: 0 }} />)}
                                                 <Typography variant="body1" color="grey.200">
                                                     {analytic.link ? <a href={analytic.link} target="_blank" rel="noopener noreferrer">{analytic.name}</a> : analytic.name}
                                                 </Typography>

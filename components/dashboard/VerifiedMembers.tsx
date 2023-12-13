@@ -168,7 +168,7 @@ export default function VerifiedMembers({ user }: any) {
                     {(!loadingInfo && userInfo) ? (
                         <>
                             <Stack spacing={1} direction="row" alignItems="center" sx={{ borderRadius: "1rem", flexDirection: { xs: "column", md: "row" } }}>
-                                <AvatarFallback url={userInfo.avatar ? `https://cdn.discordapp.com/avatars/${userInfo.userId}/${userInfo.avatar}.png?size=512` : `https://cdn.discordapp.com/embed/avatars/${Number(userInfo.username.split("#")[1]) % 5}.png?size=512`} fallback={`https://cdn.discordapp.com/embed/avatars/${Number(userInfo.username.split("#")[1]) % 5}.png?size=512`} username={userInfo.username} />
+                                <AvatarFallback url={userInfo.avatar ? `https://cdn.discordapp.com/avatars/${userInfo.id}/${userInfo.avatar}.png?size=512` : `https://cdn.discordapp.com/embed/avatars/${Number(userInfo.username.split("#")[1]) % 5}.png?size=512`} fallback={`https://cdn.discordapp.com/embed/avatars/${Number(userInfo.username.split("#")[1]) % 5}.png?size=512`} username={userInfo.username} />
 
                                 <Tooltip title={`${userInfo.username}#${userInfo.discriminator}`} placement="top">
                                     <Typography variant="h5" sx={{ fontWeight: "600", zIndex: 9999 }}>

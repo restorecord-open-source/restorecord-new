@@ -137,13 +137,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     break;
                 case "asn":
                     if (user.role === "premium") return res.status(400).json({ success: false, message: "You need to have a Business subscription to blacklist ASN's." });
-                    if (!value.match(/^[0-9]{1,10}$/)) return res.status(400).json({ success: false, message: "Invalid ASN." });
+                    if (!value.replace("AS", "").match(/^[0-9]{1,10}$/)) return res.status(400).json({ success: false, message: "Invalid ASN." });
                     if (blacklist.find((item: any) => (item.value === value && item.guildId === BigInt(guildId) as bigint))) return res.status(400).json({ success: false, message: "This ASN is already blacklisted in this server." });
 
                     await prisma.blacklist.create({
                         data: {
                             type: 2,
-                            value: String(value) as string,
+                            value: String(value.replace("AS", "")) as string,
                             reason: reason,
                             guildId: BigInt(guildId)
                         }
