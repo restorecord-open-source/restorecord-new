@@ -234,7 +234,7 @@ export default function Home() {
                                 What our customers say
                             </Typography>
 
-                            <Typography variant="body1" sx={{ fontStyle: "normal", fontWeight: 400, fontSize: { sm: 10, md: 20 }, textAlign: "center", color: theme.palette.text.primary, my: 4, mx: 2, wordWrap: "break-all" }}>
+                            <Typography variant="body1" sx={{ fontStyle: "normal", fontWeight: 400, fontSize: { sm: 10, md: 20 }, textAlign: "center", color: theme.palette.text.primary, my: 4, mx: 2, wordWrap: "break-word" }}>
                                 We are proud to have helped thousands of businesses grow their sales and increase their revenue.
                             </Typography>
 

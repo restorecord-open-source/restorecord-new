@@ -5,14 +5,24 @@ import { Prisma } from "@prisma/client";
 
 const redis = createRedisInstance();
 
+const blockedWords = [
+    "porn",
+    "nsfw",
+    "sex",
+    "s3x",
+    "p0rn",
+    "invites",
+]
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== "GET") return res.status(405).json({ success: false, message: "Method not allowed" });
 
     try {
         const search = req.query.q ? String(req.query.q) : undefined;
-        const cached = await redis.get(`discovery`);
-        if (cached && !search) return res.status(200).json({ success: true, servers: JSON.parse(cached) });
         if (search && (search.length < 3 || search.length > 99)) return res.status(200).json({ success: true, servers: [] });
+
+        const limit: number = req.query.max ? parseInt(req.query.max as string) : 39;
+        const page: number = req.query.page ? parseInt(req.query.page as string) : 0;
 
         const servers = await prisma.servers.findMany({
             select: {
@@ -33,36 +43,40 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             },
             where: {
                 AND: [
-                    {
-                        locked: false,
-                    },
-                    {
-                        discoverable: 1
-                    },
-                    
+                    { locked: false },
+                    { discoverable: 1 },
                     ...(search && (search.length >= 3 && search.length <= 99)) ? [{
                         name: {
                             contains: search
                         }
                     }] : []
                 ],
-                NOT: [
-                    { name: { contains: "porn" } },
-                    { name: { contains: "nsfw" } },
-                    { name: { contains: "sex" } },
-                    { name: { contains: "s3x" } },
-                    { name: { contains: "p0rn" } },
-                    { name: { contains: "invites" } },
-                    { name: { contains: "= nitro" } },
-                ]
+                NOT: [...blockedWords.map(word => ({ name: { contains: word } }))]
             },
-            take: 39,
             orderBy: {
                 createdAt: "desc"
-            }
+            },
+            skip: page ? (page - 1) * limit : 0,
+            take: limit > 99 ? 99 : limit
         });
 
-        servers.sort(() => Math.random() - 0.5);
+        if (!servers || servers.length === 0) return res.status(200).json({ success: true, pages: 0, servers: [] });
+
+        const serverCount = await prisma.servers.count({
+            where: {
+                AND: [
+                    { locked: false },
+                    { discoverable: 1 },
+                    ...(search && (search.length >= 3 && search.length <= 99)) ? [{
+                        name: {
+                            contains: search
+                        }
+                    }] : []
+                ],
+                NOT: [...blockedWords.map(word => ({ name: { contains: word } }))]
+            },
+            take: 1000,
+        });
 
         servers.forEach(server => {
             server.guildId = String(server.guildId) as any;
@@ -70,10 +84,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             server.customBot.customDomain = server.customBot?.customDomain ? String(server.customBot.customDomain) : "restorecord.com" as any;
         });
 
-        // cache the servers for 1 hour
         search ? null : await redis.set("discovery", JSON.stringify(servers), "EX", 1800);
 
-        return res.status(200).json({ success: true, servers });
+        return res.status(200).json({ success: true, pages: Math.ceil(serverCount / limit), servers });
     }
     catch (err: any) {
         console.error(err);

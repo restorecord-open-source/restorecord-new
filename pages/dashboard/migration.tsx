@@ -1,42 +1,31 @@
-import { useRouter } from "next/router";
 import { useQuery } from "react-query";
-import { useEffect, useState } from "react";
-import { darken } from "@mui/material/styles";
-import { grey } from "@mui/material/colors";
-import { IntlRelativeTime, formatEstimatedTime, stringAvatar } from "../../src/functions";
+import { useRouter } from "next/router";
 import { useToken } from "../../src/token";
-import { makeXTrack } from "../../src/getIPAddress";
+import { useEffect, useState } from "react";
+import { IntlRelativeTime, stringAvatar } from "../../src/functions";
 
-import NavBar from "../../components/dashboard/navBar";
-import getUser from "../../src/dashboard/getUser";
 import theme from "../../src/theme";
-import LoadingButton from "../../components/misc/LoadingButton";
+import getUser from "../../src/dashboard/getUser";
+import NavBar from "../../components/dashboard/navBar";
 
 import axios from "axios";
-import Link from "next/link"
 
 import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import Button from "@mui/material/Button";
-import CardContent from "@mui/material/CardContent";
-import Container from "@mui/material/Container";
-import Grid from "@mui/material/Grid";
-import Paper from "@mui/material/Paper";
-import Typography from "@mui/material/Typography";
-import Avatar from "@mui/material/Avatar";
-import Stack from "@mui/material/Stack";
 import Alert from "@mui/material/Alert";
+import Stack from "@mui/material/Stack";
+import Paper from "@mui/material/Paper";
+import Avatar from "@mui/material/Avatar";
+import Toolbar from "@mui/material/Toolbar";
 import Snackbar from "@mui/material/Snackbar";
-import MuiLink from "@mui/material/Link";
-import IconButton from "@mui/material/IconButton";
-import CircularProgress from "@mui/material/CircularProgress";
-import Badge from "@mui/material/Badge";
-import Tooltip from "@mui/material/Tooltip";
 import Accordion from "@mui/material/Accordion";
+import Container from "@mui/material/Container";
+import Typography from "@mui/material/Typography";
+import CardContent from "@mui/material/CardContent";
 import LinearProgress from "@mui/material/LinearProgress";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import CircularProgress from "@mui/material/CircularProgress";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { LinearProgressProps } from "@mui/material/LinearProgress";
 
 
@@ -144,7 +133,7 @@ export default function Server() {
         return (
             <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between" sx={{ "@media screen and (max-width: 600px)": { flexDirection: "column" } }}>
                 <Typography variant="h4" sx={{ fontWeight: "700" }}>
-                    Migration Status
+                    Migrations
                 </Typography>
             </Stack>
         )
@@ -154,7 +143,7 @@ export default function Server() {
         return (
             <Accordion sx={{ borderRadius: "1rem", border: "1px solid #18182e", mt: "1rem", padding: "0.5rem" }} key={server.id} id={`server_${server.guildId}`} expanded={migration.open} onChange={() => { setMigrations(migrations.map((migration) => migration.guildId === server.guildId ? { ...migration, open: !migration.open } : migration)) }}>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header" sx={{ "& .MuiAccordionSummary-expandIconWrapper.Mui-expanded": { transform: "rotate(180deg)" } }}>
-                    <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between" sx={{ width: "100%" }}>
+                    <Stack spacing={2} justifyContent="space-between" sx={{ width: "100%" }} direction={{ xs: "column", sm: "row" }} alignItems={{ xs: "flex-start", sm: "center" }}>
                         <Box sx={{ display: "inline-flex", alignItems: "center" }}>
                             {server.picture === "" ? (
                                 <Avatar {...stringAvatar(server.name, { sx: { mr: "0.5rem" } })} />
@@ -162,7 +151,7 @@ export default function Server() {
                                 <Avatar src={server.picture} alt={server.serverName} sx={{ mr: "0.5rem" }} />
                             )}
                         
-                            <Typography variant="h6" sx={{ fontWeight: "500", wordBreak: "break-all" }}>{server.name}</Typography>
+                            <Typography variant="h6" sx={{ fontWeight: "500", wordBreak: "break-word" }}>{server.name}</Typography>
                         </Box>
                         <Typography variant="body2" sx={{ fontWeight: "500", color: migration.status === "SUCCESS" ? theme.palette.success.main : (migration.status === "FAILED" || migration.status === "STOPPED") ? theme.palette.error.main : migration.status === "PENDING" ? theme.palette.info.main : theme.palette.warning.main }}>
                             {migration.status === "PENDING" ? ("Pending") : (`${migration.attempted} / ${migration.total} users pulled`)}

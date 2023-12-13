@@ -12,8 +12,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             return res.status(200).json({ success: true, max: 0, pullable: 0, maxPages: 1, members: [], message: "No servers found." });
         }
 
-        const limit: number = req.query.max ? parseInt(req.query.max as string, 10) : 50;
-        const page: number = req.query.page ? parseInt(req.query.page as string, 10) : 0;
+        const limit: number = req.query.max ? parseInt(req.query.max as string) : 50;
+        const page: number = req.query.page ? parseInt(req.query.page as string) : 0;
 
         let guildIds: BigInt[] = [];
 

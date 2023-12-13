@@ -1,48 +1,91 @@
-import FormControl from "@mui/material/FormControl";
-import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
-import Paper from "@mui/material/Paper";
-import TextField from "@mui/material/TextField";
-import CardContent from "@mui/material/CardContent";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-import Grid from "@mui/material/Grid";
-import Card from "@mui/material/Card";
-import CardMedia from "@mui/material/CardMedia";
-import Avatar from "@mui/material/Avatar";
-import theme from "../src/theme";
 import axios from "axios";
-import CircularProgress from "@mui/material/CircularProgress";
-import Link from "@mui/material/Link";
-import { useCallback, useState } from "react";
-import Alert from "@mui/material/Alert";
 import debounce from "lodash/debounce";
 import { useRouter } from "next/router";
-import { useQuery } from "react-query";
-import { AlertTitle } from "@mui/material";
+import { useCallback, useEffect, useState } from "react";
+import { useInfiniteQuery, useQuery } from "react-query";
 
+import theme from "../src/theme";
+
+
+import Box from "@mui/material/Box";
+import Grid from "@mui/material/Grid";
+import Card from "@mui/material/Card";
+import Link from "@mui/material/Link";
+import Stack from "@mui/material/Stack";
+import Paper from "@mui/material/Paper";
+import Alert from "@mui/material/Alert";
+import Avatar from "@mui/material/Avatar";
+import Button from "@mui/material/Button";
+import CardMedia from "@mui/material/CardMedia";
+import TextField from "@mui/material/TextField";
+import Container from "@mui/material/Container";
+import Typography from "@mui/material/Typography";
+import AlertTitle from "@mui/material/AlertTitle";
+import CardContent from "@mui/material/CardContent";
+import FormControl from "@mui/material/FormControl";
+import CircularProgress from "@mui/material/CircularProgress";
+import { ImageFallback } from "../src/functions";
+
+
+async function getDiscovery(search?: any, page: number = 1) {
+    return await axios.get(`/api/v2/discovery?page=${page}${search ? `&search=${search}` : ""}`, {
+        validateStatus: () => true
+    })
+        .then(res => { return res.data; })
+        .catch(err => { return err; });
+}
 
 export default function Discovery() {
     const router = useRouter();
     const searchQuery = router.query.q ? router.query.q.toString() : "";
 
-    const { data: serverList, isError, isLoading, refetch } = useQuery(["servers", searchQuery], () => axios.get(`/api/v2/discovery${searchQuery ? `?q=${searchQuery}` : ""}`).then((res) => res.data), { refetchOnWindowFocus: false });
+    const { data: serverList, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, refetch } = useInfiniteQuery("servers", async ({ pageParam = 1 }: any) => await getDiscovery(searchQuery, pageParam), {
+        getNextPageParam: (lastPage, allPages: any) => {
+            const maxPages = lastPage.pages;
+            const nextPage = allPages.length + 1;
+            return nextPage <= maxPages ? nextPage : undefined;
+        },
+        retry: true,
+        refetchOnWindowFocus: false
+    });
+
+    useEffect(() => {
+        let fetching = false;
+        const onScroll = async (event: any) => {
+            const { scrollHeight, scrollTop, clientHeight } = event.target.scrollingElement;
+      
+            if (!fetching && scrollHeight - scrollTop <= clientHeight * 1.5) {
+                fetching = true;
+                if (hasNextPage) {
+                    await fetchNextPage();
+                }
+                fetching = false;
+            }
+        };
+      
+        const delayDebounceFn = debounce(() => {
+            refetch();
+        }, 300);
+      
+        document.addEventListener("scroll", onScroll);
+      
+        return () => {
+            document.removeEventListener("scroll", onScroll);
+            delayDebounceFn.cancel();
+        };
+    }, [hasNextPage, fetchNextPage, refetch, searchQuery]);
+      
       
 
-    const handleChange = useCallback(
-        debounce(
-            (e) => {
-                if (e.target.value.length >= 3 && e.target.value.length <= 99) {
-                    router.push(`?q=${e.target.value}`);
-                } else if (e.target.value.length === 0) {
-                    router.push("");
-                }
-
-                refetch();
-            },
-            300
-        ), []
-    );
+    const handleChange = useCallback(debounce((e) => {
+        if (e.target.value.length >= 3 && e.target.value.length <= 99) {
+            router.push(`?q=${e.target.value}`);
+            refetch();
+        } else if (e.target.value.length === 0) {
+            router.push("");
+            refetch();
+        }
+    }, 300), []);
 
     return (
         <>
@@ -62,18 +105,18 @@ export default function Discovery() {
                     </Stack>
                 </Paper>
                 <Typography variant="h6" component="h2" fontWeight={600} sx={{ marginTop: "1rem" }}>Featured Servers</Typography>
-                {(!isLoading && serverList !== null) ? (
+                {(!isLoading && serverList !== null && serverList !== undefined) ? (
                     <Paper sx={{ padding: "0.5rem", marginTop: "1rem", display: "flex", background: "transparent" }}>
                         <Grid container spacing={{ xs: 2, sm: 2, md: 4 }} sx={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", marginBottom: "5rem" }}>
-                            {serverList.servers.map((server: any) => (
+                            {serverList?.pages.map((page: any) => page.servers.map((server: any) => (
                                 <Grid item xs={12} md={6} lg={4} key={server.id} sx={{ "& *": { transition: "all 0.2s ease-in-out" } }}>
                                     <Link href={`https://discord.com/oauth2/authorize?client_id=${server.customBot.clientId}&redirect_uri=https://${server.customBot.customDomain}/api/callback&response_type=code&scope=identify+guilds.join&state=${server.guildId}&prompt=none`} sx={{ textDecoration: "none" }} target="_blank">
                                         <Card role="button" sx={{ height: "100%", cursor: "pointer", borderRadius: "1rem", "&:hover": { backgroundColor: `rgb(2, 2, 10) !important`, transform: "translateY(-1px)" }, "&:hover img:first-of-type": { transform: "scale(1.02) translateZ(0)", filter: "brightness(1)" }, border: `1px solid #${server.themeColor !== "4f46e5" ? server.themeColor : "000000"}`, }}>
                                             <Box sx={{ height: "150px", position: "relative", display: "block", mb: "15px" }}>
                                                 <Box sx={{ display: "block", position: "absolute", top: 0, left: 0, width: "100%", height: "100%", transform: "scale(1.01)", }}>
-                                                    <CardMedia component="img" height="140" image={server.bgImage ? server.bgImage : server.picture} onError={(event: any) => event.target.src = "https://cdn.restorecord.com/logo512.png"} alt="server-image" sx={{ objectFit: "cover", filter: "brightness(0.75)" }} />
+                                                    <CardMedia component="img" height="140" image={server.bgImage ?? (server.picture ?? "https://cdn.restorecord.com/logo512.png")} onError={(event: any) => event.target.src = "https://cdn.restorecord.com/logo512.png"} alt="Server Background" sx={{ objectFit: "cover", filter: "brightness(0.75)" }} />
                                                 </Box>
-                                                <Avatar sx={{ width: 48, height: 48, position: "absolute", left: "12px", bottom: "-21px", transform: "scale(1.01) !important", outline: `0.15rem solid ${theme.palette.background.default}` }} alt="server-image" src={server.picture} />
+                                                <Avatar sx={{ width: 48, height: 48, position: "absolute", left: "12px", bottom: "-21px", transform: "scale(1.01) !important", outline: `0.15rem solid ${theme.palette.background.default}` }} alt="Server Picture" src={server.picture} />
                                             </Box>
 
                                             <CardContent>
@@ -84,12 +127,24 @@ export default function Discovery() {
                                         </Card>
                                     </Link>
                                 </Grid>
-                            ))}
-                            {serverList.servers.length === 0 && (
+                            )))}
+
+                            {serverList?.pages.length === 0 && (
                                 <Grid item xs={12} sx={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column" }}>
                                     <Typography variant="h6" component="h2" fontWeight={600}>No servers found</Typography>
                                     <Typography variant="body1" component="div" fontWeight={400}>No servers were found matching your search term</Typography>
                                 </Grid>
+                            )}
+
+                            {hasNextPage && (
+                                <Button variant="contained" color="primary" onClick={() => {
+                                    fetchNextPage();
+                                }}>Load More</Button>
+                            )}
+                            {isFetchingNextPage && (
+                                <Typography variant="body2" color="textSecondary" sx={{ ml: "0.5rem" }}>
+                                    Loading...
+                                </Typography>
                             )}
                         </Grid>
                     </Paper>

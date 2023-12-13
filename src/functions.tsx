@@ -111,15 +111,54 @@ export function AvatarFallback({ url, fallback, username, sx, ...props }: { url:
     };
 
     return (
-        <Avatar
-            alt={username}
-            src={avatarUrl}
-            sx={sx}
-            onLoad={handleImageLoad}
-            {...props}
-        >
+        <Avatar alt={username} src={avatarUrl} sx={sx} onLoad={handleImageLoad} {...props}>
             {username[0]}
         </Avatar>
+    );
+}
+
+export function ImageFallback({ url, fallback, sx, ...props }: { url: string, fallback: string, sx?: SxProps | null | undefined, props?: any | null | undefined }) {
+    const [imageUrl, setImageUrl] = useState<string>("");
+    const [imageLoaded, setImageLoaded] = useState(false);
+
+    useEffect(() => {
+        const fetchImage = async () => {
+            if (avatarCache[url]) {
+                setImageUrl(avatarCache[url]);
+                setImageLoaded(true);
+            } else {
+                try {
+                    await axios.get(url);
+                    setImageUrl(url);
+                    avatarCache[url] = url;
+                } catch {
+                    if (avatarCache[fallback]) {
+                        setImageUrl(avatarCache[fallback]);
+                        setImageLoaded(true);
+                    } else {
+                        try {
+                            await axios.get(fallback);
+                            setImageUrl(fallback);
+                            avatarCache[fallback] = fallback;
+                        } catch {
+                            setImageUrl(`https://ui-avatars.com/api/?background=${stringToColor(url)}&color=fff&name=${url}`);
+                        }
+                    }
+                }
+            }
+        };
+
+        if (!imageLoaded) {
+            fetchImage();
+        }
+    }, [url, fallback, imageLoaded]);
+
+    const handleImageLoad = () => {
+        setImageLoaded(true);
+    };
+
+    return (
+        <Avatar src={imageUrl} sx={sx} onLoad={handleImageLoad} {...props} />
     );
 }
 
