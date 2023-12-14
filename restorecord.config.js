@@ -4,7 +4,5 @@ module.exports = {
         script: "npx next start",
         max_restarts: 100,
         autorestart: true,
-        instances: "max",
-        exec_mode: "cluster",
     }],
 };
