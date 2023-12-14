@@ -9,8 +9,6 @@ const DISCORD_API_BASE = "https://discord.com/api/v10";
 
 
 export const loadConfig = async(server: servers, bot: customBots, backup: backups) => {
-    // send a request to PATCH https://discord.com/api/v10/guilds/ and update name and icon
-
     let image;
     if (backup.iconURL !== null && backup.iconURL !== "") {
         image = await axios.get(backup.iconURL, { responseType: "arraybuffer", validateStatus: () => true });

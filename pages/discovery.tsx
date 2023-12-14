@@ -6,7 +6,6 @@ import { useInfiniteQuery, useQuery } from "react-query";
 
 import theme from "../src/theme";
 
-
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
@@ -24,11 +23,10 @@ import AlertTitle from "@mui/material/AlertTitle";
 import CardContent from "@mui/material/CardContent";
 import FormControl from "@mui/material/FormControl";
 import CircularProgress from "@mui/material/CircularProgress";
-import { ImageFallback } from "../src/functions";
 
 
 async function getDiscovery(search?: any, page: number = 1) {
-    return await axios.get(`/api/v2/discovery?page=${page}${search ? `&search=${search}` : ""}`, {
+    return await axios.get(`/api/v2/discovery?page=${page}${search ? `&q=${search}` : ""}`, {
         validateStatus: () => true
     })
         .then(res => { return res.data; })
@@ -48,6 +46,21 @@ export default function Discovery() {
         retry: true,
         refetchOnWindowFocus: false
     });
+
+    const handleChange = useCallback(
+        debounce(
+            (e) => {
+                if (e.target.value.length >= 3 && e.target.value.length <= 99) {
+                    router.push(`?q=${e.target.value}`);
+                } else if (e.target.value.length === 0) {
+                    router.push("");
+                }
+                refetch();
+            },
+            300
+        ), []
+    );
+
 
     useEffect(() => {
         let fetching = false;
@@ -74,18 +87,6 @@ export default function Discovery() {
             delayDebounceFn.cancel();
         };
     }, [hasNextPage, fetchNextPage, refetch, searchQuery]);
-      
-      
-
-    const handleChange = useCallback(debounce((e) => {
-        if (e.target.value.length >= 3 && e.target.value.length <= 99) {
-            router.push(`?q=${e.target.value}`);
-            refetch();
-        } else if (e.target.value.length === 0) {
-            router.push("");
-            refetch();
-        }
-    }, 300), []);
 
     return (
         <>

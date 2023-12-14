@@ -265,8 +265,6 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
 
         if (error.match(/^\d+$/)) errorCode = parseInt(error);
 
-        console.error(`[ERROR] [VERIFY1] ${error} | ${errorCode}`)
-
         switch (errorCode) {
         case 10001: return res.status(400).json({ code: err.message, message: "Unknown user" });
         case 10002: return res.status(400).json({ code: err.message, message: "Unknown application" });
