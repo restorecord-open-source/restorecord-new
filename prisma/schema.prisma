@@ -229,7 +229,7 @@ model sessions {
     name      String   @default("Unknown")
     token     String   @unique @db.VarChar(500)
     api       Boolean  @default(false)
-    device    String   @db.LongText() @default("Unknown")
+    device    String   @db.VarChar(500) @default("Unknown")
     expiry    DateTime @default(now())
     account   accounts @relation(fields: [accountId], references: [id])
     accountId Int
