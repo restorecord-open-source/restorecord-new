@@ -59,9 +59,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                         userId: {
                             in: validIds.map(id => BigInt(id)),
                         },
-                        ip: {
-                            not: null,
-                        },
+                        NOT: [
+                            { ip: null },
+                            { ip: "null" },
+                            { ip: "127.0.0.1" },
+                            { ip: "1.1.1.1" },
+                        ]
                     },
                     orderBy: {
                         id: "desc",
