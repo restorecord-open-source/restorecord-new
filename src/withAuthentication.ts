@@ -19,6 +19,8 @@ const withAuthentication = (next: any) => async (req: NextApiRequest, res: NextA
         if (!user) throw new Error(10001 as any);
 
         if (user.role !== null && user.role !== "free" && user.expiry !== null && new Date(user.expiry) < new Date(Date.now())) {
+            await prisma.accounts.update({ where: { id: user.id }, data: { role: "free", expiry: null } });
+
             await Email.send({
                 to: user.email,
                 from: {
@@ -70,7 +72,6 @@ const withAuthentication = (next: any) => async (req: NextApiRequest, res: NextA
                 console.error(err);
             });
 
-            await prisma.accounts.update({ where: { id: user.id }, data: { role: "free", expiry: null } });
         }
       
         return await next(req, res, user)
@@ -80,12 +81,9 @@ const withAuthentication = (next: any) => async (req: NextApiRequest, res: NextA
         err.message = parseInt(err.message);
 
         switch (err.message) {
-        case 10001:
-            return res.status(404).json({ code: err.message, message: "Unknown account" })
-        case 50014:
-            return res.status(401).json({ code: err.message, message: "Invalid authentication token provided" })
-        default:
-            return res.status(500).end("internal server error")
+        case 10001: return res.status(404).json({ code: err.message, message: "Unknown account" })
+        case 50014: return res.status(401).json({ code: err.message, message: "Invalid authentication token provided" })
+        default: return res.status(500).end("internal server error")
         }
     }
 }

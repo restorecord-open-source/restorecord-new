@@ -24,8 +24,10 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import AlertTitle from "@mui/material/AlertTitle";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
+import Grid from "@mui/material/Grid";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import { makeXTrack } from "../../src/getIPAddress";
+import { IntlRelativeTime } from "../../src/functions";
 
 export default function AccountSettings() {
     const [ token ]: any = useToken()
@@ -53,12 +55,21 @@ export default function AccountSettings() {
 
     const [twoFACode, setTwoFACode] = useState("");
 
+    const [apiTokenName, setApiTokenName] = useState("");
+    const [apiTokenExpiration, setApiTokenExpiration] = useState(0);
+
     const codeRef: any = useRef<HTMLInputElement>();
     const confirmEmailRef: any = useRef<HTMLInputElement>();
 
     const { data, isError, isLoading, refetch } = useQuery("user", async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
     }), { retry: false,  refetchOnWindowFocus: true });
+
+    const { data: apiTokens, isError: apiTokensIsError, isLoading: apiTokensIsLoading, refetch: apiTokensRefetch } = useQuery("apiTokens", async () => await axios.get("/api/v2/self/tokens", {
+        headers: { 
+            Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
+        },
+    }), { retry: false, refetchOnWindowFocus: true });
 
     useEffect(() => {
         if (data && data.username) {
@@ -277,19 +288,6 @@ export default function AccountSettings() {
                                 {renderUserInfo()}
                         
                                 {data.role !== "free" ? renderSubscription() : null}
-
-                                {/* <LoadingButton variant="contained" color="primary" loading={loading1} sx={{ mt: 2}} fullWidth onClick={() => { 
-                                    setLoading1(true);
-                                    setNotiTextI("Updating...");
-                                    setOpenI(true);
-
-                                    setTimeout(() => {
-                                        setOpenI(false);
-                                        setLoading1(false);
-                                        setOpenS(true);
-                                        setNotiTextS("Updated");
-                                    }, 1000);
-                                }}>Update</LoadingButton> */}
                             </CardContent>
                         </Paper>
 
@@ -447,6 +445,132 @@ export default function AccountSettings() {
                                 )}
                             </CardContent>
                         </Paper>
+
+                        {data.admin && (
+                            <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
+                                <CardContent sx={{ pb: "1rem !important" }}>
+                                    <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
+                                        API Tokens
+                                    </Typography>
+
+                                    {apiTokensIsLoading && (
+                                        <Stack spacing={2}>
+                                            <CircularProgress />
+                                        </Stack>
+                                    )}
+
+                                    {apiTokensIsError && (
+                                        <Stack spacing={2}>
+                                            <Typography variant="body1" sx={{ mb: 2 }}>
+                                                An error occurred while loading your tokens.
+                                            </Typography>
+                                        </Stack>
+                                    )}
+
+                                    <form method="POST">
+                                        <Stack spacing={2}>
+                                            <TextField label="Token Name" variant="outlined" fullWidth required onChange={(e) => { setApiTokenName(e.target.value); }} />
+                                            <TextField label="Token Expiration (in days)" variant="outlined" fullWidth required onChange={(e) => { setApiTokenExpiration(parseInt(e.target.value)); }} />
+
+                                            <LoadingButton sx={{ mt: 2, width: "100%" }} event={async() => {
+                                                await axios.post(`/api/v2/self/tokens`, {
+                                                    name: apiTokenName,
+                                                    expiration: apiTokenExpiration,
+                                                }, {
+                                                    headers: {
+                                                        "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                    },
+                                                    validateStatus: () => true
+                                                }).then((res: any) => {
+                                                    setOpenI(false);
+        
+                                                    if (!res.data.success) {
+                                                        setNotiTextE(res.data.message);
+                                                        setOpenE(true);
+                                                    }
+                                                    else {
+                                                        setNotiTextS(res.data.message);
+                                                        setOpenS(true);
+                                            
+                                                        apiTokensRefetch();
+                                                    }
+                                        
+                                                }).catch((err: any) => {
+                                                    console.error(err);
+                                                    setNotiTextE(err);
+                                                    setOpenE(true);
+                                                });
+                                            }}>Create Token</LoadingButton>
+                                        </Stack>
+                                    </form>
+
+                                    {apiTokens && apiTokens.data.sessions.length > 0 && (
+                                        <Stack spacing={2} sx={{ mt: 2 }}>
+                                            <Typography variant="body1">
+                                                You have {apiTokens.data.sessions.length} API Token{apiTokens.data.sessions.length > 1 ? "s" : ""}.
+                                            </Typography>
+
+                                            {apiTokens.data.sessions.map((token: any) => (
+                                                <Paper key={token.id} variant="outlined" sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                                                    <CardContent>
+                                                        <Grid container direction="row" justifyContent={"space-between"}>
+                                                            <Grid item sx={{ wordBreak: "break-word" }}>
+                                                                {token.name}
+                                                                <Typography variant="body2" color="textSecondary">ID: {token.id}</Typography>
+                                                                <Typography variant="body2" color="textSecondary">Expiration: {IntlRelativeTime(new Date(token.expiry).getTime())}</Typography>
+                                                                <Typography variant="body2" color="textSecondary">Created: {IntlRelativeTime(new Date(token.createdAt).getTime())}</Typography>
+                                                            </Grid>
+                                                            <Stack direction="column" spacing={2}>
+                                                                <LoadingButton variant="contained" color="info" sx={{  width: "100%", maxWidth: "100%", }} event={() => {
+                                                                    navigator.clipboard.writeText(token.token);
+                                                                    setNotiTextS("Copied to clipboard");
+                                                                    setOpenS(true);
+
+                                                                    setTimeout(() => {
+                                                                        setOpenS(false);
+                                                                    }, 3000);
+                                                                }}>Copy</LoadingButton>
+                                                                <LoadingButton variant="contained" color="error" sx={{  width: "100%", maxWidth: "100%", }} event={async() => {
+                                                                    await axios.delete(`/api/v2/self/tokens`, {
+                                                                        headers: {
+                                                                            "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                                        },
+                                                                        data: {
+                                                                            id: token.id
+                                                                        },
+                                                                        validateStatus: () => true
+                                                                    }).then((res: any) => {
+                                                                        setOpenI(false);
+            
+                                                                        if (!res.data.success) {
+                                                                            setNotiTextE(res.data.message);
+                                                                            setOpenE(true);
+                                                                        }
+                                                                        else {
+                                                                            setNotiTextS(res.data.message);
+                                                                            setOpenS(true);
+                                                                
+                                                                            apiTokensRefetch();
+                                                                        }
+                                                            
+                                                                    }).catch((err: any) => {
+                                                                        console.error(err);
+                                                                        setNotiTextE(err);
+                                                                        setOpenE(true);
+                                                                    });
+
+                                                                }}>Delete</LoadingButton>
+                                                            </Stack>
+                                                        </Grid>
+                                                    </CardContent>
+                                                </Paper>
+                                            ))}
+
+                                        </Stack>
+                                    )}
+                                </CardContent>
+                            </Paper>
+                        )}
 
                         <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
                             <CardContent sx={{ pb: "1rem !important" }}>

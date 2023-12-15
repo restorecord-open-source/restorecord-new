@@ -226,7 +226,11 @@ model errors {
 
 model sessions {
     id        Int      @id @default(autoincrement())
+    name      String   @default("Unknown")
     token     String   @unique @db.VarChar(500)
+    api       Boolean  @default(false)
+    device    String   @db.LongText() @default("Unknown")
+    expiry    DateTime @default(now())
     account   accounts @relation(fields: [accountId], references: [id])
     accountId Int
     createdAt DateTime @default(now())
