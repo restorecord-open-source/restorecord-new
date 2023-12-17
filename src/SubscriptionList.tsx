@@ -7,8 +7,8 @@ const SubscriptionList: Subscription[] = [
     {
         id: 0,
         name: "Free", 
-        priceMonthly: "0",
-        priceYearly: "0",
+        priceMonthly: 0,
+        priceYearly: 0,
         bestPlan: false,
         features: [
             { name: "memberCapacity", value: "Unlimited Restorable Members", description: "Max restorable members", icon: <CheckCircleOutlineRounded sx={{ color: theme.palette.success.main, mr: 1 }} /> },
@@ -37,8 +37,9 @@ const SubscriptionList: Subscription[] = [
     {
         id: 1,
         name: "Premium",
-        priceMonthly: "2",
-        priceYearly: "15",
+        priceMonthly: 2,
+        priceYearly: 15,
+        discount: 30,
         bestPlan: true,
         features: [
             {
@@ -172,8 +173,9 @@ const SubscriptionList: Subscription[] = [
     {
         id: 2,
         name: "Business",
-        priceMonthly: "5",
-        priceYearly: "30",
+        priceMonthly: 5,
+        priceYearly: 30,
+        discount: 30,
         bestPlan: false,
         features: [
             {
@@ -444,8 +446,9 @@ const SubscriptionList: Subscription[] = [
 interface Subscription {
     id: number;
     name: string;
-    priceMonthly: string;
-    priceYearly: string;
+    priceMonthly: number;
+    priceYearly: number;
+    discount?: number;
     bestPlan: boolean;
     features: Feature[];
 }

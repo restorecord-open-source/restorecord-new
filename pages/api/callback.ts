@@ -61,9 +61,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
 
         domain = customBotInfo.customDomain ? customBotInfo.customDomain : req.headers.host;
 
-        if (serverInfo.locked) {
-            return res.redirect(`https://${domain}/verify/${state}`);
-        }
+        if (serverInfo.locked) return res.redirect(`https://${domain}/verify/${state}`);
 
         exchange(code as string, `https://${domain}/api/callback`, customBotInfo.clientId, customBotInfo.botSecret).then(async (respon) => {
             let data = respon.data ? respon.data : respon.response.data;
@@ -119,9 +117,6 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                 await sendWebhookMessage(serverInfo.webhook, "Attempted Blacklist", errorMessage, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0);
                 return reject(990031 + type as any);
             }
-
-            // res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
-            // res.redirect(`https://${domain}/verify/${state}`);
 
             if (serverInfo.captcha) {
                 const captcha = await redis.get(`captcha:${userId}`);

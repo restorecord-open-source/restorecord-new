@@ -606,11 +606,12 @@ export default function Upgrade() {
                             <Typography variant="h6" sx={{ fontWeight: 800, fontSize: 32, color: theme.palette.text.primary, textAlign: "center", marginTop: 2 }}>{tier.name}</Typography>
                             <CardContent sx={{ pb: "1rem !important" }}>
                                 <Box sx={{ display: "flex", justifyContent: "center", alignItems: "baseline", mb: 2 }}>
-                                    <Typography component="h2" variant="h3" color="text.primary" sx={{ fontWeight: "600" }}>
+                                    {tier.discount && <Typography component="h2" variant="h3" color="text.primary" sx={{ fontWeight: "600", fontSize: 48, marginRight: 1 }}>${tier.priceMonthly * (100 - tier.discount) / 100}</Typography>}
+                                    <Typography component={tier.discount ? "h6" : "h2"} variant={tier.discount ? "h6" : "h3"} color={tier.discount ? "text.secondary" : "text.primary"} sx={{ fontWeight: "600", ...(tier.discount ? { textDecoration: "line-through", fontSize: 32 } : { fontSize: 48 }) }}>
                                         ${tier.priceMonthly}
                                     </Typography>
                                     <Typography variant="h6" color="text.secondary" sx={{ fontWeight: "600" }}>
-                                        /monthly <Typography variant="body2" color="grey.700" sx={{ fontWeight: "500", alignItems: "center", display: "flex", mb: 1 }}>${tier.priceYearly} billed annually</Typography>
+                                        /monthly <Typography variant="body2" color="grey.700" sx={{ fontWeight: "500", alignItems: "center", display: "flex", mb: 1 }}>{tier.discount ? `$${tier.priceYearly * (100 - tier.discount) / 100} billed annually` : `$${tier.priceYearly} billed annually`}</Typography>
                                     </Typography>
                                 </Box>
                                 {tier.features.map((feature: any) => (
@@ -625,8 +626,8 @@ export default function Upgrade() {
                                         setSelectedPlan({
                                             id: tier.name.toLowerCase(),
                                             name: tier.name,
-                                            price: Number(tier.priceYearly) as number,
-                                            priceMonthly: Number(tier.priceMonthly) as number,
+                                            price: tier.discount ? (tier.priceYearly * (100 - tier.discount) / 100) : tier.priceYearly,
+                                            priceMonthly: tier.discount ? (tier.priceMonthly * (100 - tier.discount) / 100) : tier.priceMonthly,
                                         });
 
                                         // show downgrade, upgrade or purchase window

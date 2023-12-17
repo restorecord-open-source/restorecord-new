@@ -218,7 +218,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             var planFull = priceIds[subscription.items.data[0].price.id].plan;
             var plan = planFull.replace("_monthly", "");
 
-            if (status !== "incomplete" && status !== "incomplete_expired" && status !== "draft") {
+            if (status !== "incomplete" && status !== "incomplete_expired" && status !== "draft" && status !== "past_due") {
                 let account;
                 if (subscription.metadata.account_id) account = await prisma.accounts.findUnique({ where: { id: Number(subscription.metadata.account_id) as number } });
                 else {

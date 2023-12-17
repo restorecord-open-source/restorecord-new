@@ -78,17 +78,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             ...(user.referrer && {
                 discounts: [
                     {
-                        coupon: user.referrer === (25555 || 38) ? "gOXxUjqM" : "yQDbm1vi"
+                        coupon: user.referrer === (25555 || 38 || 24 || 0) ? "gOXxUjqM" : "yQDbm1vi"
                     },
                 ],
             }),
-            ...(new Date().getMonth() + 1 === 10 && new Date().getDate() >= 30) || (new Date().getMonth() + 1 === 11 && new Date().getDate() <= 5) ? {
+            ...(new Date().getMonth() + 1 === 12 && new Date().getDate() >= 16 && new Date().getDate() <= 30) ?  {
                 discounts: [
                     {
-                        coupon: "k0emdyzR",
+                        coupon: "mhuFuP6P",
                     },
                 ],
-            } : {},
+            } : {}
         });
     
         return res.status(200).json({

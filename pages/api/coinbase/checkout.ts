@@ -37,8 +37,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             break;
         }
 
-        if ((new Date().getMonth() + 1 === 10 && new Date().getDate() >= 30) || (new Date().getMonth() + 1 === 11 && new Date().getDate() <= 5)) {
-            amount = (Number(amount) - (Number(amount) * 0.20)).toFixed(2);
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth() + 1;
+        const currentDay = currentDate.getDate();
+
+        if (currentMonth === 12 && currentDay >= 16 && currentDay <= 30) {
+            amount = (Number(amount) - (Number(amount) * 0.30)).toFixed(2);
         } else if (user.referrer === (25555 || 38)) {
             amount = (Number(amount) - (Number(amount) * 0.15)).toFixed(2);
         } else if (user.referrer !== null) {
@@ -46,6 +50,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         } else {
             amount = String(Number(amount) * 1.10);
         }
+
 
         var Charge = coinbase.resources.Charge;
 

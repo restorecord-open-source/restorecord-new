@@ -5,6 +5,7 @@ import CreditCard from "@mui/icons-material/CreditCard";
 import Apps from "@mui/icons-material/Apps";
 import Help from "@mui/icons-material/Help";
 import MenuIcon from "@mui/icons-material/Menu";
+import theme from "../../src/theme";
 
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -82,7 +83,13 @@ export default function NavBar() {
     return (
         <Box sx={{ marginBottom: "6rem" }}>
             <ElevationScroll>
-                <AppBar component="nav" sx={{ backdropFilter: "blur(1rem)", backgroundColor: "transparent", width: "100%", backgroundImage: "none", background: `rgba(15,15,15,0.5)`, borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+                <AppBar component="nav" sx={{ backdropFilter: "blur(1rem)", backgroundColor: "transparent", width: "100%", backgroundImage: "none", background: "rgba(15,15,15,0.5)", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+                    <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", height: "auto", color: theme.palette.getContrastText(theme.palette.primary.main), py: 1, px: 2 }}>
+                        <Typography sx={{ fontStyle: "normal", fontWeight: 500, fontSize: 16, textAlign: "center" }}>
+                            ❄️ ENJOY <span style={{ fontWeight: 900, color: theme.palette.error.main }}>30% OFF</span> ANY SUBSCRIPTION THROUGHOUT DECEMBER ❄️
+                        </Typography>
+                    </Box>
+
                     <Container maxWidth="lg">
                         <Toolbar>
                             <Typography variant="h6" component="div" sx={{ display: { xs: "none", md: "block" }, cursor: "pointer", flexGrow: 1 }}>
