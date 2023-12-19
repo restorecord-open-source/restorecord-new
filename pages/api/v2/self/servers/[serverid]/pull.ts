@@ -13,27 +13,21 @@ import { countries } from "../../../../../dashboard/blacklist";
 
 type Status = "PENDING" | "PULLING" | "SUCCESS" | "FAILED" | "STOPPED";
 
-function updateMigration(id: number, status: Status, success: number, banned: number, maxGuild: number, invalid: number, failed: number, blacklisted: number) {
-    return new Promise<void>(async (resolve, reject) => {
-        await prisma.migrations.update({
-            where: {
-                id: id
-            },
-            data: {
-                status: status,
-                successCount: success,
-                bannedCount: banned,
-                maxGuildsCount: maxGuild,
-                invalidCount: invalid,
-                failedCount: failed,
-                blacklistedCount: blacklisted,
-                updatedAt: new Date()
-            }
-        }).then(() => {
-            resolve();
-        }).catch((err: Error) => {
-            reject(err);
-        });
+async function updateMigration(id: number, status: Status, success: number, banned: number, maxGuild: number, invalid: number, failed: number, blacklisted: number) {
+    await prisma.migrations.update({
+        where: {
+            id: id
+        },
+        data: {
+            status: status,
+            successCount: success,
+            bannedCount: banned,
+            maxGuildsCount: maxGuild,
+            invalidCount: invalid,
+            failedCount: failed,
+            blacklistedCount: blacklisted,
+            updatedAt: new Date()
+        }
     });
 }
 
@@ -248,7 +242,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 console.log(`[${server.name}] [${member.username}] Pulling...`);
 
                 let isDone = false;
-                const pullPromise = addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : []).then(async (resp: any) => {
+                await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : []).then(async (resp: any) => {
                     trysPulled++;
                     let status = resp?.response?.status || resp?.status;
                     let response = ((resp?.response?.data?.message || resp?.response?.data?.code) || (resp?.data?.message || resp?.data?.code)) ? (resp?.response?.data || resp?.data) : "";
@@ -372,8 +366,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     resolve();
                 }, MAX_PULL_TIME);
                   
-                await pullPromise;
-                  
                 if (Number(successCount) >= Number(pullCount)) {
                     console.log(`[${server.name}] [${member.username}] ${pullCount} members have been pulled`);
                     console.log(`[${server.name}] Finished pulling`);
@@ -403,7 +395,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
                 await updateMigration(migration.id, "PULLING", successCount, bannedCount, maxGuildsCount, invalidCount, errorCount, blacklistedCount);
 
-                await new Promise((resolve) => { setTimeout(resolve, delay); });
+                await new Promise((resolvePromise) => { setTimeout(resolvePromise, delay); });
             }
 
             console.log(`[${server.name}] Finished pulling`);

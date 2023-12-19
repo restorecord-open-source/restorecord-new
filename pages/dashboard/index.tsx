@@ -69,7 +69,7 @@ export default function Dashboard() {
         refetchTopAnalytics();
     }, [statType]);
 
-    if (isLoading || isLoading2 || newsLoading || recentVerifiedLoading || topAnalyticsLoading) return <CircularProgress sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
+    if (isLoading) return <CircularProgress sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
     if (isError || isError2 || newsError || recentVerifiedError || topAnalyticsError) return <div>Error</div>
 
     if (!data || !data.username) {
@@ -420,7 +420,9 @@ export default function Dashboard() {
                     <Toolbar />
 
                     <Container maxWidth="xl">
-                        {newsData.news.map((item: any) => {
+                        {newsLoading && <CircularProgress />}
+
+                        {!newsLoading && newsData.news.map((item: any) => {
                             if (window.localStorage.getItem("alerts")?.includes(item.id)) return null;
 
                             return (
