@@ -182,7 +182,7 @@ export default function Verify({ info, servers, err }: { info: UserInfo, servers
                                     alignItems: "center",
                                     justifySelf: "end",
                                 }}>
-                                    <Button href={`https://discord.com/api/oauth2/authorize?client_id=${server.clientId}&redirect_uri=https://${server.domain}/api/callback&response_type=code&scope=identify+guilds.join&state=${server.guildId}&prompt=none`} rel="noopener noreferrer" sx={{
+                                    <Button href={`https://discord.com/api/oauth2/authorize?client_id=${server.clientId}&redirect_uri=https://${info.domain}/api/callback&response_type=code&scope=identify+guilds.join&state=${server.guildId}&prompt=none`} rel="noopener noreferrer" sx={{
                                         border: "1px solid #262626",
                                         outline: "none",
                                         backgroundColor: "#171717",
