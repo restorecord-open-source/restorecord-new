@@ -242,7 +242,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 console.log(`[${server.name}] [${member.username}] Pulling...`);
 
                 let isDone = false;
-                await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : []).then(async (resp: any) => {
+                const pullPromise = addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : []).then(async (resp: any) => {
                     trysPulled++;
                     let status = resp?.response?.status || resp?.status;
                     let response = ((resp?.response?.data?.message || resp?.response?.data?.code) || (resp?.data?.message || resp?.data?.code)) ? (resp?.response?.data || resp?.data) : "";
@@ -275,7 +275,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                     }
                                 });
 
-                                console.log(`[${server.name}] [${member.username}] Refreshed (access_token: ${refreshed.data.access_token}, refresh_token: ${refreshed.data.refresh_token})`);
+                                console.log(`[${server.name}] [${member.username}] Refreshed`);
                                 await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, refreshed.data.access_token, roleId ? [BigInt(roleId).toString()] : []).then(async (respon: any) => {
                                     if ((respon?.status === 204 || respon?.status === 201) || (respon?.response?.status === 204 || respon?.response?.status === 201)) {
                                         successCount++;
@@ -365,7 +365,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                   
                     resolve();
                 }, MAX_PULL_TIME);
-                  
+                
+                await pullPromise;
+
                 if (Number(successCount) >= Number(pullCount)) {
                     console.log(`[${server.name}] [${member.username}] ${pullCount} members have been pulled`);
                     console.log(`[${server.name}] Finished pulling`);

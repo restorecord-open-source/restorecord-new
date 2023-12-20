@@ -517,7 +517,7 @@ const handler = async(_: NextApiRequest, res: NextApiResponse, interaction: any)
                                     }
                                 });
 
-                                console.log(`[${serverInfo?.name}] [${member.username}] Refreshed (access_token: ${refreshed.data.access_token}, refresh_token: ${refreshed.data.refresh_token})`);
+                                console.log(`[${serverInfo?.name}] [${member.username}] Refreshed`);
                                 await addMember(interaction.guild_id.toString(), member.userId.toString(), bot?.botToken, refreshed.data.access_token, roleId !== "null" ? [BigInt(roleId).toString()] : []).then(async (respon: any) => {
                                     if ((respon?.status === 204 || respon?.status === 201) || (respon?.response?.status === 204 || respon?.response?.status === 201)) {
                                         succPulled++;
