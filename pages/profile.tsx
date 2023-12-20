@@ -1,56 +1,30 @@
 import Head from "next/head";
-import { useEffect, useRef, useState } from "react";
-
-import Typography from "@mui/material/Typography";
-import Container from "@mui/material/Container";
-import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
-import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
-import Tooltip from "@mui/material/Tooltip";
-import Fade from "@mui/material/Fade";
-import Alert from "@mui/material/Alert";
-import AlertTitle from "@mui/material/AlertTitle";
-import LockIcon from "@mui/icons-material/Lock";
-import PublicOffIcon from "@mui/icons-material/PublicOff";
-import Link from "next/link";
-import HCaptcha from "@hcaptcha/react-hcaptcha";
-import { CircularProgress, Stack } from "@mui/material";
-import theme from "../src/theme";
 import { prisma } from "../src/db";
-import { useRouter } from "next/router";
 
 interface UserInfo {
-    username: string;
+    domain: string;
 }
 
 interface Server {
     name: string;
     guildId: string;
     clientId: string;
-    domain: string;
     description?: string;
     picture?: string;
 }
 
 export default function Verify({ info, servers, err }: { info: UserInfo, servers: Server[], err: string }) {
-    function ErrorAlert(err: string) {
-        return (
-            <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
-                <AlertTitle>An error has occurred</AlertTitle>
-                {err}
-            </Alert>
-        );
-    }
-      
+    const hostname = (info.domain.match(/(?:[^.]+\.)?([^.\s]+)\.[^.]+$/) || [])[1] || info.domain;
+    const domain = (info.domain.match(/(?:[^.]+\.)?([^.]+\.[^.]+)$/) || [])[1] || info.domain;
 
     return (
         <>
             <Head>
-                <meta name="description" content={info.username ? `View ${info.username}'s Profile` : "Profile"} />
-                <meta property="og:description" content={info.username ? `View ${info.username}'s Profile` : "Profile"} />
-                <meta property="og:title" content={info.username ? `${info.username}'s Profile` : "Profile"} />
-                <meta property="og:url" content={`https://${servers[0]?.domain ?? "restorecord.com"}`} />
+                <meta name="description" content={`Join ${hostname}`} />
+                <meta property="og:description" content={`Join ${hostname}`} />
+                <meta property="og:title" content={hostname ?? "Profile"} />
+                <meta property="og:url" content={`https://${info.domain ?? "restorecord.com"}`} />
                 {/* <meta property="og:image" content={info.avatar} /> */}
                 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
                 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -60,75 +34,181 @@ export default function Verify({ info, servers, err }: { info: UserInfo, servers
                 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
                 <meta name="apple-mobile-web-app-capable" content="yes" />
                 <meta name="mobile-web-app-capable" content="yes" />
-                <title>{info.username ? `${info.username}'s Profile` : "Profile"}</title>
+                <title>{`Join ${hostname}`}</title>
             </Head>
 
-            <Container maxWidth="lg">
-                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", flexDirection: "column" }}>
-                    <Paper sx={{ borderRadius: "1rem", padding: "2rem", marginTop: "1rem", width: { xs: "100%", md: "50%" }, marginBottom: "2rem", boxShadow: "0px 10px 10px 5px rgba(0, 0, 0, 0.25)", backgroundColor: "#00000026", backdropFilter: "blur(1.5rem)" }}>
-                        {err ? ErrorAlert(err) : null}
-                      
-                        {(info.username && servers.length > 0 ) ? (
-                            <>
-                                <Typography variant="h3" component="h3" sx={{ textAlign: "center", fontWeight: "700" }}>
-                                    {info.username}&apos;s Profile
-                                </Typography>
+            <div style={{ 
+                backgroundColor: "#0a0a0a",
+                color: "#fafafa",
+                width: "100vw",
+                height: "100vh",
+            }}>
+                {/* div with flex max-w-4xl, bg sligtly darker than 0a0a0a */}
+                <header style={{
+                    maxWidth: "56rem",
+                    margin: "auto",
+                    padding: "1rem",
+                    backgroundColor: "#0f0f0f",
+                    borderBottomLeftRadius: "1rem",
+                    borderBottomRightRadius: "1rem",
+                    border: "1px solid #262626",
+                }}>
+                    {/* 2 grid, justify-between, "Name", "x servers" */}
+                    <div style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                    }}>
+                        <h1 style={{
+                            fontWeight: "800",
+                            textAlign: "left",
+                            marginTop: 0,
+                            marginBottom: 0,
+                        }}>
+                            {domain}
+                        </h1>
 
-                                <Typography variant="body1" component="p" color="text.secondary" sx={{ textAlign: "center" }}>
-                                    {info.username} has {servers.length} {servers.length === 1 ? "server" : "servers"}.
-                                </Typography>
-
-                                {servers.map((server) => (
-                                    <Paper key={server.name} sx={{ borderRadius: "1rem", padding: "2rem", display: "flex", backgroundColor: "#00000052", my: "1rem", boxShadow: "0px 5px 5px 2.5px rgba(0, 0, 0, 0.125)" }}>
-                                        <Stack spacing={2} direction={{ xs: "row", md: "column" }} sx={{ width: "100%" }}>
-                                            <Stack spacing={2} direction={{ xs: "row", md: "column" }}>
-                                                <Stack spacing={2} direction="row" sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                                    <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                                        <Avatar src={server.picture} sx={{ width: { xs: "3rem", md: "4rem" }, height: { xs: "3rem", md: "4rem" } }} />
-                                                    </Box>
-
-                                                    <Typography variant="h4" component="h4" sx={{ textAlign: "center", fontWeight: "700" }}>
-                                                        {server.name}
-                                                    </Typography>
-                                                </Stack>
-
-                                                {server.description && <Typography variant="body2" component="p" color="text.secondary" sx={{ textAlign: "center", whiteSpace: "pre-line", overflowWrap: "break-word" }}>{server.description}</Typography>}
-                                            </Stack>
-
-                                            {/* https://discord.com/oauth2/authorize?client_id=1115758330808381530&redirect_uri=https://restorecord.com/api/callback&response_type=code&scope=identify+guilds.join&state=1115758852395253790 */}
-                                            <Button variant="contained" color="primary" href={`https://discord.com/api/oauth2/authorize?client_id=${server.clientId}&redirect_uri=https://${server.domain}/api/callback&response_type=code&scope=identify+guilds.join&state=${server.guildId}&prompt=none`} rel="noopener noreferrer" sx={{
-                                                width: "100%", 
-                                                marginTop: "2rem",
-                                                backgroundColor: theme.palette.primary.main,
-                                                outline: `1px solid ${theme.palette.primary.main}`,
-                                                color: `${theme.palette.getContrastText(theme.palette.primary.main)}`,
-                                                "@media not all and (-webkit-min-device-pixel-ratio: 1.5), not all and (-o-min-device-pixel-ratio: 3/2), not all and (min--moz-device-pixel-ratio: 1.5), not all and (min-device-pixel-ratio: 1.5)": {
-                                                    "&:hover": {
-                                                        outline: `1px solid ${theme.palette.primary.main}`,
-                                                        color: theme.palette.primary.main,
-                                                    },
-                                                },
-                                            }}>
-                                                Join
-                                            </Button>
-                                        </Stack>
-                                    </Paper>
-                                ))}
-                            </>
-                        ) : (
-                            <>
-                                <Typography variant="h1" component="h1" sx={{ textAlign: "center", fontWeight: "700", fontSize: { xs: "1.5rem", md: "3rem" } }}>
-                                    Profile Not Found
-                                </Typography>
-
-                                <Typography variant="body1" component="p" sx={{ textAlign: "center", fontSize: { xs: "1rem", md: "1.75rem" } }}>
-                                    Sorry, we couldn&apos;t find the profile you were looking for.
-                                </Typography>
-                            </>
+                        {info.domain && (
+                            <p style={{
+                                textAlign: "right",
+                                marginTop: 0,
+                                marginBottom: 0,
+                            }}>
+                                {servers.length} {servers.length === 1 ? "server" : "servers"}
+                            </p>
                         )}
-                    </Paper>
-                </Box>
-            </Container>
+                    </div>
+                </header>
+
+                <main style={{
+                    maxWidth: "56rem",
+                    margin: "auto",
+                    padding: "1rem",
+                }}>
+                    {/* if error, show error */}
+                    {err && (
+                        <div style={{
+                            backgroundColor: "#d32f2f",
+                            color: "#fafafa",
+                            borderRadius: "0.5rem",
+                            padding: "1rem",
+                        }}>
+                            <p style={{
+                                fontWeight: "800",
+                                textAlign: "left",
+                                marginTop: 0,
+                                marginBottom: 0,
+                            }}>
+                                An error has occurred
+                            </p>
+
+                            <p style={{
+                                textAlign: "left",
+                                marginTop: 0,
+                                marginBottom: 0,
+                            }}>
+                                {err}
+                            </p>
+                        </div>
+                    )}
+
+                    {/* if no servers, show no servers */}
+                    {!err && servers.length === 0 && (
+                        <div style={{
+                            backgroundColor: "#d32f2f",
+                            color: "#fafafa",
+                            borderRadius: "0.5rem",
+                            padding: "1rem",
+                        }}>
+                            <p style={{
+                                fontWeight: "800",
+                                textAlign: "left",
+                                marginTop: 0,
+                                marginBottom: 0,
+                            }}>
+                                No servers found
+                            </p>
+
+                            <p style={{
+                                textAlign: "left",
+                                marginTop: 0,
+                                marginBottom: 0,
+                            }}>
+                                Sorry, we couldn&apos;t find any servers for this domain.
+                            </p>
+                        </div>
+                    )}
+
+                    {/* if servers, show servers */}
+                    {!err && servers.length > 0 && servers.map((server) => (
+                        <div key={server.guildId} style={{
+                            backgroundColor: "#0f0f0f",
+                            color: "#fafafa",
+                            borderRadius: "0.5rem",
+                            padding: "1rem",
+                            marginBottom: "1rem",
+                            // border: "1px solid #262626",
+                        }}>
+                            {/* 2 grid, justify-between, "Name", "x servers" */}
+                            <div style={{
+                                display: "grid",
+                                gridTemplateColumns: "1fr 1fr",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                            }}>
+                                <div style={{
+                                    display: "grid",
+                                    gridTemplateColumns: "auto 1fr",
+                                    gridGap: "1rem",
+                                    alignItems: "center",
+                                }}>
+                                    <img src={server.picture} alt={server.name} style={{ width: "3rem", height: "3rem", borderRadius: "100%" }} />
+
+                                    <h2 style={{
+                                        fontWeight: "800",
+                                        textAlign: "left",
+                                        marginTop: 0,
+                                        marginBottom: 0,
+                                    }}>
+                                        {server.name}
+                                    </h2>
+                                </div>
+
+                                <div style={{
+                                    display: "grid",
+                                    gridTemplateColumns: "auto 1fr",
+                                    gridGap: "1rem",
+                                    alignItems: "center",
+                                    justifySelf: "end",
+                                }}>
+                                    <Button href={`https://discord.com/api/oauth2/authorize?client_id=${server.clientId}&redirect_uri=https://${server.domain}/api/callback&response_type=code&scope=identify+guilds.join&state=${server.guildId}&prompt=none`} rel="noopener noreferrer" sx={{
+                                        border: "1px solid #262626",
+                                        outline: "none",
+                                        backgroundColor: "#171717",
+                                        color: "#fafafa",
+                                        borderRadius: "0.5rem",
+                                        padding: "0.5rem 1rem",
+                                        textDecoration: "none",
+                                        textAlign: "center",
+                                        marginTop: 0,
+                                        marginBottom: 0,
+                                        "&:hover": {
+                                            backgroundColor: "#1a1a1a",
+                                            border: "1px solid #262626",
+                                            color: "#fafafa",
+                                        },
+                                    }}>
+                                        Join
+                                    </Button>
+
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </main>
+                                    
+            </div>
         </>
     )
 }
@@ -137,7 +217,7 @@ export default function Verify({ info, servers, err }: { info: UserInfo, servers
 export async function getServerSideProps({ req }: any) {
     if (req) {
         const domain = req.headers.host ?? "restorecord.com";
-        let info: UserInfo = { username: "" };
+        let info: UserInfo = { domain: domain };
         let servers: Server[] = [];
         let err = "";
 
@@ -152,7 +232,7 @@ export async function getServerSideProps({ req }: any) {
             } 
         });
         if (customBot.length === 0) return { props: { info: {}, servers: [], err: "" } }
-        if (customBot.length > 10) return { props: { info: {}, servers: [], err: "Too many bots found" } }
+        if (customBot.length > 10) return { props: { info: {}, servers: [], err: "Too many different custom bots found using this domain. Contact Owner" } }
 
         const userServers = await prisma.servers.findMany({
             select: {
@@ -175,16 +255,15 @@ export async function getServerSideProps({ req }: any) {
                 } 
             } 
         });
-        if (userServers.length === 0) return { props: { info: {}, servers: [], err: "No servers found" } }
+        // if (userServers.length === 0) return { props: { info: {}, servers: [], err: "No servers found" } }
 
-        userServers.every((server) => server.ownerId === userServers[0].ownerId) ? info = { username: userServers[0].owner.username } : info = { username: "Multiple Users" };
+        // userServers.every((server) => server.ownerId === userServers[0].ownerId) ? info = { username: userServers[0].owner.username } : info = { username: "Multiple Users" };
 
         servers = userServers.filter((server) => server.locked === false).map((server) => {
             return {
                 name: server.name,
                 guildId: server.guildId.toString(),
                 clientId: customBot.find((bot) => bot.id === server.customBotId)?.clientId.toString() ?? "",
-                domain: customBot.find((bot) => bot.id === server.customBotId)?.customDomain ? customBot.find((bot) => bot.id === server.customBotId)?.customDomain : domain,
                 description: server.description,
                 picture: server.picture ?? "https://cdn.restorecord.com/logo512.png",
             }
