@@ -19,7 +19,7 @@ const withDiscordInteraction = (next: any) => async (
     const signature = req.headers["x-signature-ed25519"]
     const timestamp = req.headers["x-signature-timestamp"]
     if (typeof signature !== "string" || typeof timestamp !== "string") {
-        return res.status(401).end("invalid request signature")
+        return res.status(401).end("you cannot visit this route directly, this is for discord interactions only")
     }
 
     try {

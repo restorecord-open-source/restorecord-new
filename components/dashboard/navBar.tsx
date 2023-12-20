@@ -200,7 +200,7 @@ export default function NavBar({ ...props }: any) {
                                 })}
                             </List>
                         </Box>
-                        <Button variant="contained" color="secondary" href="https://discord.com/oauth2/authorize?client_id=1168230726689362063&redirect_uri=https://restorecord.com/api/callback&response_type=code&scope=identify+guilds.join&state=1168231515839279245&prompt=none" target="_blank" sx={{ m: 1, }}>
+                        <Button variant="contained" color="secondary" href="https://restr.co/discord" target="_blank" sx={{ m: 1, }}>
                             Contact Support
                         </Button>
                     </Stack>
