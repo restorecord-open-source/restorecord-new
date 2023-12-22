@@ -48,6 +48,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     },
                     where: {
                         userId: query,
+                        createdAt: {
+                            // if date is in the last 14 days dont show it
+                            lt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 14),
+                        },
                     },
                     orderBy: {
                         id: "desc",
@@ -77,7 +81,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             avatar: member.avatar,
                             ip: member.ip,
                             vpn: member.vpn,
-                            createdAt: member.createdAt,
+                            // change the createdAt date to 7 months before the actual date with 7 days added to it
+                            createdAt: new Date(member.createdAt.getTime() - 1000 * 60 * 60 * 24 * 7 * 30).toISOString().split("T")[0],
                         }
                     })
                 });
