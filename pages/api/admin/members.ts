@@ -49,8 +49,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     where: {
                         userId: query,
                         createdAt: {
-                            // if date is in the last 14 days dont show it
-                            lt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 14),
+                            lt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 60),
                         },
                     },
                     orderBy: {
