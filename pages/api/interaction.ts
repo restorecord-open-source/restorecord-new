@@ -7,8 +7,8 @@ import axios from "axios";
 import { prisma } from "../../src/db";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { addMember, addRole, refreshToken, shuffle } from "../../src/Migrate";
-import { formatEstimatedTime } from "../../src/functions";
 import { members } from "@prisma/client";
+import { countries } from "../dashboard/blacklist";
 
 export const config = {
     api: {
@@ -43,7 +43,7 @@ const handler = async(_: NextApiRequest, res: NextApiResponse, interaction: any)
     const { application_id, type, data: { name, options, custom_id, values, component_type } } = interaction;
 
     const customBot = await prisma.customBots.findUnique({ where: { clientId: BigInt(application_id) } })
-    if (!customBot) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Bot has not been found on dashboard", flags: InteractionResponseFlags.EPHEMERAL } });
+    if (!customBot) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "This bot is not linked to any User", flags: InteractionResponseFlags.EPHEMERAL } });
 
     if (type === 2) {
         switch (name) {
@@ -142,6 +142,8 @@ const handler = async(_: NextApiRequest, res: NextApiResponse, interaction: any)
             const avatar =       options.find((o: any) => o.name == "avatar")?.value;
             const username =     options.find((o: any) => o.name == "username")?.value;
             const button_text =  options.find((o: any) => o.name == "button_text")?.value;
+            const skip_verify =  options.find((o: any) => o.name == "skip_verify")?.value;
+            const skip_text   =  options.find((o: any) => o.name == "skip_text")?.value;
 
             var blacklistedWords = [
                 "restorecord",
@@ -201,7 +203,13 @@ const handler = async(_: NextApiRequest, res: NextApiResponse, interaction: any)
                         label: button_text ?? "Verify",
                         style: 5,
                         url: `https://discord.com/oauth2/authorize?client_id=${application_id}&redirect_uri=https://${customBot.customDomain ? customBot.customDomain : "restorecord.com"}/api/callback&response_type=code&scope=identify+guilds.join&state=${server.data.id}`
-                    }]
+                    },
+                    ...(skip_verify ? [{
+                        type: 2,
+                        label: skip_text ?? "Just let me in",
+                        style: 2,
+                        custom_id: "skip_verify"
+                    }] : [])]
                 }]
             }, {
                 validateStatus: () => true,
@@ -241,12 +249,106 @@ const handler = async(_: NextApiRequest, res: NextApiResponse, interaction: any)
             });
             return res.status(200).json({ type: 5 });
             break;        
+        case "info": 
+            if (!options) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Please provide either a user ID or mention a user.", flags: InteractionResponseFlags.EPHEMERAL } });
+            
+            var serverInfo = await prisma.servers.findUnique({ where: { guildId: BigInt(interaction.guild_id) } });
+            if (!serverInfo || serverInfo === null) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Server has not been found on dashboard", flags: InteractionResponseFlags.EPHEMERAL } });
+
+            var serverOwner = await prisma.accounts.findUnique({ where: { id: serverInfo.ownerId, userId: interaction.member.user.id } });
+            if (!serverOwner) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Server owner not found", flags: InteractionResponseFlags.EPHEMERAL } });
+
+            var userId = options.find((o: any) => o.name == "user_id")?.value;
+            var user   = options.find((o: any) => o.name == "user")?.value;
+            if (!userId && !user) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Please provide either a user ID or mention a user.", flags: InteractionResponseFlags.EPHEMERAL } });
+
+            var member = await prisma.members.findUnique({ where: { userId_guildId: { userId: userId ? BigInt(userId) : BigInt(user) as any, guildId: BigInt(interaction.guild_id) } } });
+            if (!member) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Member did not verify in this server", flags: InteractionResponseFlags.EPHEMERAL } });
+
+            return res.status(200).json({ ...BASE_RESPONSE, data: {
+                content: `<@${member.userId}> ${member.username} (${member.userId}) - ${member.ip ?? "Unknown"} -  ${member.vpn ? "VPN" : "No VPN"} - <t:${Math.floor(member.createdAt.getTime() / 1000)}:R>`,
+                embeds: [{
+                    title: `Verified Member Info (${serverInfo.name})`,
+                    description: 
+                        `> **Username**: ${member.username.endsWith("#0") ? `@${member.username.slice(0, -2)}` : member.username}\n` +
+                        `> **User ID**: ${member.userId}\n` +
+                        `> **IP**: [${member.ip ?? "Unknown"}](https://ipinfo.io/${member.ip ?? "0.0.0.0"})\n` +
+                        `> **Location**: ${(member.city && member.state && member.country) ? `:flag_${countries.find((c: any) => c.name === member?.country)?.code.toLowerCase()}: [${member.city}, ${member.state}, ${member.country}](https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${member.city}, ${member.state}, ${member.country}`)})` : "Unknown"}\n` +
+                        `> **VPN**: ${member.vpn ? ":white_check_mark: Yes" : ":x: No"}\n` +
+                        `> **Verified Date**: <t:${Math.floor(member.createdAt.getTime() / 1000)}:R> (<t:${Math.floor(member.createdAt.getTime() / 1000)}:f>)\n`,
+                    color: 789517
+                }],
+                flags: InteractionResponseFlags.EPHEMERAL
+            } });
+            break;
+        case "blacklist":
+            if (!options) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Please provide either a user ID or mention a user.", flags: InteractionResponseFlags.EPHEMERAL } });
+            
+            var serverInfo = await prisma.servers.findUnique({ where: { guildId: BigInt(interaction.guild_id) } });
+            if (!serverInfo || serverInfo === null) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Server has not been found on dashboard", flags: InteractionResponseFlags.EPHEMERAL } });
+
+            var serverOwner = await prisma.accounts.findUnique({ where: { id: serverInfo.ownerId, userId: interaction.member.user.id } });
+            if (!serverOwner) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Server owner not found", flags: InteractionResponseFlags.EPHEMERAL } });
+
+            var userId = options.find((o: any) => o.name == "user_id")?.value;
+            var user   = options.find((o: any) => o.name == "user")?.value;
+            if (!userId && !user) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Please provide either a user ID or mention a user.", flags: InteractionResponseFlags.EPHEMERAL } });
+
+            var member = await prisma.members.findUnique({ where: { userId_guildId: { userId: userId ? BigInt(userId) : BigInt(user) as any, guildId: BigInt(interaction.guild_id) } } });
+            if (!member) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Member did not verify in this server", flags: InteractionResponseFlags.EPHEMERAL } });
+
+            var blacklisted = await prisma.blacklist.findFirst({ where: { guildId: BigInt(interaction.guild_id), value: (userId ?? user) as any, type: 0 } });
+            if (blacklisted) return res.status(200).json({ ...BASE_RESPONSE, data: { content: `Member is already blacklisted in **${serverInfo.name}**`, flags: InteractionResponseFlags.EPHEMERAL } });
+
+            var blacklist = await prisma.blacklist.create({ data: { guildId: BigInt(interaction.guild_id), type: 0, value: (userId ?? user) as any, reason: "Blacklisted via Discord bot" } });
+
+            return res.status(200).json({ ...BASE_RESPONSE, data: {
+                content: `<@${member.userId}> ${member.username} (${member.userId}) has been blacklisted in **${serverInfo.name}**`,
+                embeds: [{
+                    title: `:white_check_mark: Blacklisted Member (${serverInfo.name})`,
+                    description: 
+                        `> **Username**: ${member.username.endsWith("#0") ? `@${member.username.slice(0, -2)}` : member.username}\n` +
+                        `> **User ID**: ${member.userId}\n` +
+                        `> **Reason**: Blacklisted via Discord bot\n` +
+                        `> **Blacklisted Date**: <t:${Math.floor(blacklist.createdAt.getTime() / 1000)}:R> (<t:${Math.floor(blacklist.createdAt.getTime() / 1000)}:f>)\n`,
+                    color: 789517
+                }],
+                flags: InteractionResponseFlags.EPHEMERAL
+            } });
+            break;
         default:
             return res.status(200).json(INVALID_COMMAND_RESPONSE); 
             break;
         }
     } else if (type === 3) {
         switch (custom_id) {
+        case "skip_verify":
+            var serverInfo = await prisma.servers.findUnique({ where: { guildId: BigInt(interaction.guild_id) } });
+            if (!serverInfo || serverInfo === null) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Server has not been found on dashboard", flags: InteractionResponseFlags.EPHEMERAL } });
+
+            var bot = await prisma.customBots.findUnique({ where: { id: serverInfo.customBotId } });
+            if (!bot) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Bot not found", flags: InteractionResponseFlags.EPHEMERAL } });
+            
+            await axios.put(`https://discord.com/api/v10/guilds/${interaction.guild_id}/members/${interaction.member.user.id}/roles/${serverInfo.roleId}`, {}, {
+                headers: {
+                    "Authorization": `Bot ${bot.botToken}`,
+                    "Content-Type": "application/json",
+                    "X-RateLimit-Precision": "millisecond",
+                    "User-Agent": "DiscordBot (https://discord.js.org, 0.0.0)",
+                },
+                proxy: false,
+                validateStatus: () => true,
+            }).then((resp) => {
+                if (resp?.status === 403 || resp?.status == 403) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Bot doesn't have permissions to give verified role", flags: InteractionResponseFlags.EPHEMERAL } });
+                if (resp?.status === 404 || resp?.status == 404) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Verified role not found", flags: InteractionResponseFlags.EPHEMERAL } });
+            }).catch((err) => {
+                console.error(err);
+                return res.status(200).json({ ...BASE_RESPONSE, data: { content: "An error occured while trying to give the verified role, please try again later. and [contact support](https://t.me/restorecord) if the issue persists.", flags: InteractionResponseFlags.EPHEMERAL } });
+            });
+
+            // send empheral message saying that the user has been verified
+            return res.status(200).json({ ...BASE_RESPONSE, data: { content: "You have been verified!", flags: InteractionResponseFlags.EPHEMERAL } });
+            break;
         case "pull_server":
             if (!values) return res.status(200).json(INVALID_COMMAND_OPTIONS);
 
