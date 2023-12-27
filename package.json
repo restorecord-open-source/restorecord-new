@@ -24,7 +24,7 @@
 		"@types/lodash": "^4.14.202",
 		"aos": "^2.3.4",
 		"apexcharts": "^3.36.3",
-		"axios": "^1.6.3",
+		"axios": "^1.3.4",
 		"bcrypt": "^5.0.1",
 		"coinbase-commerce-node": "^1.0.4",
 		"csv-writer": "^1.6.0",
