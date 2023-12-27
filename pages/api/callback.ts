@@ -67,7 +67,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
             let data = respon.data ? respon.data : respon.response.data;
             if (data.error === "invalid_grant") return res.redirect(`https://${domain}/verify/${state}`);
 
-            if (respon.status !== 200) return res.status(400).json({ code: "10001", message: "Unknown user", help: `If you are a member trying to verify, please wait until the server owner has fixed this issue.\nIf YOU are the server owner, please contact: https://t.me/xenos1337, send:\n${Buffer.from(JSON.stringify({ status: respon.status, data: respon.data ? respon.data : respon.response.data })).toString("base64").replace(/=/g, "").split("").reverse().join("")}` });
+            if (respon.status !== 200) return res.status(400).json({ code: "10001", message: "Unknown user", help: `please contact server owner: https://docs.restorecord.com/troubleshooting/invalid-bot-secret` });
             if (!respon.data.access_token) return reject(990001 as any);
 
             serverOwner = await redis.get(`serverOwner:${serverInfo.ownerId}`);

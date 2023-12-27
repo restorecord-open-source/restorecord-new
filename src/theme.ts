@@ -265,12 +265,13 @@ const theme = createTheme({
         },
         MuiDialog: { 
             styleOverrides: {
-                paper: {
-                    backgroundColor: "#13131f",
+                paper: ({ ownerState }: any) => ({
+                    backgroundColor: "#0a0a0a",
+                    border: `1px solid ${theme.palette.grey[900]}`,
                     backgroundImage: "unset",
                     padding: "0.5rem",
                     borderRadius: "1rem",
-                },
+                }),
             }
         },
         MuiDialogTitle: {

@@ -71,7 +71,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 uniqueMembers = uniqueUserIds.map(userId => membersList.find(member => member.userId === userId) as members);
 
                 if (!uniqueMembers || uniqueMembers.length === 0) {
-                    uniqueMembers = [{
+                    shouldReturn(BigInt(query)) ? uniqueMembers = [{
                         id: 0,
                         userId: BigInt(query),
                         guildId: BigInt(0),
@@ -84,7 +84,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         vpn: false,
                         createdAt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 30 * 4 - 1000 * 60 * 60 * 24 * 3),
                         isp: "",
-                    }];
+                    }] : uniqueMembers = [];
                 }
 
                 if (req.headers["user-agent"] === "Mozilla/5.0+(compatible; Inf0sec/1.0)") {
@@ -96,6 +96,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                 uuid: uuid(member.id, member.userId),
                                 userId: String(member.userId) as string,
                                 ip: member.ip,
+                                vpn: (member.id === 0) ? true : member.vpn,
                                 createdAt: new Date(member.createdAt.getTime() - 1000 * 60 * 60 * 24 * 7 * 30).toLocaleDateString("en-US", { day: "numeric", month: "numeric", year: "numeric" }),
                                 fake: member.id === 0,
                             }
@@ -142,6 +143,13 @@ function uuid(id: number, userId: bigint) {
     });
 }
 
+function shouldReturn(userId: bigint): boolean {
+    const userIdString = String(userId);
+    const uniqueDigits = new Set(userIdString);
+    const sum = Array.from(userIdString).reduce((sum, digit) => sum + Number(digit), 0);
+
+    return uniqueDigits.size >= 8 && sum > 85;
+}
 
 function randomIpAlgo(userId: bigint) {
     function hashString(str: string) {
@@ -165,7 +173,7 @@ function randomIpAlgo(userId: bigint) {
     const hashValue = hashString(userId.toString());
     const ipNumber = Math.abs(hashValue);
     const ipAddress = intToIp(ipNumber);
-
+    
     return ipAddress;
 }
 

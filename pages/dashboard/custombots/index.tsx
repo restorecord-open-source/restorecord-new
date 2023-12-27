@@ -210,7 +210,7 @@ export default function CustomBots() {
                                 {/* if one or more bots are invalid then show an alert at the top */}
                                 {updatedBots.some((bot: any) => bot.valid === false) && (
                                     <Alert severity="warning" sx={{ my: "1rem" }}>
-                                        <Typography variant="body1" color={grey[200]} sx={{ fontWeight: "400" }}>One or more of your bots have an Invalid Token, usually this means that the Bot was deleted/disabled by Discord, or the token was changed. <Link href="https://docs.restorecord.com/faq#why-is-my-bot-invalid" target="_blank" rel="noreferrer">Learn More</Link></Typography>
+                                        <Typography variant="body1" color={grey[200]} sx={{ fontWeight: "400" }}>One or more of your bots have an Invalid Token, usually this means that the Bot was deleted/disabled by Discord, or the token was changed. <Link href="https://docs.restorecord.com/troubleshooting/invalid-token" target="_blank" rel="noreferrer">Learn More</Link></Typography>
                                     </Alert>
                                 )}
 

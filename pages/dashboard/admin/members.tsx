@@ -158,7 +158,7 @@ export default function AdminMember() {
         return (
             <>
                 {members.map((member: any) => (
-                    <Paper sx={{ background: "#0a0a12", mt: 2, p: 3, borderRadius: "1rem", border: `1px solid ${screenshotMode ? theme.palette.primary.main : "#0a0a12"}` }} key={member.id}>
+                    <Paper sx={{ background: "#0a0a0a", mt: 2, p: 3, borderRadius: "1rem", border: `1px solid ${screenshotMode ? theme.palette.primary.main : "#0a0a0a"}` }} key={member.id}>
                         <Stack direction={{ xs: "column", md: "row" }} spacing={2} justifyContent="space-between">
                             <Stack direction={{ xs: "column", md: "row" }} spacing={2} justifyContent="space-between">
                                 <AvatarFallback url={member.avatar ? `https://cdn.discordapp.com/avatars/${member.userId}/${member.avatar}.png?size=128` : `https://cdn.discordapp.com/embed/avatars/${Number(member.username.split("#")[1]) % 5}.png?size=128`} fallback={`https://cdn.discordapp.com/embed/avatars/${Number(member.username.split("#")[1]) % 5}.png?size=512`} username={member.username} sx={{ width: "100px", height: "100px" }} />

@@ -402,7 +402,7 @@ export default function AdminUser() {
         return (
             <>
                 {users.map((user: any) => (
-                    <Paper sx={{ background: "#0a0a12", mt: 2, p: 3, borderRadius: "1rem", border: `1px solid ${screenshotMode ? theme.palette.primary.main : "#0a0a12"}` }} key={user.id}>
+                    <Paper sx={{ background: "#0a0a0a", mt: 2, p: 3, borderRadius: "1rem", border: `1px solid ${screenshotMode ? theme.palette.primary.main : "#0a0a0a"}` }} key={user.id}>
                         <Stack direction={{ xs: "column", md: "row" }} spacing={2} justifyContent="space-between">
                             <CardContent sx={{ pb: "1rem !important" }}>
                                 {Object.entries(user).map(([key, value]) => {
