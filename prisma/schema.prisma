@@ -32,6 +32,7 @@ model accounts {
     emails         emails[]
     payments       payments[]
     logs           logs[]
+    giftCodes      giftCodes[]
 
     @@index([username])
     @@index([lastIp])
@@ -324,9 +325,27 @@ model payments {
     gift           Boolean  @default(false)
     createdAt      DateTime @default(now())
     account        accounts @relation(fields: [accountId], references: [id])
+    giftCodes      giftCodes[]
 
     @@index([accountId])
     @@index([subscriptionId])
+}
+
+model giftCodes {
+    id        Int      @id @default(autoincrement())
+    code      String   @unique @db.VarChar(500)
+    amount    Int
+    paymentId Int
+    used      Boolean  @default(false)
+    usedBy    Int
+    usedAt    DateTime?
+    createdAt DateTime @default(now())
+    account   accounts @relation(fields: [usedBy], references: [id])
+    payment   payments @relation(fields: [paymentId], references: [id])
+
+    @@index([code])
+    @@index([paymentId])
+    @@index([usedBy])
 }
 
 enum Theme {

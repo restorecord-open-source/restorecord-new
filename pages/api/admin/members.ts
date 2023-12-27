@@ -50,7 +50,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     where: {
                         userId: query,
                         createdAt: {
-                            lt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 180),
+                            lt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 90),
                         },
                         NOT: [
                             { ip: null },

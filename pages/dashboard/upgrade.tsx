@@ -88,13 +88,23 @@ export default function Upgrade() {
         priceMonthly: 0,
     });
 
-    const [subTab, setSubTab] = useState(0);
+    const [redeemInfo, setRedeemInfo] = useState({
+        code: "",
+        error: "",
+        success: "",
+        selectedPlan: "",
+        valid: false,
+        plans: [],
+    });
 
-    const { data: user, isError, isLoading } = useQuery("user", async () => await getUser({
+    const [subTab, setSubTab] = useState(0);
+    const [redeemCode, setRedeemCode] = useState("");
+
+    const { data: user, isError, isLoading, refetch: refetchAccount } = useQuery("user", async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
     }), { retry: false, refetchOnWindowFocus: false });
 
-    const { data: payments, isError: paymentsIsError, isLoading: paymentsIsLoading } = useQuery("payments", async () => await axios.get("/api/v2/self/payments", {
+    const { data: payments, isError: paymentsIsError, isLoading: paymentsIsLoading, refetch: refetchPayments } = useQuery("payments", async () => await axios.get("/api/v2/self/payments", {
         headers: {
             "Content-Type": "application/json",
             "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
@@ -670,51 +680,104 @@ export default function Upgrade() {
             <NavBar user={user}>
                 <Toolbar />
                 <Container maxWidth="xl">
-                    {user.role !== "free" &&
-                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
-                            <CardContent sx={{ pb: "1rem !important" }}>
-                                <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
-                                    Current Subscription
+                    <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #1a1a1a" }}>
+                        <CardContent sx={{ pb: "1rem !important" }}>
+                            <Typography variant="h4" sx={{ mb: 2, fontWeight: "700", wordBreak: "break-all" }}>
+                                Current Subscription
+                            </Typography>
+
+                            <Tabs value={subTab} onChange={(e, newValue) => setSubTab(newValue)} aria-label="subscription tab" scrollButtons="auto" variant="scrollable" allowScrollButtonsMobile>
+                                <Tab label="Subscription" id="sub-tabs-0" aria-controls="sub-tabs-0" sx={{ wordBreak: "break-all" }} />
+                                <Tab label="Payment History" id="sub-tabs-1" aria-controls="sub-tabs-1" sx={{ wordBreak: "break-all" }} />
+                                <Tab label="Redeem" id="sub-tabs-2" aria-controls="sub-tabs-2" sx={{ wordBreak: "break-all" }} />
+                            </Tabs>
+
+                            <CustomTabPanel value={subTab} index={0}>
+                                {renderSubscriptionStatus()}
+                            </CustomTabPanel>
+                            <CustomTabPanel value={subTab} index={1}>
+                                <TableContainer component={Paper} sx={{ boxShadow: "none", border: `1px solid ${theme.palette.grey[800]}` }}>
+                                    <Table aria-label="simple table">
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>Payment ID</TableCell>
+                                                <TableCell>Amount</TableCell>
+                                                <TableCell>Plan</TableCell>
+                                                <TableCell>Status</TableCell>
+                                                <TableCell>Date</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {payments.payments.map((payment: any) => (
+                                                <TableRow key={payment.id} sx={{ "&:last-child td, &:last-child th": { borderBottom: 0 } }}>
+                                                    <TableCell component="th" scope="row" sx={{ borderLeft: `3px solid ${(payment.status === "active" || payment.status === "paid" || payment.status === "CONFIRMED" || payment.status === "SUCCESS") ? theme.palette.success.main : payment.status === "cancelled" ? theme.palette.error.main : payment.status === "trialing" ? theme.palette.warning.main : theme.palette.grey[800]}`, paddingLeft: "0.5rem" }}>{payment.id}</TableCell>
+                                                    <TableCell>${(payment.amount / 100).toFixed(2)}</TableCell>
+                                                    <TableCell>{payment.plan.charAt(0).toUpperCase() + payment.plan.slice(1)}</TableCell>
+                                                    <TableCell>{(payment.status === "active" || payment.status === "paid") ? "PAID" : payment.status === "cancelled" ? "CANCELLED" : payment.status === "trialing" ? "TRIAL" : payment.status}</TableCell>
+                                                    {/* <TableCell>{new Intl.DateTimeFormat(navigator.language, { year: "numeric", month: "long", day: "2-digit" }).format(new Date(payment.createdAt))}</TableCell> */}
+                                                    <TableCell>{IntlRelativeTime(new Date(payment.createdAt).getTime())}</TableCell>
+                                                </TableRow>
+                                            ))}
+
+                                            {payments.payments.length === 0 && (
+                                                <TableRow sx={{ "&:last-child td, &:last-child th": { borderBottom: 0 } }}>
+                                                    <TableCell colSpan={5} component="th" scope="row" sx={{ textAlign: "center" }}>No payments found.</TableCell>
+                                                </TableRow>
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
+                            </CustomTabPanel>
+                            <CustomTabPanel value={subTab} index={2}>
+                                <Typography variant="body1" sx={{ fontWeight: "500", mb: 2 }}>
+                                    If you have a gift code you can redeem it below
                                 </Typography>
 
-                                <Tabs value={subTab} onChange={(e, newValue) => setSubTab(newValue)} aria-label="basic tabs example" sx={{ mb: 2 }}>
-                                    <Tab label="Subscription" id="sub-tabs-0" aria-controls="basic-tabs-0" />
-                                    <Tab label="Payment History" id="sub-tabs-1" aria-controls="basic-tabs-1" />
-                                </Tabs>
+                                <Alert severity={redeemInfo.error ? "error" : "success"} sx={{ mb: 2, display: (redeemInfo.error || redeemInfo.success) ? "flex" : "none" }}>
+                                    <AlertTitle>{redeemInfo.error ? "Error" : "Success"}</AlertTitle>
+                                    <Typography variant="body2" color="text.secondary">{(redeemInfo.error || redeemInfo.success)}</Typography>
+                                </Alert>
 
-                                <CustomTabPanel value={subTab} index={0}>
-                                    {renderSubscriptionStatus()}
-                                </CustomTabPanel>
-                                <CustomTabPanel value={subTab} index={1}>
-                                    <TableContainer component={Paper} sx={{ mt: 2, boxShadow: "none", border: `1px solid ${theme.palette.grey[800]}` }}>
-                                        <Table aria-label="simple table">
-                                            <TableHead>
-                                                <TableRow>
-                                                    <TableCell>Payment ID</TableCell>
-                                                    <TableCell>Amount</TableCell>
-                                                    <TableCell>Plan</TableCell>
-                                                    <TableCell>Status</TableCell>
-                                                    <TableCell>Date</TableCell>
-                                                </TableRow>
-                                            </TableHead>
-                                            <TableBody>
-                                                {payments.payments.map((payment: any) => (
-                                                    <TableRow key={payment.id} sx={{ "&:last-child td, &:last-child th": { borderBottom: 0 } }}>
-                                                        <TableCell component="th" scope="row" sx={{ borderLeft: `3px solid ${(payment.status === "active" || payment.status === "paid" || payment.status === "CONFIRMED") ? theme.palette.success.main : payment.status === "cancelled" ? theme.palette.error.main : payment.status === "trialing" ? theme.palette.warning.main : theme.palette.grey[800]}`, paddingLeft: "0.5rem" }}>{payment.id}</TableCell>
-                                                        <TableCell>${(payment.amount / 100).toFixed(2)}</TableCell>
-                                                        <TableCell>{payment.plan.charAt(0).toUpperCase() + payment.plan.slice(1)}</TableCell>
-                                                        <TableCell>{(payment.status === "active" || payment.status === "paid") ? "PAID" : payment.status === "cancelled" ? "CANCELLED" : payment.status === "trialing" ? "TRIAL" : payment.status}</TableCell>
-                                                        <TableCell>{new Intl.DateTimeFormat(navigator.language, { year: "numeric", month: "long", day: "2-digit" }).format(new Date(payment.createdAt))}</TableCell>
-                                                    </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                    </TableContainer>
-                                    
-                                </CustomTabPanel>
-                            </CardContent>
-                        </Paper>
-                    }
+                                <TextField autoFocus id="redeem" label="Gift Code" type="text" fullWidth={true} placeholder="XXXXX-XXXXX-XXXXX-XXXXX" value={redeemCode} onChange={(e) => setRedeemCode(e.target.value)}/>
+                                {(redeemInfo.valid && redeemInfo.plans && redeemInfo.plans.length > 0) && (
+                                    <FormControl fullWidth sx={{ mt: 2 }}>
+                                        <InputLabel id="plan">Plan</InputLabel>
+                                        <Select labelId="plan" id="plan" value={redeemInfo.selectedPlan} label="Plan" onChange={(e) => setRedeemInfo({ ...redeemInfo, selectedPlan: e.target.value })}>
+                                            {redeemInfo.plans.map((plan: any) => (
+                                                <MenuItem key={plan.name} value={plan.name}>{plan.name.replace(/_/g, " ").replace(/\b\w/g, (l: string) => l.toUpperCase())} (${(plan.price / 100).toFixed(2)})</MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                )}
+
+                                {/*  */}
+                                <LoadingButton variant="contained" color={(redeemInfo.valid && redeemInfo.selectedPlan != "") ? "success" : "primary"} fullWidth sx={{ mt: 2 }} disabled={redeemCode.length === 0 || !/^[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}$|^[A-Z0-9]{16}$/.test(redeemCode)} event={() => {
+                                    axios.post("/api/v2/self/payments", {
+                                        code: redeemCode,
+                                        ...(redeemInfo.valid && redeemInfo.selectedPlan != "") ? { plan: redeemInfo.selectedPlan } : {},
+                                    }, {
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                            "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                        },
+                                        validateStatus: () => true,
+                                    }).then((res) => {
+                                        refetchPayments();
+                                        refetchAccount();
+
+                                        setRedeemInfo({ ...redeemInfo, error: "", success: "", plans: [], valid: false, selectedPlan: "" });
+                                        if (!res.data.success) setRedeemInfo({ ...redeemInfo, error: res.data.message });
+
+                                        if (!res.data.gift.used) setRedeemInfo({ ...redeemInfo, code: res.data.gift.code, valid: true, plans: res.data.plans, success: res.data.message, error: "" });
+                                        else setRedeemInfo({ ...redeemInfo, error: "", success: res.data.message, valid: (!res.data.gift.used && res.data.gift.usedBy === user.id) ? true : false, plans: res.data.plans });
+                                   
+                                    }).catch((err) => {
+                                        console.error(err);
+                                    });
+                                }}>{(redeemInfo.valid && redeemInfo.selectedPlan != "") ? "Confirm" : "Redeem"}</LoadingButton>
+                            </CustomTabPanel>
+                        </CardContent>
+                    </Paper>
                    
                     <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #1a1a1a" }}>
                         <CardContent sx={{ pb: "1rem !important" }}>
