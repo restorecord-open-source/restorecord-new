@@ -27,7 +27,6 @@ import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
-import MuiLink from "@mui/material/Link";
 import TextField from "@mui/material/TextField";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
@@ -74,7 +73,7 @@ export default function Server() {
 
     const [allServers, setAllServers] = useState([]);
     const [allRoles, setAllRoles]: any = useState([]);
-    const [botClient, setBotClient]: any = useState({});
+    const [botClient, setBotClient]: any = useState({ loading: true, valid: false });
 
     const [openS, setOpenS] = useState(false);
     const [openE, setOpenE] = useState(false);
@@ -116,15 +115,17 @@ export default function Server() {
     }
 
     function getBotClient(botToken: string) {
+        setBotClient({ loading: true, valid: false });
+
         axios.get(`/api/v2/users/@me`, {
             headers: {
                 "Authorization": `Bot ${botToken}`,
             },
         }).then(res => {
-            if (res.data.code || res.data.message) { setBotClient({}); setNotiTextE(res.data.message); setOpenE(true); }
-            else setBotClient(res.data);
+            if (res.data.code || res.data.message) { setBotClient({ loading: false, valid: false }); setNotiTextE(res.data.message); setOpenE(true); }
+            else setBotClient({ loading: false, valid: true, ...res.data });
         }).catch(err => {
-            setBotClient({});
+            setBotClient({ loading: false, valid: false });
             console.error(err);
         });
     }
@@ -234,10 +235,10 @@ export default function Server() {
                             </Typography>
                             <Typography variant="body2" color="white" sx={{ wordBreak: "break-word" }}>
                                 Verification URL
-                                <MuiLink color={theme.palette.primary.light} href={(user.bots.find((bot: any) => bot.id === (user.servers.find((server: any) => server.guildId === server.guildId).customBotId)).customDomain != null ? "https://" + user.bots.find((bot: any) => bot.id === (user.servers.find((server: any) => server.guildId === server.guildId).customBotId)).customDomain : window.location.origin.replace("www.", "")) + "/verify/" + encodeURIComponent(server.name)} target="_blank" rel="noopener noreferrer">
+                                <Link href={(user.bots.find((bot: any) => bot.id === (user.servers.find((server: any) => server.guildId === server.guildId).customBotId)).customDomain != null ? "https://" + user.bots.find((bot: any) => bot.id === (user.servers.find((server: any) => server.guildId === server.guildId).customBotId)).customDomain : window.location.origin.replace("www.", "")) + "/verify/" + encodeURIComponent(server.name)} target="_blank" rel="noopener noreferrer" style={{ color: theme.palette.primary.light }}>
                                     <br/>
                                     {(user.bots.find((bot: any) => bot.id === (user.servers.find((server: any) => server.guildId === server.guildId).customBotId)).customDomain != null ? "https://" + user.bots.find((bot: any) => bot.id === (user.servers.find((server: any) => server.guildId === server.guildId).customBotId)).customDomain : window.location.origin.replace("www.", ""))}/verify/{encodeURIComponent(server.name)}
-                                </MuiLink>
+                                </Link>
                             </Typography>
                         </Grid>
                         <Grid item xs={12} sm={12} md={3} lg={2} xl={1}>
@@ -249,9 +250,10 @@ export default function Server() {
                                     // setCustomBotToken(user.bots.find((bot: any) => bot.id === (user.servers.find((server: any) => server.guildId === server.guildId).customBotId)).botToken);
                                     setGuildId(server.guildId);
                                     reloadUser();
+                                    setBotClient({ loading: true, valid: false });
                                     getAllGuilds(user.bots.find((bot: any) => String(bot.id) === String(user.servers.find((serv: any) => serv.guildId === server.guildId).customBotId)).botToken);
                                     getBotClient(user.bots.find((bot: any) => String(bot.id) === String(user.servers.find((serv: any) => serv.guildId === server.guildId).customBotId)).botToken);
-                                    setPullSettings({ ...pullSettings, serverId: server.id, pullWindow: true });
+                                    setPullSettings({ ...pullSettings, serverId: server.id, pullWindow: true, giveRoleOnJoin: false, customPullCountCheck: false, specificCountry: false });
                                 }}>Migrate</Button>
                                 {(user.role === "business" || user.role === "enterprise") && (
                                     <LoadingButton variant="contained" color="yellow" event={() => {
@@ -303,18 +305,24 @@ export default function Server() {
 
                             <Dialog open={pullSettings.pullWindow} onClose={() => setPullSettings({ ...pullSettings, pullWindow: false })} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" fullWidth maxWidth="sm">
                                 <DialogTitle id="alert-dialog-title">
-                                        Migration
+                                    Migration
                                     <IconButton aria-label="close" onClick={() => setPullSettings({ ...pullSettings, pullWindow: false })} sx={{ position: "absolute", right: 8, top: 8, color: theme.palette.grey[500] }}>
                                         <CloseIcon />
                                     </IconButton>
                                 </DialogTitle>
                                 <DialogContent>
+                                    {!botClient.loading && !botClient.valid && (
+                                        <Alert severity="error" sx={{ width: "100%", mb: "1rem" }}>
+                                            <Typography variant="body1" sx={{ fontWeight: "400" }}>The Bot linked to this server has an Invalid Bot Token, please update it <Link href={`/dashboard/custombots/${user.bots.find((bot: any) => String(bot.id) === String(user.servers.find((server: any) => server.id === pullSettings.serverId)?.customBotId)).clientId}`}>here</Link>.</Typography>
+                                        </Alert>
+                                    )}
+
                                     <Typography variant="body1" sx={{ fontWeight: "400", mb: "1rem" }}>
                                         Select the server you want to pull your members into, make sure you invited the bot to the server.
                                     </Typography>
-                                    {allServers.length === 0 ? (
+                                    {(allServers.length === 0 && botClient.valid) ? (
                                         <CircularProgress />
-                                    ) : (
+                                    ) : (botClient.valid) && (
                                         <FormControl fullWidth variant="outlined" required>
                                             <InputLabel id="server-select-label">Select Server</InputLabel>
                                             <Select labelId="server-select-label" label="Select Server" value={pullSettings.selectedServer} onChange={(e) => { setAllRoles([]); setPullSettings({ ...pullSettings, selectedServer: e.target.value as string }); }} required>
@@ -415,25 +423,27 @@ export default function Server() {
                                     )}
 
                                     {/* small arrow down icon with the text "advanced options" */}
-                                    <Accordion sx={{ my: "1rem" }}>
-                                        <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-                                            <Typography variant="body1" sx={{ fontWeight: "400" }}>Advanced Options</Typography>
-                                        </AccordionSummary>
-                                        <AccordionDetails>
-                                            <Alert severity="warning" sx={{ width: "100%", mb: "1rem" }}>
-                                                <Typography variant="body1" sx={{ fontWeight: "400" }}>These options are for advanced users only, please do not change these settings unless you know what you are doing.</Typography>
-                                            </Alert>
+                                    {(!botClient.loading && botClient.valid) && (
+                                        <Accordion sx={{ my: "1rem" }}>
+                                            <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
+                                                <Typography variant="body1" sx={{ fontWeight: "400" }}>Advanced Options</Typography>
+                                            </AccordionSummary>
+                                            <AccordionDetails>
+                                                <Alert severity="warning" sx={{ width: "100%", mb: "1rem" }}>
+                                                    <Typography variant="body1" sx={{ fontWeight: "400" }}>These options are for advanced users only, please do not change these settings unless you know what you are doing.</Typography>
+                                                </Alert>
 
-                                            <Typography variant="body1" sx={{ mb: "1rem" }}>Enter Server ID manually</Typography>
-                                            <TextField fullWidth label="Server ID" variant="outlined" value={pullSettings.selectedServer} onChange={(e) => setPullSettings({ ...pullSettings, selectedServer: e.target.value }) } />
-                                            {(pullSettings.giveRoleOnJoin && pullSettings.selectedServer) && (
-                                                <>
-                                                    <Typography variant="body1" sx={{ mb: "1rem", mt: "1rem" }}>Enter Role ID manually</Typography>
-                                                    <TextField fullWidth label="Role ID" variant="outlined" value={pullSettings.selectedRole} onChange={(e) => setPullSettings({ ...pullSettings, selectedRole: e.target.value }) } />
-                                                </>
-                                            )}
-                                        </AccordionDetails>
-                                    </Accordion>
+                                                <Typography variant="body1" sx={{ mb: "1rem" }}>Enter Server ID manually</Typography>
+                                                <TextField fullWidth label="Server ID" variant="outlined" value={pullSettings.selectedServer} onChange={(e) => setPullSettings({ ...pullSettings, selectedServer: e.target.value }) } />
+                                                {(pullSettings.giveRoleOnJoin && pullSettings.selectedServer) && (
+                                                    <>
+                                                        <Typography variant="body1" sx={{ mb: "1rem", mt: "1rem" }}>Enter Role ID manually</Typography>
+                                                        <TextField fullWidth label="Role ID" variant="outlined" value={pullSettings.selectedRole} onChange={(e) => setPullSettings({ ...pullSettings, selectedRole: e.target.value }) } />
+                                                    </>
+                                                )}
+                                            </AccordionDetails>
+                                        </Accordion>
+                                    )}
 
                                     {(guildId !== "" && new Date(user.servers.find((item: any) => item.guildId === guildId).pullTimeout).getTime() - new Date().getTime() > 0) && (
                                         <Alert severity="info" sx={{ width: "100%" }}>
