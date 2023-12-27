@@ -17,6 +17,7 @@
 		"@mui/icons-material": "^5.11.16",
 		"@mui/lab": "^5.0.0-alpha.98",
 		"@mui/material": "^5.14.8",
+		"@pm2/io": "^5.0.2",
 		"@prisma/client": "^5.6.0",
 		"@sendgrid/mail": "^8.0.0",
 		"@types/aos": "^3.0.4",
@@ -50,7 +51,8 @@
 		"speakeasy": "^2.0.0",
 		"stripe": "^11.15.0",
 		"tweetnacl": "^1.0.3",
-		"typed.js": "^2.0.12"
+		"typed.js": "^2.0.12",
+		"uuid": "^9.0.1"
 	},
 	"devDependencies": {
 		"@mui/types": "^7.2.3",
@@ -64,13 +66,14 @@
 		"@types/react": "^18.0.14",
 		"@types/react-dom": "^18.0.10",
 		"@types/speakeasy": "^2.0.7",
+		"@types/uuid": "^9.0.7",
 		"cross-env": "^7.0.3",
 		"eslint": "^8.29.0",
 		"eslint-config-next": "^13.4.2",
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-prettier": "^4.0.0",
 		"prettier": "^2.7.0",
-		"prisma": "^5.6.0",
+		"prisma": "^5.7.1",
 		"typescript": "^5.0.2"
 	}
 }

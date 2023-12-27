@@ -129,18 +129,6 @@ export default function Server() {
         });
     }
 
-    // useEffect(() => {
-    //     if (customBotToken) {
-    //         if (allServers.length === 0) getAllGuilds();
-
-    //         if (pullSettings.giveRoleOnJoin && pullSettings.selectedServer) {
-    //             if (!botClient.id) getBotClient();
-    //             if (allRoles.length === 0) getGuildRoles(pullSettings.selectedServer);
-    //         }
-    //     }
-    // // eslint-disable-next-line react-hooks/exhaustive-deps
-    // }, [customBotToken, pullSettings.giveRoleOnJoin, pullSettings.selectedServer]);
-
     const { data: user, isError, isLoading, refetch: reloadUser } = useQuery('user', async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
     }), { retry: false, refetchOnWindowFocus: false });
@@ -188,7 +176,7 @@ export default function Server() {
                         setIsRotating(true);
                         reloadUser();
                         setTimeout(() => { setIsRotating(false); }, 1000);
-                    }} size="medium" sx={{ ml: 1, mt: 1, animation: `${isRotating ? "rotation 0.5s linear forwards" : ""}`, transition: "transform 0.2s ease-out", }}>
+                    }} size="medium" sx={{ ml: 1, mt: 1, animation: `${isRotating ? "rotation 0.5s linear forwards" : ""}`, transition: "transform 0.2s ease-out" }}>
                         <RefreshIcon />
                     </IconButton>
                     <style jsx global>{`
@@ -308,7 +296,7 @@ export default function Server() {
                 <Toolbar />
                     
                 <Container maxWidth="xl">
-                    <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
+                    <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #1a1a1a" }}>
                         <CardContent>
                             {renderNotifications()}
                             {rendertitleBarUI()}

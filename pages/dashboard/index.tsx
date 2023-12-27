@@ -242,7 +242,7 @@ export default function Dashboard() {
     function renderGraph() {
         return (
             <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "block" } }}>
-                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%", border: "1px solid #18182e" }}>
+                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%", border: "1px solid #1a1a1a" }}>
                     <CardContent sx={{ pb: "1rem !important" }}>
                         {isLoading2 ? ( <CircularProgress /> ) : (
                             <>
@@ -266,7 +266,7 @@ export default function Dashboard() {
     function renderLastVerified() {
         return (
             <Grid item xs={12} md={6}>
-                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%", border: "1px solid #18182e" }}>
+                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%", border: "1px solid #1a1a1a" }}>
                     <CardContent sx={{ pb: "1rem !important" }}>
                         {recentVerifiedLoading && ( <CircularProgress /> )}
 
@@ -331,7 +331,7 @@ export default function Dashboard() {
     function rendertopAnalytics() {
         return (
             <Grid item xs={12} md={6}>
-                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%", border: "1px solid #18182e" }}>
+                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", height: "100%", border: "1px solid #1a1a1a" }}>
                     <CardContent sx={{ pb: "1rem !important" }}>
                         {topAnalyticsLoading && <CircularProgress />}
 
@@ -426,7 +426,7 @@ export default function Dashboard() {
                             if (window.localStorage.getItem("alerts")?.includes(item.id)) return null;
 
                             return (
-                                <Alert key={item.id} id={item.id} severity={item.severity === 0 ? "info" : (item.severity === 1 ? "warning" : "error")} sx={{ width: "100%", my: 2 }} onClose={() => {
+                                <Alert key={item.id} id={item.id} severity={item.severity === 0 ? "info" : (item.severity === 1 ? "success" : (item.severity === 2 ? "warning" : "error"))} sx={{ width: "100%", my: 2 }} onClose={() => {
                                     try {
                                         const alerts = JSON.parse(window.localStorage.getItem("alerts") ?? "[]");
                                         alerts.push(item.id);

@@ -279,7 +279,7 @@ export default function AccountSettings() {
                         {openE ? renderErrorNotification() : null}
                         {openI ? renderInfoNotification() : null}
 
-                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
+                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #1a1a1a" }}>
                             <CardContent sx={{ pb: "1rem !important" }}>
                                 <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
                                     Account
@@ -291,7 +291,7 @@ export default function AccountSettings() {
                             </CardContent>
                         </Paper>
 
-                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
+                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #1a1a1a" }}>
                             <CardContent sx={{ pb: "1rem !important" }}>
                                 <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
                                     Security
@@ -313,7 +313,7 @@ export default function AccountSettings() {
                                     <>
                                         <QRCode text={twoFAUrl} options={{ type: "image/png", level: "H", margin: 0, scale: 6, color: { dark: "#ffffff", light: "#1e1e1e", } }} />
                                         <Typography variant="body1" sx={{ mb: 2 }}>
-                                            Or use the secret (hover for 3s): <Typography variant="caption" sx={{ filter: "blur(0.25rem)", transition: "0.5s all", transitionDelay: "0s", [`&:hover`]: { filter: "blur(0px)", transitionDelay: "0.5s", }, }}>{twoFASecret}</Typography>
+                                            Or use the secret (hover for 3s): <Typography variant="caption" sx={{ filter: "blur(0.25rem)", transition: "0.5s all", transitionDelay: "0s", [`&:hover`]: { filter: "blur(0px)", transitionDelay: "0.5s", } }}>{twoFASecret}</Typography>
                                         </Typography>
                                     </>
                                 ) : null}
@@ -447,7 +447,7 @@ export default function AccountSettings() {
                         </Paper>
 
                         {data.admin && (
-                            <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
+                            <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #1a1a1a" }}>
                                 <CardContent sx={{ pb: "1rem !important" }}>
                                     <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
                                         API Tokens
@@ -572,7 +572,7 @@ export default function AccountSettings() {
                             </Paper>
                         )}
 
-                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
+                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #1a1a1a" }}>
                             <CardContent sx={{ pb: "1rem !important" }}>
                                 <form method="POST">
                                     <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>

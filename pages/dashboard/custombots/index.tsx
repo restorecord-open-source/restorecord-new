@@ -57,6 +57,7 @@ export default function CustomBots() {
                             .then((res) => res.json())
                             .then((res) => {
                                 if (res.id) {
+                                    bot.valid = true;
                                     if (res.avatar === null) {
                                         bot.avatar = `https://cdn.discordapp.com/embed/avatars/${
                                             res.discriminator % 5
@@ -67,6 +68,7 @@ export default function CustomBots() {
                                     bot.username = `${res.username}#${res.discriminator}`;
                                     bot.clientId = res.id;
                                 } else if (res.message === "401: Unauthorized") {
+                                    bot.valid = false;
                                     bot.avatar = `https://cdn.discordapp.com/embed/avatars/0.png`;
                                     bot.username = `Unknown Bot/Deleted`;
                                     bot.clientId = atob(bot.botToken.split(".")[0]);
@@ -151,12 +153,14 @@ export default function CustomBots() {
                             <Stack spacing={1} direction="column" justifyContent={"space-between"}>
                                 {BotClient.username ? (
                                     <>
-                                        <Button variant="contained" color="primary" onClick={() => { router.push(`/dashboard/custombots/${BotClient.clientId}`) }}>
-                                            Edit
+                                        <Button variant="contained" color={BotClient.valid ? "primary" : "error"} onClick={() => { router.push(`/dashboard/custombots/${BotClient.clientId}`) }}>
+                                            {BotClient.valid ? "Manage" : "Update"}
                                         </Button>
-                                        <Button variant="contained" color="success" href={`https://discord.com/oauth2/authorize?client_id=${BotClient.clientId}&scope=bot applications.commands&permissions=8`} target="_blank" rel="noreferrer">
-                                            Invite
-                                        </Button>
+                                        {BotClient.valid && (
+                                            <Button variant="contained" color="success" href={`https://discord.com/oauth2/authorize?client_id=${BotClient.clientId}&scope=bot applications.commands&permissions=8`} target="_blank" rel="noreferrer">
+                                                Invite
+                                            </Button>
+                                        )}
                                     </>
                                 ) : (
                                     <>
@@ -197,10 +201,19 @@ export default function CustomBots() {
                     <Toolbar />
 
                     <Container maxWidth="xl">
-                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
+                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #1a1a1a" }}>
                             <CardContent>
                                 {renderNotifications()}
                                 {rendertitleBarUI()}
+
+
+                                {/* if one or more bots are invalid then show an alert at the top */}
+                                {updatedBots.some((bot: any) => bot.valid === false) && (
+                                    <Alert severity="warning" sx={{ my: "1rem" }}>
+                                        <Typography variant="body1" color={grey[200]} sx={{ fontWeight: "400" }}>One or more of your bots have an Invalid Token, usually this means that the Bot was deleted/disabled by Discord, or the token was changed. <Link href="https://docs.restorecord.com/faq#why-is-my-bot-invalid" target="_blank" rel="noreferrer">Learn More</Link></Typography>
+                                    </Alert>
+                                )}
+
 
                                 {(user && user.bots.length > 0) ? (
                                     user.bots ? (

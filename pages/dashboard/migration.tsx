@@ -141,7 +141,7 @@ export default function Server() {
 
     function renderStatus(server: any, migration: Migration) {
         return (
-            <Accordion sx={{ borderRadius: "1rem", border: "1px solid #18182e", mt: "1rem", padding: "0.5rem" }} key={server.id} id={`server_${server.guildId}`} expanded={migration.open} onChange={() => { setMigrations(migrations.map((migration) => migration.guildId === server.guildId ? { ...migration, open: !migration.open } : migration)) }}>
+            <Accordion sx={{ borderRadius: "1rem", border: "1px solid #1a1a1a", mt: "1rem", padding: "0.5rem" }} key={server.id} id={`server_${server.guildId}`} expanded={migration.open} onChange={() => { setMigrations(migrations.map((migration) => migration.guildId === server.guildId ? { ...migration, open: !migration.open } : migration)) }}>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header" sx={{ "& .MuiAccordionSummary-expandIconWrapper.Mui-expanded": { transform: "rotate(180deg)" } }}>
                     <Stack spacing={2} justifyContent="space-between" sx={{ width: "100%" }} direction={{ xs: "column", sm: "row" }} alignItems={{ xs: "flex-start", sm: "center" }}>
                         <Box sx={{ display: "inline-flex", alignItems: "center" }}>
@@ -177,7 +177,7 @@ export default function Server() {
                 <Toolbar />
                     
                 <Container maxWidth="xl">
-                    <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
+                    <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #1a1a1a" }}>
                         <CardContent>
                             {renderNotifications()}
                             {rendertitleBarUI()}

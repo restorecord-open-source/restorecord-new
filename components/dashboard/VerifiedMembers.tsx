@@ -312,7 +312,6 @@ export default function VerifiedMembers({ user }: any) {
                         </Select>
                     </FormControl>
 
-                    {/* multi select for the options */}
                     <FormControl fullWidth sx={{ mt: 1 }}>
                         <InputLabel id="options-select-label">Options</InputLabel>
                         <Select labelId="options-select-label" id="options-select" label="Options" multiple value={exportOptions.selectedOptions} input={<OutlinedInput label="Format" />} onChange={(event: any) =>  setExportOptions({ ...exportOptions, selectedOptions: event.target.value })} renderValue={(selected) => ( <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>{selected.map((value: any) => ( <Chip key={value} label={value} /> ))}</Box> )} MenuProps={{ PaperProps: { style: { maxHeight: 300 } } }}>
@@ -333,7 +332,6 @@ export default function VerifiedMembers({ user }: any) {
                         </Select>
                     </FormControl>
 
-                    {/* warning when u export ur members they prob wont be able to be used again on restorecord */}
                     <Alert severity="error" sx={{ mt: 2 }}>
                         <Typography variant="body1" sx={{ fontWeight: "500" }}>
                             Warning
@@ -442,10 +440,7 @@ export default function VerifiedMembers({ user }: any) {
                         </Typography>
                     </Alert>
 
-                    {/* checkbox to accept the risk */}
                     <FormControlLabel control={<Checkbox checked={importRisk} onChange={(event: any) => setImportRisk(event.target.checked)} />} label="I understand the risk of importing members" />
-
-                    {/* checkbox to if i abuse i get banned etc */}
                     <FormControlLabel control={<Checkbox checked={usageTerms} onChange={(event: any) => setUsageTerms(event.target.checked)} />} label={<>I agree to the <a href="/terms" target="_blank">Terms of Service</a></>} sx={{ mb: 1 }} />
 
                     <LoadingButton variant="contained" color="success" fullWidth={true} disabled={importOptions.serverId.length === 0 || !importOptions.file || !importRisk || !usageTerms} event={() => {
@@ -485,7 +480,7 @@ export default function VerifiedMembers({ user }: any) {
     return (
         <>
             <Container maxWidth="xl">
-                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
+                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #1a1a1a" }}>
                     <CardContent sx={{ pb: "1rem !important" }}>
                         <Stack direction="row" alignItems="center" justifyContent="space-between">
                             <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>

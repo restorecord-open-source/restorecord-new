@@ -86,7 +86,7 @@ export default function Admin() {
                     <Toolbar />
 
                     <Container maxWidth="xl">
-                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
+                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #1a1a1a" }}>
                             <CardContent sx={{ pb: "1rem !important" }}>
                                 <Typography variant="h5" sx={{ mb: 2, fontWeight: "500" }}>
                                     Admin Panel
@@ -102,7 +102,7 @@ export default function Admin() {
                         </Paper>
                         
                         <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={{ xs: 1, sm: 2 }} sx={{ mt: 1 }}>
-                            <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", width: "100%", border: "1px solid #18182e" }}>
+                            <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", width: "100%", border: "1px solid #1a1a1a" }}>
                                 <CardContent sx={{ pb: "1rem !important" }}>
                                     <Typography variant="h5" sx={{ mb: 2, fontWeight: "500" }}>
                                         Stats
@@ -127,7 +127,7 @@ export default function Admin() {
                                 </CardContent>
                             </Paper>
 
-                            <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", width: "100%", border: "1px solid #18182e" }}>
+                            <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", width: "100%", border: "1px solid #1a1a1a" }}>
                                 <CardContent sx={{ pb: "1rem !important" }}>
                                     {statsLoading ? <CircularProgress /> : (
                                         <>

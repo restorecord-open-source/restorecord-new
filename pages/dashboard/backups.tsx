@@ -99,7 +99,7 @@ export default function Backups() {
                     <Toolbar />
                     
                     <Container maxWidth="xl">
-                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
+                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #1a1a1a" }}>
                             <CardContent sx={{ pb: "1rem !important" }}>
                                 <Badge badgeContent={<>BETA</>} color="primary" sx={{ [`& .MuiBadge-badge`]: { mt: "1.5rem", mr: "-2.5rem", color: "#fff", padding: "0.85rem", fontSize: "0.95rem", fontWeight: "bold" } }}>
                                     <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
@@ -343,7 +343,6 @@ export default function Backups() {
                                                 </Paper>
                                             ) : (
                                                 <>
-                                                    {/* user needs to upgrade subscription to use backups */}
                                                     <Typography variant="body1" sx={{ mb: 2, fontWeight: "400" }}>
                                                         Backups are only available for users with a Business subscription.
                                                     </Typography>

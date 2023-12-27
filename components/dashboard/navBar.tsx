@@ -76,16 +76,21 @@ export default function NavBar({ ...props }: any) {
     return (
         <>
             <Box sx={{ display: "flex" }}>
-                <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, background: "#09090d", boxShadow: "none", borderBottom: "1px solid rgb(38, 38, 42)" }}>
+                <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, background: "#0a0a0a", boxShadow: "none", borderBottom: "1px solid rgb(38, 38, 42)" }}>
                     <Toolbar>
                         {isMobile && (
                             <IconButton onClick={() => { setOpenDrawer(!openDrawer); document.body.style.overflow = openDrawer ? "auto" : "hidden"; }} edge="start" sx={{ marginRight: (theme) => theme.spacing(2) }} color="inherit" aria-label="menu">
                                 <MenuIcon />
                             </IconButton>
                         )}
-                        <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 0, cursor: "pointer", fontWeight: "600" }} onClick={() => { router.push("/dashboard") }}>
-                            RestoreCord
-                        </Typography>
+                        <Stack direction="row" spacing={2} alignItems="center">
+                            <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 0, cursor: "pointer", fontWeight: "600" }} onClick={() => { router.push("/dashboard") }}>
+                                RestoreCord
+                            </Typography>
+                            <ButtonBase disableRipple onClick={() => { window.open("https://restr.co/discord", "_blank") }} sx={{ display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "14px", padding: "8px 14px", background: "#121212", color: "#ffffff", transition: "all 0.2s ease-in-out", "&:hover": { background: "#1e1e1e" } }}>
+                                <Typography variant="body1">Need Help?</Typography>
+                            </ButtonBase>
+                        </Stack>
 
                         <Box sx={{ display: { xs: "none", md: "flex",  }, alignItems: "center", flexGrow: 1, justifyContent: "flex-end", mr: 2 }}>
                             <Stack direction="row" spacing={2} alignItems="center">
@@ -156,7 +161,7 @@ export default function NavBar({ ...props }: any) {
                                                         left: 0
                                                     },
                                                     "&:after": {
-                                                        backgroundColor: "#12121a", 
+                                                        backgroundColor: "#121212", 
                                                         borderRadius: "0.5rem",
                                                         content: '""',
                                                         height: "100%",
@@ -167,7 +172,7 @@ export default function NavBar({ ...props }: any) {
                                                     }
                                                 }, 
                                                 "&:before": {
-                                                    backgroundColor: "#12121a", 
+                                                    backgroundColor: "#121212", 
                                                     borderRadius: "0 5px 5px 0",
                                                     content: '""',
                                                     height: "100%",
@@ -200,9 +205,9 @@ export default function NavBar({ ...props }: any) {
                                 })}
                             </List>
                         </Box>
-                        <Button variant="contained" color="secondary" href="https://restr.co/discord" target="_blank" sx={{ m: 1, }}>
+                        {/* <Button variant="contained" color="secondary" href="https://restr.co/discord" target="_blank" sx={{ m: 1 }}>
                             Contact Support
-                        </Button>
+                        </Button> */}
                     </Stack>
                 </Drawer>
             </Box>

@@ -28,7 +28,7 @@ const theme = createTheme({
             dark: "#995c06",
         },
         background: {
-            paper: "#0a0a12",
+            paper: "#050505",
         },
     },
     typography: {
@@ -304,6 +304,16 @@ const theme = createTheme({
                         minHeight: "unset !important",
                     },
                 },
+            },
+        },
+        MuiTooltip: {
+            styleOverrides: {
+                tooltip: ({ ownerState }: any) => ({
+                    backgroundColor: theme.palette.grey[900],
+                    borderRadius: "1rem",
+                    border: `1px solid ${theme.palette.background.default}`,
+                    padding: "0.5rem",
+                }),
             },
         },
     }

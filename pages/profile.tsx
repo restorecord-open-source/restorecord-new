@@ -43,7 +43,6 @@ export default function Verify({ info, servers, err }: { info: UserInfo, servers
                 width: "100vw",
                 height: "100vh",
             }}>
-                {/* div with flex max-w-4xl, bg sligtly darker than 0a0a0a */}
                 <header style={{
                     maxWidth: "56rem",
                     margin: "auto",
@@ -53,7 +52,6 @@ export default function Verify({ info, servers, err }: { info: UserInfo, servers
                     borderBottomRightRadius: "1rem",
                     border: "1px solid #262626",
                 }}>
-                    {/* 2 grid, justify-between, "Name", "x servers" */}
                     <div style={{
                         display: "grid",
                         gridTemplateColumns: "1fr 1fr",
@@ -86,7 +84,6 @@ export default function Verify({ info, servers, err }: { info: UserInfo, servers
                     margin: "auto",
                     padding: "1rem",
                 }}>
-                    {/* if error, show error */}
                     {err && (
                         <div style={{
                             backgroundColor: "#d32f2f",
@@ -113,7 +110,6 @@ export default function Verify({ info, servers, err }: { info: UserInfo, servers
                         </div>
                     )}
 
-                    {/* if no servers, show no servers */}
                     {!err && servers.length === 0 && (
                         <div style={{
                             backgroundColor: "#d32f2f",
@@ -140,7 +136,6 @@ export default function Verify({ info, servers, err }: { info: UserInfo, servers
                         </div>
                     )}
 
-                    {/* if servers, show servers */}
                     {!err && servers.length > 0 && servers.map((server) => (
                         <div key={server.guildId} style={{
                             backgroundColor: "#0f0f0f",
@@ -150,7 +145,6 @@ export default function Verify({ info, servers, err }: { info: UserInfo, servers
                             marginBottom: "1rem",
                             // border: "1px solid #262626",
                         }}>
-                            {/* 2 grid, justify-between, "Name", "x servers" */}
                             <div style={{
                                 display: "grid",
                                 gridTemplateColumns: "1fr 1fr",

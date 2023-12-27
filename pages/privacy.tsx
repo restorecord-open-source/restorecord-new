@@ -9,7 +9,7 @@ import Head from "next/head";
 export default function Privacy() {
     return (
         <>
-            <Box sx={{ minHeight: "100vh", flexDirection: "column", display: "flex", pt: "2.5rem", background: "rgba(0, 0, 0, 0.75)" }}>
+            <Box sx={{ minHeight: "100vh", flexDirection: "column", display: "flex", pt: "2.5rem" }}>
                 <Head>
                     <meta name="description" content="RestoreCord is a Recovery Service, it can Backup and Restore your Servers Members, Channels, Categories, Roles and much more" />
                     <meta property="og:description" content="RestoreCord is a Recovery Service, it can Backup and Restore your Servers Members, Channels, Categories, Roles and do much more" />
@@ -26,18 +26,23 @@ export default function Privacy() {
                         </Typography>
                         <Typography variant="body1" component="div" sx={{ textAlign: "left", wordBreak: "break-word", mb: "4rem" }}>
                             <Typography variant="h6" component="h2" sx={{ mt: "1rem", mb: "1rem" }} id="what-information-do-we-collect">1. WHAT INFORMATION DO WE COLLECT?</Typography>
-                            <br/>Personal information you disclose to us
+                            Personal information you disclose to us
                             <br/>In Short: We collect personal information that you provide to us.
                             <br/>We collect personal information that you voluntarily provide to us when you register on the Services, express an interest in obtaining information about us or our products and Services, when you participate in activities on the Services, or otherwise when you contact us.
                             <br/>Personal Information Provided by You. The personal information that we collect depends on the context of your interactions with us and the Services, the choices you make, and the products and features you use. The personal information we collect may include the following:
-                            <br/>email addresses
-                            <br/>usernames
+                            
+                            <h4 style={{ marginBottom: 0, lineHeight: 0 }}>If you are a member verifying:</h4>
+                            <br/>discord id
+                            <br/>discord server in which you are verifying in
+                            <br/>ip address and vpn status (if server owner has enabled it)
+                            <br/>discord <a href="https://discord.com/developers/docs/topics/oauth2#authorization-code-grant-access-token-response" target="_blank"><strong>oauth2</strong></a> tokens (NOT account token)
+
+                            <h4 style={{ marginBottom: 0, lineHeight: 0 }}>If you have an account with us:</h4>
+                            <br/>username
+                            <br/>email address
                             <br/>passwords (hashed)
-                            <br/>ip address
-                            <br/>discord <strong>oauth2</strong> tokens (NOT account token)
-                            <br/>discord <strong>oauth2</strong> information (e.g. username, avatar, banner)
                             <br/>Payment Data, is stored by our payment processor (Stripe) and we do not have access to it. For more information, please see Stripe&#39;s privacy policy here: <a href="https://stripe.com/privacy">https://stripe.com/privacy</a>
-                            <br/>All personal information that you provide to us must be true, complete, and accurate, and you must notify us of any changes to such personal information. 
+                            <br/>All personal information that you provide to us must be true, complete, and accurate, and you must notify us of any changes to such personal information.
                            
                             <Typography variant="h6" component="h2" sx={{ mt: "1rem", mb: "1rem" }} id="how-do-we-process-your-information">2. HOW DO WE PROCESS YOUR INFORMATION?</Typography>
                             <br/>In Short: We process your information to provide, improve, and administer our Services, communicate with you, for security and fraud prevention, and to comply with law. We may also process your information for other purposes with your consent.

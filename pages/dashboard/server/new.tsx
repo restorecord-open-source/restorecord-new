@@ -392,7 +392,7 @@ export default function Server() {
                     <Toolbar />
                     
                     <Container maxWidth="xl">
-                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
+                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #1a1a1a" }}>
                             <CardContent>
                                 <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
                                     Server setup

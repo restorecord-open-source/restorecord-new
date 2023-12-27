@@ -194,7 +194,7 @@ export default function DashServerSettings({ user, id }: any) {
     return (
         <>
             <Container maxWidth="xl">
-                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
+                <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #1a1a1a" }}>
                     <CardContent>
                         <Stack direction="row" spacing={1} justifyContent="space-between">
                             <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
@@ -216,7 +216,7 @@ export default function DashServerSettings({ user, id }: any) {
                                     }, 1000);
                                 });
                             }}>
-                                Delete Server
+                                Delete
                             </Button>
                         </Stack>
 

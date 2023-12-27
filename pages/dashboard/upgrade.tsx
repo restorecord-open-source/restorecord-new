@@ -715,7 +715,7 @@ export default function Upgrade() {
                         </Paper>
                     }
                    
-                    <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #18182e" }}>
+                    <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #1a1a1a" }}>
                         <CardContent sx={{ pb: "1rem !important" }}>
                             <Typography variant="h4" sx={{ mb: 2, fontWeight: "700" }}>
                                 Upgrade
@@ -732,9 +732,6 @@ export default function Upgrade() {
                         
                         </CardContent>
                     </Paper>
-
-                    
-
                 </Container>
             </NavBar>
         </Box>

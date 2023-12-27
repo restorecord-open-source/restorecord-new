@@ -198,14 +198,6 @@ export default function AdminMember() {
                                     })}
                                 </CardContent>
                             </Stack>
-                            <CardContent sx={{ pb: "1rem !important" }}>
-                                <Stack direction="column" spacing={2}>
-                                    <Button variant="contained" color="info" onClick={async () => {
-                                        getMemberInfo(member.id);
-                                        setModals({ ...Modals, info: true });
-                                    }}>More info</Button>
-                                </Stack>
-                            </CardContent>
                         </Stack>
                     </Paper>
                 ))}

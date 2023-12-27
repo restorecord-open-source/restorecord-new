@@ -17,7 +17,6 @@ import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
-import ButtonBase from "@mui/material/ButtonBase";
 import ListItemText from "@mui/material/ListItemText";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import Stack from "@mui/material/Stack";
@@ -58,7 +57,7 @@ export default function NavBar() {
             const token = localStorage?.getItem("token")?.split(".");
             if (token) {
                 const payload = JSON.parse(atob(token[1]));
-                if (!payload.id && new Date(payload.exp * 1000) < new Date()) { setButton({ text: "Login", href: "/login" }); }
+                if (!payload.id && new Date(payload.exp * 1000) < new Date()) { setButton({ text: "Login", href: "/login" }); localStorage.removeItem("token"); }
                 else { setButton({ text: "Dashboard", href: "/dashboard" }); }
             } else { setButton({ text: "Login", href: "/login" }); }
         } else { setButton({ text: "Login", href: "/login" }); }
@@ -92,11 +91,11 @@ export default function NavBar() {
 
                     <Container maxWidth="lg">
                         <Toolbar>
-                            <Typography variant="h6" component="div" sx={{ display: { xs: "none", md: "block" }, cursor: "pointer", flexGrow: 1 }}>
-                                <MuiLink href="/" color="text.primary" sx={{ textDecoration: "none" }}>
+                            <MuiLink href="/" color="text.primary" sx={{ textDecoration: "none", display: { xs: "none", md: "block" }, cursor: "pointer", flexGrow: 1 }}>
+                                <Typography variant="h6">
                                     RestoreCord
-                                </MuiLink>
-                            </Typography>
+                                </Typography>
+                            </MuiLink>
                             <Box sx={{ display: { xs: "flex", md: "none" }, flexGrow: 1 }}>
                                 <IconButton id="menu-btn" edge="start" color="inherit" aria-label="menu" aria-controls={open ? "menu" : undefined} aria-haspopup="true" aria-expanded={open ? "true" : undefined} onClick={handleClick}>
                                     <MenuIcon />
@@ -104,22 +103,18 @@ export default function NavBar() {
                                 <Menu id="menu" anchorEl={anchorEl} open={open} onClose={handleClose} MenuListProps={{ "aria-labelledby": "menu-btn" }}>
                                     <MenuItem onClick={handleClose}>
                                         <Link href="/#pricing">
-                                            <ButtonBase href="/#pricing">
-                                                <ListItemIcon>
-                                                    <CreditCard />
-                                                </ListItemIcon>
-                                                <ListItemText>Pricing</ListItemText>
-                                            </ButtonBase>
+                                            <ListItemIcon>
+                                                <CreditCard />
+                                            </ListItemIcon>
+                                            <ListItemText>Pricing</ListItemText>
                                         </Link>
                                     </MenuItem>
 
                                     <MenuItem onClick={handleClose}>
-                                        <ButtonBase href="/discovery">
-                                            <ListItemIcon>
-                                                <Help />
-                                            </ListItemIcon>
-                                            <ListItemText>Discovery</ListItemText>
-                                        </ButtonBase>
+                                        <ListItemIcon>
+                                            <Help />
+                                        </ListItemIcon>
+                                        <ListItemText>Discovery</ListItemText>
                                     </MenuItem>
                                 </Menu>
                             </Box>
@@ -133,11 +128,9 @@ export default function NavBar() {
                                     </Button>
                                 </Stack>
                             </Box>
-                            <Link href={button.href}>
-                                <Button href={button.href} variant="contained" color="primary" sx={{ ml: 1 }}>
-                                    {button.text}
-                                </Button>
-                            </Link>
+                            <Button href={button.href} variant="contained" color="primary" sx={{ ml: 1 }}>
+                                {button.text}
+                            </Button>
                         </Toolbar>
                     </Container>
                 </AppBar>

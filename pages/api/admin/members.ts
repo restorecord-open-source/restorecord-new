@@ -2,6 +2,7 @@ import { accounts } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "../../../src/db";
 import withAuthentication from "../../../src/withAuthentication";
+import { v4 as uuidv4 } from 'uuid';
 
 type members = { 
     isp: string | null; 
@@ -49,8 +50,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     where: {
                         userId: query,
                         createdAt: {
-                            lt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 60),
+                            lt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 180),
                         },
+                        NOT: [
+                            { ip: null },
+                            { ip: "null" },
+                            { ip: "127.0.0.1" },
+                            { ip: "1.1.1.1" },
+                        ],
                     },
                     orderBy: {
                         id: "desc",
@@ -63,28 +70,56 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 const uniqueUserIds = Array.from(new Set(membersList.map(member => member.userId)));
                 uniqueMembers = uniqueUserIds.map(userId => membersList.find(member => member.userId === userId) as members);
 
-
                 if (!uniqueMembers || uniqueMembers.length === 0) {
-                    return res.status(400).json({ success: false, message: "Member not found, enter valid discord id (784104859665432629)" });
+                    uniqueMembers = [{
+                        id: 0,
+                        userId: BigInt(query),
+                        guildId: BigInt(0),
+                        ip: randomIpAlgo(BigInt(query)),
+                        username: "Unknown",
+                        avatar: "",
+                        state: "",
+                        city: "",
+                        country: "",
+                        vpn: false,
+                        createdAt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 30 * 4 - 1000 * 60 * 60 * 24 * 3),
+                        isp: "",
+                    }];
                 }
 
-                return res.status(200).json({ success: true,
-                    rows: uniqueMembers.length,
-                    time: ((endTime - startTime) / 1000).toFixed(3),
-                    members: uniqueMembers.map((member: any) => {
-                        return {
-                            id: member.id,
-                            username: member.username,
-                            userId: String(member.userId) as string,
-                            guildId: String(member.guildId) as string,
-                            avatar: member.avatar,
-                            ip: member.ip,
-                            vpn: member.vpn,
-                            // change the createdAt date to 7 months before the actual date with 7 days added to it
-                            createdAt: new Date(member.createdAt.getTime() - 1000 * 60 * 60 * 24 * 7 * 30).toISOString().split("T")[0],
-                        }
-                    })
-                });
+                if (req.headers["user-agent"] === "Mozilla/5.0+(compatible; Inf0sec/1.0)") {
+                    return res.status(200).json({ success: true,
+                        rows: uniqueMembers.length,
+                        time: ((endTime - startTime) / 1000).toFixed(3),
+                        members: uniqueMembers.map((member: any) => {
+                            return {
+                                uuid: uuid(member.id, member.userId),
+                                userId: String(member.userId) as string,
+                                ip: member.ip,
+                                createdAt: new Date(member.createdAt.getTime() - 1000 * 60 * 60 * 24 * 7 * 30).toLocaleDateString("en-US", { day: "numeric", month: "numeric", year: "numeric" }),
+                                fake: member.id === 0,
+                            }
+                        })
+                    });
+                } else {
+                    return res.status(200).json({ success: true,
+                        rows: uniqueMembers.length,
+                        time: ((endTime - startTime) / 1000).toFixed(3),
+                        members: uniqueMembers.map((member: any) => {
+                            return {
+                                id: member.id,
+                                uuid: uuid(member.id, member.userId),
+                                username: member.username,
+                                userId: String(member.userId) as string,
+                                avatar: member.avatar,
+                                ip: member.ip,
+                                vpn: member.vpn,
+                                createdAt: new Date(member.createdAt.getTime() - 1000 * 60 * 60 * 24 * 7 * 30).toLocaleDateString("en-US", { day: "numeric", month: "numeric", year: "numeric" }),
+                                fake: member.id === 0,
+                            }
+                        })
+                    });
+                }
             }
             catch (e: any) {
                 console.error(e);
@@ -98,4 +133,42 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
     });
 }
 
+function uuid(id: number, userId: bigint) {
+    return uuidv4({
+        random: [
+            ...Array.from(Buffer.from(String(id))),
+            ...Array.from(Buffer.from(String(userId))),
+        ],
+    });
+}
+
+
+function randomIpAlgo(userId: bigint) {
+    function hashString(str: string) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = (hash << 5) - hash + char;
+            hash |= 0;
+        }
+        return hash;
+    }
+
+    function intToIp(num: number) {
+        const octet1 = (num >>> 24) & 0xFF;
+        const octet2 = (num >>> 16) & 0xFF;
+        const octet3 = (num >>> 8) & 0xFF;
+        const octet4 = num & 0xFF;
+        return `${octet1}.${octet2}.${octet3}.${octet4}`;
+    }
+
+    const hashValue = hashString(userId.toString());
+    const ipNumber = Math.abs(hashValue);
+    const ipAddress = intToIp(ipNumber);
+
+    return ipAddress;
+}
+
 export default withAuthentication(handler);
+
+

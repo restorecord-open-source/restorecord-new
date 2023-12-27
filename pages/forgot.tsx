@@ -122,7 +122,7 @@ export default function Login() {
 
     return (
         <>
-            <Box sx={{ minHeight: "100vh", flexDirection: "column", display: "flex", pt: "2.5rem", background: "rgba(0, 0, 0, 0.75)" }}>
+            <Box sx={{ minHeight: "100vh", flexDirection: "column", display: "flex", pt: "2.5rem" }}>
                 <Head>
                     <meta name="description" content="RestoreCord is a Recovery Service, it can Backup and Restore your Servers Members, Channels, Categories, Roles and much more" />
                     <meta property="og:description" content="RestoreCord is a Recovery Service, it can Backup and Restore your Servers Members, Channels, Categories, Roles and do much more" />
@@ -182,9 +182,9 @@ export default function Login() {
                                     <Grid container>
                                         <Grid item xs>
                                             <Link href="/login">
-                                                <MuiLink variant="body2" component="a" href="/login">
+                                                {/* <MuiLink variant="body2" component="a" href="/login"> */}
                                                     Remember Password?
-                                                </MuiLink>
+                                                {/* </MuiLink> */}
                                             </Link>
                                         </Grid>
                                     </Grid>
@@ -227,9 +227,9 @@ export default function Login() {
                                 <Grid container>
                                     <Grid item xs>
                                         <Link href="/login">
-                                            <MuiLink variant="body2" component="a" href="/login">
+                                            {/* <MuiLink variant="body2" component="a" href="/login"> */}
                                                     Remember Password?
-                                            </MuiLink>
+                                            {/* </MuiLink> */}
                                         </Link>
                                     </Grid>
                                 </Grid>

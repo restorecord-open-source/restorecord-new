@@ -1,5 +1,5 @@
 html {
-	background-color: #09090d !important;
+	background-color: #0a0a0a !important;
 	height: 100% !important;
 }
 
@@ -37,8 +37,8 @@ body {
 }
 
 .apexcharts-tooltip.apexcharts-theme-dark {
-	background: #16161e !important;
-	border: 1px solid #28282f !important;
+	background: #121212 !important;
+	border: 1px solid #1a1a1a !important;
 }
 
 .apexcharts-tooltip {
@@ -46,6 +46,6 @@ body {
 }
 
 .apexcharts-tooltip.apexcharts-theme-dark .apexcharts-tooltip-title {
-	background: rgb(0 0 0 / 25%) !important;
+	background: rgb(5 5 5 / 25%) !important;
 	border-bottom: unset !important;
 }
