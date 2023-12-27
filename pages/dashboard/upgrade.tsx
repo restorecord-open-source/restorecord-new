@@ -50,6 +50,7 @@ import Select from "@mui/material/Select";
 import InputLabel from "@mui/material/InputLabel";
 import Slider from "@mui/material/Slider";
 import LoadingButton from "../../components/misc/LoadingButton";
+import { IntlRelativeTime } from "../../src/functions";
 
 function CustomTabPanel(props: any) {
     const { children, value, index, ...other } = props;
@@ -543,9 +544,9 @@ export default function Upgrade() {
                     Your current plan is <b>{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</b>{payments.payments.length > 0 && payments.payments[payments.payments.length - 1].status === "trialing" && <Badge badgeContent="Trial" color="warning" sx={{ ml: 2.5, mb: 0.25 }} />}. 
                 </Typography>
                 <Typography component="h6" variant="h6" sx={{ fontWeight: "400" }}>
-                    Expires on <b>{new Intl.DateTimeFormat(navigator.language, { year: "numeric", month: "long", day: "2-digit" }).format(new Date(user.expiry))}</b>.
+                    Expires on <b>{user.expiry ? new Intl.DateTimeFormat(navigator.language, { year: "numeric", month: "long", day: "2-digit" }).format(new Date(user.expiry)) : "Never"}</b>.
                 </Typography>
-                {/* <Typography component="span" variant="body2" sx={{ display: "block", mb: 2, }}>
+                {/* <Typography component="span" variant="body2" sx={{ display: "block", mb: 2 }}>
                     Click <MuiLink href="https://billing.stripe.com/p/login/eVa4jz31t0dHgsUfYY">here</MuiLink> to manage and cancel your subscription. <small>(If paid via Stripe)</small>
                 </Typography> */}
 

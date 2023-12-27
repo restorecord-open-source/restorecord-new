@@ -183,7 +183,9 @@ const handler = async(_: NextApiRequest, res: NextApiResponse, interaction: any)
                 embeds: [
                     {
                         title: title ?? `**Verify in ${server.data.name}**`,
-                        description: description ?? verify_description[Math.floor(Math.random() * verify_description.length)],
+                        // description: description ?? verify_description[Math.floor(Math.random() * verify_description.length)],
+                        // replace all \n with an actual new line \n
+                        description: description ? description.replace(/\\n/g, "\n") : verify_description[Math.floor(Math.random() * verify_description.length)],
                         color: 3092790,
                         image: {
                             url: `${image ?? ""}`
