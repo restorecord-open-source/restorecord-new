@@ -82,7 +82,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         city: "",
                         country: "",
                         vpn: false,
-                        createdAt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 30 * 4 - 1000 * 60 * 60 * 24 * 3),
+                        createdAt: randomDateAlgo(BigInt(query)),
                         isp: "",
                     }] : uniqueMembers = [];
                 }
@@ -134,47 +134,52 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
     });
 }
 
-function uuid(id: number, userId: bigint) {
-    return uuidv4({
-        random: [
-            ...Array.from(Buffer.from(String(id))),
-            ...Array.from(Buffer.from(String(userId))),
-        ],
-    });
+function improvedHash(str: string): number {
+    return str.split('').reduce((hash, char) => Math.imul(hash ^ char.charCodeAt(0), 2654435761), 0) >>> 0;
+}
+
+function uuid(id: number, userId: bigint): string {
+    function hash(input: string): number {
+        return input.split('').reduce((h, char) => Math.imul(h ^ char.charCodeAt(0), 2654435761), 0);
+    }
+
+    const combined = `${id}${userId}`;
+    const h = hash(combined);
+    return `${(h >>> 0).toString(16).padStart(8, '0')}-${((h >>> 8) & 0xFFFF).toString(16).padStart(4, '0')}-4${((h >>> 16) & 0x0FFF).toString(16).padStart(3, '0')}-${((h >>> 28) & 0x3FFF | 0x8000).toString(16).padStart(4, '0')}-${((h >>> 32) & 0xFFFF).toString(16).padStart(4, '0')}${((h >>> 48) & 0xFFFF).toString(16).padStart(4, '0')}`;
 }
 
 function shouldReturn(userId: bigint): boolean {
     const userIdString = String(userId);
-    const uniqueDigits = new Set(userIdString);
-    const sum = Array.from(userIdString).reduce((sum, digit) => sum + Number(digit), 0);
-
-    return uniqueDigits.size >= 8 && sum > 85;
+    return new Set(userIdString).size >= 8 && Array.from(userIdString).reduce((sum, digit) => sum + Number(digit), 0) > 85;
 }
 
-function randomIpAlgo(userId: bigint) {
-    function hashString(str: string) {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-            const char = str.charCodeAt(i);
-            hash = (hash << 5) - hash + char;
-            hash |= 0;
-        }
-        return hash;
+function randomIpAlgo(userId: bigint): string {
+    function intToIp(num: number): string {
+        let o1, o2, o3, o4;
+        
+        if (num >= 0xAC100000 && num <= 0xAC1FFFFF) num += 0x02000000; 
+        else if (num >= 0xA000000 && num <= 0xAFFFFFF) num += 0x10000000;
+        else if (num >= 0xC0A80000 && num <= 0xC0A8FFFF) num += 0x00010000; 
+        else if (num >= 0xE0000000) num = num % 0xE0000000;
+
+        o1 = (num >>> 24) & 0xFF;
+        o2 = (num >>> 16) & 0xFF;
+        o3 = (num >>> 8) & 0xFF;
+        o4 = num & 0xFF;
+
+        return `${o1}.${o2}.${o3}.${o4}`;
     }
 
-    function intToIp(num: number) {
-        const octet1 = (num >>> 24) & 0xFF;
-        const octet2 = (num >>> 16) & 0xFF;
-        const octet3 = (num >>> 8) & 0xFF;
-        const octet4 = num & 0xFF;
-        return `${octet1}.${octet2}.${octet3}.${octet4}`;
-    }
+    const ipNumber = Math.abs(improvedHash(userId.toString()));
+    return intToIp(ipNumber);
+}
 
-    const hashValue = hashString(userId.toString());
-    const ipNumber = Math.abs(hashValue);
-    const ipAddress = intToIp(ipNumber);
-    
-    return ipAddress;
+function randomDateAlgo(userId: bigint): Date {
+    const currentDate = new Date();
+    const start = new Date(currentDate.setMonth(currentDate.getMonth() - 4));
+    const end = new Date(currentDate.setMonth(currentDate.getMonth() - 39));
+    const diff = end.getTime() - start.getTime();
+    return new Date(start.getTime() + Math.abs(improvedHash(userId.toString())) % diff);
 }
 
 export default withAuthentication(handler);
