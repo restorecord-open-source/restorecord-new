@@ -93,6 +93,7 @@ export default function Terms() {
                             <br/>Attacking the webserver or attempting arbitrary code execution.
                             <br/>Attempting to libel RestoreCord with the intent of hurting its reputation.
                             <br/>Creating multiple accounts.
+                            <br/>Using the Site to dox or harass other users.
                             
                             <Typography variant="h6" component="h2" sx={{ mt: "3rem" }} id="guidelines-for-reviews">7. GUIDELINES FOR REVIEWS</Typography>
                             We may provide you with areas on the Site where you can leave reviews or ratings. When posting a review, you must comply with the following criteria: (1) you should have firsthand experience with the person/entity being reviewed; (2) your reviews should not contain offensive profanity or abusive, racist, offensive, or hate language; (3) your reviews should not contain discriminatory references based on religion, race, gender, national origin, age, marital status, sexual orientation, or disability; (4) your reviews should not contain references to illegal activity; (5) you should not be affiliated with competitors if posting negative reviews; (6) you should not make any conclusions as to the legality of conduct; (7) you may not post any false or misleading statements; and (8) you may not organize a campaign encouraging others to post reviews, whether positive or negative.
