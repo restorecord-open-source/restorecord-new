@@ -103,7 +103,6 @@ export default function Login() {
                         if (res.status === 204) {
                             setNotiTextS("Check your email for a link to reset your password");
                             setOpenS(true);
-                            router.push("/login");
                         } else {
                             setNotiTextE("Invalid email or captcha");
                             setOpenE(true);

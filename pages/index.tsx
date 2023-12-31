@@ -85,7 +85,7 @@ export default function Home() {
 
                         <Box sx={{ display: { xs: "none", md: "flex" } , justifyContent: "center", alignItems: "center", flexDirection: "column", mt: 10 }} data-aos="zoom-in-up">
                             <Image src="https://cdn.restorecord.com/static/images/homepage/dashboard_mu.png" alt="Dashboard" width={Number(isMobile ? 600 : isSmallDesktop ? 800 : 1251)} height={Number(isMobile ? 369 : isSmallDesktop ? 492 : 769)} />
-                        </Box>  
+                        </Box>
 
                         <Box id="features" sx={{ marginTop: 4 }} />
 

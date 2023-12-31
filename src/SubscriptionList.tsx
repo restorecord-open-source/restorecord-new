@@ -39,7 +39,6 @@ const SubscriptionList: Subscription[] = [
         name: "Premium",
         priceMonthly: 2,
         priceYearly: 15,
-        discount: 30,
         bestPlan: true,
         features: [
             {
@@ -175,7 +174,6 @@ const SubscriptionList: Subscription[] = [
         name: "Business",
         priceMonthly: 5,
         priceYearly: 30,
-        discount: 30,
         bestPlan: false,
         features: [
             {

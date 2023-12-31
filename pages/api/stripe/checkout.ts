@@ -82,13 +82,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     },
                 ],
             }),
-            ...(new Date().getMonth() + 1 === 12 && new Date().getDate() >= 16 && new Date().getDate() <= 30) ?  {
-                discounts: [
-                    {
-                        coupon: "mhuFuP6P",
-                    },
-                ],
-            } : {}
         });
     
         return res.status(200).json({

@@ -252,7 +252,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }
                 });
 
-                // update the metadata on stripe if its not the same
                 if (subscription.metadata.plan !== planFull) {
                     await stripe.subscriptions.update(subscription.id, {
                         metadata: {
@@ -260,39 +259,41 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         }
                     });
                 }
-
-                await prisma.payments.update({
-                    where: {
-                        id: payment.id
-                    },
-                    data: {
-                        payment_status: status,
-                        amount: subscription.plan.amount,
-                        type: planFull
-                    }
-                });
-
-                await prisma.accounts.update({
-                    where: {
-                        id: Number(payment.accountId) as number
-                    },
-                    data: {
-                        role: plan,
-                        expiry: new Date(subscription.current_period_end * 1000)
-                    }
-                });
-
-                await prisma.servers.updateMany({
-                    where: {
-                        ownerId: Number(payment.accountId) as number,
-                        pullTimeout: {
-                            gt: new Date()
+                
+                if (payment) {
+                    await prisma.payments.update({
+                        where: {
+                            id: payment.id
+                        },
+                        data: {
+                            payment_status: status,
+                            amount: subscription.plan.amount,
+                            type: planFull
                         }
-                    },
-                    data: {
-                        pullTimeout: new Date()
-                    }
-                });
+                    });
+
+                    await prisma.accounts.update({
+                        where: {
+                            id: Number(payment.accountId) as number
+                        },
+                        data: {
+                            role: plan,
+                            expiry: new Date(subscription.current_period_end * 1000)
+                        }
+                    });
+
+                    await prisma.servers.updateMany({
+                        where: {
+                            ownerId: Number(payment.accountId) as number,
+                            pullTimeout: {
+                                gt: new Date()
+                            }
+                        },
+                        data: {
+                            pullTimeout: new Date()
+                        }
+                    });
+                }
             }
             break;
         }
@@ -300,6 +301,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(200).json({ success: true });
     } catch (err: any) {
         console.error(`[STRIPE] ⚠️ ${err}`);
-        return res.status(200).json({ success: false, message: "Something went wrong", error: err });
+        return res.status(400).json({ success: false, message: "Something went wrong", error: err, err: JSON.stringify(err) });
     }
 }
