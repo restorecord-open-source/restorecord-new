@@ -34,6 +34,10 @@ import CloseIcon from "@mui/icons-material/Close";
 import { ImageFallback } from "../../src/functions";
 import Skeleton from "@mui/material/Skeleton";
 import Link from "next/link";
+import Avatar from "@mui/material/Avatar";
+import Fade from "@mui/material/Fade";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 
 function CustomTabPanel(props: any) {
     const { children, value, index, ...other } = props;
@@ -52,6 +56,8 @@ function CustomTabPanel(props: any) {
 export default function DashServerSettings({ user, id }: any) {
     const [token]: any = useToken();
     const router = useRouter();
+
+    const isMobile = useMediaQuery(useTheme().breakpoints.down("md"));
 
     const [newServer, setNewServer] = useState({
         serverName: "",
@@ -122,25 +128,21 @@ export default function DashServerSettings({ user, id }: any) {
                 "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
             },
             body: JSON.stringify({
-                newServerName: newServer.serverName,
-                newGuildId: newServer.guildId,
-                newRoleId: newServer.roleId,
-                newWebhook: newServer.webhook,
-                newWebhookCheck: newServer.webhookcheck,
-                newIpLogging: newServer.ipLogging,
-                newBlockAlts: newServer.blockAlts,
-                newDiscoverable: newServer.discoverable,
-                newCaptcha: newServer.captcha,
-                newVpnCheck: newServer.vpncheck,
-                newPicture: newServer.picture,
-                newBackground: newServer.background,
-                newDescription: newServer.description,
-                newTheme: newServer.theme,
-                newThemeColor: newServer.themeColor,
-                
-                serverName: server.name,
-                guildId: server.guildId,
-                roleId: server.roleId,
+                name: newServer.serverName,
+                guildId: newServer.guildId,
+                roleId: newServer.roleId,
+                webhook: newServer.webhook,
+                WebhookCheck: newServer.webhookcheck,
+                ipLogging: newServer.ipLogging,
+                blockAlts: newServer.blockAlts,
+                discoverable: newServer.discoverable,
+                captcha: newServer.captcha,
+                vpnCheck: newServer.vpncheck,
+                picture: newServer.picture,
+                background: newServer.background,
+                description: newServer.description,
+                theme: newServer.theme,
+                themeColor: newServer.themeColor
             })
         })
             .then(res => res.json())
@@ -407,61 +409,109 @@ export default function DashServerSettings({ user, id }: any) {
                                     </CustomTabPanel>
 
                                     <CustomTabPanel value={settingsTab} index={1}>
-                                        <Stack direction="column" spacing={2}>
-                                            <Stack direction="row">
-                                                <Typography variant="h6">Show on Discovery</Typography>
-                                                {user.role !== "business" && user.role !== "enterprise" ? (
-                                                    <Tooltip arrow placement="top" title="This feature requires the Business subscription or higher.">
-                                                        <CloseIcon color="error" sx={{ alignSelf: "center", ml: "0.25rem" }} />
-                                                    </Tooltip>
-                                                ) : (
-                                                    <Tooltip arrow placement="top" title="If enabled, your server will be shown on the RestoreCord Discovery page, located at https://restorecord.com/discovery.">
-                                                        <InfoIcon sx={{ fontSize: "1rem", alignSelf: "center", ml: "0.25rem" }} />
-                                                    </Tooltip>
-                                                )}
-                                                <Switch onChange={handleChange} name="discoverable" defaultChecked={server.discoverable} disabled={user.role !== "business" && user.role !== "enterprise"} />
-                                            </Stack>
-                                            <Stack direction="column">
-                                                <Stack direction="row">
-                                                    <Typography variant="h6">Server Icon</Typography>
-                                                    {user.role === "free" && (
-                                                        <Tooltip arrow placement="top" title="This feature requires the Premium subscription or higher.">
-                                                            <CloseIcon color="error" sx={{ alignSelf: "center", ml: "0.25rem" }} />
-                                                        </Tooltip>
-                                                    )}
+                                        <Stack direction={isMobile ? "column" : "row"} spacing={2} justifyContent="space-between">
+                                            <Box sx={{ width: "100%" }}>
+                                                <Stack direction="column" spacing={2}>
+                                                    <Stack direction="row">
+                                                        <Typography variant="h6">Show on Discovery</Typography>
+                                                        {user.role !== "business" && user.role !== "enterprise" ? (
+                                                            <Tooltip arrow placement="top" title="This feature requires the Business subscription or higher.">
+                                                                <CloseIcon color="error" sx={{ alignSelf: "center", ml: "0.25rem" }} />
+                                                            </Tooltip>
+                                                        ) : (
+                                                            <Tooltip arrow placement="top" title="If enabled, your server will be shown on the RestoreCord Discovery page, located at https://restorecord.com/discovery.">
+                                                                <InfoIcon sx={{ fontSize: "1rem", alignSelf: "center", ml: "0.25rem" }} />
+                                                            </Tooltip>
+                                                        )}
+                                                        <Switch onChange={handleChange} name="discoverable" defaultChecked={server.discoverable} disabled={user.role !== "business" && user.role !== "enterprise"} />
+                                                    </Stack>
+                                                    <Stack direction="column">
+                                                        <Stack direction="row">
+                                                            <Typography variant="h6">Server Icon</Typography>
+                                                            {user.role === "free" && (
+                                                                <Tooltip arrow placement="top" title="This feature requires the Premium subscription or higher.">
+                                                                    <CloseIcon color="error" sx={{ alignSelf: "center", ml: "0.25rem" }} />
+                                                                </Tooltip>
+                                                            )}
+                                                        </Stack>
+                                                        <TextField fullWidth variant="outlined" name="picture" value={newServer.picture} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Server Icon URL" type="url" disabled={user.role === "free"} />
+                                                    </Stack>
+                                                    <Stack direction="column">
+                                                        <Typography variant="h6">Server Description</Typography>
+                                                        <TextField fullWidth variant="outlined" name="description" value={newServer.description} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Description" rows={3} multiline />
+                                                    </Stack>
+                                                    <Stack direction="column">
+                                                        <Stack direction="row">
+                                                            <Typography variant="h6">Server Background Image</Typography>
+                                                            {user.role === "free" && (
+                                                                <Tooltip arrow placement="top" title="This feature requires the Premium subscription or higher.">
+                                                                    <CloseIcon color="error" sx={{ alignSelf: "center", ml: "0.25rem" }} />
+                                                                </Tooltip>
+                                                            )}
+                                                        </Stack>
+                                                        <TextField fullWidth variant="outlined" name="background" value={newServer.background} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Background Image URL" type="url" disabled={user.role === "free"} />
+                                                    </Stack>
+                                                    <Stack direction="column">
+                                                        <Stack direction="row">
+                                                            <Typography variant="h6">Theme Color</Typography>
+                                                            {user.role === "free" ? (
+                                                                <Tooltip arrow placement="top" title="This feature requires the Premium subscription or higher.">
+                                                                    <CloseIcon color="error" sx={{ alignSelf: "center", ml: "0.25rem" }} />
+                                                                </Tooltip>
+                                                            ) : (
+                                                                <Tooltip arrow placement="top" title="This is the color that will be used for the Buttons and other elements on the Verification Page.">
+                                                                    <InfoIcon sx={{ fontSize: "1rem", alignSelf: "center", ml: "0.25rem" }} />
+                                                                </Tooltip>
+                                                            )}
+                                                        </Stack>
+                                                        <MuiColorInput format="hex" fallbackValue="#4e46ef" isAlphaHidden value={newServer.themeColor} onChange={onColorChange} disabled={user.role === "free"} sx={{ width: "100%" }} />
+                                                    </Stack>
                                                 </Stack>
-                                                <TextField fullWidth variant="outlined" name="picture" value={newServer.picture} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Server Icon URL" type="url" disabled={user.role === "free"} />
-                                            </Stack>
-                                            <Stack direction="column">
-                                                <Typography variant="h6">Server Description</Typography>
-                                                <TextField fullWidth variant="outlined" name="description" value={newServer.description} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Description" rows={3} multiline />
-                                            </Stack>
-                                            <Stack direction="column">
-                                                <Stack direction="row">
-                                                    <Typography variant="h6">Server Background Image</Typography>
-                                                    {user.role === "free" && (
-                                                        <Tooltip arrow placement="top" title="This feature requires the Premium subscription or higher.">
-                                                            <CloseIcon color="error" sx={{ alignSelf: "center", ml: "0.25rem" }} />
+                                            </Box>
+                                            <Box sx={{ position: "relative", width: "100%", height: "100%", maxWidth: "100%", maxHeight: "100%", overflow: "hidden", borderRadius: "1rem", boxShadow: "0px 10px 10px 5px rgba(0, 0, 0, 0.25)" }}>
+                                                {newServer.background && <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundImage: `url(${newServer.background})`, backgroundSize: "cover", backgroundPosition: "center", filter: "blur(0.5rem)" }} />}
+                                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "50vh", flexDirection: "column" }}>
+                                                    <Paper sx={{ borderRadius: "1rem", padding: "2rem", marginTop: "1rem", width: { xs: "100%", md: "75%" }, marginBottom: "2rem", boxShadow: "0px 10px 10px 5px rgba(0, 0, 0, 0.25)", backgroundColor: "#00000026", backdropFilter: "blur(1.5rem)" }}>
+                                                        <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} placement="top" disableInteractive title={server.name}>
+                                                            <Typography variant="h1" component="h1" sx={{ fontWeight: "700", fontSize: { xs: "1.5rem", md: "3rem" }, pl: "1rem", mr: "1rem", textShadow: "0px 0px 15px rgba(0, 0, 0, 0.25)", textAlign: "center" }}>
+                                                                {newServer.serverName}
+                                                            </Typography>
                                                         </Tooltip>
-                                                    )}
-                                                </Stack>
-                                                <TextField fullWidth variant="outlined" name="background" value={newServer.background} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Background Image URL" type="url" disabled={user.role === "free"} />
-                                            </Stack>
-                                            <Stack direction="column">
-                                                <Stack direction="row">
-                                                    <Typography variant="h6">Theme Color</Typography>
-                                                    {user.role === "free" ? (
-                                                        <Tooltip arrow placement="top" title="This feature requires the Premium subscription or higher.">
-                                                            <CloseIcon color="error" sx={{ alignSelf: "center", ml: "0.25rem" }} />
-                                                        </Tooltip>
-                                                    ) : (
-                                                        <Tooltip arrow placement="top" title="This is the color that will be used for the Buttons and other elements on the Verification Page.">
-                                                            <InfoIcon sx={{ fontSize: "1rem", alignSelf: "center", ml: "0.25rem" }} />
-                                                        </Tooltip>
-                                                    )}
-                                                </Stack>
-                                                <MuiColorInput format="hex" fallbackValue="#4e46ef" isAlphaHidden value={newServer.themeColor} onChange={onColorChange} sx={{ width: "100%" }} disabled={user.role === "free"} />
-                                            </Stack>
+                                                       
+                                                        {newServer.description && <Typography variant="body1" component="p" sx={{ textAlign: "center", fontSize: { xs: "1rem", md: "1.75rem" }, whiteSpace: "pre-line", overflowWrap: "break-word" }}>{newServer.description}</Typography>}
+
+                                                        {newServer.picture && <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", mt: "1rem" }}><Avatar src={newServer.picture} sx={{ width: { xs: "6rem", md: "8rem" }, height: { xs: "6rem", md: "8rem" } }} /></Box>}
+
+                                                        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                            <Button variant="contained" color="primary" 
+                                                                sx={{ 
+                                                                    cursor: "pointer",
+                                                                    width: "100%",
+                                                                    marginTop: "2rem",
+                                                                    backgroundColor: newServer.themeColor.includes("#") ? newServer.themeColor : "#4e46ef",
+                                                                    outline: `1px solid ${newServer.themeColor.includes("#") ? newServer.themeColor : "#4e46ef"}`,
+                                                                    color: theme.palette.getContrastText(newServer.themeColor.includes("#") ? newServer.themeColor : "#4e46ef"),
+                                                                    "@media not all and (-webkit-min-device-pixel-ratio: 1.5), not all and (-o-min-device-pixel-ratio: 3/2), not all and (min--moz-device-pixel-ratio: 1.5), not all and (min-device-pixel-ratio: 1.5)": {
+                                                                        "&:hover": {
+                                                                            outline: `1px solid ${newServer.themeColor.includes("#") ? newServer.themeColor : "#4e46ef"}`,
+                                                                            color: newServer.themeColor.includes("#") ? newServer.themeColor : "#4e46ef",
+                                                                        },
+                                                                    },
+                                                                    "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (min-device-pixel-ratio: 1.5)": {
+                                                                        "&:hover": {
+                                                                            // backgroundColor: `rgba(${parseInt(newServer.themeColor.slice(1, 3), 16)}, ${parseInt(newServer.themeColor.slice(3, 5), 16)}, ${parseInt(newServer.themeColor.slice(5, 7), 16)}, 0.65)`,
+                                                                            backgroundColor: `rgba(${newServer.themeColor.includes("#") ? newServer.themeColor.slice(1, 3) : newServer.themeColor.slice(0, 2)}, ${newServer.themeColor.includes("#") ? newServer.themeColor.slice(3, 5) : newServer.themeColor.slice(2, 4)}, ${newServer.themeColor.includes("#") ? newServer.themeColor.slice(5, 7) : newServer.themeColor.slice(4, 6)}, 0.65)`,
+                                                                            color: theme.palette.getContrastText(newServer.themeColor.includes("#") ? newServer.themeColor : "#4e46ef"),
+                                                                        },
+                                                                    },
+                                                                }}
+                                                            >
+                                                                Verify
+                                                            </Button>
+                                                        </Box>
+                                                    </Paper>
+                                                </Box>
+                                            </Box>
                                         </Stack>
                                     </CustomTabPanel>
 

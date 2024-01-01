@@ -12,35 +12,30 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
     try {
         const data = { ...req.body };
-        const { serverName, guildId, roleId, newServerName, newGuildId, newRoleId } = data;
+        const { name, guildId, roleId } = data;
     
-        if (!serverName || !guildId || !roleId || !newServerName || !newGuildId || !newRoleId) return res.status(400).json({ success: false, message: "Missing required fields" });
+        if (!name || !guildId || !roleId || !req.query.serverid) return res.status(400).json({ success: false, message: "Missing required fields" });
 
-        const trimmedServerName = newServerName.trim();
-        
+        const trimmedServerName = name.trim();
 
         const serverCheck = await prisma.servers.findFirst({
             where: {
                 OR: [
                     { name: trimmedServerName },
-                    { guildId: isBigInt(newGuildId) ? BigInt(newGuildId) : 0 },
-                    { roleId: isBigInt(newRoleId) ? BigInt(newRoleId) : 0 },
+                    { guildId: isBigInt(guildId) ? BigInt(guildId) : 0 },
+                    { roleId: isBigInt(roleId) ? BigInt(roleId) : 0 },
                 ],
                 NOT: {
-                    AND: [
-                        { name: serverName },
-                        { guildId: isBigInt(guildId) ? BigInt(guildId) : 0 },
-                        { roleId: isBigInt(roleId) ? BigInt(roleId) : 0 },
-                    ],
+                    guildId: BigInt(req.query.serverid as string),
                 },
             },
         });
           
         if (serverCheck) {
             const errorMessages = [
-                { condition: serverCheck.name === newServerName, message: "Server name is already in use" },
-                { condition: serverCheck.guildId === BigInt(newGuildId), message: "Guild ID is already in use" },
-                { condition: serverCheck.roleId === BigInt(newRoleId), message: "Role ID is already in use" },
+                { condition: serverCheck.name === name, message: "Server name is already in use" },
+                { condition: serverCheck.guildId === BigInt(guildId), message: "Guild ID is already in use" },
+                { condition: serverCheck.roleId === BigInt(roleId), message: "Role ID is already in use" },
             ];
           
             for (const { condition, message } of errorMessages) {
@@ -51,19 +46,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         const server = await prisma.servers.findFirst({
             where: {
                 AND: [
-                    { 
-                        name: serverName, 
-                        ownerId: user.id, 
-                        guildId: BigInt(guildId), 
-                        roleId: BigInt(roleId)
-                    }
+                    { ownerId: user.id },
+                    { guildId: BigInt(req.query.serverid as string) },
                 ],
             },
         });
           
         if (!server) return res.status(400).json({ success: false, message: "Server not found" });
-        if (data?.newWebhook && !/^.*(discord|discordapp)\.com\/api\/webhooks\/([\d]+)\/([a-zA-Z0-9_-]+)$/.test(data.newWebhook)) return res.status(400).json({ success: false, message: "Invalid Webhook" });
-        if (data?.newThemeColor && !/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(data.newThemeColor)) return res.status(400).json({ success: false, message: "Invalid Theme Color" });
+        if (data?.webhook && data.webhook.startsWith("https://ptb.discord")) data.webhook = data.webhook.replace("https://ptb.discord", "https://discord");
+        if (data?.webhook && data.webhook.startsWith("https://canary.discord")) data.webhook = data.webhook.replace("https://canary.discord", "https://discord");
+        if (data?.webhook && !/^(https:\/\/(discord|discordapp)\.com\/api\/webhooks\/[\d]+\/[a-zA-Z0-9_-]+)$/.test(data.webhook)) return res.status(400).json({ success: false, message: "Invalid Webhook" });
+        if (data?.themeColor && !/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(data.themeColor)) return res.status(400).json({ success: false, message: "Invalid Theme Color" });
         
         const newServer = await prisma.servers.update({
             where: {
@@ -71,28 +64,28 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             },
             data: {
                 name: trimmedServerName,
-                guildId: BigInt(newGuildId as any),
-                roleId: BigInt(newRoleId as any),
-                webhook: data.newWebhookCheck ? (user.role !== "free" ? data.newWebhook : null) : null,
-                picture: data.newPicture,
-                bgImage: data.newBackground ? (user.role === "business" ? data.newBackground : null) : null,
-                description: data.newDescription,
-                theme: data.newTheme ? (user.role === "business" ? data.newTheme : "DEFAULT") : "DEFAULT",
-                ipLogging: data.newIpLogging,
-                discoverable: data.newDiscoverable ? ((user.role === "business" || user.role === "enterprise") ? 1 : 0) : 0,
-                blockAlts: data.newBlockAlts ? (user.role !== "free" ? data.newBlockAlts : false) : false,
-                captcha: data.newCaptcha,
-                vpncheck: data.newWebhookCheck ? (data.newVpnCheck ? (user.role !== "free" ? true : false) : false) : false,
-                themeColor: data.newThemeColor ? ((user.role === "business" || user.role === "enterprise") ? data.newThemeColor.replace("#", "") : "4e46ef") : "4e46ef",
+                guildId: BigInt(guildId as any),
+                roleId: BigInt(roleId as any),
+                webhook: data.webhook ? (user.role !== "free" ? data.webhook : null) : null,
+                picture: data.picture,
+                bgImage: data.background ? (user.role === "business" ? data.background : null) : null,
+                description: data.description,
+                theme: data.theme ? (user.role === "business" ? data.theme : "DEFAULT") : "DEFAULT",
+                ipLogging: data.ipLogging,
+                discoverable: data.discoverable ? ((user.role === "business" || user.role === "enterprise") ? 1 : 0) : 0,
+                blockAlts: data.blockAlts ? (user.role !== "free" ? data.blockAlts : false) : false,
+                captcha: data.captcha,
+                vpncheck: data.webhookCheck ? (data.vpnCheck ? (user.role !== "free" ? true : false) : false) : false,
+                themeColor: data.themeColor ? ((user.role === "business" || user.role === "enterprise") ? data.themeColor.replace("#", "") : "4e46ef") : "4e46ef",
             }
         });
 
-        let memberCount = await prisma.members.count({ where: { guildId: BigInt(guildId as any) } });
+        let memberCount = await prisma.members.count({ where: { guildId: BigInt(req.query.serverid as string) } });
 
         while (memberCount >= 100000) {
             const members = await prisma.members.findMany({
                 where: {
-                    guildId: BigInt(guildId as any),
+                    guildId: BigInt(req.query.serverid as string),
                 },
                 take: 100000,
             });
@@ -107,67 +100,67 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         },
                     },
                     data: {
-                        guildId: BigInt(newGuildId as any),
+                        guildId: BigInt(guildId as any),
                     },
                 });
             }
 
-            memberCount = await prisma.members.count({ where: { guildId: BigInt(guildId as any) } });
+            memberCount = await prisma.members.count({ where: { guildId: BigInt(req.query.serverid as string) } });
         }
 
         if (memberCount <= 100000) {
             await prisma.members.updateMany({
                 where: {
-                    guildId: BigInt(guildId as any),
+                    guildId: BigInt(req.query.serverid as string),
                 },
                 data: {
-                    guildId: BigInt(newGuildId as any),
+                    guildId: BigInt(guildId as any),
                 },
             });
         }
 
         await prisma.members.updateMany({
             where: {
-                guildId: BigInt(guildId as any),
+                guildId: BigInt(req.query.serverid as string),
             },
             data: {
-                guildId: BigInt(newGuildId as any),
+                guildId: BigInt(guildId as any),
             },
         });
 
         await prisma.blacklist.updateMany({
             where: {
-                guildId: BigInt(guildId as any),
+                guildId: BigInt(req.query.serverid as string),
             },
             data: {
-                guildId: BigInt(newGuildId as any),
+                guildId: BigInt(guildId as any),
             },
         });
 
         await prisma.backups.updateMany({
             where: {
-                guildId: BigInt(guildId as any),
+                guildId: BigInt(req.query.serverid as string),
             },
             data: {
-                guildId: BigInt(newGuildId as any),
+                guildId: BigInt(guildId as any),
             },
         });
 
         await prisma.migrations.updateMany({
             where: {
-                guildId: BigInt(guildId as any),
+                guildId: BigInt(req.query.serverid as string),
             },
             data: {
-                guildId: BigInt(newGuildId as any),
+                guildId: BigInt(guildId as any),
             },
         });
 
         await prisma.guildMembers.updateMany({
             where: {
-                guildId: BigInt(guildId as any),
+                guildId: BigInt(req.query.serverid as string),
             },
             data: {
-                guildId: BigInt(newGuildId as any),
+                guildId: BigInt(guildId as any),
             },
         });
 
