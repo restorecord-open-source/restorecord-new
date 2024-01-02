@@ -75,7 +75,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 discoverable: data.discoverable ? ((user.role === "business" || user.role === "enterprise") ? 1 : 0) : 0,
                 blockAlts: data.blockAlts ? (user.role !== "free" ? data.blockAlts : false) : false,
                 captcha: data.captcha,
-                vpncheck: data.webhookCheck ? (data.vpnCheck ? (user.role !== "free" ? true : false) : false) : false,
+                vpncheck: data.vpnCheck ? (user.role !== "free" ? true : false) : false,
                 themeColor: data.themeColor ? ((user.role === "business" || user.role === "enterprise") ? data.themeColor.replace("#", "") : "4e46ef") : "4e46ef",
             }
         });
