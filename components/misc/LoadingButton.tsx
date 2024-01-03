@@ -1,12 +1,13 @@
-import Button from "@mui/material/Button";
+import Button, { ButtonPropsColorOverrides } from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import { SxProps, Theme } from "@mui/material/styles";
+import { OverridableStringUnion } from "@mui/types";
 import { useState } from "react";
 
 interface LoadingButtonProps {
     event: () => void;
     variant?: "text" | "outlined" | "contained";
-    color?: "inherit" | "primary" | "secondary" | "error" | "info" | "success" | "warning" | "yellow";
+    color?: OverridableStringUnion<"inherit" | "primary" | "secondary" | "error" | "info" | "success" | "warning" | "yellow", ButtonPropsColorOverrides>;
     sx?: SxProps<Theme>;
     ref?: React.Ref<HTMLButtonElement>;
     children: React.ReactNode;

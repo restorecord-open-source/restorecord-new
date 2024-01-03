@@ -124,7 +124,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                 </div>
                                 <div style="text-align: center; margin-top: 1rem;">
                                     <em style="color: rb(190, 198, 213)">
-                                        Copyright &#169; 2023 RestoreCord. All rights reserved.
+                                        Copyright &#169; 2024 RestoreCord. All rights reserved.
                                     </em>
                                 </div>
                             </div>
