@@ -132,7 +132,7 @@ export default function DashServerSettings({ user, id }: any) {
                 guildId: newServer.guildId,
                 roleId: newServer.roleId,
                 webhook: newServer.webhook,
-                WebhookCheck: newServer.webhookcheck,
+                webhookCheck: newServer.webhookcheck,
                 ipLogging: newServer.ipLogging,
                 blockAlts: newServer.blockAlts,
                 discoverable: newServer.discoverable,
