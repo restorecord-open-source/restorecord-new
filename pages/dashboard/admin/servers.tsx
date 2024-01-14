@@ -30,6 +30,10 @@ import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
 import OutlinedInput from "@mui/material/OutlinedInput";
+import LoadingButton from "../../../components/misc/LoadingButton";
+import { IntlRelativeTime } from "../../../src/functions";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
 
 export default function AdminServer() {
     const router = useRouter();
@@ -41,6 +45,8 @@ export default function AdminServer() {
     const [servers, setServers]: any = useState({});
     const [Modals, setModals]: any = useState({ info: false, unclaim: false });
     const [ModalData, setModalData]: any = useState({ info: {}, query: { rows: 0, time: 0 } });
+
+    const [screenshotMode, setScreenshotMode] = useState(false);
 
     const { data, isError, isLoading } = useQuery('user', async () => await getUser({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
@@ -176,29 +182,53 @@ export default function AdminServer() {
         return (
             <>
                 {servers.map((server: any) => (
-                    <Paper sx={{ background: "#000", mt: 2, p: 3, borderRadius: "1rem" }} key={server.id}>
+                    <Paper sx={{ background: "#0a0a0a", mt: 2, p: 3, borderRadius: "1rem", border: `1px solid ${screenshotMode ? theme.palette.primary.main : "#0a0a0a"}` }} key={server.id}>
                         <Stack direction={{ xs: "column", md: "row" }} spacing={2} justifyContent="space-between">
                             <CardContent sx={{ pb: "1rem !important" }}>
                                 {Object.entries(server).map(([key, value]) => {
-                                    if (typeof value === "string") {
-                                        return (<Typography variant="body1" sx={{ mb: 1 }} key={key}>{key}: <code>{value}</code></Typography>);
-                                    } else if (value instanceof Date || key === "createdAt" || key === "updatedAt") {
-                                        return (<Typography variant="body1" sx={{ mb: 1 }} key={key}>{key}: <code>{new Date(value as any).toLocaleDateString()}</code></Typography>);
+                                    let newKey = key.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/(?:^|\s)([a-z])/g, (_, c) => c.toUpperCase());
+
+                                    if (newKey.slice(-2, -1).toUpperCase() === newKey.slice(-2, -1) && newKey.slice(-1).toUpperCase() !== newKey.slice(-1)) {
+                                        // if newKey is 2 characters long then dont capitalize the last character
+                                        newKey = newKey.slice(0, -2) + newKey.slice(-2, -1).toUpperCase() + newKey.slice(-1);
+                                    }
+                                    
+
+                                    if (screenshotMode) {
+                                        switch (key) {
+                                        case "id":
+                                            newKey = "Database ID";
+                                            break;
+                                        case "guildId":
+                                            newKey = "Server ID";
+                                            break;
+                                        case "pullTimeout":
+                                            newKey = "Cooldown";
+                                            break;
+                                        case "createdAt":
+                                            newKey = "Creation";
+                                            break;
+                                        }
+                                    }
+
+                                    if (value instanceof Date || key === "createdAt" || key === "updatedAt" || key === "pullTimeout") {
+                                        return (<Typography variant="body1" sx={{ mb: 1 }} key={key}>{newKey}: <b><code onClick={() => { navigator.clipboard.writeText(new Date(value as any).toLocaleDateString()); setSuccessMessage("Copied to clipboard!"); setTimeout(() => { setSuccessMessage(""); }, 1500); }} style={{ cursor: "pointer" }}>{new Intl.DateTimeFormat("en-UK", { dateStyle: "medium" }).format(new Date(value as any))} ({IntlRelativeTime(new Date(value as any).getTime()) ?? "Expired"})</code></b></Typography>);
                                     } else if (typeof value === "boolean") {
-                                        return (<Typography variant="body1" sx={{ mb: 1 }} key={key}>{key}: <code>{value ? "Yes" : "No"}</code></Typography>);
+                                        return (<Typography variant="body1" sx={{ mb: 1 }} key={key}>{newKey}: <b><code style={{ color: value ? "#00d26a" : "#f92f60" }}>{value ? "✅ Yes" : "❌ No"}</code></b></Typography>);
+                                    } else if (typeof value === "string") {
+                                        return (<Typography variant="body1" sx={{ mb: 1 }} key={key}>{newKey}: <b><code onClick={() => { navigator.clipboard.writeText(value); setSuccessMessage("Copied to clipboard!"); setTimeout(() => { setSuccessMessage(""); }, 1500); }} style={{ cursor: "pointer" }}>{key === "role" ? value.charAt(0).toUpperCase() + value.slice(1) : value}</code></b></Typography>);
                                     } else {
-                                        // if key is 
-                                        return (<Typography variant="body1" sx={{ mb: 1 }} key={key}>{key}: <code>{JSON.stringify(value)}</code></Typography>);
+                                        return (<Typography variant="body1" sx={{ mb: 1 }} key={key}>{newKey}: <b><code onClick={() => { navigator.clipboard.writeText(JSON.stringify(value)); setSuccessMessage("Copied to clipboard!"); setTimeout(() => { setSuccessMessage(""); }, 1500); }} style={{ cursor: "pointer" }}>{JSON.stringify(value)}</code></b></Typography>);
                                     }
                                 })}
                             </CardContent>
                             <CardContent sx={{ pb: "1rem !important" }}>
                                 <Stack direction="column" spacing={2}>
-                                    <Button variant="contained" color="info" onClick={async () => {
+                                    <LoadingButton variant="contained" color="info" event={async () => {
                                         getServerInfo(server.id);
                                         setModals({ ...Modals, info: true });
-                                    }}>More info</Button>
-                                    <Button variant="contained" color="yellow" onClick={async () => {
+                                    }}>More info</LoadingButton>
+                                    <LoadingButton variant="contained" color="yellow" event={async () => {
                                         setErrorMessages("");
                                         await axios.post("/api/admin/reset?option=cooldown", { serverId: server.id }, {
                                             headers: {
@@ -211,8 +241,8 @@ export default function AdminServer() {
                                             console.error(err);
                                             setErrorMessages(JSON.stringify(err.response.data));
                                         });
-                                    }}>Reset Cooldown</Button>
-                                    <Button variant="contained" color="primary" onClick={async () => {
+                                    }}>Reset Cooldown</LoadingButton>
+                                    <LoadingButton variant="contained" color="primary" event={async () => {
                                         setErrorMessages("");
                                         await axios.post("/api/admin/reset?option=status", { serverId: server.id }, {
                                             headers: {
@@ -225,8 +255,8 @@ export default function AdminServer() {
                                             console.error(err);
                                             setErrorMessages(JSON.stringify(err.response.data));
                                         });
-                                    }}>Reset Pull Status</Button>
-                                    <Button variant="contained" color="error" onClick={async () => {
+                                    }}>Reset Pull Status</LoadingButton>
+                                    <LoadingButton variant="contained" color="error" event={async () => {
                                         setErrorMessages("");
                                         await axios.post("/api/admin/reset?option=member", { serverId: server.id }, {
                                             headers: {
@@ -239,11 +269,11 @@ export default function AdminServer() {
                                             console.error(err);
                                             setErrorMessages(JSON.stringify(err.response.data));
                                         });
-                                    }}>Reset Members</Button>
-                                    <Button variant="contained" color="error" onClick={async () => {
+                                    }}>Reset Members</LoadingButton>
+                                    <LoadingButton variant="contained" color="error" event={async () => {
                                         getServerInfo(server.id);
                                         setModals({ ...Modals, unclaim: true });
-                                    }}>UNCLAIM ID</Button>
+                                    }}>UNCLAIM ID</LoadingButton>
                                 </Stack>
                             </CardContent>
                         </Stack>
@@ -262,9 +292,14 @@ export default function AdminServer() {
                     <Container maxWidth="xl">
                         <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
                             <CardContent sx={{ pb: "1rem !important" }}>
-                                <Typography variant="h5" sx={{ mb: 2, fontWeight: "500" }}>
-                                    Admin Server
-                                </Typography>
+                                <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between" sx={{ mb: 2, "@media screen and (max-width: 600px)": { flexDirection: "column" } }}>
+                                    <Typography variant="h5" sx={{ fontWeight: "500" }}>
+                                        Admin Servers
+                                    </Typography>
+                                    <Stack direction="row" spacing={2}>
+                                        <FormControlLabel control={<Switch checked={screenshotMode} onChange={() => setScreenshotMode(!screenshotMode)} />} label="Screenshot Mode" />
+                                    </Stack>
+                                </Stack>
 
                                 {Modals.info && renderInfoModal()}
                                 {Modals.unclaim && renderUnclaimModal()}

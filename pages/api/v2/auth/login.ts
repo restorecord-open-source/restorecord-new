@@ -22,7 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         let tokenExpiry: string = "30d";
         if (!data.username || !data.password) {
-            return res.status(400).json({ message: "Missing username or password" });
+            return res.status(400).json({ success: false, message: "Missing username or password" });
         }
         
         if (!data) return res.status(400).json({ message: "Please provide all fields" });

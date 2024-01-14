@@ -36,7 +36,23 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
         serverInfo = await redis.get(`server:${guildId}`);
         if (serverInfo) { serverInfo = JSON.parse(serverInfo); }
         else { 
-            serverInfo = await prisma.servers.findUnique({ where: { guildId: guildId } });
+            serverInfo = await prisma.servers.findUnique({
+                select: {
+                    guildId: true,
+                    customBotId: true,
+                    roleId: true,
+                    webhook: true,
+                    ipLogging: true,
+                    captcha: true,
+                    blockAlts: true,
+                    locked: true,
+                    vpncheck: true,
+                    ownerId: true,
+                },
+                where: {
+                    guildId: guildId 
+                } 
+            });
             if (!serverInfo) return reject(10004 as any);
 
             serverInfo.guildId = serverInfo.guildId.toString();
@@ -50,7 +66,17 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
         customBotInfo = await redis.get(`customBot:${serverInfo.customBotId}`);
         if (customBotInfo) { customBotInfo = JSON.parse(customBotInfo); }
         else {
-            customBotInfo = await prisma.customBots.findUnique({ where: { id: serverInfo.customBotId } });
+            customBotInfo = await prisma.customBots.findUnique({
+                select: {
+                    clientId: true,
+                    botSecret: true,
+                    botToken: true,
+                    customDomain: true,
+                },
+                where: {
+                    id: serverInfo.customBotId 
+                } 
+            });
             if (!customBotInfo) return reject(10002 as any);
             
             customBotInfo.clientId = customBotInfo.clientId.toString();
@@ -73,7 +99,15 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
             serverOwner = await redis.get(`serverOwner:${serverInfo.ownerId}`);
             if (serverOwner) { serverOwner = JSON.parse(serverOwner); }
             else {
-                serverOwner = await prisma.accounts.findUnique({ where: { id: serverInfo.ownerId } });
+                serverOwner = await prisma.accounts.findUnique({
+                    select: {
+                        userId: true,
+                        role: true,
+                    },
+                    where: {
+                        id: serverInfo.ownerId 
+                    } 
+                });
                 serverOwner.userId = serverOwner.userId ? serverOwner.userId.toString() : "0";
                 
                 await redis.set(`serverOwner:${serverInfo.ownerId}`, JSON.stringify(serverOwner), "EX", 60 * 60);

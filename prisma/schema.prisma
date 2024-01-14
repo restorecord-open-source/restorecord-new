@@ -81,7 +81,7 @@ model servers {
 model migrations {
     id               Int      @id @default(autoincrement())
     guildId          BigInt   @db.UnsignedBigInt
-    migrationGuildId BigInt   @db.UnsignedBigInt @default(0)
+    migrationGuildId BigInt   @default(0) @db.UnsignedBigInt
     status           Status   @default(PENDING)
     totalCount       Int      @default(0)
     successCount     Int      @default(0)
@@ -230,7 +230,7 @@ model sessions {
     name      String   @default("Unknown")
     token     String   @unique @db.VarChar(500)
     api       Boolean  @default(false)
-    device    String   @db.VarChar(500) @default("Unknown")
+    device    String   @default("Unknown") @db.VarChar(500)
     expiry    DateTime @default(now())
     account   accounts @relation(fields: [accountId], references: [id])
     accountId Int
@@ -316,15 +316,15 @@ model emails {
 }
 
 model payments {
-    id             Int      @id @default(autoincrement())
+    id             Int         @id @default(autoincrement())
     accountId      Int
     amount         Int
     type           String
-    subscriptionId String   @unique @db.VarChar(500)
+    subscriptionId String      @unique @db.VarChar(500)
     payment_status String
-    gift           Boolean  @default(false)
-    createdAt      DateTime @default(now())
-    account        accounts @relation(fields: [accountId], references: [id])
+    gift           Boolean     @default(false)
+    createdAt      DateTime    @default(now())
+    account        accounts    @relation(fields: [accountId], references: [id])
     giftCodes      giftCodes[]
 
     @@index([accountId])
@@ -332,16 +332,16 @@ model payments {
 }
 
 model giftCodes {
-    id        Int      @id @default(autoincrement())
-    code      String   @unique @db.VarChar(500)
+    id        Int       @id @default(autoincrement())
+    code      String    @unique @db.VarChar(500)
     amount    Int
     paymentId Int
-    used      Boolean  @default(false)
+    used      Boolean   @default(false)
     usedBy    Int
     usedAt    DateTime?
-    createdAt DateTime @default(now())
-    account   accounts @relation(fields: [usedBy], references: [id])
-    payment   payments @relation(fields: [paymentId], references: [id])
+    createdAt DateTime  @default(now())
+    account   accounts  @relation(fields: [usedBy], references: [id])
+    payment   payments  @relation(fields: [paymentId], references: [id])
 
     @@index([code])
     @@index([paymentId])

@@ -24,7 +24,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
     data.serverName = data.serverName.trim();
 
-    const customBot = await prisma.customBots.findUnique({ where: { clientId: BigInt(data.customBot) } });
+    const customBot = await prisma.customBots.findUnique({ where: { clientId: BigInt(data.customBot), ownerId: user.id } });
     if (!customBot) {
         return res.status(400).json({ success: false, message: "Custom Bot not found" });
     }

@@ -66,7 +66,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 name: trimmedServerName,
                 guildId: BigInt(guildId as any),
                 roleId: BigInt(roleId as any),
-                webhook: data.webhook ? (user.role !== "free" ? data.webhook : null) : null,
+                webhook: (data.webhook && data.webhookCheck) ? (user.role !== "free" ? data.webhook : null) : null,
                 picture: data.picture,
                 bgImage: data.background ? (user.role === "business" ? data.background : null) : null,
                 description: data.description,

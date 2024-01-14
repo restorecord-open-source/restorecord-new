@@ -43,6 +43,7 @@ import Chip from "@mui/material/Chip";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import { AvatarFallback } from "../../src/functions";
+import Link from "next/link";
 
 export default function VerifiedMembers({ user }: any) {
     const [token]: any = useToken();
@@ -392,6 +393,16 @@ export default function VerifiedMembers({ user }: any) {
                 </DialogTitle>
 
                 <DialogContent sx={{ marginTop: 2 }}>
+                    <Alert severity="info" sx={{ mb: 1 }}>
+                        <Typography variant="body1" sx={{ fontWeight: "500" }}>
+                            Info
+                        </Typography>
+                        <Typography variant="body2">
+                            This will import members from a different service, not PULL members.
+                            To pull members, go to the <Link href="/dashboard/server">Servers</Link> and click Migrate.
+                        </Typography>
+                    </Alert>
+
                     <Stack spacing={1} direction="row" alignItems="center">
                         <Typography variant="body1" sx={{ fontWeight: "500" }}>
                             Options
@@ -429,7 +440,7 @@ export default function VerifiedMembers({ user }: any) {
                     </Button> */}
 
                     <TextField fullWidth label="File" id="file" name="file" value={importOptions.file ? importOptions.file[0].name : "Select File"} sx={{ mt: 1 }} InputProps={{endAdornment: (<input type="file" accept="application/json, text/csv" onChange={(e) => setImportOptions({ ...importOptions, file: e.target.files })} tabIndex={ -1 } style={{ position: "absolute", top: 0, right: 0, bottom: 0, left: 0, opacity: 0 }} />) }} />
-                        
+
                     <Alert severity="error" sx={{ mt: 1 }}>
                         <Typography variant="body1" sx={{ fontWeight: "500" }}>
                             Warning

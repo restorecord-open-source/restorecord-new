@@ -28,8 +28,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 where: {
                     OR: [
                         { clientId: BigInt(clientId) as bigint },
-                        { botSecret },
-                        { botToken },
+                        { botSecret: botSecret },
+                        { botToken: botToken },
                     ],
                 },
             });

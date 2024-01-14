@@ -15,8 +15,8 @@ interface Server {
 }
 
 export default function Verify({ info, servers, err }: { info: UserInfo, servers: Server[], err: string }) {
-    const hostname = (info.domain.match(/(?:[^.]+\.)?([^.\s]+)\.[^.]+$/) || [])[1] || info.domain;
-    const domain = (info.domain.match(/(?:[^.]+\.)?([^.]+\.[^.]+)$/) || [])[1] || info.domain;
+    const hostname = info.domain ? (info.domain.match(/(?:[^.]+\.)?([^.\s]+)\.[^.]+$/) || [])[1] || info.domain : "restorecord.com";
+    const domain = info.domain ? (info.domain.match(/(?:[^.]+\.)?([^.]+\.[^.]+)$/) || [])[1] || info.domain : "restorecord.com";
 
     return (
         <>

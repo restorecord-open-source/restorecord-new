@@ -57,7 +57,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 account_id: user.id,
                 plan: plan,
             },
-            // if previous customer exists add customer parameter if not use customer_email parameter
+            
             ...(previousCustomer ? { customer: previousCustomer } : { customer_email: user.email }),
             ...(previousCustomer ? { customer_update: {
                 name: "auto",
@@ -70,7 +70,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 },
                 ...(payments.length === 0 && {
                     trial_period_days: 7,
-                }),
+                }),  
             },
             tax_id_collection: {
                 enabled: true,

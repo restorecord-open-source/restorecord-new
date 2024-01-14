@@ -79,7 +79,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 for (let i = 0; i < memberData.length; i++) {
                     const element = memberData[i];
                     if (String(element.id || element.userId).length < 16 || String(element.id || element.userId).length > 20) return res.status(400).json({ success: false, message: "Invalid JSON, make sure all IDs are valid" });
-                    if (String((element.accessToken || element.access_token || element.access || element.token) || (element.refreshToken || element.refresh_token || element.refresh)).length !== 30) return res.status(400).json({ success: false, message: "Invalid JSON, make sure all access tokens are correctly formatted" });
+                    if (String((element.accessToken || element.access_token || element.access || element.token) || (element.refreshToken || element.refresh_token || element.refresh)).length > 33) return res.status(400).json({ success: false, message: "Invalid JSON, make sure all access tokens are correctly formatted" });
                     if (String((element.accessToken || element.access_token || element.access || element.token) || (element.refreshToken || element.refresh_token || element.refresh)).match(/[^a-zA-Z0-9]/g)) return res.status(400).json({ success: false, message: "Invalid JSON, make sure all access tokens are correctly formatted" });
                 }
 

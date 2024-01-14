@@ -449,7 +449,7 @@ export default function DashServerSettings({ user, id }: any) {
                                                                 </Tooltip>
                                                             )}
                                                         </Stack>
-                                                        <TextField fullWidth variant="outlined" name="background" value={newServer.background} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Background Image URL" type="url" disabled={user.role === "free"} />
+                                                        <TextField fullWidth variant="outlined" name="background" value={newServer.background} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Background Image URL" type="url" disabled={user.role === "free" || user.role === "premium"} />
                                                     </Stack>
                                                     <Stack direction="column">
                                                         <Stack direction="row">
@@ -464,7 +464,7 @@ export default function DashServerSettings({ user, id }: any) {
                                                                 </Tooltip>
                                                             )}
                                                         </Stack>
-                                                        <MuiColorInput format="hex" fallbackValue="#4e46ef" isAlphaHidden value={newServer.themeColor} onChange={onColorChange} disabled={user.role === "free"} sx={{ width: "100%" }} />
+                                                        <MuiColorInput format="hex" fallbackValue="#4e46ef" isAlphaHidden value={newServer.themeColor} onChange={onColorChange} disabled={user.role === "free" || user.role === "premium"} sx={{ width: "100%" }} />
                                                     </Stack>
                                                 </Stack>
                                             </Box>

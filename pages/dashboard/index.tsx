@@ -38,6 +38,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Skeleton from "@mui/material/Skeleton";
 import Tooltip from "@mui/material/Tooltip";
 import { AvatarFallback } from "../../src/functions";
+import { TableBody } from "@mui/material";
 
 const ApexChart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
@@ -179,7 +180,6 @@ export default function Dashboard() {
                     hideOverlappingLabels: true,
                     formatter: function (value: any, timestamp: any) {
                         const date = new Date(timestamp);
-                        // show day and month so: 29th June
                         return date.toLocaleDateString("en-US", {
                             weekday: "short",
                             day: "numeric",
@@ -193,9 +193,9 @@ export default function Dashboard() {
                 crosshairs: {
                     show: false,
                 },
-                categories: new Array(30).fill(0).map((_, i) => {
-                    const date = new Date();
-                    date.setDate(date.getDate() - i);
+                categories: new Array(Math.min(Math.floor((new Date().getTime() - new Date(new Date().getFullYear(), 0, 1).getTime()) / (1000 * 60 * 60 * 24)) + 1, 30)).fill(0).map((_, i) => {
+                    const date = new Date(new Date(new Date().getFullYear(), 0, 1));
+                    date.setDate(date.getDate() + i);
                     return date.toLocaleDateString("en-US", {
                         weekday: "short",
                         month: "short",
@@ -227,15 +227,17 @@ export default function Dashboard() {
         },
         series: memberList ? memberList.servers.map((server: any) => ({
             name: server.name,
-            data: Array.from({ length: 30 }, (_, i) => {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
+            data: Array.from({ 
+                length: Math.min(Math.floor((new Date().getTime() - new Date(new Date().getFullYear(), 0, 1).getTime()) / (1000 * 60 * 60 * 24)) + 1, 30) 
+            }, (_, i) => {
+                const date = new Date(new Date().getFullYear(), 0, 1);
+                date.setDate(date.getDate() + i);
                 return server.members.filter((member: any) => {
                     const createdAt = new Date(member.createdAt);
                     return createdAt.getDate() === date.getDate() && createdAt.getMonth() === date.getMonth() && createdAt.getFullYear() === date.getFullYear();
-                }).length;
+                }).length; // Assuming you want the count of members
             }).reverse()
-        })) : [],
+        })) : []
     };
 
     
@@ -372,41 +374,42 @@ export default function Dashboard() {
                         )}
 
                         <Table>
-                            {!topAnalyticsLoading && topAnalytics.content.map((analytic: any) => {
-                                return (
-                                    <TableRow key={analytic.country} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                                        <TableCell>
-                                            <Stack direction="row" spacing={1} alignItems="center">
-                                                {statType === "country" && countries.find((c: any) => c.name === analytic.name) && (<Avatar alt="Country" src={`https://cdn.ipregistry.co/flags/twemoji/${countries.find((c: any) => c.name === analytic.name)?.code.toLowerCase()}.svg`} sx={{ width: 20, height: 20, borderRadius: 0 }} />)}
-                                                <Typography variant="body1" color="grey.200">
-                                                    {analytic.link ? <a href={analytic.link} target="_blank" rel="noopener noreferrer">{analytic.name}</a> : analytic.name}
-                                                </Typography>
-                                            </Stack>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Typography variant="body1" color="grey.200">{analytic.count}</Typography>
-                                        </TableCell>
-                                    </TableRow>
-                                )
-                            })}
+                            <TableBody>
+                                {!topAnalyticsLoading && topAnalytics.content.map((analytic: any, id: number) => {
+                                    return (
+                                        <TableRow key={id} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                                            <TableCell>
+                                                <Stack direction="row" spacing={1} alignItems="center">
+                                                    {statType === "country" && countries.find((c: any) => c.name === analytic.name) && (<Avatar alt="Country" src={`https://cdn.ipregistry.co/flags/twemoji/${countries.find((c: any) => c.name === analytic.name)?.code.toLowerCase()}.svg`} sx={{ width: 20, height: 20, borderRadius: 0 }} />)}
+                                                    <Typography variant="body1" color="grey.200">
+                                                        {analytic.link ? <a href={analytic.link} target="_blank" rel="noopener noreferrer">{analytic.name}</a> : analytic.name}
+                                                    </Typography>
+                                                </Stack>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Typography variant="body1" color="grey.200">{analytic.count}</Typography>
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                })}
 
-                            {!topAnalyticsLoading && topAnalytics.content.length === 0 && countries.slice(0, 10).map((country: any) => {
-                                return (
-                                    <TableRow key={country.name} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                                        <TableCell>
-                                            <Stack direction="row" spacing={1} alignItems="center">
-                                                <Avatar alt="Country" src={`https://cdn.ipregistry.co/flags/twemoji/${country.code.toLowerCase()}.svg`} sx={{ width: 20, height: 20, borderRadius: 0 }} />
-                                                <Typography variant="body1" color="grey.200">{country.name}</Typography>
-                                            </Stack>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Typography variant="body1" color="grey.200">0</Typography>
-                                        </TableCell>
-                                    </TableRow>
-                                )
-                            })}
+                                {!topAnalyticsLoading && topAnalytics.content.length === 0 && countries.slice(0, 10).map((country: any) => {
+                                    return (
+                                        <TableRow key={country.name} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                                            <TableCell>
+                                                <Stack direction="row" spacing={1} alignItems="center">
+                                                    <Avatar alt="Country" src={`https://cdn.ipregistry.co/flags/twemoji/${country.code.toLowerCase()}.svg`} sx={{ width: 20, height: 20, borderRadius: 0 }} />
+                                                    <Typography variant="body1" color="grey.200">{country.name}</Typography>
+                                                </Stack>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Typography variant="body1" color="grey.200">0</Typography>
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                })}
+                            </TableBody>
                         </Table>
-
                     </CardContent>
                 </Paper>
             </Grid>

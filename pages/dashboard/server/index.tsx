@@ -241,26 +241,22 @@ export default function Server() {
                                 </Link>
                             </Typography>
                         </Grid>
-                        <Grid item xs={12} sm={12} md={3} lg={2} xl={1}>
-                            <Stack spacing={1} direction="column" justifyContent={"space-between"}>
+                        <Grid item xs={12} sm={12} md={1.5}>
+                            <Stack spacing={1} direction="column">
                                 <Button variant="contained" onClick={() => { router.push(`/dashboard/server/${server.guildId}`)} }>
-                                Edit
+                                    Edit
                                 </Button>
-                                <Button variant="contained" color="success" onClick={() => {
-                                    // setCustomBotToken(user.bots.find((bot: any) => bot.id === (user.servers.find((server: any) => server.guildId === server.guildId).customBotId)).botToken);
+                                <LoadingButton variant="contained" color="success" event={() => {
                                     setGuildId(server.guildId);
                                     reloadUser();
                                     setBotClient({ loading: true, valid: false });
                                     getAllGuilds(user.bots.find((bot: any) => String(bot.id) === String(user.servers.find((serv: any) => serv.guildId === server.guildId).customBotId)).botToken);
                                     getBotClient(user.bots.find((bot: any) => String(bot.id) === String(user.servers.find((serv: any) => serv.guildId === server.guildId).customBotId)).botToken);
                                     setPullSettings({ ...pullSettings, serverId: server.id, pullWindow: true, giveRoleOnJoin: false, customPullCountCheck: false, specificCountry: false });
-                                }}>Migrate</Button>
+                                }}>Migrate</LoadingButton>
                                 {(user.role === "business" || user.role === "enterprise") && (
-                                    <LoadingButton variant="contained" color="yellow" event={() => {
-                                        setNotiTextI("Creating a backup...");
-                                        setOpenI(true);
-
-                                        axios.post(`/api/v2/self/servers/${server.guildId}/backup/create`, {}, {
+                                    <LoadingButton variant="contained" color="yellow" event={async() => {
+                                        await axios.post(`/api/v2/self/servers/${server.guildId}/backup/create`, {}, {
                                             headers: {
                                                 "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
                                             },

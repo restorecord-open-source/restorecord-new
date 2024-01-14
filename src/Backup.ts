@@ -93,11 +93,9 @@ export const createBackup = async (guildId: bigint, options: { roles: boolean, c
             return resolve({ success: true, message: "Backup Created" });
         } catch (e: any) {
             console.error(e);
-            // check if e.response.data.message exists and if it does return that
+            
             if (e.response && e.response.data && e.response.data.message) {
                 return reject({ success: false, message: e.response.data.message });
-            } else if (e.message) {
-                return reject({ success: false, message: e.message });
             } else {
                 return reject({ success: false, message: "Something went wrong, contact support." });
             }
