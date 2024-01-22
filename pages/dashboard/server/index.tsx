@@ -455,7 +455,7 @@ export default function Server() {
                                         }} color="primary" variant="contained" sx={{ width: "100%", mb: { sm: "1rem", md: "0" } }}>
                                             Refresh Server List
                                         </Button>
-                                        {guildId !== "" && user.servers.find((item: any) => item.guildId === guildId).pulling ? (
+                                        {guildId !== "" && user.servers.find((item: any) => item.guildId === guildId).pulling && user.role !== "enterprise" ? (
                                             <LoadingButton event={() => (
                                                 axios.delete(`/api/v2/self/servers/${guildId}/stop`, {
                                                     headers: {

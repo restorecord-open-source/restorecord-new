@@ -118,7 +118,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             });
         }
 
-        if (server.pulling === true) return res.status(400).json({ success: false, message: "You are already pulling", code: 50055 });
+        if (server.pulling === true && user.role !== "enterprise") return res.status(400).json({ success: false, message: "You are already pulling", code: 50055 });
         if (server.pullTimeout !== null) if (server.pullTimeout > new Date()) return res.status(400).json({ success: false, message: "You're on cooldown, you can pull again in", pullTimeout: server.pullTimeout, code: 50056 });
 
         // let done;

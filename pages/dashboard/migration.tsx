@@ -86,16 +86,20 @@ export default function Server() {
     }), { retry: false, refetchOnWindowFocus: false });
 
     useEffect(() => {
-        if (user && user.username) {
-            const interval = setInterval(async () => {
-                const { data } = await axios.get(`/api/v2/self/servers/status`, { headers: { Authorization: (process.browser && window.localStorage.getItem("token")) ?? token } });
-                setMigrations((migrations) => data.migrations.map((migration: Migration) => ({ ...migration, open: migrations.find((m) => m.guildId === migration.guildId)?.open ?? false })));
-                setIsLoading(false);
-            }, 2000);
+        const fetchData = async () => {
+            const { data } = await axios.get(`/api/v2/self/servers/status`, { headers: { Authorization: (process.browser && window.localStorage.getItem("token")) ?? token } });
+            setMigrations((migrations) => data.migrations.map((migration: Migration) => ({ ...migration, open: migrations.find((m) => m.guildId === migration.guildId)?.open ?? false })));
+        };
 
-            return () => clearInterval(interval);
+        if (user && user.username) {
+            fetchData();
+            setIsLoading(false);
         }
-    }, [user, token, migrations]);
+
+        const interval = setInterval(fetchData, 2000);
+
+        return () => clearInterval(interval);
+    }, [user, token]);
 
     if (isLoadingUser) {
         return <CircularProgress sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
