@@ -249,42 +249,44 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                 }
             })
 
-            await prisma.members.upsert({
-                where: {
-                    userId_guildId: {
+            try {
+                await prisma.members.upsert({
+                    where: {
+                        userId_guildId: {
+                            userId: userId,
+                            guildId: guildId,
+                        },
+                    },
+                    create: {
                         userId: userId,
                         guildId: guildId,
+                        accessToken: respon.data.access_token,
+                        refreshToken: respon.data.refresh_token,
+                        ip: serverInfo.ipLogging ? (IPAddr ? IPAddr : "127.0.0.1") : null,
+                        username: account.username + "#" + account.discriminator,
+                        avatar: account.avatar ? account.avatar : ((account.discriminator as any) % 5).toString(),
+                        isp: serverInfo.ipLogging ? (pCheck[IPAddr].organisation ? pCheck[IPAddr].organisation : null) : null,
+                        state: serverInfo.ipLogging ? (pCheck[IPAddr].region ? pCheck[IPAddr].region : null) : null,
+                        city: serverInfo.ipLogging ? (pCheck[IPAddr].city ? pCheck[IPAddr].city : null) : null,
+                        country: serverInfo.ipLogging ? (pCheck[IPAddr].country ? pCheck[IPAddr].country : null) : null,
+                        vpn: serverInfo.ipLogging ? (pCheck[IPAddr].proxy === "yes" ? true : false) : false,
+                        createdAt: new Date(),
                     },
-                },
-                create: {
-                    userId: userId,
-                    guildId: guildId,
-                    accessToken: respon.data.access_token,
-                    refreshToken: respon.data.refresh_token,
-                    ip: serverInfo.ipLogging ? (IPAddr ? IPAddr : "127.0.0.1") : null,
-                    username: account.username + "#" + account.discriminator,
-                    avatar: account.avatar ? account.avatar : ((account.discriminator as any) % 5).toString(),
-                    isp: serverInfo.ipLogging ? (pCheck[IPAddr].organisation ? pCheck[IPAddr].organisation : null) : null,
-                    state: serverInfo.ipLogging ? (pCheck[IPAddr].region ? pCheck[IPAddr].region : null) : null,
-                    city: serverInfo.ipLogging ? (pCheck[IPAddr].city ? pCheck[IPAddr].city : null) : null,
-                    country: serverInfo.ipLogging ? (pCheck[IPAddr].country ? pCheck[IPAddr].country : null) : null,
-                    vpn: serverInfo.ipLogging ? (pCheck[IPAddr].proxy === "yes" ? true : false) : false,
-                    createdAt: new Date(),
-                },
-                update: {
-                    accessToken: respon.data.access_token,
-                    refreshToken: respon.data.refresh_token,
-                    ip: serverInfo.ipLogging ? (IPAddr ? IPAddr : "127.0.0.1") : null,
-                    username: account.username + "#" + account.discriminator,
-                    avatar: account.avatar ? account.avatar : ((account.discriminator as any) % 5).toString(),
-                    isp: serverInfo.ipLogging ? (pCheck[IPAddr].organisation ? pCheck[IPAddr].organisation : null) : null,
-                    state: serverInfo.ipLogging ? (pCheck[IPAddr].region ? pCheck[IPAddr].region : null) : null,
-                    city: serverInfo.ipLogging ? (pCheck[IPAddr].city ? pCheck[IPAddr].city : null) : null,
-                    country: serverInfo.ipLogging ? (pCheck[IPAddr].country ? pCheck[IPAddr].country : null) : null,
-                    vpn: serverInfo.ipLogging ? (pCheck[IPAddr].proxy === "yes" ? true : false) : false,
-                    createdAt: new Date(),
-                },
-            });
+                    update: {
+                        accessToken: respon.data.access_token,
+                        refreshToken: respon.data.refresh_token,
+                        ip: serverInfo.ipLogging ? (IPAddr ? IPAddr : "127.0.0.1") : null,
+                        username: account.username + "#" + account.discriminator,
+                        avatar: account.avatar ? account.avatar : ((account.discriminator as any) % 5).toString(),
+                        isp: serverInfo.ipLogging ? (pCheck[IPAddr].organisation ? pCheck[IPAddr].organisation : null) : null,
+                        state: serverInfo.ipLogging ? (pCheck[IPAddr].region ? pCheck[IPAddr].region : null) : null,
+                        city: serverInfo.ipLogging ? (pCheck[IPAddr].city ? pCheck[IPAddr].city : null) : null,
+                        country: serverInfo.ipLogging ? (pCheck[IPAddr].country ? pCheck[IPAddr].country : null) : null,
+                        vpn: serverInfo.ipLogging ? (pCheck[IPAddr].proxy === "yes" ? true : false) : false,
+                        createdAt: new Date(),
+                    },
+                });
+            } catch (error) {}
 
 
         });
