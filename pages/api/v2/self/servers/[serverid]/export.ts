@@ -48,7 +48,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 guildId: server.guildId
             },
             select: {
-                id: true,
                 userId: true,
                 accessToken: true,
                 refreshToken: true,

@@ -68,7 +68,6 @@ export default function VerifiedMembers({ user }: any) {
         serverId: "",
         format: "csv",
         options: [
-            { label: "Id", value: "id" },
             { label: "User Id", value: "userId" },
             { label: "Access Token", value: "accessToken" },
             { label: "Refresh Token", value: "refreshToken" },

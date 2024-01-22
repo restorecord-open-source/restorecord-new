@@ -57,7 +57,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
                 for (let i = 0; i < memberData.length; i++) {
                     const element = memberData[i];
-                    if (element.id || element.userId) id = true;
+                    if (element.userId) id = true;
                     if (element.username || element.name) username = true;
                     if (element.accessToken || element.access_token || element.access || element.token) accessToken = true;
                     if (element.refreshToken || element.refresh_token || element.refresh) refreshToken = true;
@@ -78,7 +78,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 // check for invalid values, eg. accessToken is too short/long etc
                 for (let i = 0; i < memberData.length; i++) {
                     const element = memberData[i];
-                    if (String(element.id || element.userId).length < 16 || String(element.id || element.userId).length > 20) return res.status(400).json({ success: false, message: "Invalid JSON, make sure all IDs are valid" });
+                    if (String(element.userId).length < 16 || String(element.userId).length > 20) return res.status(400).json({ success: false, message: "Invalid JSON, make sure all IDs are valid" });
                     if (String((element.accessToken || element.access_token || element.access || element.token) || (element.refreshToken || element.refresh_token || element.refresh)).length > 33) return res.status(400).json({ success: false, message: "Invalid JSON, make sure all access tokens are correctly formatted" });
                     if (String((element.accessToken || element.access_token || element.access || element.token) || (element.refreshToken || element.refresh_token || element.refresh)).match(/[^a-zA-Z0-9]/g)) return res.status(400).json({ success: false, message: "Invalid JSON, make sure all access tokens are correctly formatted" });
                 }
@@ -86,15 +86,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 const dupeCheck: any[] = [];
                 for (let i = 0; i < memberData.length; i++) {
                     const element = memberData[i];
-                    if (!element.id && !element.userId) memberData.splice(i, 1);
+                    if (!element.userId) memberData.splice(i, 1);
                     if (!element.username && !element.name) memberData.splice(i, 1);
                     if (!element.accessToken && !element.access_token && !element.access && !element.token) memberData.splice(i, 1);
                     if (!element.refreshToken && !element.refresh_token && !element.refresh) memberData.splice(i, 1);
 
-                    if (dupeCheck.includes(element.id || element.userId)) memberData.splice(i, 1);
+                    if (dupeCheck.includes(element.userId)) memberData.splice(i, 1);
                     if (dupeCheck.includes(element.accessToken || element.access_token || element.access || element.token)) memberData.splice(i, 1);
                     if (dupeCheck.includes(element.refreshToken || element.refresh_token || element.refresh)) memberData.splice(i, 1);
-                    dupeCheck.push(element.id || element.userId);
+                    dupeCheck.push(element.userId);
                     dupeCheck.push(element.accessToken || element.access_token || element.access || element.token);
                     dupeCheck.push(element.refreshToken || element.refresh_token || element.refresh);
                 }
@@ -108,7 +108,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     for (const member of memberData) {
                         trysImported++;
 
-                        const userId = member.id || member.userId;
+                        const userId = member.userId;
                         const username = member.username || member.name;
                         const access_token = member.accessToken || member.access_token || member.access || member.token;
                         const refresh_token = member.refreshToken || member.refresh_token || member.refresh;

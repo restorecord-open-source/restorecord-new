@@ -8,9 +8,9 @@ import { createRedisInstance } from "../../src/Redis";
 const redis = createRedisInstance();
 
 const whitelist: any = [
-    "853409308251652106", // @bl4ckbl1zz_
-    "784104859665432629", // @xenos_1337
-    "1125439749189013586", // zebratic
+    "853405459616497664", // @bl4ckbl1zz__
+    "830866889885745233", // @xenos1337_
+    "1194146833723838525", // zebratic_
 ];
 
 function handler(req: NextApiRequest, res: NextApiResponse) {

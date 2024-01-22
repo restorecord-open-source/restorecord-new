@@ -235,7 +235,7 @@ export default function Dashboard() {
                 return server.members.filter((member: any) => {
                     const createdAt = new Date(member.createdAt);
                     return createdAt.getDate() === date.getDate() && createdAt.getMonth() === date.getMonth() && createdAt.getFullYear() === date.getFullYear();
-                }).length; // Assuming you want the count of members
+                }).length;
             }).reverse()
         })) : []
     };
@@ -342,7 +342,7 @@ export default function Dashboard() {
                                 <Stack direction="row" spacing={1} sx={{ mb: 2 }} alignItems="center" justifyContent={"space-between"}>
                                     <Typography variant="h4" sx={{ fontWeight: "700", wordBreak: "break-word" }}>Top Analytics</Typography>
                                     <FormControl sx={{ minWidth: 120 }}>
-                                        <Select value={statType} onChange={(e) => { if (data.role === "business" || data.role === "enterprise") setStatType(e.target.value as any)}} displayEmpty={true} inputProps={{ "aria-label": "Without label" }}>
+                                        <Select value={statType} onChange={(e) => { if ((data.role === "business" || data.role === "enterprise") && (e.target.value !== "country" && e.target.value !== "server")) setStatType(e.target.value as any)}} displayEmpty={true} inputProps={{ "aria-label": "Without label" }}>
                                             <MenuItem value="country">Country</MenuItem>
                                             <MenuItem value="server">Server</MenuItem>
                                             <MenuItem value="state" disabled={data.role !== "business" && data.role !== "enterprise"}>
@@ -435,9 +435,7 @@ export default function Dashboard() {
                                         alerts.push(item.id);
                                         window.localStorage.setItem("alerts", JSON.stringify(alerts));
                                         document.getElementById(item.id)?.remove();
-                                    } catch (err) {
-                                        console.error(err);
-                                    }
+                                    } catch (err) {}
                                 }}>
                                     <AlertTitle>{item.title}</AlertTitle>
                                     <Typography variant="body2" component="p" sx={{ whiteSpace: "pre-line", wordBreak: "break-word" }} dangerouslySetInnerHTML={{ __html: item.content }}></Typography>
