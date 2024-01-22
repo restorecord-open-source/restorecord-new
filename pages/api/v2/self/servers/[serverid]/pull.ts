@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { HttpsProxyAgent } from "https-proxy-agent";
-import { accounts, members } from "@prisma/client";
+import { accounts, members, migrations } from "@prisma/client";
 
 import { prisma } from "../../../../../../src/db";
 import { addMember, addRole, refreshToken, shuffle, sleep } from "../../../../../../src/Migrate";
@@ -27,6 +27,14 @@ async function updateMigration(id: number, status: Status, success: number, bann
             failedCount: failed,
             blacklistedCount: blacklisted,
             updatedAt: new Date()
+        }
+    });
+}
+
+async function getMigration(id: number): Promise<migrations | null> {
+    return await prisma.migrations.findUnique({
+        where: {
+            id: id
         }
     });
 }
@@ -356,6 +364,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         },
                         data: {
                             pulling: false,
+                            pullTimeout: new Date(Date.now()),
                         },
                     }).catch(async (err: Error) => {
                         console.error(`[${server.name}] [PULLING] 5 ${err}`);
@@ -384,8 +393,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         console.error(`[${server.name}] [PULLING] 5 ${err}`);
                     });
 
-
-                    await updateMigration(migration.id, "SUCCESS", successCount, bannedCount, maxGuildsCount, invalidCount, errorCount, blacklistedCount);
+                    if (await getMigration(migration.id).then((m) => m?.status === "PULLING")) await updateMigration(migration.id, "SUCCESS", successCount, bannedCount, maxGuildsCount, invalidCount, errorCount, blacklistedCount);
                    
                     resolve();
                 }
@@ -416,7 +424,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
             console.log(`[${server.name}] [PULLING] Done with ${successCount} members pulled`);
             
-            await updateMigration(migration.id, "SUCCESS", successCount, bannedCount, maxGuildsCount, invalidCount, errorCount, blacklistedCount);
+            if (await getMigration(migration.id).then((m) => m?.status === "PULLING")) await updateMigration(migration.id, "SUCCESS", successCount, bannedCount, maxGuildsCount, invalidCount, errorCount, blacklistedCount);
 
             resolve();
         }).then(async () => {

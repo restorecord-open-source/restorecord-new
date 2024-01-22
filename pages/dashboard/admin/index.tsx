@@ -96,7 +96,7 @@ export default function Admin() {
                                     <Button fullWidth={true} variant="contained" href="/dashboard/admin/users" onClick={(e) => { e.preventDefault(); router.push("/dashboard/admin/users"); }}><GroupIcon sx={{ mr: 1 }} />User</Button>
                                     <Button fullWidth={true} variant="contained" href="/dashboard/admin/servers" onClick={(e) => { e.preventDefault(); router.push("/dashboard/admin/servers"); }}><StorageIcon sx={{ mr: 1 }} />Servers</Button>
                                     <Button fullWidth={true} variant="contained" href="/dashboard/admin/members" onClick={(e) => { e.preventDefault(); router.push("/dashboard/admin/members"); }}><SmartToyIcon sx={{ mr: 1 }} />Members</Button>
-                                    <Button fullWidth={true} variant="contained" href="/dashboard/admin/stats" onClick={(e) => { e.preventDefault(); router.push("/dashboard/admin/stats"); }}><TimelineIcon sx={{ mr: 1 }} />Graphs</Button>
+                                    <Button fullWidth={true} variant="contained" href="/dashboard/admin/logs" onClick={(e) => { e.preventDefault(); router.push("/dashboard/admin/logs"); }}><TimelineIcon sx={{ mr: 1 }} />Logs</Button>
                                 </Stack>
                             </CardContent>
                         </Paper>

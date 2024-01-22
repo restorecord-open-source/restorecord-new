@@ -495,7 +495,7 @@ export default function AdminUser() {
                     <Toolbar />
 
                     <Container maxWidth="xl">
-                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem" }}>
+                        <Paper sx={{ borderRadius: "1rem", padding: "0.5rem", marginTop: "1rem", border: "1px solid #1a1a1a" }}>
                             <CardContent>
                                 <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between" sx={{ mb: 2, "@media screen and (max-width: 600px)": { flexDirection: "column" } }}>
                                     <Typography variant="h5" sx={{ fontWeight: "500" }}>
