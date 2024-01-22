@@ -3,6 +3,10 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "../../../src/db";
 import withAuthentication from "../../../src/withAuthentication";
 import Email from "../../../src/email";
+import Stripe from "stripe";
+
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2022-11-15", typescript: true });
+//const stripe = new Stripe("sk_test_51LntpRIDsTail4YBlix309uMRctzdtJaNiTRMNgncRs6KPmeQJGIMeJKXSeCbosHRBTaGnaySMgbtfzJFqEUiUHL002RZTmipV", { apiVersion: "2022-11-15", typescript: true, });
 
 export const banReasons = [
     { 
@@ -89,6 +93,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         accountId: parseInt(fullId) as number,
                     },
                 });
+
+                const stripeCustomer = await stripe.customers.list({ email: account.email });
+                if (stripeCustomer.data.length > 0) {
+                    const customer = stripeCustomer.data[0];
+
+                    const subscriptions = await stripe.subscriptions.list({ customer: customer.id });
+                    for (const subscription of subscriptions.data) {
+                        await stripe.subscriptions.update(subscription.id, { cancel_at_period_end: true });
+                    }
+                }
 
                 await Email.send({
                     to: account.email,

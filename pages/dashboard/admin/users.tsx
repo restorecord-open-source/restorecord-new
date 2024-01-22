@@ -352,7 +352,7 @@ export default function AdminUser() {
                         </Select>
 
                         <Button variant="contained" sx={{ mt: 2 }} onClick={async () => {
-                            await axios.post("/api/admin/ban", { userId: ModalData.info.id, reason: ModalData?.ban?.reason }, {
+                            await axios.post("/api/admin/ban", { userId: ModalData.info.id, reason: ModalData.ban.reason }, {
                                 headers: {
                                     Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
                                 },
@@ -445,40 +445,42 @@ export default function AdminUser() {
                             </CardContent>
                             <CardContent sx={{ pb: "1rem !important" }}>
                                 <Stack direction="column" spacing={2}>
-                                    <Button variant="contained" color="info" onClick={async () => {
+                                    <LoadingButton variant="contained" color="info" event={async () => {
                                         getUserInfo(user.id);
                                         setModals({ ...Modals, info: true });
-                                    }}>More info</Button>
-                                    <Button variant="contained" color="yellow" onClick={async () => {
+                                    }}>More info</LoadingButton>
+                                    <LoadingButton variant="contained" color="yellow" event={async () => {
                                         getUserInfo(user.id);
                                         setModals({ ...Modals, upgrade: true });
-                                    }}>Upgrade</Button>
-                                    <Button variant="contained" color="primary" onClick={async () => {
+                                    }}>Upgrade</LoadingButton>
+                                    <LoadingButton variant="contained" color="primary" event={async () => {
                                         getUserInfo(user.id);
                                         setModals({ ...Modals, email: true });
-                                    }}>Update Email</Button>
-                                    <Button variant="contained" color="error" onClick={async () => {
+                                    }}>Update Email</LoadingButton>
+                                    <LoadingButton variant="contained" color="error" event={async () => {
                                         getUserInfo(user.id);
                                         setModals({ ...Modals, disable2FA: true });
-                                    }}>Disable 2FA</Button>
-                                    <Button variant="contained" color="error" onClick={async () => {
-                                        getUserInfo(user.id);
+                                    }}>Disable 2FA</LoadingButton>
+                                    <LoadingButton variant="contained" color="error" event={async () => {
+                                        try {
+                                            await getUserInfo(user.id);
 
-                                        let banReasons = await axios.get(`/api/admin/ban?h=1`, {
-                                            headers: {
-                                                Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
-                                            },
-                                        }).then((res) => res.data).catch((err) => err.response.data);
+                                            const banReasons = await axios.get(`/api/admin/ban?h=1`, {
+                                                headers: {
+                                                    Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
+                                                },
+                                            }).then((res) => res.data).catch((err) => err.response.data);
 
-
-                                        if (banReasons.status === 200) {
-                                            setModalData({ ...ModalData, ban: banReasons });
-                                            setModals({ ...Modals, ban: true });
-                                        } 
-                                        else {
-                                            setErrorMessages(JSON.stringify(banReasons));
+                                            if (banReasons.status === 200) {
+                                                setModalData({ ...ModalData, ban: banReasons, info: { ...ModalData.info, id: user.id } });
+                                                setModals({ ...Modals, ban: true });
+                                            } else {
+                                                setErrorMessages(JSON.stringify(banReasons));
+                                            }
+                                        } catch (error) {
+                                            console.error(error);
                                         }
-                                    }}>Ban</Button>
+                                    }}>Ban</LoadingButton>
                                 </Stack>
                             </CardContent>
                         </Stack>
