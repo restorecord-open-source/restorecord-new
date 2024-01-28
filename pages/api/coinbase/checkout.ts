@@ -49,7 +49,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             amount = String(Number(amount) * 1.10);
         }
 
-
         var Charge = coinbase.resources.Charge;
 
         const charge = await Charge.create({
@@ -57,7 +56,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             description: `RestoreCord ${plan} Subscription ${user.referrer ? `(Discount applied)` : ""}`,
             local_price: {
                 amount: amount,
-                currency: "USD"
+                currency: "EUR"
             },
             pricing_type: "fixed_price",
             metadata: {

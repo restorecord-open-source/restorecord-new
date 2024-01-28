@@ -32,6 +32,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             for (const channel of channels) {
                 await prisma.channelPermissions.deleteMany({ where: { channelId: channel.channelId } });
             }
+            await prisma.messages.deleteMany({ where: { backupId: backup.backupId } });
             await prisma.channels.deleteMany({ where: { backupId: backup.backupId } });
             await prisma.guildMembers.deleteMany({ where: { backupId: backup.backupId } });
             await prisma.backups.deleteMany({ where: { backupId: backup.backupId } });

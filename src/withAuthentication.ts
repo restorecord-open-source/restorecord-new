@@ -15,7 +15,19 @@ const withAuthentication = (next: any) => async (req: NextApiRequest, res: NextA
         const sessions = await prisma.sessions.findMany({ where: { accountId: JWTInfo.id, token: token } });
         if (sessions.length === 0) throw new Error(50014 as any);
 
-        const user = await prisma.accounts.findFirst({ where: { id: JWTInfo.id } });
+        const user = await prisma.accounts.findFirst({
+            select: {
+                id: true,
+                username: true,
+                email: true,
+                role: true,
+                expiry: true,
+                createdAt: true,
+            },
+            where: { 
+                id: JWTInfo.id
+            } 
+        });
         if (!user) throw new Error(10001 as any);
 
         if (user.role !== null && user.role !== "free" && user.expiry !== null && new Date(user.expiry) < new Date(Date.now())) {

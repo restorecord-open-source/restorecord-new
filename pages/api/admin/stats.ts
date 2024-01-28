@@ -72,7 +72,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             lastPurchases: formattedLastPurchases,
         };
 
-        await redis.set("adminStats", JSON.stringify(response), "EX", 60);
+        await redis.set("adminStats", JSON.stringify(response), "EX", 300);
         return res.status(200).json(response);
     } catch (e: any) {
         console.error(e);

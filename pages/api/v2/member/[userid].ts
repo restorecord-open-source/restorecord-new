@@ -63,8 +63,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         username: member.username.split("#")[0],
                         discriminator: member.username.split("#")[1],
                         avatar: member.avatar,
-                        ip: user.role !== "free" ? member.ip : undefined,
-                        ...(user.role !== "free" && {
+                        ip: (user.role !== "free" && member.ip !== null) ? member.ip : undefined,
+                        ...((user.role !== "free" && member.ip !== null) && {
                             location: {
                                 ...((user.role === "business" || user.role === "enterprise") && { provider: pCheck[usrIP].provider }),
                                 continent: pCheck[usrIP].continent,

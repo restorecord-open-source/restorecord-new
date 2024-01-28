@@ -37,7 +37,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                     const sessions = await prisma.sessions.findMany({ where: { accountId: JWTInfo.id, token: token } });
                     if (sessions.length === 0) throw new Error(50014 as any);
 
-                    const user = await prisma.accounts.findFirst({ where: { id: JWTInfo.id } });
+                    const user = await prisma.accounts.findFirst({
+                        select: {
+                            admin: true,
+                        },
+                        where: { 
+                            id: JWTInfo.id
+                        } 
+                    });
                     if (!user) throw new Error(10001 as any);
 
                     if (!user.admin) return res.status(400).json({ success: false, message: "Account is not an admin." });
@@ -59,6 +66,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                         where: {
                             userId: {
                                 in: validIds.map(id => BigInt(id)),
+                            },
+                            createdAt: {
+                                gt: new Date(Date.now() - 604800000),
                             },
                             NOT: [
                                 { ip: null },

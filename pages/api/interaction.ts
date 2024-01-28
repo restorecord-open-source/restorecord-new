@@ -72,7 +72,7 @@ const handler = async(_: NextApiRequest, res: NextApiResponse, interaction: any)
             if (!serverInfo || serverInfo === null) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Server has not been found on dashboard", flags: InteractionResponseFlags.EPHEMERAL } });
 
             var serverOwner = await prisma.accounts.findUnique({ where: { id: serverInfo.ownerId, userId: interaction.member.user.id } });
-            if (!serverOwner) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Server owner does not exist", flags: InteractionResponseFlags.EPHEMERAL } });
+            if (!serverOwner) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Discord Account is not linked to RC Account, link here: https://restr.co/acc", flags: InteractionResponseFlags.EPHEMERAL } });
 
             var servers = await prisma.servers.findMany({ where: { AND: [ { ownerId: serverOwner.id }, { customBotId: customBot.id } ] } });
             if (servers.length === 0) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "No servers found", flags: InteractionResponseFlags.EPHEMERAL } });
@@ -256,7 +256,7 @@ const handler = async(_: NextApiRequest, res: NextApiResponse, interaction: any)
             if (!serverInfo || serverInfo === null) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Server has not been found on dashboard", flags: InteractionResponseFlags.EPHEMERAL } });
 
             var serverOwner = await prisma.accounts.findUnique({ where: { id: serverInfo.ownerId, userId: interaction.member.user.id } });
-            if (!serverOwner) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Server owner not found", flags: InteractionResponseFlags.EPHEMERAL } });
+            if (!serverOwner) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Discord Account is not linked to RC Account, link here: https://restr.co/acc", flags: InteractionResponseFlags.EPHEMERAL } });
 
             var userId = options.find((o: any) => o.name == "user_id")?.value;
             var user   = options.find((o: any) => o.name == "user")?.value;
@@ -288,7 +288,7 @@ const handler = async(_: NextApiRequest, res: NextApiResponse, interaction: any)
             if (!serverInfo || serverInfo === null) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Server has not been found on dashboard", flags: InteractionResponseFlags.EPHEMERAL } });
 
             var serverOwner = await prisma.accounts.findUnique({ where: { id: serverInfo.ownerId, userId: interaction.member.user.id } });
-            if (!serverOwner) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Server owner not found", flags: InteractionResponseFlags.EPHEMERAL } });
+            if (!serverOwner) return res.status(200).json({ ...BASE_RESPONSE, data: { content: "Discord Account is not linked to RC Account, link here: https://restr.co/acc", flags: InteractionResponseFlags.EPHEMERAL } });
 
             var userId = options.find((o: any) => o.name == "user_id")?.value;
             var user   = options.find((o: any) => o.name == "user")?.value;

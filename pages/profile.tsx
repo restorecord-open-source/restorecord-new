@@ -264,46 +264,5 @@ export async function getServerSideProps({ req }: any) {
         });
 
         return { props: { info, servers, err } }
-
-
-        // await prisma.servers.findUnique({
-        //     where: {
-        //         name: type === 0 ? decodeURIComponent(serverName) : undefined,
-        //         guildId: type === 1 ? BigInt(serverName) as bigint : undefined
-        //     }
-        // }).then(async (res: any) => {
-        //     if (res) {
-        //         const customBot = await prisma.customBots.findUnique({ where: { id: res.customBotId }});
-        //         const ownerAccount = await prisma.accounts.findUnique({ where: { id: res.ownerId } });
-        //         if (!ownerAccount) return { props: { server: serverInfo, status: "error", err: "Owner account not found. Contact Owner", errStack: "" } }
-        //         if (!customBot) return { props: { server: serverInfo, status: "error", err: "Custom bot not found. Contact Owner", errStack: "" } }
-
-        //         serverInfo = {
-        //             success: true,
-        //             name: res.name,
-        //             guildId: res.guildId.toString(),
-        //             icon: res.picture ?? "https://cdn.restorecord.com/logo512.png",
-        //             bg: res.bgImage ? res.bgImage : "",
-        //             description: res.description,
-        //             theme: res.theme,
-        //             color: `#${res.themeColor}`,
-        //             ipLogging: res.ipLogging,
-        //             clientId: customBot?.clientId.toString(),
-        //             domain: customBot?.customDomain ? `https://${customBot.customDomain}` : host,
-        //             locked: res.locked
-        //         }
-        //     }
-        // })
-
-        // return { 
-        //     props: {
-        //         server: JSON.parse(JSON.stringify(serverInfo)),
-        //         status: cookies.includes("verified=true") ? "finished" : "verifying",
-        //         err: cookies.includes("RC_err") ? cookies.split("RC_err=")[1].split("RC_errStack")[0].trim() : "", 
-        //         // find RC_errStack="..." from the RC_err cookie and then split it to get the value of RC_errStack
-        //         errStack: cookies.includes("RC_errStack=\"") ? (cookies.split("RC_errStack=\"")[1].split("\"")[0] ?? "") : (cookies.includes("RC_errStack") ? cookies.split("RC_errStack=")[1].split(";")[0] : ""),
-        //         captcha: cookies.includes("captcha=true") ? true : false,
-        //     }
-        // }
     }
 }

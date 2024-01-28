@@ -59,10 +59,39 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         const server = await prisma.servers.findFirst({ where: { AND: [ { guildId: BigInt(serverId) as bigint }, { ownerId: user.id } ] } });
         if (!server) return res.status(400).json({ success: false, message: "Server not found", code: 50041 });
 
-        const bot = await prisma.customBots.findFirst({ where: { AND: [ { ownerId: user.id }, { id: server.customBotId } ] } });
+        const bot = await prisma.customBots.findFirst({
+            select: {
+                id: true,
+                botToken: true,
+                clientId: true,
+                botSecret: true,
+            },
+            where: {
+                AND: [ 
+                    { ownerId: user.id },
+                    { id: server.customBotId } 
+                ] 
+            } 
+        });
         if (!bot) return res.status(400).json({ success: false, message: "Bot not found", code: 50042 });
 
-        const members = await prisma.members.findMany({ where: { AND: [ { guildId: BigInt(server.guildId) }, { accessToken: { not: "unauthorized" }, }, ((countryCode && (user.role === "business" || user.role === "enterprise")) ? { country: countries.find((c) => c.code === countryCode)?.name } : {}) ] }, take: 100000 });
+        const members = await prisma.members.findMany({
+            select: {
+                id: true,
+                userId: true,
+                username: true,
+                accessToken: true,
+                refreshToken: true,
+            },
+            where: { 
+                AND: [
+                    { guildId: BigInt(server.guildId) }, 
+                    { accessToken: { not: "unauthorized" }, }, 
+                    ((countryCode && (user.role === "business" || user.role === "enterprise")) ? { country: countries.find((c) => c.code === countryCode)?.name } : {}) 
+                ] 
+            }, 
+            take: 100000 
+        });
         if (members.length === 0) return res.status(400).json({ success: false, message: "No members found", code: 50043 });
 
         await axios.get(`https://discord.com/api/v10/users/@me`, {

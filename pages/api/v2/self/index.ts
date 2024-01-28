@@ -305,6 +305,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 if (!/^[a-zA-Z0-9_]+$/.test(username)) return res.status(400).json({ success: false, message: "Username can only contain letters, numbers, and underscores." });
 
                 const userExists = await prisma.accounts.findFirst({
+                    select: {
+                        id: true
+                    },
                     where: {
                         username: username
                     }
@@ -327,6 +330,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ success: false, message: "Invalid email." });
 
                 var alreadyExists = await prisma.accounts.findFirst({
+                    select: {
+                        id: true
+                    },
                     where: {
                         email: email
                     }
@@ -525,6 +531,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 if (!/^[0-9]+$/.test(userId)) return res.status(400).json({ success: false, message: "Invalid Discord ID." });
 
                 var alreadyExists = await prisma.accounts.findFirst({
+                    select: {
+                        id: true
+                    },
                     where: {
                         userId: userId
                     }
