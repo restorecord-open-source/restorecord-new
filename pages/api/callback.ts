@@ -1,9 +1,10 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "../../src/db";
 import { getIPAddress } from "../../src/getIPAddress";
-import { User, addMember, addRole, exchange, resolveUser, sendWebhookMessage, sleep } from "../../src/Migrate";
+import { User, addMember, addRole, exchange, resolveUser, sendWebhookMessage, sleep, snowflakeToDate } from "../../src/Migrate";
 import { ProxyCheck } from "../../src/proxycheck";
 import { createRedisInstance } from "../../src/Redis";
+import { IntlRelativeTime } from "../../src/functions";
 
 const redis = createRedisInstance();
 
@@ -48,6 +49,8 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                     locked: true,
                     vpncheck: true,
                     ownerId: true,
+                    blockWireless: true,
+                    minAccountAge: true,
                 },
                 where: {
                     guildId: guildId 
@@ -142,6 +145,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                 1: "This user attempted to verify, but their IP is blacklisted in this server.",
                 2: "This user attempted to verify, but their ISP is blacklisted in this server.",
                 3: "This user attempted to verify, but their Country is blacklisted in this server.",
+                4: "This server doesn't allow Wireless Connections, try use WiFi instead.",
             };
               
             for (const entry of blacklistEntries) {
@@ -161,20 +165,26 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                 }
             }
                 
-            if (serverInfo.webhook) {
-                const isProxy = serverInfo.vpncheck && pCheck[IPAddr].proxy === "yes";
-                const altCheck = await prisma.members.findMany({ where: { guildId: guildId, ip: IPAddr, NOT: { userId: userId } }, select: { username: true, userId: true } });
-                
-                if (isProxy && serverInfo.ipLogging) {
-                    await sendWebhookMessage(serverInfo.webhook, "Failed VPN Check", null, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0);
-                    return reject(990044 as any);
-                } else if (altCheck.length > 0 && (serverOwner.role === "premium" || serverOwner.role === "business" || serverOwner.role === "enterprise")) {
-                    await sendWebhookMessage(serverInfo.webhook, serverInfo.blockAlts ? "Alt Blocked" : "WARNING: Alt Found", `A user with this IP has already verified with another account(s):\n${altCheck.map((a: any) => `${a.username.replace(/#0+$/, "")} (${a.userId})`).join("\n")}${serverInfo.blockAlts ? ",\n\nThis user has been denied to verify!" : ",\n\nThis user has been allowed to verify, but may be an alt."}`, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, serverInfo.blockAlts ? 0 : 2);
-                    if (serverInfo.blockAlts) return reject(990045 as any);
-                } else {
-                    await sendWebhookMessage(serverInfo.webhook, "Successfully Verified", null, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 1);
-                }
+            const isProxy = serverInfo.vpncheck && pCheck[IPAddr].proxy === "yes";
+            let altCheck: any = [];
+            serverInfo.blockAlts ? altCheck = await prisma.members.findMany({ where: { guildId: guildId, ip: IPAddr, NOT: { userId: userId } }, select: { username: true, userId: true } }) : altCheck = [];
+
+            if (isProxy) {
+                serverInfo.webhook ? await sendWebhookMessage(serverInfo.webhook, "Failed VPN Check", null, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0) : null;
+                return reject(990044 as any);
+            } else if (altCheck.length > 0 && (serverOwner.role === "premium" || serverOwner.role === "business" || serverOwner.role === "enterprise")) {
+                serverInfo.webhook ? await sendWebhookMessage(serverInfo.webhook, serverInfo.blockAlts ? "Alt Blocked" : "WARNING: Alt Found", `A user with this IP has already verified with another account(s):\n${altCheck.map((a: any) => `${a.username.replace(/#0+$/, "")} (${a.userId})`).join("\n")}${serverInfo.blockAlts ? ",\n\nThis user has been denied to verify!" : ",\n\nThis user has been allowed to verify, but may be an alt."}`, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, serverInfo.blockAlts ? 0 : 2) : null;
+                if (serverInfo.blockAlts) return reject(990045 as any);
+            } else if (serverInfo.blockWireless && pCheck[IPAddr].type.toLowerCase() === "wireless") {
+                serverInfo.webhook ? await sendWebhookMessage(serverInfo.webhook, "Blocked Wireless Connection", null, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0) : null;
+                return reject(990043 as any);
+            } else if (serverInfo.minAccountAge && (Date.now() - (await snowflakeToDate(String(account.id))).getTime()) < (serverInfo.minAccountAge * 86400000)) {
+                serverInfo.webhook ? await sendWebhookMessage(serverInfo.webhook, "Blocked Account Age", null, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0) : null;
+                return reject({ message: "990035", retry_after: IntlRelativeTime(((await snowflakeToDate(String(account.id))).getTime()) + (serverInfo.minAccountAge * 86400000)) });
+            } else {
+                serverInfo.webhook ? await sendWebhookMessage(serverInfo.webhook, "Successfully Verified", null, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 1) : null;
             }
+
 
             await addMember(guildId.toString(), userId.toString(), customBotInfo.botToken, respon.data.access_token, serverInfo.guildId === serverInfo.roleId ? [] : [BigInt(serverInfo.roleId).toString()]).then(async (resp) => {
                 let status = resp?.response?.status || resp?.status;
@@ -306,8 +316,10 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
         case 990032: res.setHeader("Set-Cookie", `RC_err=307 RC_errStack=Your IP-Address is blacklisted in this server.; Path=/; Max-Age=5;`); break;
         case 990033: res.setHeader("Set-Cookie", `RC_err=307 RC_errStack=Your ISP is blacklisted in this server.; Path=/; Max-Age=5;`); break;
         case 990034: res.setHeader("Set-Cookie", `RC_err=307 RC_errStack=Your Country is blacklisted in this server.; Path=/; Max-Age=5;`); break;
-        case 990044: res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=5;`); break;
+        case 990035: res.setHeader("Set-Cookie", `RC_err=400 RC_errStack=Your account is too new to verify in this server try again in ${err.retry_after}.; Path=/; Max-Age=5;`); break;
+        case 990043: res.setHeader("Set-Cookie", `RC_err=304; Path=/; Max-Age=5;`); break;
         case 990045: res.setHeader("Set-Cookie", `RC_err=305; Path=/; Max-Age=5;`); break;
+        case 990044: res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=5;`); break;
         case 990401: res.setHeader("Set-Cookie", `RC_err=401; Path=/; Max-Age=5;`); break;
         case 990403: res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=5;`); break;
         case 990404: res.setHeader("Set-Cookie", `RC_err=404; Path=/; Max-Age=5;`); break;

@@ -79,8 +79,9 @@ export default function Verify({ server, status, err, errStack, captcha }: any) 
             "404": "Sorry, we couldn't add the Verify role to your Account. Contact the server owner for assistance.",
             "403": "Oops! The bot is missing permissions. contact the server owner to fix this issue.",
             "401": "Oh no! The Bot Token is Invalid. Contact the server owner to fix this issue.",
-            "306": "Sorry, but you can't verify while using a VPN or proxy on this server. Please disable it and try again.",
+            "304": "Sorry, This server doesn't allow verification with a wireless conection (LTE, 4G, 5G, etc). Please use WiFi or try again later.",
             "305": "Oops! This server doesn't allow verification with alt accounts. Please use your main account to verify.",
+            "306": "Sorry, but you can't verify while using a VPN or proxy on this server. Please disable it and try again.",
             "307": "You're blacklisted in this server. Contact the server owner for more information.",
             "30001": "You've reached Discord's 100-server limit. Leave a server before verifying again.",
             "777": "Verification requires solving a captcha on this server. Please complete the captcha to proceed.",
@@ -127,11 +128,12 @@ export default function Verify({ server, status, err, errStack, captcha }: any) 
                 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
                 <meta name="apple-mobile-web-app-capable" content="yes" />
                 <meta name="mobile-web-app-capable" content="yes" />
-                <meta name="theme-color" content="" />
-                <meta name="msapplication-navbutton-color" content="" />
+                <meta name="theme-color" content={server.color ?? "#000"} />
+                <meta name="msapplication-navbutton-color" content={server.color ?? "#000"} />
                 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
                 <meta name="apple-mobile-web-app-capable" content="yes" />
                 <meta name="mobile-web-app-capable" content="yes" />
+                {(server.unlisted || server.private || server.locked) && ( <meta name="robots" content="noindex" /> )}
                 <title>{server.name ? server.name : "RestoreCord"}</title>
             </Head>
 
@@ -219,33 +221,35 @@ export default function Verify({ server, status, err, errStack, captcha }: any) 
                                             </Box>
                                         )}
 
-                                        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                            <Button variant="contained" color="primary" href={err === "777" ? "#" : (`https://discord.com/oauth2/authorize?client_id=${server.clientId}&redirect_uri=${server.domain}/api/callback&response_type=code&scope=identify+guilds.join&state=${server.guildId}`)} rel="noopener noreferrer"
-                                                sx={{ 
-                                                    width: "100%",
-                                                    marginTop: "2rem",
-                                                    backgroundColor: server.color,
-                                                    outline: `1px solid ${server.color}`,
-                                                    color: theme.palette.getContrastText(server.color),
-                                                    "@media not all and (-webkit-min-device-pixel-ratio: 1.5), not all and (-o-min-device-pixel-ratio: 3/2), not all and (min--moz-device-pixel-ratio: 1.5), not all and (min-device-pixel-ratio: 1.5)": {
-                                                        "&:hover": {
-                                                            outline: `1px solid ${server.color}`,
-                                                            color: server.color,
+                                        {(!server.private) && (
+                                            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                <Button variant="contained" color="primary" href={err === "777" ? "#" : (`https://discord.com/oauth2/authorize?client_id=${server.clientId}&redirect_uri=${server.domain}/api/callback&response_type=code&scope=identify+guilds.join&state=${server.guildId}`)} rel="noopener noreferrer"
+                                                    sx={{ 
+                                                        width: "100%",
+                                                        marginTop: "2rem",
+                                                        backgroundColor: server.color,
+                                                        outline: `1px solid ${server.color}`,
+                                                        color: theme.palette.getContrastText(server.color),
+                                                        "@media not all and (-webkit-min-device-pixel-ratio: 1.5), not all and (-o-min-device-pixel-ratio: 3/2), not all and (min--moz-device-pixel-ratio: 1.5), not all and (min-device-pixel-ratio: 1.5)": {
+                                                            "&:hover": {
+                                                                outline: `1px solid ${server.color}`,
+                                                                color: server.color,
+                                                            },
                                                         },
-                                                    },
-                                                    "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (min-device-pixel-ratio: 1.5)": {
-                                                        "&:hover": {
-                                                            backgroundColor: `rgba(${parseInt(server.color.slice(1, 3), 16)}, ${parseInt(server.color.slice(3, 5), 16)}, ${parseInt(server.color.slice(5, 7), 16)}, 0.65)`,
-                                                            color: theme.palette.getContrastText(server.color),
+                                                        "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (min-device-pixel-ratio: 1.5)": {
+                                                            "&:hover": {
+                                                                backgroundColor: `rgba(${parseInt(server.color.slice(1, 3), 16)}, ${parseInt(server.color.slice(3, 5), 16)}, ${parseInt(server.color.slice(5, 7), 16)}, 0.65)`,
+                                                                color: theme.palette.getContrastText(server.color),
+                                                            },
                                                         },
-                                                    },
-                                                }}
-                                                disabled={loading || disabled}
-                                                onClick={() => { if (err === "777") { setLoading(true); captchaRef.current.execute(); } }}
-                                            >
-                                                {err === "777" ? (loading ? (<Stack direction={"row"} gap={1}><CircularProgress size={24} />Verifying...</Stack>) : ("Verify")) : ("Verify")}
-                                            </Button>
-                                        </Box>
+                                                    }}
+                                                    disabled={loading || disabled}
+                                                    onClick={() => { if (err === "777") { setLoading(true); captchaRef.current.execute(); } }}
+                                                >
+                                                    {err === "777" ? (loading ? (<Stack direction={"row"} gap={1}><CircularProgress size={24} />Verifying...</Stack>) : ("Verify")) : ("Verify")}
+                                                </Button>
+                                            </Box>
+                                        )}
                                     </>
                                 )}
                             </>
@@ -288,7 +292,7 @@ export async function getServerSideProps({ req }: any) {
         let serverName = req.url.split("/")[2];
         let type = 1;
 
-        let serverInfo: { success: boolean, name: string, guildId: string, icon: string, bg: string, description: string, theme: string, color: string, ipLogging: boolean, clientId: string, domain: string, locked: boolean } = {
+        let serverInfo: { success: boolean, name: string, guildId: string, icon: string, bg: string, description: string, theme: string, color: string, ipLogging: boolean, clientId: string, domain: string, locked: boolean, verified: boolean, unlisted: boolean, private: boolean } = {
             success: false,
             name: decodeURI(serverName),
             guildId: "",
@@ -300,7 +304,10 @@ export async function getServerSideProps({ req }: any) {
             ipLogging: true,
             clientId: "",
             domain: "",
-            locked: false
+            locked: false,
+            verified: false,
+            unlisted: false,
+            private: false
         }
 
         if (isNaN(Number.parseInt(serverName as any))) type = 0;
@@ -318,23 +325,33 @@ export async function getServerSideProps({ req }: any) {
         }).then(async (res: any) => {
             if (res) {
                 const customBot = await prisma.customBots.findUnique({ where: { id: res.customBotId }});
-                const ownerAccount = await prisma.accounts.findUnique({ where: { id: res.ownerId } });
+                const ownerAccount = await prisma.accounts.findUnique({
+                    select: {
+                        id: true
+                    },
+                    where: {
+                        id: res.ownerId 
+                    } 
+                });
                 if (!ownerAccount) return { props: { server: serverInfo, status: "error", err: "Owner account not found. Contact Owner", errStack: "" } }
                 if (!customBot) return { props: { server: serverInfo, status: "error", err: "Custom bot not found. Contact Owner", errStack: "" } }
 
                 serverInfo = {
                     success: true,
                     name: res.name,
-                    guildId: res.guildId.toString(),
+                    guildId: res.private ? "" : res.guildId.toString(),
                     icon: res.picture ?? "https://cdn.restorecord.com/logo512.png",
                     bg: res.bgImage ? res.bgImage : "",
                     description: res.description,
                     theme: res.theme,
                     color: `#${res.themeColor}`,
                     ipLogging: res.ipLogging,
-                    clientId: customBot?.clientId.toString(),
-                    domain: customBot?.customDomain ? `https://${customBot.customDomain}` : host,
-                    locked: res.locked
+                    clientId: res.private ? "0" : customBot?.clientId.toString(),
+                    domain: customBot?.customDomain ? (res.private ? "" : `https://${customBot.customDomain}`) : host,
+                    locked: res.locked,
+                    verified: res.verified,
+                    unlisted: res.unlisted,
+                    private: res.private
                 }
             }
         })

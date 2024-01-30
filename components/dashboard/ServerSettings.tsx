@@ -68,9 +68,14 @@ export default function DashServerSettings({ user, id }: any) {
         discoverable: 0,
         captcha: false,
         blockAlts: false,
+        blockWireless: false,
+        unlisted: false,
+        private: false,
+        verified: false,
         webhook: "",
         background: "",
         description: "",
+        minAccountAge: 0,
         theme: "DEFAULT",
         webhookcheck: false,
         vpncheck: false,
@@ -86,7 +91,7 @@ export default function DashServerSettings({ user, id }: any) {
     const [notiTextE, setNotiTextE] = useState("X");
     
     const [confirmDelete, setConfirmDelete] = useState(false);
-    const [confirmDeleteTimer, setConfirmDeleteTimer] = useState(5);
+    const [confirmDeleteName, setConfirmDeleteName] = useState("");
 
     const [settingsTab, setSettingsTab] = useState(0);
     const [allServers, setAllServers] = useState([]);
@@ -104,10 +109,15 @@ export default function DashServerSettings({ user, id }: any) {
                 webhook: server.webhook ? server.webhook : "",
                 ipLogging: server.ipLogging,
                 blockAlts: server.blockAlts,
+                blockWireless: server.blockWireless,
+                unlisted: server.unlisted,
+                private: server.private,
+                verified: server.verified,
                 discoverable: server.discoverable,
                 captcha: server.captcha,
                 picture: server.picture ? server.picture : "",
                 description: server.description ? server.description : "",
+                minAccountAge: server.minAccountAge ? server.minAccountAge : 0,
                 background: server.bgImage ? server.bgImage : "",
                 theme: server.theme ? server.theme : "DEFAULT",
                 vpncheck: server.vpncheck,
@@ -135,11 +145,15 @@ export default function DashServerSettings({ user, id }: any) {
                 webhookCheck: newServer.webhookcheck,
                 ipLogging: newServer.ipLogging,
                 blockAlts: newServer.blockAlts,
+                blockWireless: newServer.blockWireless,
+                unlisted: newServer.unlisted,
+                private: newServer.private,
                 discoverable: newServer.discoverable,
                 captcha: newServer.captcha,
                 vpnCheck: newServer.vpncheck,
                 picture: newServer.picture,
                 background: newServer.background,
+                minAccountAge: newServer.minAccountAge,
                 description: newServer.description,
                 theme: newServer.theme,
                 themeColor: newServer.themeColor
@@ -167,52 +181,9 @@ export default function DashServerSettings({ user, id }: any) {
     }
 
     function handleChange(e: any) {
-        switch (e.target.name) {
-        case "serverName":
-            setNewServer({ ...newServer, serverName: e.target.value });
-            break;
-        case "guildId":
-            setNewServer({ ...newServer, guildId: e.target.value });
-            break;
-        case "roleId":
-            setNewServer({ ...newServer, roleId: e.target.value });
-            break;
-        case "webhookcheck":
-            setNewServer({ ...newServer, webhookcheck: e.target.checked });
-            break;
-        case "webhook":
-            setNewServer({ ...newServer, webhook: e.target.value });
-            break;
-        case "ipLogging":
-            setNewServer({ ...newServer, ipLogging: e.target.checked });
-            break;
-        case "blockAlts":
-            setNewServer({ ...newServer, blockAlts: e.target.checked });
-            break;
-        case "discoverable":
-            setNewServer({ ...newServer, discoverable: e.target.checked ? 1 : 0 });
-            break;
-        case "captcha":
-            setNewServer({ ...newServer, captcha: e.target.checked });
-            break;
-        case "vpncheck":
-            setNewServer({ ...newServer, vpncheck: e.target.checked });
-            break;
-        case "picture":
-            setNewServer({ ...newServer, picture: e.target.value });
-            break;
-        case "background":
-            setNewServer({ ...newServer, background: e.target.value });
-            break;
-        case "description":
-            setNewServer({ ...newServer, description: e.target.value });
-            break;
-        case "theme":
-            setNewServer({ ...newServer, theme: e.target.value });
-            break;
-        default:
-            break;
-        }
+        const { name, value, checked } = e.target;
+        console.log(name, value, checked);
+        setNewServer({ ...newServer, [name]: (value === "on" ? checked : value) });
     }
 
     function onColorChange(color: string, colors: MuiColorInputColors) {
@@ -277,21 +248,7 @@ export default function DashServerSettings({ user, id }: any) {
                                 Edit Server
                             </Typography>
 
-                            <Button variant="contained" color="error" sx={{ mb: 2 }} onClick={() => { 
-                                setConfirmDelete(true) 
-                                new Promise((resolve, reject) => {
-                                    let timer = 15;
-                                    setConfirmDeleteTimer(timer--);
-                                    const interval = setInterval(() => {
-                                        setConfirmDeleteTimer(timer);
-                                        timer--;
-                                        if (timer === -1) {
-                                            clearInterval(interval);
-                                            resolve(true);
-                                        }
-                                    }, 1000);
-                                });
-                            }}>
+                            <Button variant="contained" color="error" sx={{ mb: 2 }} onClick={() => setConfirmDelete(true)}>
                                 Delete
                             </Button>
                         </Stack>
@@ -322,20 +279,22 @@ export default function DashServerSettings({ user, id }: any) {
 
                                     Deleting this server will remove:
                                     <ul>
+                                        <li><b style={{ fontSize: "1.25rem", color: "#ff0000", textDecoration: "underline" }}>All Verified Members</b></li>
                                         <li><b style={{ fontSize: "1.25rem" }}>All Backups</b></li>
-                                        <li><b style={{ fontSize: "1.25rem" }}>All Verified Members</b></li>
                                         <li><b style={{ fontSize: "1.25rem" }}>All Customized Settings</b></li>
                                     </ul>
 
-                                    {confirmDeleteTimer > 0 && 
-                                        <Typography variant="body1" sx={{ fontWeight: "500", color: theme.palette.warning.main }}>
-                                            ⚠ You can delete this Server in {confirmDeleteTimer} second{confirmDeleteTimer > 1 && "s"}.
+                                    <Stack direction="column" spacing={2}>
+                                        <Typography variant="body1" sx={{ fontWeight: "500", color: theme.palette.error.main }}>
+                                            Enter the Server name to confirm deletion.
                                         </Typography>
-                                    }
+                                        <TextField fullWidth variant="outlined" name="confirmDeleteName" value={confirmDeleteName} onChange={(e) => setConfirmDeleteName(e.target.value)} inputProps={{ maxLength: 191 }} placeholder="Server Name" />
+                                    </Stack>
+
                                 </DialogContentText>
                             </DialogContent>
                             <DialogActions>
-                                <Button disabled={confirmDeleteTimer > 0}
+                                <Button disabled={confirmDeleteName !== server.name} variant="contained"
                                     onClick={() => {
                                         setConfirmDelete(false);
 
@@ -425,6 +384,20 @@ export default function DashServerSettings({ user, id }: any) {
                                                         )}
                                                         <Switch onChange={handleChange} name="discoverable" defaultChecked={server.discoverable} disabled={user.role !== "business" && user.role !== "enterprise"} />
                                                     </Stack>
+                                                    <Stack direction="row">
+                                                        <Typography variant="h6">Unlisted</Typography>
+                                                        <Tooltip arrow placement="top" title="If enabled, your server wont get shown on Search Engines.">
+                                                            <InfoIcon sx={{ fontSize: "1rem", alignSelf: "center", ml: "0.25rem" }} />
+                                                        </Tooltip>
+                                                        <Switch onChange={handleChange} name="unlisted" defaultChecked={server.unlisted} />
+                                                    </Stack>
+                                                    <Stack direction="row">
+                                                        <Typography variant="h6">Private Server</Typography>
+                                                        <Tooltip arrow placement="top" title="If enabled, Members can only verify through the Discord Embed or via a direct link.">
+                                                            <InfoIcon sx={{ fontSize: "1rem", alignSelf: "center", ml: "0.25rem" }} />
+                                                        </Tooltip>
+                                                        <Switch onChange={handleChange} name="private" defaultChecked={server.private} disabled={user.role === "free"} />
+                                                    </Stack>
                                                     <Stack direction="column">
                                                         <Stack direction="row">
                                                             <Typography variant="h6">Server Icon</Typography>
@@ -482,33 +455,35 @@ export default function DashServerSettings({ user, id }: any) {
 
                                                         {newServer.picture && <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", mt: "1rem" }}><Avatar src={newServer.picture} sx={{ width: { xs: "6rem", md: "8rem" }, height: { xs: "6rem", md: "8rem" } }} /></Box>}
 
-                                                        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                                            <Button variant="contained" color="primary" 
-                                                                sx={{ 
-                                                                    cursor: "pointer",
-                                                                    width: "100%",
-                                                                    marginTop: "2rem",
-                                                                    backgroundColor: newServer.themeColor.includes("#") ? newServer.themeColor : "#4e46ef",
-                                                                    outline: `1px solid ${newServer.themeColor.includes("#") ? newServer.themeColor : "#4e46ef"}`,
-                                                                    color: theme.palette.getContrastText(newServer.themeColor.includes("#") ? newServer.themeColor : "#4e46ef"),
-                                                                    "@media not all and (-webkit-min-device-pixel-ratio: 1.5), not all and (-o-min-device-pixel-ratio: 3/2), not all and (min--moz-device-pixel-ratio: 1.5), not all and (min-device-pixel-ratio: 1.5)": {
-                                                                        "&:hover": {
-                                                                            outline: `1px solid ${newServer.themeColor.includes("#") ? newServer.themeColor : "#4e46ef"}`,
-                                                                            color: newServer.themeColor.includes("#") ? newServer.themeColor : "#4e46ef",
+                                                        {(!newServer.private) && (
+                                                            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                                <Button variant="contained" color="primary" 
+                                                                    sx={{ 
+                                                                        cursor: "pointer",
+                                                                        width: "100%",
+                                                                        marginTop: "2rem",
+                                                                        backgroundColor: newServer.themeColor.includes("#") ? newServer.themeColor : "#4e46ef",
+                                                                        outline: `1px solid ${newServer.themeColor.includes("#") ? newServer.themeColor : "#4e46ef"}`,
+                                                                        color: theme.palette.getContrastText(newServer.themeColor.includes("#") ? newServer.themeColor : "#4e46ef"),
+                                                                        "@media not all and (-webkit-min-device-pixel-ratio: 1.5), not all and (-o-min-device-pixel-ratio: 3/2), not all and (min--moz-device-pixel-ratio: 1.5), not all and (min-device-pixel-ratio: 1.5)": {
+                                                                            "&:hover": {
+                                                                                outline: `1px solid ${newServer.themeColor.includes("#") ? newServer.themeColor : "#4e46ef"}`,
+                                                                                color: newServer.themeColor.includes("#") ? newServer.themeColor : "#4e46ef",
+                                                                            },
                                                                         },
-                                                                    },
-                                                                    "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (min-device-pixel-ratio: 1.5)": {
-                                                                        "&:hover": {
+                                                                        "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (min-device-pixel-ratio: 1.5)": {
+                                                                            "&:hover": {
                                                                             // backgroundColor: `rgba(${parseInt(newServer.themeColor.slice(1, 3), 16)}, ${parseInt(newServer.themeColor.slice(3, 5), 16)}, ${parseInt(newServer.themeColor.slice(5, 7), 16)}, 0.65)`,
-                                                                            backgroundColor: `rgba(${newServer.themeColor.includes("#") ? newServer.themeColor.slice(1, 3) : newServer.themeColor.slice(0, 2)}, ${newServer.themeColor.includes("#") ? newServer.themeColor.slice(3, 5) : newServer.themeColor.slice(2, 4)}, ${newServer.themeColor.includes("#") ? newServer.themeColor.slice(5, 7) : newServer.themeColor.slice(4, 6)}, 0.65)`,
-                                                                            color: theme.palette.getContrastText(newServer.themeColor.includes("#") ? newServer.themeColor : "#4e46ef"),
+                                                                                backgroundColor: `rgba(${newServer.themeColor.includes("#") ? newServer.themeColor.slice(1, 3) : newServer.themeColor.slice(0, 2)}, ${newServer.themeColor.includes("#") ? newServer.themeColor.slice(3, 5) : newServer.themeColor.slice(2, 4)}, ${newServer.themeColor.includes("#") ? newServer.themeColor.slice(5, 7) : newServer.themeColor.slice(4, 6)}, 0.65)`,
+                                                                                color: theme.palette.getContrastText(newServer.themeColor.includes("#") ? newServer.themeColor : "#4e46ef"),
+                                                                            },
                                                                         },
-                                                                    },
-                                                                }}
-                                                            >
-                                                                Verify
-                                                            </Button>
-                                                        </Box>
+                                                                    }}
+                                                                >
+                                                                    Verify
+                                                                </Button>
+                                                            </Box>
+                                                        )}
                                                     </Paper>
                                                 </Box>
                                             </Box>
@@ -575,6 +550,34 @@ export default function DashServerSettings({ user, id }: any) {
                                                     </Tooltip>
                                                 )}
                                                 <Switch onChange={handleChange} name="blockAlts" defaultChecked={server.blockAlts} disabled={user.role === "free"} />
+                                            </Stack>
+                                            <Stack direction="row">
+                                                <Typography variant="h6">Block Wireless (LTE, 4G, 5G)</Typography>
+                                                {user.role !== "enterprise" ? (
+                                                    <Tooltip arrow placement="top" title="This feature requires the Enterprise subscription">
+                                                        <CloseIcon color="error" sx={{ alignSelf: "center", ml: "0.25rem" }} />
+                                                    </Tooltip>
+                                                ) : (
+                                                    <Tooltip arrow placement="top" title="If enabled, RestoreCord will block users from using a Wireless IP Address (LTE, 4G, 5G) to verify.">
+                                                        <InfoIcon sx={{ fontSize: "1rem", alignSelf: "center", ml: "0.25rem" }} />
+                                                    </Tooltip>
+                                                )}
+                                                <Switch onChange={handleChange} name="blockWireless" defaultChecked={server.blockWireless} disabled={user.role !== "enterprise"} />
+                                            </Stack>
+                                            <Stack direction="column">
+                                                <Stack direction="row">
+                                                    <Typography variant="h6">Minimum Account Age (days)</Typography>
+                                                    {user.role !== "enterprise" ? (
+                                                        <Tooltip arrow placement="top" title="This feature requires the Enterprise subscription">
+                                                            <CloseIcon color="error" sx={{ alignSelf: "center", ml: "0.25rem" }} />
+                                                        </Tooltip>
+                                                    ) : (
+                                                        <Tooltip arrow placement="top" title="If enabled, RestoreCord will block users from verifying if their Discord Account is younger than the specified amount of days.">
+                                                            <InfoIcon sx={{ fontSize: "1rem", alignSelf: "center", ml: "0.25rem" }} />
+                                                        </Tooltip>
+                                                    )}
+                                                </Stack>
+                                                <TextField variant="outlined" name="minAccountAge" value={newServer.minAccountAge} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Minimum Account Age" type="number" disabled={user.role !== "enterprise"} />
                                             </Stack>
                                         </Stack>
                                     </CustomTabPanel>

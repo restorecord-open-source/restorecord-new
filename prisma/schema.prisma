@@ -41,41 +41,61 @@ model accounts {
 }
 
 model servers {
-    id           Int            @id @default(autoincrement())
-    name         String         @unique
-    ownerId      Int
-    guildId      BigInt         @unique @db.UnsignedBigInt
-    roleId       BigInt         @unique @db.UnsignedBigInt
-    redirectUrl  String?
-    picture      String?        @default("https://cdn.restorecord.com/logo512.png")
-    vpncheck     Boolean        @default(false)
-    blockAlts    Boolean        @default(false)
-    webhook      String?
-    bgImage      String?
-    description  String         @default("Verify to view the rest of the server.")
-    themeColor   String         @default("4f46e5")
-    customBotId  Int
-    pulling      Boolean        @default(false)
-    pullTimeout  DateTime?      @default(now())
-    importing    Boolean        @default(false)
-    ipLogging    Boolean        @default(true)
-    captcha      Boolean        @default(false)
-    locked       Boolean        @default(false)
-    discoverable Int            @default(0)
-    theme        Theme          @default(DEFAULT)
-    createdAt    DateTime       @default(now())
-    customBot    customBots     @relation(fields: [customBotId], references: [id])
-    owner        accounts       @relation(fields: [ownerId], references: [id])
-    members      members[]
-    blacklist    blacklist[]
-    backups      backups[]
-    guildMembers guildMembers[]
-    migrations   migrations[]
+    id            Int            @id @default(autoincrement())
+    name          String         @unique
+    ownerId       Int
+    guildId       BigInt         @unique @db.UnsignedBigInt
+    roleId        BigInt         @unique @db.UnsignedBigInt
+    redirectUrl   String?
+    picture       String?        @default("https://cdn.restorecord.com/logo512.png")
+    vpncheck      Boolean        @default(false)
+    blockAlts     Boolean        @default(false)
+    blockWireless Boolean        @default(false)
+    webhook       String?
+    bgImage       String?
+    description   String         @default("Verify to view the rest of the server.")
+    themeColor    String         @default("4f46e5")
+    customBotId   Int
+    pulling       Boolean        @default(false)
+    pullTimeout   DateTime?      @default(now())
+    importing     Boolean        @default(false)
+    ipLogging     Boolean        @default(true)
+    captcha       Boolean        @default(false)
+    locked        Boolean        @default(false)
+    verified      Boolean        @default(false)
+    minAccountAge Int            @default(0)
+    unlisted      Boolean        @default(false)
+    private       Boolean        @default(false)
+    inviteOnly    Boolean        @default(false)
+    discoverable  Int            @default(0)
+    theme         Theme          @default(DEFAULT)
+    createdAt     DateTime       @default(now())
+    customBot     customBots     @relation(fields: [customBotId], references: [id])
+    owner         accounts       @relation(fields: [ownerId], references: [id])
+    members       members[]
+    blacklist     blacklist[]
+    backups       backups[]
+    guildMembers  guildMembers[]
+    migrations    migrations[]
+    invites       invites[]
 
     @@index([name])
     @@index([guildId])
     @@index([customBotId])
     @@index([ownerId])
+}
+
+model invites {
+    id        Int      @id @default(autoincrement())
+    code      String   @unique @db.VarChar(500)
+    uses      Int      @default(0)
+    maxUses   Int      @default(-1)
+    guildId   BigInt   @db.UnsignedBigInt
+    guild     servers  @relation(fields: [guildId], references: [guildId])
+    createdAt DateTime @default(now())
+
+    @@index([code])
+    @@index([guildId])
 }
 
 model migrations {

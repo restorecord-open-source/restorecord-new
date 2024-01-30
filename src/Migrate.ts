@@ -227,6 +227,10 @@ export async function resolveUser(token: string) {
     }).then(async (res: any) => { return res.data; } );
 }
 
+export async function snowflakeToDate(snowflake: string) {
+    return new Date(parseInt(snowflake) / 4194304 + 1420070400000);
+}
+
 export async function resolveOAuth2User(token: string) {
     return await axios.get("https://discord.com/api/oauth2/@me", {
         headers: {
@@ -299,7 +303,7 @@ export async function sendWebhookMessage(webhookUrl: string, title: string = "Su
         proxy: false, 
         httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
     }).catch(async (err) => {
-        if (err?.response?.status === 404) {
+        if (err?.response?.status === 404 && webhookUrl !== null) {
             console.error(`${webhookUrl.split("/")[5]} Webhook not found (webhook removed from config)`);
             const servers = await prisma.servers.findMany({
                 where: {
