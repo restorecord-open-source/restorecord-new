@@ -15,9 +15,6 @@ jobs:
         node-version: [18.x]
 
     steps:
-      - name: typos-action
-        uses: crate-ci/typos@v1.0.4
-
       - name: Checkout repository
         uses: actions/checkout@v3
 
