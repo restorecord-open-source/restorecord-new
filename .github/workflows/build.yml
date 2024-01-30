@@ -36,4 +36,4 @@ jobs:
         run: |
           npm run deploy
           sleep 5
-          tail -n 5 /root/.pm2/logs/restorecord-out.log
+          tail -n 5 /home/x/.pm2/logs/restorecord-out.log
