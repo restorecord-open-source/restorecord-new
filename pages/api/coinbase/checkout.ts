@@ -14,12 +14,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         
         let amount = "15.00"
         switch (plan) {
-            case "premium":             amount = "15.00";   break;
-            case "business":            amount = "30.00";   break;
-            case "enterprise":          amount = "200.00";  break;
-            case "premium_monthly":     amount = "2.00";    break;
-            case "business_monthly":    amount = "5.00";    break;
-            case "enterprise_monthly":  amount = "20.00";   break;
+        case "premium":             amount = "15.00";   break;
+        case "business":            amount = "30.00";   break;
+        case "enterprise":          amount = "200.00";  break;
+        case "premium_monthly":     amount = "2.00";    break;
+        case "business_monthly":    amount = "5.00";    break;
+        case "enterprise_monthly":  amount = "20.00";   break;
         }
 
         if (user.referrer === (25555 || 38))    amount = (Number(amount) - (Number(amount) * 0.15)).toFixed(2);

@@ -133,21 +133,21 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
         } catch (err: any) {
             err.message = parseInt(err.message);
             switch (err.message) {
-                case 10001: return res.status(400).json({ error: "Member not found, retry verification" });
-                case 10401: return res.status(400).json({ error: "Invalid request" });
-                case 50014: return res.status(401).json({ error: "Unauthorized" });
+            case 10001: return res.status(400).json({ error: "Member not found, retry verification" });
+            case 10401: return res.status(400).json({ error: "Invalid request" });
+            case 50014: return res.status(401).json({ error: "Unauthorized" });
 
-                default: console.error(err); return res.status(500).json({ error: "Internal server error" });
+            default: console.error(err); return res.status(500).json({ error: "Internal server error" });
             }
         }
     }).catch((err) => {
         err.message = parseInt(err.message);
         switch (err.message) {
-            case 10001: return res.status(400).json({ error: "Member not found, retry verification" });
-            case 10401: return res.status(400).json({ error: "Invalid request" });
-            case 50014: return res.status(401).json({ error: "Unauthorized" });
+        case 10001: return res.status(400).json({ error: "Member not found, retry verification" });
+        case 10401: return res.status(400).json({ error: "Invalid request" });
+        case 50014: return res.status(401).json({ error: "Unauthorized" });
             
-            default: console.error(err); return res.status(500).json({ error: "Internal server error" });
+        default: console.error(err); return res.status(500).json({ error: "Internal server error" });
         }
     });
 }

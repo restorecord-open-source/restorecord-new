@@ -102,173 +102,173 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.log(`[${event.type}] ${JSON.stringify(event.data.object)}`);
 
         switch (event.type) {
-            case "customer.subscription.created":
-                subscription = event.data.object;
-                status = subscription.status;
+        case "customer.subscription.created":
+            subscription = event.data.object;
+            status = subscription.status;
 
-                var planFull = priceIds[subscription.items.data[0].price.id].plan;
-                var plan = planFull.replace("_monthly", "");
+            var planFull = priceIds[subscription.items.data[0].price.id].plan;
+            var plan = planFull.replace("_monthly", "");
 
-                const paymentCreated = await prisma.payments.findUnique({ where: { subscriptionId: subscription.id } });
-                if (!paymentCreated) {
-                    await prisma.payments.create({
-                        data: {
-                            subscriptionId: subscription.id,
-                            accountId: Number(subscription.metadata.account_id) as number,
-                            type: subscription.metadata.plan,
-                            amount: subscription.plan.amount,
-                            payment_status: status,
-                        }
-                    });
-                }
-
-                if (status === "trialing") {
-                    const payment = await prisma.payments.findUnique({
-                        where: {
-                            subscriptionId: subscription.id,
-                            accountId: Number(subscription.metadata.account_id) as number
-                        }
-                    });
-
-                    if (subscription.metadata.plan !== planFull)
-                        await stripe.subscriptions.update(subscription.id, { metadata: { plan: planFull, } });
-
-                    if (payment) {
-                        await prisma.payments.update({
-                            where: { id: payment.id },
-                            data: {
-                                payment_status: status,
-                                amount: subscription.plan.amount,
-                                type: planFull
-                            }
-                        });
-
-                        await prisma.accounts.update({
-                            where: { id: Number(payment.accountId) as number },
-                            data: {
-                                role: plan,
-                                expiry: new Date(subscription.current_period_end * 1000)
-                            }
-                        });
-
-                        await prisma.servers.updateMany({
-                            where: {
-                                ownerId: Number(payment.accountId) as number,
-                                pullTimeout: { gt: new Date() }
-                            },
-                            data: { pullTimeout: new Date() }
-                        });
+            const paymentCreated = await prisma.payments.findUnique({ where: { subscriptionId: subscription.id } });
+            if (!paymentCreated) {
+                await prisma.payments.create({
+                    data: {
+                        subscriptionId: subscription.id,
+                        accountId: Number(subscription.metadata.account_id) as number,
+                        type: subscription.metadata.plan,
+                        amount: subscription.plan.amount,
+                        payment_status: status,
                     }
-                }
-                break;
+                });
+            }
 
-            case "customer.subscription.deleted":
-                subscription = event.data.object;
-                status = subscription.status;
+            if (status === "trialing") {
+                const payment = await prisma.payments.findUnique({
+                    where: {
+                        subscriptionId: subscription.id,
+                        accountId: Number(subscription.metadata.account_id) as number
+                    }
+                });
 
-                if (status === "canceled") {
-                    let account;
-                    if (subscription.metadata.account_id)
-                        account = await prisma.accounts.findUnique({ where: { id: Number(subscription.metadata.account_id) as number } });
+                if (subscription.metadata.plan !== planFull)
+                    await stripe.subscriptions.update(subscription.id, { metadata: { plan: planFull, } });
 
-                    await postWebhook(subscription, account, status, `Subscription canceled. ${subscription?.cancellation_details?.reason ? `Reason: ${subscription?.cancellation_details?.reason}` : ""} ${subscription?.cancellation_details?.comment ? `Comment: ${subscription?.cancellation_details?.comment}` : ""} ${subscription?.cancellation_details?.feedback ? `Feedback: ${subscription?.cancellation_details?.feedback}` : ""}`);
+                if (payment) {
+                    await prisma.payments.update({
+                        where: { id: payment.id },
+                        data: {
+                            payment_status: status,
+                            amount: subscription.plan.amount,
+                            type: planFull
+                        }
+                    });
 
                     await prisma.accounts.update({
-                        where: { id: Number(subscription.metadata.account_id) as number },
+                        where: { id: Number(payment.accountId) as number },
                         data: {
-                            role: "free",
-                            expiry: null
+                            role: plan,
+                            expiry: new Date(subscription.current_period_end * 1000)
                         }
                     });
 
-                    // reset all servers
                     await prisma.servers.updateMany({
-                        where: { ownerId: Number(subscription.metadata.account_id) as number, },
-                        data: {
-                            picture: "https://cdn.restorecord.com/logo512.png",
-                            vpncheck: false,
-                            webhook: "",
-                            bgImage: "",
-                            description: "Verify to view the rest of the server.",
-                            themeColor: "4f46e5",
-                        }
-                    });
-                }
-                break;
-
-            case "customer.subscription.updated":
-                subscription = event.data.object;
-                status = subscription.status;
-
-                var planFull = priceIds[subscription.items.data[0].price.id].plan;
-                var plan = planFull.replace("_monthly", "");
-
-                if (status !== "incomplete" && status !== "incomplete_expired" && status !== "draft" && status !== "past_due") {
-                    let account;
-                    if (subscription.metadata.account_id)
-                        account = await prisma.accounts.findUnique({ where: { id: Number(subscription.metadata.account_id) as number } });
-                    else {
-                        console.error(`[STRIPE] Account not found for subscription ${subscription.id}`);
-                        return res.status(200).json({ success: false, message: "Account not found for subscription." });
-                    }
-
-                    await postWebhook(subscription, account, status);
-                }
-
-                const paymentUpdated = await prisma.payments.findUnique({ where: { subscriptionId: subscription.id } });
-                if (!paymentUpdated) {
-                    await prisma.payments.create({
-                        data: {
-                            subscriptionId: subscription.id,
-                            accountId: Number(subscription.metadata.account_id) as number,
-                            type: subscription.metadata.plan,
-                            amount: subscription.plan.amount,
-                            payment_status: status,
-                        }
-                    });
-                }
-
-                if (status === "active" || status === "trialing") {
-                    console.log(`[STRIPE] Subscription status is ${status}.`);
-
-                    const payment = await prisma.payments.findUnique({
                         where: {
-                            subscriptionId: subscription.id,
-                            accountId: Number(subscription.metadata.account_id) as number
+                            ownerId: Number(payment.accountId) as number,
+                            pullTimeout: { gt: new Date() }
+                        },
+                        data: { pullTimeout: new Date() }
+                    });
+                }
+            }
+            break;
+
+        case "customer.subscription.deleted":
+            subscription = event.data.object;
+            status = subscription.status;
+
+            if (status === "canceled") {
+                let account;
+                if (subscription.metadata.account_id)
+                    account = await prisma.accounts.findUnique({ where: { id: Number(subscription.metadata.account_id) as number } });
+
+                await postWebhook(subscription, account, status, `Subscription canceled. ${subscription?.cancellation_details?.reason ? `Reason: ${subscription?.cancellation_details?.reason}` : ""} ${subscription?.cancellation_details?.comment ? `Comment: ${subscription?.cancellation_details?.comment}` : ""} ${subscription?.cancellation_details?.feedback ? `Feedback: ${subscription?.cancellation_details?.feedback}` : ""}`);
+
+                await prisma.accounts.update({
+                    where: { id: Number(subscription.metadata.account_id) as number },
+                    data: {
+                        role: "free",
+                        expiry: null
+                    }
+                });
+
+                // reset all servers
+                await prisma.servers.updateMany({
+                    where: { ownerId: Number(subscription.metadata.account_id) as number, },
+                    data: {
+                        picture: "https://cdn.restorecord.com/logo512.png",
+                        vpncheck: false,
+                        webhook: "",
+                        bgImage: "",
+                        description: "Verify to view the rest of the server.",
+                        themeColor: "4f46e5",
+                    }
+                });
+            }
+            break;
+
+        case "customer.subscription.updated":
+            subscription = event.data.object;
+            status = subscription.status;
+
+            var planFull = priceIds[subscription.items.data[0].price.id].plan;
+            var plan = planFull.replace("_monthly", "");
+
+            if (status !== "incomplete" && status !== "incomplete_expired" && status !== "draft" && status !== "past_due") {
+                let account;
+                if (subscription.metadata.account_id)
+                    account = await prisma.accounts.findUnique({ where: { id: Number(subscription.metadata.account_id) as number } });
+                else {
+                    console.error(`[STRIPE] Account not found for subscription ${subscription.id}`);
+                    return res.status(200).json({ success: false, message: "Account not found for subscription." });
+                }
+
+                await postWebhook(subscription, account, status);
+            }
+
+            const paymentUpdated = await prisma.payments.findUnique({ where: { subscriptionId: subscription.id } });
+            if (!paymentUpdated) {
+                await prisma.payments.create({
+                    data: {
+                        subscriptionId: subscription.id,
+                        accountId: Number(subscription.metadata.account_id) as number,
+                        type: subscription.metadata.plan,
+                        amount: subscription.plan.amount,
+                        payment_status: status,
+                    }
+                });
+            }
+
+            if (status === "active" || status === "trialing") {
+                console.log(`[STRIPE] Subscription status is ${status}.`);
+
+                const payment = await prisma.payments.findUnique({
+                    where: {
+                        subscriptionId: subscription.id,
+                        accountId: Number(subscription.metadata.account_id) as number
+                    }
+                });
+
+                if (subscription.metadata.plan !== planFull)
+                    await stripe.subscriptions.update(subscription.id, { metadata: { plan: planFull, } });
+
+                if (payment) {
+                    await prisma.payments.update({
+                        where: { id: payment.id },
+                        data: {
+                            payment_status: status,
+                            amount: subscription.plan.amount,
+                            type: planFull
                         }
                     });
 
-                    if (subscription.metadata.plan !== planFull)
-                        await stripe.subscriptions.update(subscription.id, { metadata: { plan: planFull, } });
+                    await prisma.accounts.update({
+                        where: { id: Number(payment.accountId) as number },
+                        data: {
+                            role: plan,
+                            expiry: new Date(subscription.current_period_end * 1000)
+                        }
+                    });
 
-                    if (payment) {
-                        await prisma.payments.update({
-                            where: { id: payment.id },
-                            data: {
-                                payment_status: status,
-                                amount: subscription.plan.amount,
-                                type: planFull
-                            }
-                        });
-
-                        await prisma.accounts.update({
-                            where: { id: Number(payment.accountId) as number },
-                            data: {
-                                role: plan,
-                                expiry: new Date(subscription.current_period_end * 1000)
-                            }
-                        });
-
-                        await prisma.servers.updateMany({
-                            where: {
-                                ownerId: Number(payment.accountId) as number,
-                                pullTimeout: { gt: new Date() }
-                            },
-                            data: { pullTimeout: new Date() }
-                        });
-                    }
+                    await prisma.servers.updateMany({
+                        where: {
+                            ownerId: Number(payment.accountId) as number,
+                            pullTimeout: { gt: new Date() }
+                        },
+                        data: { pullTimeout: new Date() }
+                    });
                 }
-                break;
+            }
+            break;
         }
         return res.status(200).json({ success: true });
     }

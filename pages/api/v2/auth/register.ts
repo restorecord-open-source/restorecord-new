@@ -35,10 +35,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             },
             body: `response=${data.captcha}&secret=${process.env.HCAPTCHA_SECRET}`
         })
-        .then(res => res.json())
-        .then(res => {
-            if (!res.success) { console.error(res); throw new Error("Invalid captcha"); }
-        });
+            .then(res => res.json())
+            .then(res => {
+                if (!res.success) { console.error(res); throw new Error("Invalid captcha"); }
+            });
 
         const accounts: accounts[] = await prisma.accounts.findMany({
             where: {

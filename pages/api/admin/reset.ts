@@ -6,7 +6,7 @@ import withAuthentication from "../../../src/withAuthentication";
 async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts) {
     return new Promise(async resolve => {
         switch (req.method) {
-            case "POST":
+        case "POST":
             {
                 try {
                     if (!user.admin) return res.status(400).json({ success: false, message: "Account is not an admin." });
@@ -63,7 +63,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             } break;
             */
 
-            default: return res.status(400).send("400 Bad Request");
+        default: return res.status(400).send("400 Bad Request");
         }
     });
 }

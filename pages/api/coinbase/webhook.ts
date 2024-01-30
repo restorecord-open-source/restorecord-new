@@ -43,12 +43,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         let expiry: Date = new Date(Date.now() + 31536000000);
 
         switch (event.data.metadata.plan ?? "premium") {
-            case "premium":             amount = 1500;  expiry = new Date(Date.now() + 31536000000); break; // 1 year
-            case "premium_monthly":     amount = 200;   expiry = new Date(Date.now() + 2592000000); break;  // 1 month
-            case "business":            amount = 3000;  expiry = new Date(Date.now() + 31536000000); break;
-            case "business_monthly":    amount = 500;   expiry = new Date(Date.now() + 2592000000); break;
-            case "enterprise":          amount = 10000; expiry = new Date(Date.now() + 31536000000); break;
-            case "enterprise_monthly":  amount = 1000;  expiry = new Date(Date.now() + 2592000000); break;
+        case "premium":             amount = 1500;  expiry = new Date(Date.now() + 31536000000); break; // 1 year
+        case "premium_monthly":     amount = 200;   expiry = new Date(Date.now() + 2592000000); break;  // 1 month
+        case "business":            amount = 3000;  expiry = new Date(Date.now() + 31536000000); break;
+        case "business_monthly":    amount = 500;   expiry = new Date(Date.now() + 2592000000); break;
+        case "enterprise":          amount = 10000; expiry = new Date(Date.now() + 31536000000); break;
+        case "enterprise_monthly":  amount = 1000;  expiry = new Date(Date.now() + 2592000000); break;
         }
 
         switch (event.type) {

@@ -29,9 +29,9 @@ export default function Login() {
     function handleChange(e: any) {
         const { name, value } = e.target;
         switch (name) {
-            case "username": setUsername(value); break;
-            case "password": setPassword(value); break;
-            case "totp": setTotp(value); break;
+        case "username": setUsername(value); break;
+        case "password": setPassword(value); break;
+        case "totp": setTotp(value); break;
         }
     }
 

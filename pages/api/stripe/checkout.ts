@@ -15,11 +15,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
         let paymentid;
         switch (plan) {
-            case "premium": paymentid = await stripe.prices.retrieve("price_1MVilKIDsTail4YBdF2GvIUi");             break; // PREMIUM 1 YEAR (15 EUR) TEST: price_1MSks7IDsTail4YBgM8FFLTg
-            case "premium_monthly": paymentid = await stripe.prices.retrieve("price_1MakYlIDsTail4YBvmoAoG37");     break; // PREMIUM 30 DAYS (2 EUR)
-            case "business": paymentid = await stripe.prices.retrieve("price_1MVilQIDsTail4YBuxkF8JRc");            break; // BUSINESS 1 YEAR (30 EUR) TEST: price_1MSt40IDsTail4YBGWYS6YvP
-            case "business_monthly": paymentid = await stripe.prices.retrieve("price_1MakYkIDsTail4YBS7RWBqQL");    break; // BUSINESS 30 DAYS (5 EUR)
-            default: paymentid = await stripe.prices.retrieve("price_1MVilKIDsTail4YBdF2GvIUi");                    break; // PREMIUM 1 YEAR (15 EUR)
+        case "premium": paymentid = await stripe.prices.retrieve("price_1MVilKIDsTail4YBdF2GvIUi");             break; // PREMIUM 1 YEAR (15 EUR) TEST: price_1MSks7IDsTail4YBgM8FFLTg
+        case "premium_monthly": paymentid = await stripe.prices.retrieve("price_1MakYlIDsTail4YBvmoAoG37");     break; // PREMIUM 30 DAYS (2 EUR)
+        case "business": paymentid = await stripe.prices.retrieve("price_1MVilQIDsTail4YBuxkF8JRc");            break; // BUSINESS 1 YEAR (30 EUR) TEST: price_1MSt40IDsTail4YBGWYS6YvP
+        case "business_monthly": paymentid = await stripe.prices.retrieve("price_1MakYkIDsTail4YBS7RWBqQL");    break; // BUSINESS 30 DAYS (5 EUR)
+        default: paymentid = await stripe.prices.retrieve("price_1MVilKIDsTail4YBdF2GvIUi");                    break; // PREMIUM 1 YEAR (15 EUR)
         }
 
         const payments = await prisma.payments.findMany({ where: { accountId: user.id }, orderBy: { createdAt: "desc" } });

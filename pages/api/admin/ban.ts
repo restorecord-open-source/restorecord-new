@@ -131,8 +131,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     </html>
                     `,
                 })
-                .then(() => { console.log(`[EMAIL] [${new Date().toLocaleString()}] Account banned, Email sent to ${account.email}`); })
-                .catch((err: any) => { console.error(err); })
+                    .then(() => { console.log(`[EMAIL] [${new Date().toLocaleString()}] Account banned, Email sent to ${account.email}`); })
+                    .catch((err: any) => { console.error(err); })
 
                 return res.status(200).json({ success: true, message: "Account banned, Email sent." });
             }

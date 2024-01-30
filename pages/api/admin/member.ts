@@ -94,9 +94,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                     err.message = parseInt(err.message);
 
                     switch (err.message) {
-                        case 10001: return res.status(404).json({ code: err.message, message: "Unknown account" })
-                        case 50014: return res.status(401).json({ code: err.message, message: "Invalid authentication token provided" })
-                        default: return res.status(500).end("internal server error")
+                    case 10001: return res.status(404).json({ code: err.message, message: "Unknown account" })
+                    case 50014: return res.status(401).json({ code: err.message, message: "Invalid authentication token provided" })
+                    default: return res.status(500).end("internal server error")
                     }
                 }
             default: return res.status(400).send("400 Bad Request");
@@ -108,9 +108,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         err.message = parseInt(err.message);
 
         switch (err.message) {
-            case 10001: return res.status(404).json({ code: err.message, message: "Unknown account" })
-            case 50014: return res.status(401).json({ code: err.message, message: "Invalid authentication token provided" })
-            default: return res.status(500).end("internal server error")
+        case 10001: return res.status(404).json({ code: err.message, message: "Unknown account" })
+        case 50014: return res.status(401).json({ code: err.message, message: "Invalid authentication token provided" })
+        default: return res.status(500).end("internal server error")
         }
     }
 }

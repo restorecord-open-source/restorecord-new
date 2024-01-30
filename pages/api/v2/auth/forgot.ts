@@ -29,10 +29,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         },
                         body: `response=${data.captcha}&secret=${process.env.HCAPTCHA_SECRET}`
                     })
-                    .then(res => res.json())
-                    .then(res => {
-                        if (!res.success) { console.log(res); throw new Error("Invalid captcha"); }
-                    });
+                        .then(res => res.json())
+                        .then(res => {
+                            if (!res.success) { console.log(res); throw new Error("Invalid captcha"); }
+                        });
                 
                     const account = await prisma.accounts.findFirst({ where: { email: data.login } });
                     if (!account) return res.status(400).json({ message: "Account not found" });
@@ -219,7 +219,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 return res.status(500);
             }
         
-            default: return res.status(400).json({ success: false, message: "Method not allowed" });
+        default: return res.status(400).json({ success: false, message: "Method not allowed" });
         }
     });
 }
