@@ -24,21 +24,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 
                 if (!bot) return res.status(400).json({ success: false, message: "Bot not found" });
 
-                const servers = await prisma.servers.findMany({
-                    where: {
-                        customBotId: bot.id,
-                    },
-                });
+                const servers = await prisma.servers.findMany({ where: { customBotId: bot.id, }, });
 
-                if (servers.length > 0) {
+                if (servers.length > 0)
                     return res.status(400).json({ success: false, message: "Please Delete the following servers on RestoreCord dashboard, then try again", servers: servers.map((s) => s.id) });
-                }
+                
 
-                await prisma.customBots.delete({
-                    where: {
-                        clientId: bot.clientId,
-                    },
-                }).then(() => {
+                await prisma.customBots.delete({ where: { clientId: bot.clientId, }, }).then(() => {
                     return res.status(200).json({ success: true, message: "Bot successfully deleted" });
                 }).catch((err) => {
                     console.error(err);
@@ -49,8 +41,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 console.error(err);
                 return res.status(400).json({ success: false, message: "Something went wrong" });
             }
-        default:
-            return res.status(405).json({ success: false, message: "Method not allowed" });
+            
+        default: return res.status(405).json({ success: false, message: "Method not allowed" });
         }
     });
 }

@@ -10,7 +10,6 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "
 
 async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts) {
     try {
-
         const payments = await prisma.payments.findMany({ where: { accountId: user.id, OR: [{ payment_status: "trialing" }, { payment_status: "active" }] }, orderBy: { createdAt: "desc" } });
         if (payments.length === 0 || (payments[0].subscriptionId === null || payments[0].subscriptionId === undefined)) return res.status(400).json({ success: false, message: "Subscription not found." });
 

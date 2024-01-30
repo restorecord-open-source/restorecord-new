@@ -310,23 +310,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 if (!/^[a-zA-Z0-9_]+$/.test(username)) return res.status(400).json({ success: false, message: "Username can only contain letters, numbers, and underscores." });
 
                 const userExists = await prisma.accounts.findFirst({
-                    select: {
-                        id: true
-                    },
-                    where: {
-                        username: username
-                    }
+                    select: { id: true },
+                    where: { username: username }
                 });
 
                 if (userExists) return res.status(400).json({ success: false, message: "Username is already taken." });
 
                 await prisma.accounts.update({
-                    where: {
-                        id: user.id
-                    },
-                    data: {
-                        username: username
-                    }
+                    where: { id: user.id },
+                    data: { username: username }
                 });
 
                 return res.status(200).json({ success: true, message: "Username changed.", username: username });
@@ -352,9 +344,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         title: "Email Change",
                         used: false
                     },
-                    data: {
-                        expires: new Date(Date.now() - 1),
-                    }
+                    data: { expires: new Date(Date.now() - 1), }
                 });
 
                 await axios.get(`https://ipinfo.io/${getIPAddress(req)}/json?token=${process.env.IPINFO_TOKEN}`).then(async (res) => {
@@ -438,21 +428,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 if (verifyCode.used) return res.status(400).json({ success: false, message: "Confirmation code already used." });
 
                 await prisma.emails.update({
-                    where: {
-                        id: verifyCode.id
-                    },
-                    data: {
-                        used: true
-                    }
+                    where: { id: verifyCode.id },
+                    data: { used: true }
                 });
 
                 await prisma.accounts.update({
-                    where: {
-                        id: user.id
-                    },
-                    data: {
-                        email: email
-                    }
+                    where: { id: user.id },
+                    data: { email: email }
                 });
 
                 await axios.get(`https://ipinfo.io/${getIPAddress(req)}/json?token=${process.env.IPINFO_TOKEN}`).then(async (res) => {
@@ -521,9 +503,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
                 for (const payment of payments) {
                     await stripe.subscriptions.retrieve(payment.subscriptionId).then(async (subscription) => {
-                        await stripe.customers.update(subscription.customer as string, {
-                            email: email
-                        });
+                        await stripe.customers.update(subscription.customer as string, { email: email });
                     }).catch((err: any) => {
                         console.error(err);
                     });
@@ -536,23 +516,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 if (!/^[0-9]+$/.test(userId)) return res.status(400).json({ success: false, message: "Invalid Discord ID." });
 
                 var alreadyExists = await prisma.accounts.findFirst({
-                    select: {
-                        id: true
-                    },
-                    where: {
-                        userId: userId
-                    }
+                    select: { id: true },
+                    where: { userId: userId }
                 });
 
                 if (alreadyExists) return res.status(400).json({ success: false, message: "Discord ID already linked to another account." });
 
                 await prisma.accounts.update({
-                    where: {
-                        id: user.id
-                    },
-                    data: {
-                        userId: userId
-                    }
+                    where: { id: user.id },
+                    data: { userId: userId }
                 });
 
                 return res.status(200).json({ success: true, message: "Discord ID updated." });
@@ -570,12 +542,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     const qrcodeUrl = generateQRUrl(secret.base32, user.username);
 
                     await prisma.accounts.update({
-                        where: {
-                            id: user.id
-                        },
-                        data: {
-                            googleAuthCode: secret.base32
-                        }
+                        where: { id: user.id },
+                        data: { googleAuthCode: secret.base32 }
                     });
 
                     return res.status(200).json({ success: true, message: "2FA Requested", secret: secret.base32, url: qrcodeUrl });
@@ -644,12 +612,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 });
 
                 await prisma.accounts.update({
-                    where: {
-                        id: user.id
-                    },
-                    data: {
-                        twoFactor: Number(1) as number
-                    }
+                    where: { id: user.id },
+                    data: { twoFactor: Number(1) as number }
                 });
                     
                 await prisma.logs.create({
@@ -660,12 +624,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         device: JSON.stringify(xTrack)
                     }
                 });
-                    
-                await prisma.sessions.deleteMany({
-                    where: {
-                        accountId: user.id
-                    }
-                });
+                
+                // expire all sessions for this account
+                await prisma.sessions.deleteMany({ where: { accountId: user.id } });
 
                 return res.status(200).json({ success: true, message: "2FA Successfully Enabled" });
             } else if (code && !username && password && user.googleAuthCode && user.twoFactor) {
@@ -732,12 +693,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 });
 
                 await prisma.accounts.update({
-                    where: {
-                        id: user.id
-                    },
-                    data: {
-                        twoFactor: Number(0) as number
-                    }
+                    where: { id: user.id },
+                    data: { twoFactor: Number(0) as number }
                 });
 
                 await prisma.logs.create({
@@ -758,7 +715,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         }
         break;
     default:
-        res.setHeader("Allow", "GET");
+        res.setHeader("Allow", ["GET", "POST", "PATCH"]);
         res.status(405).end(`Method ${req.method} Not Allowed`);
         break;
     }

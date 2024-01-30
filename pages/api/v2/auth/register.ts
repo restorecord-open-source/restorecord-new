@@ -3,7 +3,7 @@ import * as bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import { prisma } from "../../../../src/db";
 import { accounts } from "@prisma/client";
-import { getIPAddress, getBrowser, getPlatform, getXTrack } from "../../../../src/getIPAddress";
+import { getIPAddress, getXTrack } from "../../../../src/getIPAddress";
 import { sign } from "jsonwebtoken";
 dotenv.config({ path: "../../" });
 
@@ -35,10 +35,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             },
             body: `response=${data.captcha}&secret=${process.env.HCAPTCHA_SECRET}`
         })
-            .then(res => res.json())
-            .then(res => {
-                if (!res.success) { console.error(res); throw new Error("Invalid captcha"); }
-            });
+        .then(res => res.json())
+        .then(res => {
+            if (!res.success) { console.error(res); throw new Error("Invalid captcha"); }
+        });
 
         const accounts: accounts[] = await prisma.accounts.findMany({
             where: {
@@ -58,9 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         let refUser = null;
-        if (data.ref) {
-            refUser = await prisma.accounts.findFirst({ where: { referralCode: { contains: data.ref.toLowerCase() } } });
-        }
+        if (data.ref) refUser = await prisma.accounts.findFirst({ where: { referralCode: { contains: data.ref.toLowerCase() } } });
 
         const hashedPassword = await bcrypt.hash(data.password, await bcrypt.genSalt(10));
 

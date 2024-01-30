@@ -9,9 +9,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 let server;
                 let serverID = req.query.id as any;
 
-                if (!req.query.id) {
+                if (!req.query.id)
                     return res.status(400).json({ success: false, message: "No id provided" });
-                }
 
                 if (isNaN(Number.parseInt(req.query.id as any))) {
                     server = await prisma.servers.findFirst({ where: { name: req.query.id.toString(), } });
@@ -21,9 +20,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         if (BigInt(serverID) > 18446744073709551615 || BigInt(serverID) > 18446744073709551615) await prisma.servers.findFirst({ where: { name: req.query.id.toString() } });
 
                         server = await prisma.servers.findUnique({ where: { guildId: BigInt(req.query.id as any) as bigint }});
-                    } catch {
-                        server = await prisma.servers.findFirst({ where: { name: req.query.id.toString() } });
                     }
+                    catch { server = await prisma.servers.findFirst({ where: { name: req.query.id.toString() } }); }
                 }
 
                 if (!server) return res.status(404).json({ success: false, message: "Server not found" });
@@ -46,16 +44,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         // verified: members >= 1000,
                     } });
                 }
-                else {
+                else
                     return res.status(404).json({ success: false, message: "Server not found" });
-                }
                 
             }
             catch (err: any) {
                 console.error(err);
                 return res.status(400).json({ success: false, message: "Something went wrong" });
             }
-            break;
+            break; // pointless but whatever
+
+
         default:
             res.setHeader("Allow", "GET");
             res.status(405).end(`Method ${req.method} Not Allowed`);

@@ -12,18 +12,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         case "GET":
             try {
                 const fingerprint = generateFingerprint();
-
                 res.setHeader("Set-Cookie", `x-fp=${fingerprint}; Max-Age=300; Path=/`);
-
                 return res.status(200).json({ status: 200, success: true, fingerprint: fingerprint });
             }
             catch (err: any) {
                 console.error(err);
                 return res.status(400).json({ success: false, message: "Something went wrong" });
             }
-            break;
-        default:
-            return res.status(400).json({ success: false, message: "Method not allowed" });
+
+        default: return res.status(400).json({ success: false, message: "Method not allowed" });
         }
     });
 }

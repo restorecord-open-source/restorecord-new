@@ -4,7 +4,6 @@ import * as bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import { prisma } from "../../../../src/db";
 import { getIPAddress, getBrowser, getPlatform, getXTrack } from "../../../../src/getIPAddress";
-import { ProxyCheck } from "../../../../src/proxycheck";
 import Email from "../../../../src/email";
 import * as speakeasy from "speakeasy";
 import axios from "axios";

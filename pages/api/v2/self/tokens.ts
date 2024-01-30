@@ -29,7 +29,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             console.error(err);
             return res.status(400).json({ success: false, message: "Something went wrong" });
         }
-        break;
+        break; // pointless but whatever
+
     case "POST":
         try {
             const { name, expiration } = req.body;
@@ -66,7 +67,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             console.error(err);
             return res.status(400).json({ success: false, message: "Something went wrong" });
         }
-        break;
+        break; // pointless but whatever
+
+
     case "DELETE":
         try {
             const { id } = req.body;
@@ -83,11 +86,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
             if (!session) return res.status(400).json({ success: false, message: "Session not found" });
 
-            await prisma.sessions.delete({
-                where: {
-                    id: id
-                }
-            });
+            await prisma.sessions.delete({ where: { id: id } });
 
             return res.status(200).json({ success: true, message: "Session deleted successfully" });
         }
@@ -95,9 +94,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             console.error(err);
             return res.status(400).json({ success: false, message: "Something went wrong" });
         }
-        break;
+        break; // pointless but whatever
+
+
     default:
-        res.setHeader("Allow", "GET, POST, DELETE");
+        res.setHeader("Allow", ["GET", "POST", "DELETE"]);
         res.status(405).end(`Method ${req.method} Not Allowed`);
         break;
     }

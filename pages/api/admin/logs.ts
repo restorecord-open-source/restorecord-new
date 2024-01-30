@@ -19,10 +19,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
 
                 res.write(`data: hello\n`);
-                res.write(`data: hello\n`);
-                res.write(`data: hello\n`);
-                res.write(`data: hello\n`);
-                res.write(`data: hello\n`);
                 res.end();
             } catch (e) {
                 console.error(e);

@@ -33,9 +33,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             ]),
                         ],
                     },
-                    orderBy: {
-                        createdAt: "desc",
-                    },
+                    orderBy: { createdAt: "desc", },
                 });
                 const endTime = performance.now();
 
@@ -77,14 +75,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     })
                 });
             }
-            catch (e: any) {
-                console.error(e);
-                return res.status(400).send("400 Bad Request");
-            }
-            break;
-        default:
-            return res.status(400).send("400 Bad Request");
-            break;
+            catch (e: any) { console.error(e); return res.status(400).send("400 Bad Request"); }
+            
+        default: return res.status(400).send("400 Bad Request");
         }
     });
 }

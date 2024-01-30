@@ -32,9 +32,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     usedBy: true,
                     usedAt: true,
                 },
-                where: { 
-                    code: code 
-                } 
+                where: { code: code } 
             });
 
             if (!giftCode) return res.status(400).json({ success: false, message: "Invalid Gift Code" });
@@ -60,9 +58,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             });
 
             giftCode = await prisma.giftCodes.update({
-                where: {
-                    code: code
-                },
+                where: { code: code },
                 select: {
                     code: true,
                     amount: true,
@@ -80,9 +76,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             });
 
             await prisma.accounts.update({
-                where: {
-                    id: user.id
-                },
+                where: { id: user.id },
                 data: {
                     role: (plan === "premium" || plan === "premium_monthly") ? "premium" : (plan === "business" || plan === "business_monthly") ? "business" : "enterprise",
                     expiry: (user.expiry && user.expiry > new Date(Date.now()) && (user.role === "premium" && (plan === "premium" || plan === "premium_monthly")) || (user.role === "business" && (plan === "business" || plan === "business_monthly")) || (user.role === "enterprise" && (plan === "enterprise" || plan === "enterprise_monthly"))) ? new Date(new Date(user.expiry || Date.now()).getTime() + (plans.find(p => p.name === plan)?.expiry! * 24 * 60 * 60 * 1000)) : new Date(Date.now() + (plans.find(p => p.name === plan)?.expiry! * 24 * 60 * 60 * 1000)),
@@ -90,12 +84,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             });
 
             await prisma.servers.updateMany({
-                where: {
-                    ownerId: user.id
-                },
-                data: {
-                    pullTimeout: new Date()
-                }
+                where: { ownerId: user.id },
+                data: { pullTimeout: new Date() }
             });
 
             return res.status(200).json({ success: true, gift: giftCode, message: "Gift Code redeemed successfully, your plan has been updated" });
@@ -103,7 +93,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             console.error(err);
             return res.status(500).json({ success: false, message: "Internal server error" });
         }
-        break;
+        break; // pointless but ok
+
     case "GET":
         try {
             let payments = await prisma.payments.findMany({ where: { accountId: user.id }, orderBy: { createdAt: "desc" } });
@@ -134,6 +125,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         };
                     }
                 } else {
+                    // nice chatgpt code xenos 👏👏👏
                     return {
                         // if subscription id starts with GIFT- then replace split by - and get the 2nd last element then respond with GIFT-*****-*****-*****-ABC123
                         id: (payment.subscriptionId && payment.subscriptionId.startsWith("GIFT-")) ? `GIFT-${payment.subscriptionId.split("-")[1]}` : payment.id,
@@ -146,13 +138,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             }));
         
             const mergedResponse = response.flat().sort((a, b) => Number(b.createdAt) - Number(a.createdAt));
-        
             return res.status(200).json({ success: true, payments: mergedResponse });
         } catch (err) {
             console.error(err);
             return res.status(500).json({ success: false, message: "Internal server error" });
         }
-        break;
     }
 }
 

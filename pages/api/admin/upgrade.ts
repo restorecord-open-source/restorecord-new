@@ -17,17 +17,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 const expiry: string = req.body.expiry ?? null;
 
                 const account = await prisma.accounts.findUnique({
-                    where: {
-                        id: parseInt(fullId) as number,
-                    },
+                    where: { id: parseInt(fullId) as number, },
                 });
 
                 if (!account) return res.status(400).json({ success: false, message: "Account not found." });
 
                 await prisma.accounts.update({
-                    where: {
-                        id: parseInt(fullId) as number,
-                    },
+                    where: { id: parseInt(fullId) as number, },
                     data: {
                         role: plan,
                         expiry: plan === "free" ? null : new Date(expiry),
@@ -83,14 +79,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
                 return res.status(200).json({ success: true, message: `${account.username} Subscription changed to ${plan.charAt(0).toUpperCase() + plan.slice(1)} until ${expiry ? new Date(new Date(expiry).getTime() + 1000 * 60 * 60 * 24 * 30).toLocaleDateString() : "Never"}` });
             }
-            catch (e: any) {
-                console.error(e);
-                return res.status(400).send("400 Bad Request");
-            }
-            break;
-        default:
-            return res.status(400).send("400 Bad Request");
-            break;
+            catch (e: any) { console.error(e); return res.status(400).send("400 Bad Request"); }
+            
+        default: return res.status(400).send("400 Bad Request");
         }
     });
 }

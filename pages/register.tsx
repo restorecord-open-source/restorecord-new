@@ -5,7 +5,6 @@ import NavBar from "../components/landing/NavBar"
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 import Link from "next/link";
 import Head from "next/head";
-import Footer from "../components/landing/Footer";
 
 import Container from "@mui/material/Container";
 import TextField from "@mui/material/TextField";
@@ -45,20 +44,10 @@ export default function Register() {
     const handleChange = (e: any) => {
         const { name, value } = e.target;
         switch (name) {
-        case "username":
-            setUsername(value);
-            break;
-        case "email":
-            setEmail(value);
-            break;
-        case "password":
-            setPassword(value);
-            break;
-        case "password2":
-            setPassword2(value);
-            break;
-        default:
-            break;
+            case "username": setUsername(value); break;
+            case "email": setEmail(value); break;
+            case "password": setPassword(value); break;
+            case "password2": setPassword2(value); break;
         }
     }
 

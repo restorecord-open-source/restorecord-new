@@ -29,9 +29,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             const member = await prisma.members.findFirst({
                 where: {
                     id: Number(userId) as number,
-                    guildId: {
-                        in: guildIds,
-                    }
+                    guildId: { in: guildIds, }
                 },
             });
 
@@ -85,9 +83,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 }
                 else if (resp.status === 200) {
                     await prisma.members.update({
-                        where: {
-                            id: member.id,
-                        },
+                        where: { id: member.id, },
                         data: {
                             username: `${json.username}#${json.discriminator}`,
                             avatar: json.avatar ? json.avatar : String(json.discriminator % 5),
@@ -139,6 +135,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             return res.status(400).json({ success: false, message: "Something went wrong" });
         }
         break;
+
+
     case "PUT":
         try {
             const userId: any = req.query.userid as string;
@@ -173,33 +171,24 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 console.log(`[${server.name}] [SM] [${member.username}] ${status} ${JSON.stringify(response).toString() ?? null}`);
             
                 switch (status) {
-                case 429:   
-                    const retryAfter = resp.response.headers["retry-after"];
-                    console.log(`[${server.name}] [SM] [${member.username}] 429 | retry-after: ${retryAfter}`);
-                    if (retryAfter) {
-                        const retry = parseInt(retryAfter);
-                        setTimeout(async () => {
-                            await addMember(server.guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, [BigInt(server.roleId).toString()])
-                        }, retry);
-                    }
-                    break;
-                case 403:
-                    refreshTokenAddDB(member.userId.toString(), member.id, server.guildId.toString(), bot?.botToken, server.roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma);
-                    break;
-                case 407:
-                    console.log(`407 Exponential Membership Growth/Proxy Authentication Required`);
-                    break;
-                case 204:
-                    await addRole(server.roleId.toString(), member.userId.toString(), bot?.botToken, BigInt(server.roleId).toString());
-                    break;
-                case 201:
-                    break;
-                case 400:
-                    console.error(`[FATAL ERROR] [SM] [${server.name}] [${member.id}]-[${member.username}] 400 | ${JSON.stringify(response)}`);
-                    break;
-                default:
-                    console.error(`[FATAL ERROR] [SM] [UNDEFINED STATUS] [${server.name}] [${member.id}]-[${member.username}] ${status} | ${JSON.stringify(response)} | ${JSON.stringify(resp)}`);
-                    break;
+                    case 429:   
+                        const retryAfter = resp.response.headers["retry-after"];
+                        console.log(`[${server.name}] [SM] [${member.username}] 429 | retry-after: ${retryAfter}`);
+                        if (retryAfter) {
+                            const retry = parseInt(retryAfter);
+                            setTimeout(async () => {
+                                await addMember(server.guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, [BigInt(server.roleId).toString()])
+                            }, retry);
+                        }
+                        break;
+
+                    case 403: refreshTokenAddDB(member.userId.toString(), member.id, server.guildId.toString(), bot?.botToken, server.roleId, member.refreshToken, bot?.clientId.toString(), bot?.botSecret.toString(), prisma); break;
+                    case 407: console.log(`407 Exponential Membership Growth/Proxy Authentication Required`); break;
+                    case 204: await addRole(server.roleId.toString(), member.userId.toString(), bot?.botToken, BigInt(server.roleId).toString()); break;
+                    case 201: /* ??? */ break;
+                    case 400: console.error(`[FATAL ERROR] [SM] [${server.name}] [${member.id}]-[${member.username}] 400 | ${JSON.stringify(response)}`); break;
+                    
+                    default: console.error(`[FATAL ERROR] [SM] [UNDEFINED STATUS] [${server.name}] [${member.id}]-[${member.username}] ${status} | ${JSON.stringify(response)} | ${JSON.stringify(resp)}`); break;
                 }
             }).catch(async (err: Error) => {
                 console.error(`[${server.name}] [SM] [addMember.catch] [${member.username}] ${err}`);
@@ -208,13 +197,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 
 
             console.log(`[${server.name}] [SM] [${member.username}]`);
-
             return res.status(200).json({ success: true, message: "Started Pulling..." });
         }
         catch (err: any) {
             console.error(err);
             return res.status(400).json({ success: false, message: "Something went wrong" });
         }
+
+
     case "DELETE":
         try {
             const userId: any = req.query.userid as string;
@@ -241,9 +231,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             });
 
             await prisma.members.delete({
-                where: {
-                    id: member.id
-                }
+                where: { id: member.id }
             }).then(async () => {
                 return res.status(200).json({ success: true, message: "Member removed from server." });
             }).catch(async (err: Error) => {

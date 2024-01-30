@@ -49,9 +49,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     },
                     where: {
                         userId: query,
-                        createdAt: {
-                            lt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 180),
-                        },
+                        createdAt: { lt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 180), },
                         NOT: [
                             { ip: null },
                             { ip: "null" },
@@ -59,9 +57,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             { ip: "1.1.1.1" },
                         ],
                     },
-                    orderBy: {
-                        id: "desc",
-                    },
+                    orderBy: { id: "desc", },
                 });
                 const endTime = performance.now();
 
@@ -122,15 +118,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     });
                 }
             }
-            catch (e: any) {
-                console.error(e);
-                return res.status(400).send("400 Bad Request");
-            }
-            break;
-        default:
-            return res.status(400).send("400 Bad Request");
-            break;
-        }
+            catch (e: any) { console.error(e); return res.status(400).send("400 Bad Request"); }
+        default: return res.status(400).send("400 Bad Request"); }
     });
 }
 

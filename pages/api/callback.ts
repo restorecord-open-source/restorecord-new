@@ -52,9 +52,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                     blockWireless: true,
                     minAccountAge: true,
                 },
-                where: {
-                    guildId: guildId 
-                } 
+                where: { guildId: guildId  } 
             });
             if (!serverInfo) return reject(10004 as any);
 
@@ -76,9 +74,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                     botToken: true,
                     customDomain: true,
                 },
-                where: {
-                    id: serverInfo.customBotId 
-                } 
+                where: { id: serverInfo.customBotId  } 
             });
             if (!customBotInfo) return reject(10002 as any);
             
@@ -107,9 +103,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                         userId: true,
                         role: true,
                     },
-                    where: {
-                        id: serverInfo.ownerId 
-                    } 
+                    where: { id: serverInfo.ownerId } 
                 });
                 serverOwner.userId = serverOwner.userId ? serverOwner.userId.toString() : "0";
                 
@@ -169,6 +163,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
             let altCheck: any = [];
             serverInfo.blockAlts ? altCheck = await prisma.members.findMany({ where: { guildId: guildId, ip: IPAddr, NOT: { userId: userId } }, select: { username: true, userId: true } }) : altCheck = [];
 
+            // what the fuck xenos
             if (isProxy) {
                 serverInfo.webhook ? await sendWebhookMessage(serverInfo.webhook, "Failed VPN Check", null, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0) : null;
                 return reject(990044 as any);
@@ -192,40 +187,39 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                 console.log(`[${guildId}] [${account.username}#${account.discriminator}] ${status} ${status.toString().startsWith("4") ? JSON.stringify(resp?.data ? resp?.data : resp?.response?.data) ?? "" : ""}`);
 
                 switch (status) {
-                case 201:
-                    res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
-                    return res.redirect(`https://${domain}/verify/${state}`);
-                case 204:
-                    if (serverInfo.guildId === serverInfo.roleId) {
+                    case 201:
                         res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
                         return res.redirect(`https://${domain}/verify/${state}`);
-                    }
-
-                    await addRole(guildId.toString(), userId.toString(), customBotInfo.botToken, serverInfo.roleId.toString()).then(async (response) => {
-                        console.log(`[${guildId}] [${account.username}#${account.discriminator}] Adding Role... ${response?.response?.status || response?.status} ${JSON.stringify(response?.data ? response?.data : response?.response?.data) ?? ""}`);
-                            
-                        switch (response?.response?.status || response?.status) {
-                        case 204:
+                    case 204:
+                        if (serverInfo.guildId === serverInfo.roleId) {
                             res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
                             return res.redirect(`https://${domain}/verify/${state}`);
-                        case 403:
-                            return reject(990403 as any);
-                        case 404:
-                            return reject(990404 as any);
-                        default:
-                            res.setHeader("Set-Cookie", `RC_err=${response?.status || response?.response?.status} RC_errStack=${JSON.stringify(response?.data?.message || response?.response?.data?.message)}; Path=/; Max-Age=5;`);
-                            console.error(`addRole 0/1: ${response?.status}|${response?.response?.status}|${JSON.stringify(response?.data)}|${JSON.stringify(response?.response?.data)}`);
-                            return res.redirect(`https://${domain}/verify/${state}`);
                         }
-                    }).catch((err: any) => {
-                        err.message = parseInt(err.message);
-                        return reject(err.message);
-                    });
-                    break;
-                case 403:
-                    return reject(990403 as any);
-                case 401:
-                    return reject(990401 as any);
+
+                        await addRole(guildId.toString(), userId.toString(), customBotInfo.botToken, serverInfo.roleId.toString()).then(async (response) => {
+                            console.log(`[${guildId}] [${account.username}#${account.discriminator}] Adding Role... ${response?.response?.status || response?.status} ${JSON.stringify(response?.data ? response?.data : response?.response?.data) ?? ""}`);
+
+                            switch (response?.response?.status || response?.status) {
+                            case 204:
+                                res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
+                                return res.redirect(`https://${domain}/verify/${state}`);
+                            case 403:
+                                return reject(990403 as any);
+                            case 404:
+                                return reject(990404 as any);
+                            default:
+                                res.setHeader("Set-Cookie", `RC_err=${response?.status || response?.response?.status} RC_errStack=${JSON.stringify(response?.data?.message || response?.response?.data?.message)}; Path=/; Max-Age=5;`);
+                                console.error(`addRole 0/1: ${response?.status}|${response?.response?.status}|${JSON.stringify(response?.data)}|${JSON.stringify(response?.response?.data)}`);
+                                return res.redirect(`https://${domain}/verify/${state}`);
+                            }
+                        }).catch((err: any) => {
+                            err.message = parseInt(err.message);
+                            return reject(err.message);
+                        });
+                        break;
+
+                case 403: return reject(990403 as any);
+                case 401: return reject(990401 as any);
                 case 429:
                     await sleep(resp?.response?.data?.retry_after ? resp?.response?.data?.retry_after : 1000);
                     await addMember(guildId.toString(), userId.toString(), customBotInfo.botToken, respon.data.access_token, serverInfo.guildId === serverInfo.roleId ? [] : [BigInt(serverInfo.roleId).toString()]).then(async (resp) => {
@@ -249,9 +243,11 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                         return reject(err);
                     });
                     break;
+
                 case 400:
                     res.setHeader("Set-Cookie", `RC_err=${resp?.status || resp?.response?.status} RC_errStack=${JSON.stringify(resp?.data?.message || resp?.response?.data?.message)}; Path=/; Max-Age=5;`);
                     return res.redirect(`https://${domain}/verify/${state}`);
+                
                 default:
                     res.setHeader("Set-Cookie", `RC_err=${resp?.status || resp?.response?.status} RC_errStack=${JSON.stringify(resp?.data?.message || resp?.response?.data?.message)}; Path=/; Max-Age=5;`);
                     console.error(`addRole 0/1: ${resp?.status}|${resp?.response?.status}|${JSON.stringify(resp?.data)}|${JSON.stringify(resp?.response?.data)}`);
@@ -307,27 +303,27 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
         if (error.match(/^\d+$/)) errorCode = parseInt(error);
 
         switch (errorCode) {
-        case 10001: return res.status(400).json({ code: err.message, message: "Unknown user" });
-        case 10002: return res.status(400).json({ code: err.message, message: "Unknown application" });
-        case 10004: return res.status(400).json({ code: err.message, message: "Unknown guild" });
-        case 10401: return res.status(400).json({ code: err.message, message: "Wrongly formatted request" });
-        case 990001: return res.status(400).json({ code: err.message, message: "Server not setup correctly", help: "https://docs.restorecord.com" });
-        case 990031: res.setHeader("Set-Cookie", `RC_err=307 RC_errStack=Your Discord Account is blacklisted in this server.; Path=/; Max-Age=5;`); break;
-        case 990032: res.setHeader("Set-Cookie", `RC_err=307 RC_errStack=Your IP-Address is blacklisted in this server.; Path=/; Max-Age=5;`); break;
-        case 990033: res.setHeader("Set-Cookie", `RC_err=307 RC_errStack=Your ISP is blacklisted in this server.; Path=/; Max-Age=5;`); break;
-        case 990034: res.setHeader("Set-Cookie", `RC_err=307 RC_errStack=Your Country is blacklisted in this server.; Path=/; Max-Age=5;`); break;
-        case 990035: res.setHeader("Set-Cookie", `RC_err=400 RC_errStack=Your account is too new to verify in this server try again in ${err.retry_after}.; Path=/; Max-Age=5;`); break;
-        case 990043: res.setHeader("Set-Cookie", `RC_err=304; Path=/; Max-Age=5;`); break;
-        case 990045: res.setHeader("Set-Cookie", `RC_err=305; Path=/; Max-Age=5;`); break;
-        case 990044: res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=5;`); break;
-        case 990401: res.setHeader("Set-Cookie", `RC_err=401; Path=/; Max-Age=5;`); break;
-        case 990403: res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=5;`); break;
-        case 990404: res.setHeader("Set-Cookie", `RC_err=404; Path=/; Max-Age=5;`); break;
-        default: return res.status(500).json({ code: err.message, message: "Internal Server Error" }); 
+            case 10001: return res.status(400).json({ code: err.message, message: "Unknown user" });
+            case 10002: return res.status(400).json({ code: err.message, message: "Unknown application" });
+            case 10004: return res.status(400).json({ code: err.message, message: "Unknown guild" });
+            case 10401: return res.status(400).json({ code: err.message, message: "Wrongly formatted request" });
+            case 990001: return res.status(400).json({ code: err.message, message: "Server not setup correctly", help: "https://docs.restorecord.com" });
+            case 990031: res.setHeader("Set-Cookie", `RC_err=307 RC_errStack=Your Discord Account is blacklisted in this server.; Path=/; Max-Age=5;`); break;
+            case 990032: res.setHeader("Set-Cookie", `RC_err=307 RC_errStack=Your IP-Address is blacklisted in this server.; Path=/; Max-Age=5;`); break;
+            case 990033: res.setHeader("Set-Cookie", `RC_err=307 RC_errStack=Your ISP is blacklisted in this server.; Path=/; Max-Age=5;`); break;
+            case 990034: res.setHeader("Set-Cookie", `RC_err=307 RC_errStack=Your Country is blacklisted in this server.; Path=/; Max-Age=5;`); break;
+            case 990035: res.setHeader("Set-Cookie", `RC_err=400 RC_errStack=Your account is too new to verify in this server try again in ${err.retry_after}.; Path=/; Max-Age=5;`); break;
+            case 990043: res.setHeader("Set-Cookie", `RC_err=304; Path=/; Max-Age=5;`); break; // WHY????
+            case 990045: res.setHeader("Set-Cookie", `RC_err=305; Path=/; Max-Age=5;`); break; // WHY????
+            case 990044: res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=5;`); break; // WHY????
+            case 990401: res.setHeader("Set-Cookie", `RC_err=401; Path=/; Max-Age=5;`); break; // WHY????
+            case 990403: res.setHeader("Set-Cookie", `RC_err=403; Path=/; Max-Age=5;`); break; // WHY????
+            case 990404: res.setHeader("Set-Cookie", `RC_err=404; Path=/; Max-Age=5;`); break; // WHY????
+
+            default: return res.status(500).json({ code: err.message, message: "Internal Server Error" }); 
         }
 
         return res.redirect(`https://${domain}/verify/${state}`);
-
     });
 }
 

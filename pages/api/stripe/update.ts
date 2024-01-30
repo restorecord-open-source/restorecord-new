@@ -19,27 +19,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
         let amount = "15.00"
         switch (plan) {
-        case "premium":
-            amount = "15.00";
-            break;
-        case "business":
-            amount = "30.00";
-            break;
-        case "enterprise":
-            amount = "200.00";
-            break;
-        case "premium_monthly":
-            amount = "2.00";
-            break;
-        case "business_monthly":
-            amount = "5.00";
-            break;
-        case "enterprise_monthly":
-            amount = "20.00";
-            break;
-        default:
-            amount = "15.00";
-            break;
+            case "premium": amount = "15.00"; break;
+            case "business": amount = "30.00"; break;
+            case "enterprise": amount = "200.00"; break;
+            case "premium_monthly": amount = "2.00"; break;
+            case "business_monthly": amount = "5.00"; break;
+            case "enterprise_monthly": amount = "20.00"; break;
+            default: amount = "15.00"; break;
         }
 
         var payment = await prisma.payments.findFirst({ where: { accountId: user.id, OR: [{ payment_status: "trialing" }, { payment_status: "active" }] }, orderBy: { createdAt: "desc" } });

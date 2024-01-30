@@ -27,15 +27,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             prisma.migrations.count({
                 where: {
                     status: "PULLING",
-                    updatedAt: {
-                        gte: new Date(new Date().getTime() - 15 * 60000),
-                    }
+                    updatedAt: { gte: new Date(new Date().getTime() - 15 * 60000), }
                 }
             }),
             prisma.payments.findMany({
-                where: {
-                    OR: [{ payment_status: "CONFIRMED" }, { payment_status: "active" }],
-                },
+                where: { OR: [{ payment_status: "CONFIRMED" }, { payment_status: "active" }], },
                 orderBy: { createdAt: "desc" },
             }),
         ]);
@@ -74,10 +70,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
         await redis.set("adminStats", JSON.stringify(response), "EX", 300);
         return res.status(200).json(response);
-    } catch (e: any) {
-        console.error(e);
-        return res.status(400).send("400 Bad Request");
     }
+    catch (e: any) { console.error(e); return res.status(400).send("400 Bad Request"); }
 }
 
 function getFormattedPlan(type: string): string {
@@ -86,9 +80,8 @@ function getFormattedPlan(type: string): string {
         const categoryFormatted = category.charAt(0).toUpperCase() + category.slice(1);
         const durationFormatted = duration.charAt(0).toUpperCase();
         return `${categoryFormatted} ${durationFormatted}`;
-    } else {
-        return type.charAt(0).toUpperCase() + type.slice(1);
     }
+    else return type.charAt(0).toUpperCase() + type.slice(1);
 }
 
 function calcRevenue(payments: any[], startDate: Date): number {

@@ -14,10 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log("Rebuilding and Deploying...");
 
     exec("cd /home/restorecord-new && git pull && npm i && npm run build && pm2 restart all", (err: any, stdout: any, stderr: any) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).end();
-        }
+        if (err) { console.error(err); return res.status(500).end(); }
 
         console.error(stdout);
         console.error(stderr);

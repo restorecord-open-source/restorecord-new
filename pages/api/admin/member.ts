@@ -38,12 +38,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                     if (sessions.length === 0) throw new Error(50014 as any);
 
                     const user = await prisma.accounts.findFirst({
-                        select: {
-                            admin: true,
-                        },
-                        where: { 
-                            id: JWTInfo.id
-                        } 
+                        select: { admin: true, },
+                        where: {  id: JWTInfo.id } 
                     });
                     if (!user) throw new Error(10001 as any);
 
@@ -64,12 +60,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                             vpn: true,
                         },
                         where: {
-                            userId: {
-                                in: validIds.map(id => BigInt(id)),
-                            },
-                            createdAt: {
-                                gt: new Date(Date.now() - 604800000),
-                            },
+                            userId: { in: validIds.map(id => BigInt(id)), },
+                            createdAt: { gt: new Date(Date.now() - 604800000), },
                             NOT: [
                                 { ip: null },
                                 { ip: "null" },
@@ -77,9 +69,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                                 { ip: "1.1.1.1" },
                             ]
                         },
-                        orderBy: {
-                            id: "desc",
-                        },
+                        orderBy: { id: "desc", },
                     });
 
                     let uniqueMembers: members[] = [];
@@ -98,21 +88,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                         obj[String(member.userId)] = String(member.ip) as string;
                         return obj;
                     }, {} as any));
-                    break;
                 } catch (err: any) {
                     if (err?.name === "" || err?.name === "TokenExpiredError" || err?.name === "JsonWebTokenError" || err?.name === "NotBeforeError") err.message = 50014;
         
                     err.message = parseInt(err.message);
 
                     switch (err.message) {
-                    case 10001: return res.status(404).json({ code: err.message, message: "Unknown account" })
-                    case 50014: return res.status(401).json({ code: err.message, message: "Invalid authentication token provided" })
-                    default: return res.status(500).end("internal server error")
+                        case 10001: return res.status(404).json({ code: err.message, message: "Unknown account" })
+                        case 50014: return res.status(401).json({ code: err.message, message: "Invalid authentication token provided" })
+                        default: return res.status(500).end("internal server error")
                     }
                 }
-            default:
-                return res.status(400).send("400 Bad Request");
-                break;
+            default: return res.status(400).send("400 Bad Request");
             }
         });
     } catch (err: any) {
@@ -121,9 +108,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         err.message = parseInt(err.message);
 
         switch (err.message) {
-        case 10001: return res.status(404).json({ code: err.message, message: "Unknown account" })
-        case 50014: return res.status(401).json({ code: err.message, message: "Invalid authentication token provided" })
-        default: return res.status(500).end("internal server error")
+            case 10001: return res.status(404).json({ code: err.message, message: "Unknown account" })
+            case 50014: return res.status(401).json({ code: err.message, message: "Invalid authentication token provided" })
+            default: return res.status(500).end("internal server error")
         }
     }
 }

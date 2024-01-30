@@ -7,10 +7,7 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
         const { success, canceled } = req.query;
-
         return res.redirect(301, `/dashboard/upgrade${success ? "?s=1" : canceled ? "?c=1" : ""}`);
-    } catch (err: any) {
-        console.error(err);
-        return res.redirect(301, `/dashboard/upgrade`);
     }
+    catch (err: any) { console.error(err); return res.redirect(301, `/dashboard/upgrade`); }
 }

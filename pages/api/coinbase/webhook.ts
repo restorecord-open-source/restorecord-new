@@ -40,37 +40,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // console.log(`[COINBASE] [${JSON.stringify(event)}`);
 
         let amount: number = 1500;
-        let expiry: Date = new Date(Date.now() + 2592000000);
+        let expiry: Date = new Date(Date.now() + 31536000000);
 
         switch (event.data.metadata.plan ?? "premium") {
-        case "premium":
-            amount = 1500;
-            expiry = new Date(Date.now() + 31536000000);
-            break;
-        case "premium_monthly":
-            amount = 200;
-            expiry = new Date(Date.now() + 2592000000);
-            break;
-        case "business":
-            amount = 3000;
-            expiry = new Date(Date.now() + 31536000000);
-            break;
-        case "business_monthly":
-            amount = 500;
-            expiry = new Date(Date.now() + 2592000000);
-            break;
-        case "enterprise":
-            amount = 10000;
-            expiry = new Date(Date.now() + 31536000000);
-            break;
-        case "enterprise_monthly":
-            amount = 1000;
-            expiry = new Date(Date.now() + 2592000000);
-            break;
-        default:
-            amount = 1500;
-            expiry = new Date(Date.now() + 31536000000);
-            break;
+            case "premium":             amount = 1500;  expiry = new Date(Date.now() + 31536000000); break; // 1 year
+            case "premium_monthly":     amount = 200;   expiry = new Date(Date.now() + 2592000000); break;  // 1 month
+            case "business":            amount = 3000;  expiry = new Date(Date.now() + 31536000000); break;
+            case "business_monthly":    amount = 500;   expiry = new Date(Date.now() + 2592000000); break;
+            case "enterprise":          amount = 10000; expiry = new Date(Date.now() + 31536000000); break;
+            case "enterprise_monthly":  amount = 1000;  expiry = new Date(Date.now() + 2592000000); break;
         }
 
         switch (event.type) {
@@ -128,16 +106,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 if (event.data.payments[0].status === "CONFIRMED") {
                     const payment = await prisma.payments.findUnique({
-                        where: {
-                            subscriptionId: event.data.id
-                        }
+                        where: { subscriptionId: event.data.id }
                     });
 
                     if (payment) {
                         await prisma.payments.update({
-                            where: {
-                                id: payment.id
-                            },
+                            where: { id: payment.id },
                             data: {
                                 payment_status: event.data.payments[0].status,
                                 amount: amount
@@ -145,9 +119,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         });
 
                         await prisma.accounts.update({
-                            where: {
-                                id: Number(payment.accountId) as number ?? 1
-                            },
+                            where: { id: Number(payment.accountId) as number ?? 1 },
                             data: {
                                 role: payment.type.includes("_") ? payment.type.split("_")[0] : payment.type,
                                 expiry: new Date(expiry)
@@ -158,13 +130,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         await prisma.servers.updateMany({
                             where: {
                                 ownerId: Number(payment.accountId) as number ?? 1,
-                                pullTimeout: {
-                                    gt: new Date()
-                                }
+                                pullTimeout: { gt: new Date() }
                             },
-                            data: {
-                                pullTimeout: new Date()
-                            }
+                            data: { pullTimeout: new Date() }
                         });
                     } else {
                         console.error(`[COINBASE] Payment not found for subscription ${event.data.id}`);
@@ -180,9 +148,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         });
 
                         await prisma.accounts.update({
-                            where: {
-                                id: Number(event.data.metadata.account_id) as number ?? 1
-                            },
+                            where: { id: Number(event.data.metadata.account_id) as number ?? 1 },
                             data: {
                                 role: event.data.metadata.plan.includes("_") ? event.data.metadata.plan.split("_")[0] : event.data.metadata.plan,
                                 expiry: new Date(expiry)
@@ -193,13 +159,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         await prisma.servers.updateMany({
                             where: {
                                 ownerId: Number(event.data.metadata.account_id) as number ?? 1,
-                                pullTimeout: {
-                                    gt: new Date()
-                                }
+                                pullTimeout: { gt: new Date() }
                             },
-                            data: {
-                                pullTimeout: new Date()
-                            }
+                            data: { pullTimeout: new Date() }
                         });
                     }
                 }
@@ -209,19 +171,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             console.log(`[⏳] PENDING [${event.type}] ${JSON.stringify(event.data)}`);
             if (event.data.payments[0]) {
                 const payment = await prisma.payments.findUnique({
-                    where: {
-                        subscriptionId: event.data.id
-                    }
+                    where: { subscriptionId: event.data.id }
                 });
 
                 if (payment) {
                     await prisma.payments.update({
-                        where: {
-                            id: payment.id
-                        },
-                        data: {
-                            payment_status: event.data.payments[0].status
-                        }
+                        where:  { id: payment.id },
+                        data:   { payment_status: event.data.payments[0].status }
                     });
                 } else {
                     await prisma.payments.create({

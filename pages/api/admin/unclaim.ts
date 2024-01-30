@@ -23,9 +23,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         }
 
         await prisma.servers.update({
-            where: { 
-                id: server.id,
-            },
+            where: {  id: server.id, },
             data: {
                 guildId: BigInt(newGuildId as any),
                 roleId: BigInt(newRoleId as any),
@@ -34,45 +32,32 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
         await prisma.members.updateMany({
             where: { guildId: server.guildId },
-            data: {
-                guildId: BigInt(newGuildId as any),
-            }
+            data: { guildId: BigInt(newGuildId as any), }
         });
 
         await prisma.blacklist.updateMany({
             where: { guildId: server.guildId },
-            data: {
-                guildId: BigInt(newGuildId as any),
-            }
+            data: { guildId: BigInt(newGuildId as any), }
         });
 
         await prisma.backups.updateMany({
             where: { guildId: server.guildId },
-            data: {
-                guildId: BigInt(newGuildId as any),
-            }
+            data: { guildId: BigInt(newGuildId as any), }
         });
 
         await prisma.migrations.updateMany({
             where: { guildId: server.guildId },
-            data: {
-                guildId: BigInt(newGuildId as any),
-            }
+            data: { guildId: BigInt(newGuildId as any), }
         });
 
         await prisma.guildMembers.updateMany({
             where: { guildId: server.guildId },
-            data: {
-                guildId: BigInt(newGuildId as any),
-            }
+            data: { guildId: BigInt(newGuildId as any), }
         });
 
         return res.status(200).send(`Server ${server.name} has been unclaimed.`);
     }
-    catch (e: any) {
-        console.error(e);
-        return res.status(400).send("400 Bad Request");
-    }
+    catch (e: any) { console.error(e); return res.status(400).send("400 Bad Request"); }
 }
 
 export default withAuthentication(handler);

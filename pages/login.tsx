@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 
 import Link from "next/link";
 import NavBar from "../components/landing/NavBar";
-import Footer from "../components/landing/Footer";
 
 import Container from "@mui/material/Container";
 import TextField from "@mui/material/TextField";
@@ -30,17 +29,9 @@ export default function Login() {
     function handleChange(e: any) {
         const { name, value } = e.target;
         switch (name) {
-        case "username":
-            setUsername(value);
-            break;
-        case "password":
-            setPassword(value);
-            break;
-        case "totp":
-            setTotp(value);
-            break;
-        default:
-            break;
+            case "username": setUsername(value); break;
+            case "password": setPassword(value); break;
+            case "totp": setTotp(value); break;
         }
     }
 

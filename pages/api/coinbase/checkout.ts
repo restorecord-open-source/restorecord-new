@@ -14,44 +14,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         
         let amount = "15.00"
         switch (plan) {
-        case "premium":
-            amount = "15.00";
-            break;
-        case "business":
-            amount = "30.00";
-            break;
-        case "enterprise":
-            amount = "200.00";
-            break;
-        case "premium_monthly":
-            amount = "2.00";
-            break;
-        case "business_monthly":
-            amount = "5.00";
-            break;
-        case "enterprise_monthly":
-            amount = "20.00";
-            break;
-        default:
-            amount = "15.00";
-            break;
+            case "premium":             amount = "15.00";   break;
+            case "business":            amount = "30.00";   break;
+            case "enterprise":          amount = "200.00";  break;
+            case "premium_monthly":     amount = "2.00";    break;
+            case "business_monthly":    amount = "5.00";    break;
+            case "enterprise_monthly":  amount = "20.00";   break;
         }
 
-        const currentDate = new Date();
-        const currentMonth = currentDate.getMonth() + 1;
-        const currentDay = currentDate.getDate();
+        if (user.referrer === (25555 || 38))    amount = (Number(amount) - (Number(amount) * 0.15)).toFixed(2);
+        else if (user.referrer !== null)        amount = (Number(amount) - (Number(amount) * 0.05)).toFixed(2);
+        else                                    amount = String(Number(amount) * 1.10);
+        
 
-        if (user.referrer === (25555 || 38)) {
-            amount = (Number(amount) - (Number(amount) * 0.15)).toFixed(2);
-        } else if (user.referrer !== null) {
-            amount = (Number(amount) - (Number(amount) * 0.05)).toFixed(2);
-        } else {
-            amount = String(Number(amount) * 1.10);
-        }
-
-        var Charge = coinbase.resources.Charge;
-
-        const charge = await Charge.create({
+        const charge = await coinbase.resources.Charge.create({
             name: "RestoreCord Subscription",
             description: `RestoreCord ${plan} Subscription ${user.referrer ? `(Discount applied)` : ""}`,
             local_price: {

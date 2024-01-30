@@ -71,37 +71,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 const fullId: any = req.body.userId ?? "";
                 const reason: number = req.body.reason ?? "";
 
-                const account = await prisma.accounts.findUnique({
-                    where: {
-                        id: parseInt(fullId) as number,
-                    },
-                });
-
+                const account = await prisma.accounts.findUnique({ where: { id: parseInt(fullId) as number, }, });
                 if (!account) return res.status(400).json({ success: false, message: "Account not found." });
 
                 await prisma.accounts.update({
-                    where: {
-                        id: parseInt(fullId) as number,
-                    },
-                    data: {
-                        banned: reason,
-                    },
+                    where: { id: parseInt(fullId) as number, },
+                    data: { banned: reason, },
                 });
 
-                await prisma.sessions.deleteMany({
-                    where: {
-                        accountId: parseInt(fullId) as number,
-                    },
-                });
+                // delete all sessions for this account
+                await prisma.sessions.deleteMany({ where: { accountId: parseInt(fullId) as number, }, });
 
                 const stripeCustomer = await stripe.customers.list({ email: account.email });
                 if (stripeCustomer.data.length > 0) {
-                    const customer = stripeCustomer.data[0];
-
-                    const subscriptions = await stripe.subscriptions.list({ customer: customer.id });
-                    for (const subscription of subscriptions.data) {
+                    const subscriptions = await stripe.subscriptions.list({ customer: stripeCustomer.data[0].id });
+                    for (const subscription of subscriptions.data) 
                         await stripe.subscriptions.update(subscription.id, { cancel_at_period_end: true });
-                    }
                 }
 
                 await Email.send({
@@ -145,35 +130,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         </body>
                     </html>
                     `,
-                }).then(() => {
-                    console.log(`[EMAIL] [${new Date().toLocaleString()}] Account banned, Email sent to ${account.email}`);
-                }).catch((err: any) => {
-                    console.error(err);
                 })
+                .then(() => { console.log(`[EMAIL] [${new Date().toLocaleString()}] Account banned, Email sent to ${account.email}`); })
+                .catch((err: any) => { console.error(err); })
 
                 return res.status(200).json({ success: true, message: "Account banned, Email sent." });
             }
-            catch (e: any) {
-                console.error(e);
-                return res.status(400).send("400 Bad Request");
-            }
-            break;
+            catch (e: any) { console.error(e); return res.status(400).send("400 Bad Request"); }
         case "GET":
             try {
                 if (!user.admin) return res.status(400).json({ success: false, message: "Account is not an admin." });
 
                 const help: any = req.query.h ?? "";
-                if (help === "1") {
-                    return res.status(200).json({ status: 200, reasons: banReasons });
-                }
+                if (help === "1") return res.status(200).json({ status: 200, reasons: banReasons });
             }
-            catch (e: any) {
-                console.error(e);
-                return res.status(400).send("400 Bad Request");
-            }
-        default:
-            return res.status(400).send("400 Bad Request");
-            break;
+            catch (e: any) { console.error(e); return res.status(400).send("400 Bad Request"); }
+        
+        default: return res.status(400).send("400 Bad Request");
         }
     });
 }
