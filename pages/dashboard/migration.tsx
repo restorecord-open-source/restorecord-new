@@ -158,16 +158,16 @@ export default function Server() {
                             <Typography variant="h6" sx={{ fontWeight: "500", wordBreak: "break-word" }}>{server.name}</Typography>
                         </Box>
                         <Typography variant="body2" sx={{ fontWeight: "500", color: migration.status === "SUCCESS" ? theme.palette.success.main : (migration.status === "FAILED" || migration.status === "STOPPED") ? theme.palette.error.main : migration.status === "PENDING" ? theme.palette.info.main : theme.palette.warning.main }}>
-                            {migration.status === "PENDING" ? ("Pending") : (`${migration.attempted} / ${migration.total} users pulled`)}
+                            {migration.status === "PENDING" ? ("Pending") : (`${migration.success} / ${migration.attempted} users pulled`)}
                         </Typography>
                     </Stack>
                 </AccordionSummary>
 
                 <AccordionDetails sx={{ display: "flex", flexDirection: "column" }}>
-                    <LinearProgressWithLabel variant="determinate" value={migration.total === 0 ? 0 : ((migration.attempted) / migration.total) * 100} color={migration.status === "SUCCESS" ? "success" : (migration.status === "FAILED" || migration.status === "STOPPED") ? "error" : migration.status === "PENDING" ? "info" : "warning"} sx={{ borderRadius: "1rem", transition: "background-color 0.2s ease-out" }} />
+                    <LinearProgressWithLabel variant="determinate" value={migration.attempted === 0 ? 0 : ((migration.success) / migration.attempted) * 100} color={migration.status === "SUCCESS" ? "success" : (migration.status === "FAILED" || migration.status === "STOPPED") ? "error" : migration.status === "PENDING" ? "info" : "warning"} sx={{ borderRadius: "1rem", transition: "background-color 0.2s ease-out" }} />
 
                     <Typography variant="body2" sx={{ fontWeight: "500", mt: "0.5rem" }}>
-                        {migration.attempted} / {migration.total} users pulled ({statusNames[migration.status]})
+                        {migration.success} / {migration.attempted} users pulled ({statusNames[migration.status]})
                     </Typography>
                     {migration.createdAt && <Typography variant="body2" sx={{ fontWeight: "500" }}>Created {IntlRelativeTime(new Date(migration.createdAt).getTime())}</Typography>}
                 </AccordionDetails>
