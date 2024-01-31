@@ -35,9 +35,5 @@ jobs:
       - name: Build project
         run: npm run build
 
-      # deploy locally, run "npm run deploy" then respond with the last 15 logs of /root/.pm2/logs/restorecord-out.log
-      - name: Deploy
-        run: |
-          npm run deploy
-          sleep 5
-          tail -n 5 /root/.pm2/logs/restorecord-out.log
+      - name: Deploy locally
+        run: npm run deploy
