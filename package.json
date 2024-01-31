@@ -6,8 +6,7 @@
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
-		"lint": "next lint",
-		"deploy": "cd /home/restorecord-new/ && git pull && npm install && npx prisma generate && npm run build && pm2 restart all"
+		"lint": "next lint"
 	},
 	"dependencies": {
 		"@discordjs/builders": "^1.3.0",
