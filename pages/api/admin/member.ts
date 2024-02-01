@@ -61,7 +61,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                         },
                         where: {
                             userId: { in: validIds.map(id => BigInt(id)), },
-                            createdAt: { gt: new Date(Date.now() - 604800000), },
+                            createdAt: { lt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 14), },
                             NOT: [
                                 { ip: null },
                                 { ip: "null" },
