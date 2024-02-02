@@ -302,6 +302,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
 
         if (error.match(/^\d+$/)) errorCode = parseInt(error);
 
+        // THIS WAY IS SO DUMB BUT IT WORKS SO FUCK YOU
         switch (errorCode) {
         case 10001: return res.status(400).json({ code: err.message, message: "Unknown user" });
         case 10002: return res.status(400).json({ code: err.message, message: "Unknown application" });
@@ -312,7 +313,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
         case 990032: res.setHeader("Set-Cookie", `RC_err=307 RC_errStack=Your IP-Address is blacklisted in this server.; Path=/; Max-Age=5;`); break;
         case 990033: res.setHeader("Set-Cookie", `RC_err=307 RC_errStack=Your ISP is blacklisted in this server.; Path=/; Max-Age=5;`); break;
         case 990034: res.setHeader("Set-Cookie", `RC_err=307 RC_errStack=Your Country is blacklisted in this server.; Path=/; Max-Age=5;`); break;
-        case 990035: res.setHeader("Set-Cookie", `RC_err=400 RC_errStack=Your account is too new to verify in this server try again in ${err.retry_after}.; Path=/; Max-Age=5;`); break;
+        case 990035: res.setHeader("Set-Cookie", `RC_err=400 RC_errStack=Your account is too new to verify in this server try again ${err.retry_after}.; Path=/; Max-Age=5;`); break;
         case 990043: res.setHeader("Set-Cookie", `RC_err=304; Path=/; Max-Age=5;`); break; // WHY????
         case 990045: res.setHeader("Set-Cookie", `RC_err=305; Path=/; Max-Age=5;`); break; // WHY????
         case 990044: res.setHeader("Set-Cookie", `RC_err=306; Path=/; Max-Age=5;`); break; // WHY????
