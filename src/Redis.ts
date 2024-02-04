@@ -9,12 +9,13 @@ function getRedisConfiguration(): { port: number; host: string; } {
 
 export function createRedisInstance(config = getRedisConfiguration()) {
     try {
-        const platform = process.env.platform;
+        const platform = process.env.PLATFORM || "PRODUCTION";
 
         if (platform === "TESTING") {
             return {
                 get: async () => null,
                 set: async () => {},
+                del: async () => {},
             };
         }
 
