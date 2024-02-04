@@ -21,29 +21,31 @@ async function buffer(readable: Readable) {
     return Buffer.concat(chunks);
 }
 
-async function postWebhook(subscription: any, account: any, status: string, description = "") {
-    if (description === "") description = `Subscription status is ${status}. ${subscription.cancel_at_period_end ? `(Plan ends: __${new Date(subscription.cancel_at * 1000).toLocaleString()})__` : ""}`;
+async function postWebhook(subscription: any, account: any, status: string, description = "", title = "Subscription Updated") {
+    if (description === "") description = `Subscription status is ${status}. ${subscription?.cancel_at_period_end ? `(Plan ends: __${new Date(subscription.cancel_at * 1000).toLocaleString()})__` : ""}`;
 
     await axios.post(`https://discord.com/api/webhooks/1053705505899548692/9LRHelRG4dmnSNR2Ili3Ab2SiyS96zHSz0Gy4o9g0GDsmdA6ZLli2CLlid7b0hQNd7rL`, {
         embeds: [
             {
-                title: "Subscription Updated",
+                title: title,
                 description: description,
-                color: subscription.cancel_at_period_end ? 0xFFFF00 : status === "active" ? 0x00ff12 : 0xff0000,
+                color: subscription?.cancel_at_period_end ? 0xFFFF00 : (status === "paid" || status === "active") ? 0x00ff12 : 0xff0000,
                 fields: [
                     {
                         name: "Subscription ID",
-                        value: `||${subscription.id}||`,
+                        value: `||${subscription.payment_intent ?? subscription.id}||`,
                         inline: true
                     },
-                    {
-                        name: "Current Period End",
-                        value: `<t:${Math.floor(subscription.current_period_end)}:F>`,
-                        inline: true
-                    },
+                    ...(subscription?.cancel_at_period_end ? [
+                        {
+                            name: "Current Period End",
+                            value: `<t:${Math.floor(subscription.current_period_end)}:F>`,
+                            inline: true
+                        }
+                    ] : []),
                     {
                         name: "Status",
-                        value: status === "active" ? `:white_check_mark: ${status}` : status === "trialing" ? `:hourglass: ${status}` : `:x: ${status}`,
+                        value: (status === "active" || status === "paid") ? `:white_check_mark: ${status}` : status === "trialing" ? `:hourglass: ${status}` : `:x: ${status}`,
                         inline: true
                     },
                     {
@@ -58,7 +60,7 @@ async function postWebhook(subscription: any, account: any, status: string, desc
                     },
                     {
                         name: "Amount",
-                        value: `$${subscription.plan.amount / 100}`,
+                        value: `$${subscription?.plan?.amount ? subscription.plan.amount / 100 : subscription.amount_total / 100}`,
                         inline: true
                     },
                 ]
@@ -84,10 +86,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         let event;
         let subscription: any;
         let status: string;
+        let session: any;
+        let payment: any;
 
         const buf = await buffer(req);
-        //const endpointSecret = "whsec_V36i82Fn70v9edAJHKeKwykhUI8bFLBt";
         const endpointSecret = "whsec_J2ZCMxWPvKeaStSWl4r1RdSnvTu39Gix";
+        // const endpointSecret = "whsec_V36i82Fn70v9edAJHKeKwykhUI8bFLBt"; // TESTING
         if (endpointSecret) {
             const signature: any = req.headers["stripe-signature"];
             try {
@@ -107,9 +111,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             status = subscription.status;
 
             var planFull = priceIds[subscription.items.data[0].price.id].plan;
-            var plan = planFull.replace("_monthly", "");
+            var role = planFull.replace("_monthly", "");
 
-            const paymentCreated = await prisma.payments.findUnique({ where: { subscriptionId: subscription.id } });
+            var paymentCreated = await prisma.payments.findUnique({ where: { subscriptionId: subscription.id } });
             if (!paymentCreated) {
                 await prisma.payments.create({
                     data: {
@@ -123,6 +127,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
 
             if (status === "trialing") {
+                let account;
+                if (session.metadata.account_id)
+                    account = await prisma.accounts.findUnique({ where: { id: Number(session.metadata.account_id) as number } });
+                else {
+                    console.error(`[STRIPE] Account not found for session ${session.id}`);
+                    return res.status(200).json({ success: false, message: "Account not found for session." });
+                }
+
+                await postWebhook(session, account, status);
+
                 const payment = await prisma.payments.findUnique({
                     where: {
                         subscriptionId: subscription.id,
@@ -146,7 +160,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     await prisma.accounts.update({
                         where: { id: Number(payment.accountId) as number },
                         data: {
-                            role: plan,
+                            role: role,
                             expiry: new Date(subscription.current_period_end * 1000)
                         }
                     });
@@ -201,7 +215,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             status = subscription.status;
 
             var planFull = priceIds[subscription.items.data[0].price.id].plan;
-            var plan = planFull.replace("_monthly", "");
+            var role = planFull.replace("_monthly", "");
 
             if (status !== "incomplete" && status !== "incomplete_expired" && status !== "draft" && status !== "past_due") {
                 let account;
@@ -215,7 +229,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 await postWebhook(subscription, account, status);
             }
 
-            const paymentUpdated = await prisma.payments.findUnique({ where: { subscriptionId: subscription.id } });
+            var paymentUpdated = await prisma.payments.findUnique({ where: { subscriptionId: subscription.id } });
             if (!paymentUpdated) {
                 await prisma.payments.create({
                     data: {
@@ -254,7 +268,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     await prisma.accounts.update({
                         where: { id: Number(payment.accountId) as number },
                         data: {
-                            role: plan,
+                            role: role,
                             expiry: new Date(subscription.current_period_end * 1000)
                         }
                     });
@@ -268,6 +282,77 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     });
                 }
             }
+            break;
+        
+        case "checkout.session.completed":
+            session = event.data.object;
+            status = session.payment_status;
+
+            if (session.mode !== "payment") break;
+
+            var paymentCreated = await prisma.payments.findUnique({ where: { subscriptionId: session.payment_intent } });
+            if (!paymentCreated) {
+                await prisma.payments.create({
+                    data: {
+                        subscriptionId: session.payment_intent,
+                        accountId: Number(session.metadata.account_id) as number,
+                        type: session.metadata.plan,
+                        amount: session.amount_total,
+                        payment_status: status,
+                    }
+                });
+            }
+
+            if (status === "paid") {
+                let account;
+                if (session.metadata.account_id)
+                    account = await prisma.accounts.findUnique({ where: { id: Number(session.metadata.account_id) as number } });
+                else {
+                    console.error(`[STRIPE] Account not found for session ${session.id}`);
+                    return res.status(200).json({ success: false, message: "Account not found for session." });
+                }
+
+                await postWebhook(session, account, status, `Payment complete via ${session.payment_method_types[0]}`, "Payment Complete");
+
+                const payment = await prisma.payments.findUnique({
+                    where: {
+                        subscriptionId: session.payment_intent,
+                        accountId: Number(session.metadata.account_id) as number
+                    }
+                });
+
+                var pricing = Object.values(priceIds).find((priceObj) => priceObj.plan === session.metadata.plan);
+                var role = pricing?.plan ?? "premium".replace("_monthly", "");
+                var expiry = pricing?.expiry ?? 2592000;
+
+                if (payment) {
+                    await prisma.payments.update({
+                        where: { id: payment.id },
+                        data: {
+                            payment_status: status,
+                            amount: session.amount_total,
+                            type: role
+                        }
+                    });
+
+                    await prisma.accounts.update({
+                        where: { id: Number(payment.accountId) as number },
+                        data: {
+                            role: role,
+                            expiry: new Date(Date.now() + expiry * 1000)
+                        }
+                    });
+
+                    await prisma.servers.updateMany({
+                        where: {
+                            ownerId: Number(payment.accountId) as number,
+                            pullTimeout: { gt: new Date() }
+                        },
+                        data: { pullTimeout: new Date() }
+                    });
+                }
+            }
+
             break;
         }
         return res.status(200).json({ success: true });
