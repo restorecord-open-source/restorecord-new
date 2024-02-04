@@ -74,8 +74,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             payment_method_types: ["card"],
             ...(req.body.klarna && { payment_method_types: ["klarna"] }),
             ...(req.body.giropay && { payment_method_types: ["giropay"] }),
-            success_url: `https://dev.restorecord.com/api/stripe/payment?success=true&session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `https://dev.restorecord.com/api/stripe/payment?canceled=true`,
+            success_url: `https://restorecord.com/api/stripe/payment?success=true&session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `https://restorecord.com/api/stripe/payment?canceled=true`,
             client_reference_id: String(user.id) as string,
             metadata: {
                 account_id: user.id,
