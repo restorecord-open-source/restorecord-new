@@ -9,6 +9,15 @@ function getRedisConfiguration(): { port: number; host: string; } {
 
 export function createRedisInstance(config = getRedisConfiguration()) {
     try {
+        const platform = process.env.platform;
+
+        if (platform === "TESTING") {
+            return {
+                get: async () => null,
+                set: async () => {},
+            };
+        }
+
         const options: RedisOptions = {
             host: config.host,
             lazyConnect: true,

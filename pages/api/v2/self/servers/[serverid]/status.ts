@@ -27,6 +27,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 migrationGuildId: String(migration.migrationGuildId) as string,
                 status: migration.status,
                 total: migration.totalCount,
+                attempted: migration.successCount + migration.failedCount + migration.invalidCount + migration.blacklistedCount + migration.bannedCount,
                 success: migration.successCount,
                 banned: migration.bannedCount,
                 maxGuilds: migration.maxGuildsCount,
