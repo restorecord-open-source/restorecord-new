@@ -77,6 +77,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             success_url: `https://restorecord.com/api/stripe/payment?success=true&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `https://restorecord.com/api/stripe/payment?canceled=true`,
             client_reference_id: String(user.id) as string,
+            customer_creation: "always",
             metadata: {
                 account_id: user.id,
                 plan: plan,
@@ -87,7 +88,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             }, } : {}),
             ...(req.body.klarna || req.body.giropay ? {
                 line_items: [{
-                    price: paymentid?.id,
+                    price: paymentid.id,
                     quantity: 1,
                 }],
             } : {
@@ -104,7 +105,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             }),
             ...(!req.body.klarna && !req.body.giropay && {
                 line_items: [{
-                    price: paymentid?.id,
+                    price: paymentid.id,
                     quantity: 1,
                 }],
             }),
@@ -116,6 +117,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             }),
             tax_id_collection: {
                 enabled: true,
+            },
+            consent_collection: {
+                terms_of_service: "required",
             },
             phone_number_collection: {
                 enabled: true,

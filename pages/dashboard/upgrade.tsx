@@ -233,8 +233,8 @@ export default function Upgrade() {
                             <Grid container sx={{ mt: 2, mb: 2 }}>
                                 {renderBillingCycleSelect(payments.payments.length === 0)}
 
-                                <LoadingButton variant="contained" color="primary" fullWidth event={() => {
-                                    axios.post("/api/stripe/checkout", {
+                                <LoadingButton variant="contained" color="primary" fullWidth event={async() => {
+                                    await axios.post("/api/stripe/checkout", {
                                         plan: selectedPlan.id,
                                         id: user.id,
                                     }, {
@@ -267,8 +267,8 @@ export default function Upgrade() {
 
                                 {renderBillingCycleSelect(false, true)}
 
-                                <LoadingButton variant="contained" color="primary" fullWidth event={() => {
-                                    axios.post("/api/coinbase/checkout", {
+                                <LoadingButton variant="contained" color="primary" fullWidth event={async() => {
+                                    await axios.post("/api/coinbase/checkout", {
                                         plan: selectedPlan.id,
                                         id: user.id,
                                     }, {
@@ -301,8 +301,8 @@ export default function Upgrade() {
 
                                 {renderBillingCycleSelect(false, true)}
 
-                                <LoadingButton variant="contained" color="primary" fullWidth event={() => {
-                                    axios.post("/api/stripe/checkout", {
+                                <LoadingButton variant="contained" color="primary" fullWidth event={async() => {
+                                    await axios.post("/api/stripe/checkout", {
                                         plan: selectedPlan.id,
                                         id: user.id,
                                         klarna: true,
@@ -337,8 +337,8 @@ export default function Upgrade() {
 
                                 {renderBillingCycleSelect(false, true)}
 
-                                <LoadingButton variant="contained" color="primary" fullWidth event={() => {
-                                    axios.post("/api/stripe/checkout", {
+                                <LoadingButton variant="contained" color="primary" fullWidth event={async() => {
+                                    await axios.post("/api/stripe/checkout", {
                                         plan: selectedPlan.id,
                                         id: user.id,
                                         giropay: true,
