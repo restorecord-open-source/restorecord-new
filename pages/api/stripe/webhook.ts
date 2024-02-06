@@ -128,11 +128,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             if (status === "trialing") {
                 let account;
-                if (session.metadata.account_id)
+                if (subscription.metadata.account_id) {
                     account = await prisma.accounts.findUnique({ where: { id: Number(session.metadata.account_id) as number } });
+                }
                 else {
-                    console.error(`[STRIPE] Account not found for session ${session.id}`);
-                    return res.status(200).json({ success: false, message: "Account not found for session." });
+                    console.error(`[STRIPE] Account not found for session ${subscription.id}`);
+                    return res.status(200).json({ success: false, message: "Account not found for subscription." });
                 }
 
                 await postWebhook(session, account, status);
