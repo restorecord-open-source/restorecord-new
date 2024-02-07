@@ -33,7 +33,7 @@ async function postWebhook(subscription: any, account: any, status: string, desc
                 fields: [
                     {
                         name: "Subscription ID",
-                        value: `||${subscription.payment_intent ?? subscription.id}||`,
+                        value: `||${subscription?.payment_intent ? subscription?.payment_intent : subscription.id}||`,
                         inline: true
                     },
                     ...(subscription?.cancel_at_period_end ? [
