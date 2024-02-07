@@ -323,7 +323,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 });
 
                 var pricing = Object.values(priceIds).find((priceObj) => priceObj.plan === session.metadata.plan);
-                var role = pricing?.plan ?? "premium".replace("_monthly", "");
+                var role = pricing?.plan.replace("_monthly", "") ?? "premium".replace("_monthly", "");
                 var expiry = pricing?.expiry ?? 2592000;
 
                 if (payment) {
