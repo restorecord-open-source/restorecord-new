@@ -136,7 +136,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     return res.status(200).json({ success: false, message: "Account not found for subscription." });
                 }
 
-                await postWebhook(session, account, status);
+                await postWebhook(subscription, account, status);
 
                 const payment = await prisma.payments.findUnique({
                     where: {
