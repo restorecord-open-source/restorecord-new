@@ -129,10 +129,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             if (status === "trialing") {
                 let account;
                 if (subscription.metadata.account_id) {
-                    account = await prisma.accounts.findUnique({ where: { id: Number(session.metadata.account_id) as number } });
+                    account = await prisma.accounts.findUnique({ where: { id: Number(subscription.metadata.account_id) as number } });
                 }
                 else {
-                    console.error(`[STRIPE] Account not found for session ${subscription.id}`);
+                    console.error(`[STRIPE] Account not found for subscription ${subscription.id}`);
                     return res.status(200).json({ success: false, message: "Account not found for subscription." });
                 }
 
