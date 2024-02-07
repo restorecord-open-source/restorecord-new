@@ -34,7 +34,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         if (serverCheck) {
             const errorMessages = [
                 { condition: serverCheck.name === name, message: "Server name is already in use" },
-                { condition: serverCheck.guildId === BigInt(guildId), message: "Guild ID is already in use" },
+                { condition: serverCheck.guildId === BigInt(guildId), message: "Guild ID is already in use, contact support" },
                 { condition: serverCheck.roleId === BigInt(roleId), message: "Role ID is already in use" },
             ];
           

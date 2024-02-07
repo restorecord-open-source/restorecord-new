@@ -193,9 +193,9 @@ export default function Dashboard() {
                 crosshairs: {
                     show: false,
                 },
-                categories: new Array(Math.min(Math.floor((new Date().getTime() - new Date(new Date().getFullYear(), 0, 1).getTime()) / (1000 * 60 * 60 * 24)) + 1, 30)).fill(0).map((_, i) => {
-                    const date = new Date(new Date(new Date().getFullYear(), 0, 1));
-                    date.setDate(date.getDate() + i);
+                categories: new Array(30).fill(0).map((_, i) => {
+                    const date = new Date();
+                    date.setDate(date.getDate() - i);
                     return date.toLocaleDateString("en-US", {
                         weekday: "short",
                         month: "short",
@@ -228,10 +228,10 @@ export default function Dashboard() {
         series: memberList ? memberList.servers.map((server: any) => ({
             name: server.name,
             data: Array.from({ 
-                length: Math.min(Math.floor((new Date().getTime() - new Date(new Date().getFullYear(), 0, 1).getTime()) / (1000 * 60 * 60 * 24)) + 1, 30) 
+                length: 30
             }, (_, i) => {
-                const date = new Date(new Date().getFullYear(), 0, 1);
-                date.setDate(date.getDate() + i);
+                const date = new Date();
+                date.setDate(date.getDate() - i);
                 return server.members.filter((member: any) => {
                     const createdAt = new Date(member.createdAt);
                     return createdAt.getDate() === date.getDate() && createdAt.getMonth() === date.getMonth() && createdAt.getFullYear() === date.getFullYear();

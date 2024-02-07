@@ -191,7 +191,7 @@ export default function Register() {
                                     variant="contained"
                                     color="primary"
                                     sx={{ mt: "1rem", mb: "0.5rem" }}
-                                    event={() => {
+                                    event={async() => {
                                         setError({ status: false, message: "" });
 
                                         if (!username || !email || !password || !password2) {
@@ -204,7 +204,7 @@ export default function Register() {
                                             return;
                                         }
 
-                                        captchaRef.current.execute();
+                                        await captchaRef.current.execute();
                                     }}
                                 >Register</LoadingButton>
                                 <Stack direction="row" spacing={2} justifyContent="space-between">

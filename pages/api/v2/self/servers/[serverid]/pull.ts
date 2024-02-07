@@ -459,7 +459,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         }).then(async () => {
             console.log(`[${server.name}] Pulling done with ${successCount} members pulled`);
 
-            await updateMigration(migration.id, "SUCCESS", successCount, bannedCount, maxGuildsCount, invalidCount, errorCount, blacklistedCount);
+            if (await getMigration(migration.id).then((m) => m?.status === "PULLING")) await updateMigration(migration.id, "SUCCESS", successCount, bannedCount, maxGuildsCount, invalidCount, errorCount, blacklistedCount);
 
             await prisma.servers.update({
                 where: {

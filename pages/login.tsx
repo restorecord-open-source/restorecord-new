@@ -137,8 +137,8 @@ export default function Login() {
                                     variant="contained"
                                     color="primary"
                                     sx={{ mt: "2rem", mb: "0.5rem" }}
-                                    event={() => {
-                                        fetch(`/api/v2/auth/login`, {
+                                    event={async() => {
+                                        await fetch(`/api/v2/auth/login`, {
                                             method: "POST",
                                             headers: {
                                                 "Content-Type": "application/json",

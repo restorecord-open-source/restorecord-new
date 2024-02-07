@@ -41,7 +41,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
     if (server) {
         if (server.name.toLowerCase() === data.serverName.toLowerCase()) return res.status(400).json({ success: false, message: "Server name is already in use" });
-        if (server.guildId === BigInt(data.guildId)) return res.status(400).json({ success: false, message: "Guild ID is already in use" });
+        if (server.guildId === BigInt(data.guildId)) return res.status(400).json({ success: false, message: "Guild ID is already in use, contact support" });
         if (server.roleId === BigInt(data.roleId)) return res.status(400).json({ success: false, message: "Role ID is already in use" });
     }
 
