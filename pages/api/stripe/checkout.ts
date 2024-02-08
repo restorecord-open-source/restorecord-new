@@ -77,7 +77,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             success_url: `https://restorecord.com/api/stripe/payment?success=true&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `https://restorecord.com/api/stripe/payment?canceled=true`,
             client_reference_id: String(user.id) as string,
-            customer_creation: "always",
             metadata: {
                 account_id: user.id,
                 plan: plan,
