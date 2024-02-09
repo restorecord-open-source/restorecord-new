@@ -7,7 +7,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
     try {
         const serverId: any = req.query.guild ? req.query.guild : "all";
 
-        const servers = await prisma.servers.findMany({ where: { ownerId: user.id } });
+        const servers = await prisma.servers.findMany({ where: { ownerId: user.id, guildId: serverId === "all" ? undefined : BigInt(serverId) } });
         if (!servers || servers.length === 0) {
             return res.status(200).json({ success: true, max: 0, pullable: 0, maxPages: 1, members: [], message: "No servers found." });
         }
@@ -18,9 +18,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         let guildIds: BigInt[] = [];
 
         if (serverId === undefined || serverId.toLowerCase() === "all") {
-            guildIds = servers.map((server: any) => server.guildId);
+            guildIds = servers.filter((server: any) => server.ownerId === user.id).map((server: any) => server.guildId);
         } else {
-            guildIds = serverId ? [BigInt(serverId)] : servers.map((server: any) => server.guildId);
+            guildIds = serverId ? [BigInt(serverId)] : servers.filter((server: any) => server.ownerId === user.id).map((server: any) => server.guildId);
         }
 
         const search: string | undefined = req.query.search ? req.query.search as string : undefined;
@@ -45,6 +45,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         });
 
         const memberList = await prisma.members.findMany({
+            select: {
+                id: true,
+                userId: true,
+                username: true,
+                avatar: true,
+                createdAt: true,
+                guildId: true,
+                accessToken: true,
+            },
             where: {
                 AND: conditions,
             },
@@ -70,7 +79,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 userId: String(member.userId),
                 username: member.username,
                 avatar: member.avatar,
-                ip: user.role !== "free" ? member.ip : null,
+                // ip: user.role !== "free" ? member.ip : null,
                 createdAt: member.createdAt,
                 guildId: String(member.guildId),
                 guildName: servers.find((server: any) => server.guildId === member.guildId)?.name,

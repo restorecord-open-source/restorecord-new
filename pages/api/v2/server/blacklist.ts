@@ -88,6 +88,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 const servers = await prisma.servers.findMany({ where: { ownerId: user.id } });
                 if (!servers) return res.status(400).json({ success: false, message: "No servers found." });
 
+                const serverIds = servers.map((server: any) => server.guildId);
+                if (!serverIds.includes(guildId)) return res.status(400).json({ success: false, message: "Server not found." });
+
                 if (user.role === "free") return res.status(400).json({ success: false, message: "You are not allowed to use this feature." });
 
                 const blacklist = await prisma.blacklist.findMany({ where: { guildId: { in: servers.map((server: any) => server.guildId) } } });

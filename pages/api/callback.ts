@@ -152,7 +152,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
 
             if (serverInfo.captcha) {
                 const captcha = await redis.get(`captcha:${userId}`);
-                const alreadyVerified = await prisma.members.findUnique({ where: { userId_guildId: { userId: userId, guildId: guildId } } });
+                const alreadyVerified = await prisma.members.findUnique({ select: { id: true }, where: { userId_guildId: { userId: userId, guildId: guildId } } });
                 if (!captcha && !alreadyVerified) {
                     res.setHeader("Set-Cookie", `RC_err=777 RC_errStack=${userId}; Path=/; Max-Age=120;`);
                     return res.redirect(`https://${domain}/verify/${state}`);
@@ -161,7 +161,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                 
             const isProxy = serverInfo.vpncheck && pCheck[IPAddr].proxy === "yes";
             let altCheck: any = [];
-            serverInfo.blockAlts ? altCheck = await prisma.members.findMany({ where: { guildId: guildId, ip: IPAddr, NOT: { userId: userId } }, select: { username: true, userId: true } }) : altCheck = [];
+            serverInfo.blockAlts ? altCheck = await prisma.members.findMany({ select: { username: true, userId: true }, where: { guildId: guildId, ip: IPAddr, NOT: { userId: userId } } }) : altCheck = [];
 
             // what the fuck xenos
             if (isProxy) {
