@@ -9,7 +9,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
         const servers = await prisma.servers.findMany({ where: { ownerId: user.id, guildId: serverId === "all" ? undefined : BigInt(serverId) } });
         if (!servers || servers.length === 0) {
-            return res.status(200).json({ success: true, max: 0, pullable: 0, maxPages: 1, members: [], message: "No servers found." });
+            return res.status(200).json({ success: true, max: 0, pullable: 0, maxPages: 0, members: [], message: "No servers found." });
         }
 
         const limit: number = req.query.max ? parseInt(req.query.max as string) : 50;
@@ -20,7 +20,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         if (serverId === undefined || serverId.toLowerCase() === "all") {
             guildIds = servers.filter((server: any) => server.ownerId === user.id).map((server: any) => server.guildId);
         } else {
-            guildIds = serverId ? [BigInt(serverId)] : servers.filter((server: any) => server.ownerId === user.id).map((server: any) => server.guildId);
+            guildIds = serverId ? (servers.find((server: any) => server.guildId === BigInt(serverId)) ? [BigInt(serverId)] : []) : servers.filter((server: any) => server.ownerId === user.id).map((server: any) => server.guildId);
         }
 
         const search: string | undefined = req.query.search ? req.query.search as string : undefined;
