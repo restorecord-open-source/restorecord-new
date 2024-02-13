@@ -53,7 +53,7 @@ model servers {
     blockWireless Boolean        @default(false)
     webhook       String?
     bgImage       String?
-    description   String         @default("Verify to view the rest of the server.")
+    description   String?
     tags          String?
     themeColor    String         @default("4f46e5")
     customBotId   Int
