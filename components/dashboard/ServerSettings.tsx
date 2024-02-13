@@ -401,11 +401,6 @@ export default function DashServerSettings({ user, id }: any) {
                                                     <Stack direction="column">
                                                         <Stack direction="row">
                                                             <Typography variant="h6">Server Icon</Typography>
-                                                            {user.role === "free" && (
-                                                                <Tooltip arrow placement="top" title="This feature requires the Premium subscription or higher.">
-                                                                    <CloseIcon color="error" sx={{ alignSelf: "center", ml: "0.25rem" }} />
-                                                                </Tooltip>
-                                                            )}
                                                         </Stack>
                                                         <TextField fullWidth variant="outlined" name="picture" value={newServer.picture} onChange={handleChange} inputProps={{ maxLength: 191 }} placeholder="Server Icon URL" type="url" disabled={user.role === "free"} />
                                                     </Stack>

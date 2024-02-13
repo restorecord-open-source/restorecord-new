@@ -224,16 +224,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         let blacklistedCount: number = 0;
         let errorCount: number = 0;
 
-        // await prisma.blacklist.findMany({ where: { type: 0, value: { in: members.map((m) => m.userId.toString()) } } }).then((blacklisted) => {
-        //     blacklisted.forEach((blacklistedMember) => {
-        //         const member = members.find((m) => m.userId === BigInt(blacklistedMember.value) as bigint);
-        //         if (member) {
-        //             members.splice(members.indexOf(member), 1);
-        //             blacklistedCount++;
-        //         }
-        //     });
-        // });
-
         const blacklisted = await prisma.blacklist.findMany({
             where: {
                 type: 0,
@@ -249,7 +239,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             }
         });
 
-        await prisma.migrations.update({ where: { id: migration.id }, data: { startedAt: new Date() } });
+        await prisma.migrations.update({ where: { id: migration.id }, data: { startedAt: new Date(), totalCount: members.length } });
 
         new Promise<void>(async (resolve, reject) => {
             let membersNew: members[] = await shuffle(members);
@@ -267,15 +257,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     
             console.log(`[${server.name}] Started Pulling`);
 
-            const MAX_PULL_TIME = 1000 * 60 * 2;
-            // const MAX_PULL_TIME = 1000 * 15;
+            const MAX_PULL_TIME = 1000 * 60 * 5;
 
             for (const member of membersNew) {
-                const newServer = await prisma.servers.findFirst({ where: { id: server.id } });
-
-                if (!newServer) return reject(`[${server.name}] Server not found`);
-                if (!newServer.pulling) return reject(`[${server.name}] Pulling stopped`);
-
                 console.log(`[${server.name}] [${member.username}] Pulling...`);
 
                 let isDone = false;

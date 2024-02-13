@@ -254,8 +254,10 @@ export async function sendWebhookMessage(webhookUrl: string, title: string = "Su
     if (IPAddr !== null && pCheck[IPAddr].proxy === "yes")
         operator = pCheck[IPAddr].operator ? `[\`${pCheck[IPAddr].operator.name}\`](${pCheck[IPAddr].operator.url})` : "Unknown";
 
+    const username = account.discriminator === "0" ? `@${account.username}` : `${account.username}#${account.discriminator}`;
+
     await axios.post(webhookUrl, {
-        content: `<@${account.id}> (${account.username}#${account.discriminator})`,
+        content: `<@${account.id}> (${username})`,
         embeds: [
             {
                 title: title,
@@ -263,7 +265,7 @@ export async function sendWebhookMessage(webhookUrl: string, title: string = "Su
                 timestamp: new Date().toISOString(),
                 color: type === 0 ? 0xff0000 : type === 1 ? 0x00ff00 : type === 2 ? 0xffff00 : 0x000000,
                 author: {
-                    name: `${account.username}#${account.discriminator}`,
+                    name: `${username}`,
                     url: `https://discord.id/?prefill=${account.id}`,
                     icon_url: account.avatar ? `https://cdn.discord.com/avatars/${account.id}/${account.avatar}.png` : `https://cdn.discord.com/embed/avatars/${account.discriminator % 5}.png`,
                 },
