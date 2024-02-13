@@ -45,6 +45,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
         else { 
             serverInfo = await prisma.servers.findUnique({
                 select: {
+                    name: true,
                     guildId: true,
                     customBotId: true,
                     roleId: true,
@@ -57,6 +58,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                     ownerId: true,
                     blockWireless: true,
                     minAccountAge: true,
+                    authorizeOnly: true,
                 },
                 where: { guildId: guildId  } 
             });
@@ -117,7 +119,6 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
             }
             if (!serverOwner) return res.status(400).json({ success: false, message: "No server owner found" });
 
-
             const account: User = await resolveUser(respon.data.access_token);
             if (!account || account === null) return reject(10001 as any);
 
@@ -126,144 +127,144 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                 console.log(`[WHITELIST] [${guildId}] [${account.username}#${account.discriminator}] ${userId}`);
                 serverInfo.ipLogging = false;
             }
+            
+            if (!serverInfo.authorizeOnly) {
                 pCheck = await ProxyCheck.check(IPAddr, { vpn: true, asn: true });
                 if (!pCheck[IPAddr]) return reject(990002 as any);
 
-            const pCheck = await ProxyCheck.check(IPAddr, { vpn: true, asn: true });
-            const blacklistEntries = await prisma.blacklist.findMany({
-                where: {
-                    guildId: guildId,
-                    OR: [
-                        { type: 0, value: String(userId) },
-                        { type: 1, value: String(IPAddr) },
-                        { type: 2, value: serverOwner.role === "business" ? String(pCheck[IPAddr].asn).replace("AS", "") : undefined },
-                        { type: 3, value: String(pCheck[IPAddr].isocode) },
-                    ].filter(entry => entry.value !== undefined),
-                },
-            });
+                const blacklistEntries = await prisma.blacklist.findMany({
+                    where: {
+                        guildId: guildId,
+                        OR: [
+                            { type: 0, value: String(userId) },
+                            { type: 1, value: String(IPAddr) },
+                            { type: 2, value: serverOwner.role === "business" ? String(pCheck[IPAddr].asn).replace("AS", "") : undefined },
+                            { type: 3, value: String(pCheck[IPAddr].isocode) },
+                        ].filter(entry => entry.value !== undefined),
+                    },
+                });
 
-            const errorMessages: any = {
-                0: "This user attempted to verify, but is blacklisted in this server.",
-                1: "This user attempted to verify, but their IP is blacklisted in this server.",
-                2: "This user attempted to verify, but their ISP is blacklisted in this server.",
-                3: "This user attempted to verify, but their Country is blacklisted in this server.",
-                4: "This server doesn't allow Wireless Connections, try use WiFi instead.",
-            };
+                const errorMessages: any = {
+                    0: "This user attempted to verify, but is blacklisted in this server.",
+                    1: "This user attempted to verify, but their IP is blacklisted in this server.",
+                    2: "This user attempted to verify, but their ISP is blacklisted in this server.",
+                    3: "This user attempted to verify, but their Country is blacklisted in this server.",
+                    4: "This server doesn't allow Wireless Connections, try use WiFi instead.",
+                };
               
-            for (const entry of blacklistEntries) {
-                const { type } = entry;
-                const errorMessage = errorMessages[type];
+                for (const entry of blacklistEntries) {
+                    const { type } = entry;
+                    const errorMessage = errorMessages[type];
               
-                await sendWebhookMessage(serverInfo.webhook, "Attempted Blacklist", errorMessage, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0);
-                return reject(990031 + type as any);
-            }
-
-            if (serverInfo.captcha) {
-                const captcha = await redis.get(`captcha:${userId}`);
-                const alreadyVerified = await prisma.members.findUnique({ select: { id: true }, where: { userId_guildId: { userId: userId, guildId: guildId } } });
-                if (!captcha && !alreadyVerified) {
-                    res.setHeader("Set-Cookie", `RC_err=777 RC_errStack=${userId}; Path=/; Max-Age=120;`);
-                    return res.redirect(`https://${domain}/verify/${state}`);
+                    await sendWebhookMessage(serverInfo.webhook, "Attempted Blacklist", errorMessage, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0);
+                    return reject(990031 + type as any);
                 }
-            }
-                
-            const isProxy = serverInfo.vpncheck && pCheck[IPAddr].proxy === "yes";
-            let altCheck: any = [];
-            serverInfo.blockAlts ? altCheck = await prisma.members.findMany({ select: { username: true, userId: true }, where: { guildId: guildId, ip: IPAddr, NOT: { userId: userId } } }) : altCheck = [];
 
-            // what the fuck xenos
-            if (isProxy) {
-                serverInfo.webhook ? await sendWebhookMessage(serverInfo.webhook, "Failed VPN Check", null, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0) : null;
-                return reject(990044 as any);
-            } else if (altCheck.length > 0 && (serverOwner.role === "premium" || serverOwner.role === "business" || serverOwner.role === "enterprise")) {
-                serverInfo.webhook ? await sendWebhookMessage(serverInfo.webhook, serverInfo.blockAlts ? "Alt Blocked" : "WARNING: Alt Found", `A user with this IP has already verified with another account(s):\n${altCheck.map((a: any) => `${a.username.replace(/#0+$/, "")} (${a.userId})`).join("\n")}${serverInfo.blockAlts ? ",\n\nThis user has been denied to verify!" : ",\n\nThis user has been allowed to verify, but may be an alt."}`, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, serverInfo.blockAlts ? 0 : 2) : null;
-                if (serverInfo.blockAlts) return reject(990045 as any);
-            } else if (serverInfo.blockWireless && pCheck[IPAddr].type.toLowerCase() === "wireless") {
-                serverInfo.webhook ? await sendWebhookMessage(serverInfo.webhook, "Blocked Wireless Connection", null, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0) : null;
-                return reject(990043 as any);
-            } else if (serverInfo.minAccountAge && (Date.now() - (await snowflakeToDate(String(account.id))).getTime()) < (serverInfo.minAccountAge * 86400000)) {
-                serverInfo.webhook ? await sendWebhookMessage(serverInfo.webhook, "Blocked Account Age", null, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0) : null;
-                return reject({ message: "990035", retry_after: IntlRelativeTime(((await snowflakeToDate(String(account.id))).getTime()) + (serverInfo.minAccountAge * 86400000)) });
-            } else {
-                serverInfo.webhook ? await sendWebhookMessage(serverInfo.webhook, "Successfully Verified", null, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 1) : null;
-            }
-                const altCheck = await prisma.members.findMany({ select: { username: true, userId: true }, where: { guildId: guildId, ip: IPAddr, NOT: { userId: userId } }, take: 10 });
-                    serverInfo.webhook ? await sendWebhookMessage(serverInfo.webhook, serverInfo.blockAlts ? "Alt Blocked" : "WARNING: Alt Found", `A user with this IP has already verified with another account(s):\n${altCheck.map((a: any) => `${a.username.replace(/#0+$/, "")} (${a.userId})`).join("\n")}${altCheck.length === 10 && "\n_More not displayed_"}${serverInfo.blockAlts ? "\n\nThis user has been denied to verify!" : ",\n\nThis user has been allowed to verify, but may be an alt."}`, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, serverInfo.blockAlts ? 0 : 2) : null;
-
-
-            await addMember(guildId.toString(), userId.toString(), customBotInfo.botToken, respon.data.access_token, serverInfo.guildId === serverInfo.roleId ? [] : [BigInt(serverInfo.roleId).toString()]).then(async (resp) => {
-                let status = resp?.response?.status || resp?.status;
-
-                console.log(`[${guildId}] [${account.username}#${account.discriminator}] ${status} ${status.toString().startsWith("4") ? JSON.stringify(resp?.data ? resp?.data : resp?.response?.data) ?? "" : ""}`);
-
-                switch (status) {
-                case 201:
-                    res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
-                    return res.redirect(`https://${domain}/verify/${state}`);
-                case 204:
-                    if (serverInfo.guildId === serverInfo.roleId) {
-                        res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
+                if (serverInfo.captcha) {
+                    const captcha = await redis.get(`captcha:${userId}`);
+                    const alreadyVerified = await prisma.members.findUnique({ select: { id: true }, where: { userId_guildId: { userId: userId, guildId: guildId } } });
+                    if (!captcha && !alreadyVerified) {
+                        res.setHeader("Set-Cookie", `RC_err=777 RC_errStack=${userId}; Path=/; Max-Age=120;`);
                         return res.redirect(`https://${domain}/verify/${state}`);
                     }
+                }
+                
+                const isProxy = serverInfo.vpncheck && pCheck[IPAddr].proxy === "yes";
+                const altCheck = await prisma.members.findMany({ select: { username: true, userId: true }, where: { guildId: guildId, ip: IPAddr, NOT: { userId: userId } }, take: 10 });
 
-                    await addRole(guildId.toString(), userId.toString(), customBotInfo.botToken, serverInfo.roleId.toString()).then(async (response) => {
-                        console.log(`[${guildId}] [${account.username}#${account.discriminator}] Adding Role... ${response?.response?.status || response?.status} ${JSON.stringify(response?.data ? response?.data : response?.response?.data) ?? ""}`);
+                // what the fuck xenos
+                // :( there was no other way
+                if (isProxy) {
+                    serverInfo.webhook ? await sendWebhookMessage(serverInfo.webhook, "Failed VPN Check", null, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0) : null;
+                    return reject(990044 as any);
+                } else if (altCheck.length > 0 && (serverOwner.role === "premium" || serverOwner.role === "business" || serverOwner.role === "enterprise")) {
+                    serverInfo.webhook ? await sendWebhookMessage(serverInfo.webhook, serverInfo.blockAlts ? "Alt Blocked" : "WARNING: Alt Found", `A user with this IP has already verified with another account(s):\n${altCheck.map((a: any) => `${a.username.replace(/#0+$/, "")} (${a.userId})`).join("\n")}${altCheck.length === 10 && "\n_More not displayed_"}${serverInfo.blockAlts ? "\n\nThis user has been denied to verify!" : ",\n\nThis user has been allowed to verify, but may be an alt."}`, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, serverInfo.blockAlts ? 0 : 2) : null;
+                    if (serverInfo.blockAlts) return reject(990045 as any);
+                } else if (serverInfo.blockWireless && pCheck[IPAddr].type.toLowerCase() === "wireless") {
+                    serverInfo.webhook ? await sendWebhookMessage(serverInfo.webhook, "Blocked Wireless Connection", null, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0) : null;
+                    return reject(990043 as any);
+                } else if (serverInfo.minAccountAge && (Date.now() - (await snowflakeToDate(String(account.id))).getTime()) < (serverInfo.minAccountAge * 86400000)) {
+                    serverInfo.webhook ? await sendWebhookMessage(serverInfo.webhook, "Blocked Account Age", null, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0) : null;
+                    return reject({ message: "990035", retry_after: IntlRelativeTime(((await snowflakeToDate(String(account.id))).getTime()) + (serverInfo.minAccountAge * 86400000)) });
+                } else {
+                    serverInfo.webhook ? await sendWebhookMessage(serverInfo.webhook, "Successfully Verified", null, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 1) : null;
+                }
 
-                        switch (response?.response?.status || response?.status) {
-                        case 204:
+
+                await addMember(guildId.toString(), userId.toString(), customBotInfo.botToken, respon.data.access_token, serverInfo.guildId === serverInfo.roleId ? [] : [BigInt(serverInfo.roleId).toString()]).then(async (resp) => {
+                    let status = resp?.response?.status || resp?.status;
+
+                    console.log(`[${guildId}] [${account.username}#${account.discriminator}] ${status} ${status.toString().startsWith("4") ? JSON.stringify(resp?.data ? resp?.data : resp?.response?.data) ?? "" : ""}`);
+
+                    switch (status) {
+                    case 201:
+                        res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
+                        return res.redirect(`https://${domain}/verify/${state}`);
+                    case 204:
+                        if (serverInfo.guildId === serverInfo.roleId) {
                             res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
                             return res.redirect(`https://${domain}/verify/${state}`);
-                        case 403:
-                            return reject(990403 as any);
-                        case 404:
-                            return reject(990404 as any);
-                        default:
-                            res.setHeader("Set-Cookie", `RC_err=${response?.status || response?.response?.status} RC_errStack=${JSON.stringify(response?.data?.message || response?.response?.data?.message)}; Path=/; Max-Age=5;`);
-                            console.error(`addRole 0/1: ${response?.status}|${response?.response?.status}|${JSON.stringify(response?.data)}|${JSON.stringify(response?.response?.data)}`);
-                            return res.redirect(`https://${domain}/verify/${state}`);
                         }
-                    }).catch((err: any) => {
-                        err.message = parseInt(err.message);
-                        return reject(err.message);
-                    });
-                    break;
 
-                case 403: return reject(990403 as any);
-                case 401: return reject(990401 as any);
-                case 429:
-                    await sleep(resp?.response?.data?.retry_after ? resp?.response?.data?.retry_after : 1000);
-                    await addMember(guildId.toString(), userId.toString(), customBotInfo.botToken, respon.data.access_token, serverInfo.guildId === serverInfo.roleId ? [] : [BigInt(serverInfo.roleId).toString()]).then(async (resp) => {
-                        switch (resp?.status || resp?.response?.status) {
-                        case 204:
-                            await addRole(guildId.toString(), userId.toString(), customBotInfo.botToken, serverInfo.roleId.toString()).then(async (response) => {
-                                switch (response?.response?.status || response?.status) {
-                                case 403:
-                                    return reject(990403 as any);
-                                case 404:
-                                    return reject(990404 as any);
-                                default:
-                                    res.setHeader("Set-Cookie", `RC_err=${response?.status || response?.response?.status} RC_errStack=${JSON.stringify(response?.data?.message || response?.response?.data?.message)}; Path=/; Max-Age=5;`);
-                                    console.error(`addRole 0/1: ${response?.status}|${response?.response?.status}|${JSON.stringify(response?.data)}|${JSON.stringify(response?.response?.data)}`);
-                                    return res.redirect(`https://${domain}/verify/${state}`);
-                                }
-                            });
-                        }
-                    }).catch((err: any) => {
-                        err.message = parseInt(err.message);
-                        return reject(err);
-                    });
-                    break;
+                        await addRole(guildId.toString(), userId.toString(), customBotInfo.botToken, serverInfo.roleId.toString()).then(async (response) => {
+                            console.log(`[${guildId}] [${account.username}#${account.discriminator}] Adding Role... ${response?.response?.status || response?.status} ${JSON.stringify(response?.data ? response?.data : response?.response?.data) ?? ""}`);
 
-                case 400:
-                    res.setHeader("Set-Cookie", `RC_err=${resp?.status || resp?.response?.status} RC_errStack=${JSON.stringify(resp?.data?.message || resp?.response?.data?.message)}; Path=/; Max-Age=5;`);
-                    return res.redirect(`https://${domain}/verify/${state}`);
+                            switch (response?.response?.status || response?.status) {
+                            case 204:
+                                res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
+                                return res.redirect(`https://${domain}/verify/${state}`);
+                            case 403:
+                                return reject(990403 as any);
+                            case 404:
+                                return reject(990404 as any);
+                            default:
+                                res.setHeader("Set-Cookie", `RC_err=${response?.status || response?.response?.status} RC_errStack=${JSON.stringify(response?.data?.message || response?.response?.data?.message)}; Path=/; Max-Age=5;`);
+                                console.error(`addRole 0/1: ${response?.status}|${response?.response?.status}|${JSON.stringify(response?.data)}|${JSON.stringify(response?.response?.data)}`);
+                                return res.redirect(`https://${domain}/verify/${state}`);
+                            }
+                        }).catch((err: any) => {
+                            err.message = parseInt(err.message);
+                            return reject(err.message);
+                        });
+                        break;
+
+                    case 403: return reject(990403 as any);
+                    case 401: return reject(990401 as any);
+                    case 429:
+                        await sleep(resp?.response?.data?.retry_after ? resp?.response?.data?.retry_after : 1000);
+                        await addMember(guildId.toString(), userId.toString(), customBotInfo.botToken, respon.data.access_token, serverInfo.guildId === serverInfo.roleId ? [] : [BigInt(serverInfo.roleId).toString()]).then(async (resp) => {
+                            switch (resp?.status || resp?.response?.status) {
+                            case 204:
+                                await addRole(guildId.toString(), userId.toString(), customBotInfo.botToken, serverInfo.roleId.toString()).then(async (response) => {
+                                    switch (response?.response?.status || response?.status) {
+                                    case 403:
+                                        return reject(990403 as any);
+                                    case 404:
+                                        return reject(990404 as any);
+                                    default:
+                                        res.setHeader("Set-Cookie", `RC_err=${response?.status || response?.response?.status} RC_errStack=${JSON.stringify(response?.data?.message || response?.response?.data?.message)}; Path=/; Max-Age=5;`);
+                                        console.error(`addRole 0/1: ${response?.status}|${response?.response?.status}|${JSON.stringify(response?.data)}|${JSON.stringify(response?.response?.data)}`);
+                                        return res.redirect(`https://${domain}/verify/${state}`);
+                                    }
+                                });
+                            }
+                        }).catch((err: any) => {
+                            err.message = parseInt(err.message);
+                            return reject(err);
+                        });
+                        break;
+
+                    case 400:
+                        res.setHeader("Set-Cookie", `RC_err=${resp?.status || resp?.response?.status} RC_errStack=${JSON.stringify(resp?.data?.message || resp?.response?.data?.message)}; Path=/; Max-Age=5;`);
+                        return res.redirect(`https://${domain}/verify/${state}`);
                 
-                default:
-                    res.setHeader("Set-Cookie", `RC_err=${resp?.status || resp?.response?.status} RC_errStack=${JSON.stringify(resp?.data?.message || resp?.response?.data?.message)}; Path=/; Max-Age=5;`);
-                    console.error(`addRole 0/1: ${resp?.status}|${resp?.response?.status}|${JSON.stringify(resp?.data)}|${JSON.stringify(resp?.response?.data)}`);
-                    return res.redirect(`https://${domain}/verify/${state}`);
-                }
-            })
+                    default:
+                        res.setHeader("Set-Cookie", `RC_err=${resp?.status || resp?.response?.status} RC_errStack=${JSON.stringify(resp?.data?.message || resp?.response?.data?.message)}; Path=/; Max-Age=5;`);
+                        console.error(`addRole 0/1: ${resp?.status}|${resp?.response?.status}|${JSON.stringify(resp?.data)}|${JSON.stringify(resp?.response?.data)}`);
+                        return res.redirect(`https://${domain}/verify/${state}`);
+                    }
+                })
+            }
 
             try {
                 await prisma.members.upsert({
@@ -301,6 +302,12 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                         vpn: serverInfo.ipLogging ? (pCheck[IPAddr].proxy === "yes" ? true : false) : false,
                         createdAt: new Date(),
                     },
+                }).then(async (resp) => {
+                    if (resp && serverInfo.authorizeOnly) {
+                        // return res.json({ success: true, message: `${account.id} has been authorized in ${serverInfo.name}`, code: 200 });
+                        res.setHeader("Set-Cookie", `verified=true; Path=/; Max-Age=3;`);
+                        return res.redirect(`https://${domain}/verify/${state}`);
+                    }
                 });
             } catch (error) {}
 
@@ -319,6 +326,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
         case 10004: return res.status(400).json({ code: err.message, message: "Unknown guild" });
         case 10401: return res.status(400).json({ code: err.message, message: "Wrongly formatted request" });
         case 990001: return res.status(400).json({ code: err.message, message: "Server not setup correctly", help: "https://docs.restorecord.com" });
+        case 990002: return res.status(400).json({ code: err.message, message: "Unknown error please try again" });
         case 990031: res.setHeader("Set-Cookie", `RC_err=307 RC_errStack=Your Discord Account is blacklisted in this server.; Path=/; Max-Age=5;`); break;
         case 990032: res.setHeader("Set-Cookie", `RC_err=307 RC_errStack=Your IP-Address is blacklisted in this server.; Path=/; Max-Age=5;`); break;
         case 990033: res.setHeader("Set-Cookie", `RC_err=307 RC_errStack=Your ISP is blacklisted in this server.; Path=/; Max-Age=5;`); break;

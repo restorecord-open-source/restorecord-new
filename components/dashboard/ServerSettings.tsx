@@ -38,6 +38,7 @@ import Avatar from "@mui/material/Avatar";
 import Fade from "@mui/material/Fade";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
+import { AlertTitle } from "@mui/material";
 
 function CustomTabPanel(props: any) {
     const { children, value, index, ...other } = props;
@@ -67,6 +68,7 @@ export default function DashServerSettings({ user, id }: any) {
         ipLogging: false,
         discoverable: 0,
         captcha: false,
+        authorizeOnly: false,
         blockAlts: false,
         blockWireless: false,
         unlisted: false,
@@ -115,6 +117,7 @@ export default function DashServerSettings({ user, id }: any) {
                 verified: server.verified,
                 discoverable: server.discoverable,
                 captcha: server.captcha,
+                authorizeOnly: server.authorizeOnly,
                 picture: server.picture ? server.picture : "",
                 description: server.description ? server.description : "",
                 minAccountAge: server.minAccountAge ? server.minAccountAge : 0,
@@ -150,6 +153,7 @@ export default function DashServerSettings({ user, id }: any) {
                 private: newServer.private,
                 discoverable: newServer.discoverable,
                 captcha: newServer.captcha,
+                authorizeOnly: newServer.authorizeOnly,
                 vpnCheck: newServer.vpncheck,
                 picture: newServer.picture,
                 background: newServer.background,
@@ -191,9 +195,9 @@ export default function DashServerSettings({ user, id }: any) {
         setNewServer({ ...newServer, themeColor: colors.hex });
     }
 
-    function getAllGuilds(botToken: string) {
+    async function getAllGuilds(botToken: string) {
         setAllServers([]);
-        axios.get("/api/v2/users/guilds", {
+        await axios.get("/api/v2/users/guilds", {
             headers: {
                 "Authorization": `Bot ${botToken}`,
             },
@@ -206,9 +210,9 @@ export default function DashServerSettings({ user, id }: any) {
         });
     }
 
-    function getGuildRoles(guildId: string, botToken: string) {
+    async function getGuildRoles(guildId: string, botToken: string) {
         setAllRoles([]);
-        axios.get(`/api/v2/users/guilds/${guildId}/roles`, {
+        await axios.get(`/api/v2/users/guilds/${guildId}/roles`, {
             headers: {
                 "Authorization": `Bot ${botToken}`,
             },
@@ -221,10 +225,10 @@ export default function DashServerSettings({ user, id }: any) {
         });
     }
 
-    function getBotClient(botToken: string) {
+    async function getBotClient(botToken: string) {
         setBotClient({ loading: true, valid: false });
 
-        axios.get(`/api/v2/users/@me`, {
+        await axios.get(`/api/v2/users/@me`, {
             headers: {
                 "Authorization": `Bot ${botToken}`,
             },
@@ -486,6 +490,12 @@ export default function DashServerSettings({ user, id }: any) {
                                     </CustomTabPanel>
 
                                     <CustomTabPanel value={settingsTab} index={2}>
+                                        {server.authorizeOnly && (
+                                            <Alert severity="error" sx={{ mb: "1rem" }}>
+                                                <AlertTitle>Warning</AlertTitle>
+                                                You have enabled the &quot;Authorize Only&quot; feature, this means that RestoreCord will only add the member to your Database, <b>bypass any blacklists</b>, and will <b>NOT</b> give them the Verified Role or send a message to the Webhook URL.
+                                            </Alert>
+                                        )}
                                         <Stack direction="column" spacing={2}>
                                             <Stack direction="row">
                                                 <Typography variant="h6">IP Logging</Typography>
@@ -500,6 +510,19 @@ export default function DashServerSettings({ user, id }: any) {
                                                     <InfoIcon sx={{ fontSize: "1rem", alignSelf: "center", ml: "0.25rem" }} />
                                                 </Tooltip>
                                                 <Switch onChange={handleChange} name="captcha" defaultChecked={server.captcha} />
+                                            </Stack>
+                                            <Stack direction="row">
+                                                <Typography variant="h6">Authorize Only</Typography>
+                                                {user.role !== "enterprise" ? (
+                                                    <Tooltip arrow placement="top" title="This feature requires the Enterprise subscription">
+                                                        <CloseIcon color="error" sx={{ alignSelf: "center", ml: "0.25rem" }} />
+                                                    </Tooltip>
+                                                ) : (
+                                                    <Tooltip arrow placement="top" title="If enabled, RestoreCord will ONLY add the member to your Database, and will not give them the Verified Role or send a message to the Webhook URL.">
+                                                        <InfoIcon sx={{ fontSize: "1rem", alignSelf: "center", ml: "0.25rem" }} />
+                                                    </Tooltip>
+                                                )}
+                                                <Switch onChange={handleChange} name="authorizeOnly" defaultChecked={server.authorizeOnly} disabled={user.role === "free"} />
                                             </Stack>
                                             <Stack direction="row">
                                                 <Typography variant="h6">Webhook Logs</Typography>

@@ -54,6 +54,7 @@ model servers {
     webhook       String?
     bgImage       String?
     description   String         @default("Verify to view the rest of the server.")
+    tags          String?
     themeColor    String         @default("4f46e5")
     customBotId   Int
     pulling       Boolean        @default(false)
@@ -62,11 +63,13 @@ model servers {
     ipLogging     Boolean        @default(true)
     captcha       Boolean        @default(false)
     locked        Boolean        @default(false)
+    feedbackPage  Boolean        @default(false)
     verified      Boolean        @default(false)
     minAccountAge Int            @default(0)
     unlisted      Boolean        @default(false)
     private       Boolean        @default(false)
     inviteOnly    Boolean        @default(false)
+    authorizeOnly Boolean        @default(false)
     discoverable  Int            @default(0)
     theme         Theme          @default(DEFAULT)
     createdAt     DateTime       @default(now())
@@ -78,11 +81,16 @@ model servers {
     guildMembers  guildMembers[]
     migrations    migrations[]
     invites       invites[]
+    feedback      feedback[]
 
     @@index([name])
-    @@index([guildId])
-    @@index([customBotId])
     @@index([ownerId])
+    @@index([guildId])
+    @@index([roleId])
+    @@index([description])
+    @@index([tags])
+    @@index([customBotId])
+    @@index([createdAt])
 }
 
 model invites {
@@ -95,6 +103,17 @@ model invites {
     createdAt DateTime @default(now())
 
     @@index([code])
+    @@index([guildId])
+}
+
+model feedback {
+    id        Int      @id @default(autoincrement())
+    stars     Int      @default(5)
+    message   String   @db.LongText()
+    guildId   BigInt   @db.UnsignedBigInt
+    guild     servers  @relation(fields: [guildId], references: [guildId])
+    createdAt DateTime @default(now())
+
     @@index([guildId])
 }
 

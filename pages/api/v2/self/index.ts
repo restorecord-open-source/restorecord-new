@@ -70,6 +70,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     minAccountAge: server.minAccountAge,
                     blockWireless: server.blockWireless,
                     captcha: server.captcha,
+                    authorizeOnly: server.authorizeOnly,
                     bgImage: server.bgImage,
                     themeColor: server.themeColor,
                     vpncheck: server.vpncheck,
