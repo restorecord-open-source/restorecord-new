@@ -10,7 +10,7 @@ interface Server {
     name: string;
     guildId: string;
     clientId: string;
-    description?: string;
+    description?: string | null;
     picture?: string;
 }
 
