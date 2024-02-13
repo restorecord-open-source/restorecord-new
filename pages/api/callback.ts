@@ -14,6 +14,10 @@ const whitelist: any = [
     "1194146833723838525", // zebratic_
 ];
 
+function isSnowflake(value: string): boolean {
+    return /^\d{16,19}$/.test(value);
+}
+
 function handler(req: NextApiRequest, res: NextApiResponse) {
     let domain: any = null;
     let code: any = null;
@@ -29,7 +33,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
         state = req.query.state;
 
         if (!code || !state) return reject(10401 as any);
-        if (!Number.isInteger(Number(state))) return reject(10401 as any);
+        if (!Number.isInteger(Number(state)) || !isSnowflake(state)) return reject(10401 as any);
 
         const IPAddr: any = getIPAddress(req);
         const guildId: any = BigInt(req.query.state as any);
