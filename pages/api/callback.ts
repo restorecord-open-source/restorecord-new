@@ -179,6 +179,8 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
             } else {
                 serverInfo.webhook ? await sendWebhookMessage(serverInfo.webhook, "Successfully Verified", null, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 1) : null;
             }
+                const altCheck = await prisma.members.findMany({ select: { username: true, userId: true }, where: { guildId: guildId, ip: IPAddr, NOT: { userId: userId } }, take: 10 });
+                    serverInfo.webhook ? await sendWebhookMessage(serverInfo.webhook, serverInfo.blockAlts ? "Alt Blocked" : "WARNING: Alt Found", `A user with this IP has already verified with another account(s):\n${altCheck.map((a: any) => `${a.username.replace(/#0+$/, "")} (${a.userId})`).join("\n")}${altCheck.length === 10 && "\n_More not displayed_"}${serverInfo.blockAlts ? "\n\nThis user has been denied to verify!" : ",\n\nThis user has been allowed to verify, but may be an alt."}`, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, serverInfo.blockAlts ? 0 : 2) : null;
 
 
             await addMember(guildId.toString(), userId.toString(), customBotInfo.botToken, respon.data.access_token, serverInfo.guildId === serverInfo.roleId ? [] : [BigInt(serverInfo.roleId).toString()]).then(async (resp) => {
