@@ -28,6 +28,8 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
     let customBotInfo: any = null;
     let serverOwner: any = null;
 
+    let pCheck: any = null;
+
     return new Promise(async (resolve, reject) => {
         code = req.query.code;
         state = req.query.state;
@@ -124,6 +126,8 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                 console.log(`[WHITELIST] [${guildId}] [${account.username}#${account.discriminator}] ${userId}`);
                 serverInfo.ipLogging = false;
             }
+                pCheck = await ProxyCheck.check(IPAddr, { vpn: true, asn: true });
+                if (!pCheck[IPAddr]) return reject(990002 as any);
 
             const pCheck = await ProxyCheck.check(IPAddr, { vpn: true, asn: true });
             const blacklistEntries = await prisma.blacklist.findMany({
