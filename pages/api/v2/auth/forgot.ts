@@ -51,6 +51,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         }
                     });
 
+                    // check if there was already an email for password reset in the last 5min
+                    const recentEmail = await prisma.emails.findFirst({ where: { title: "Password Reset", accountId: account.id, createdAt: { gte: new Date(new Date().getTime() - 5 * 60 * 1000) } } });
+                    if (recentEmail) return res.status(400).json({ message: "Please wait before requesting another password reset" });
+
                     await prisma.emails.create({
                         data: {
                             title: "Password Reset",
@@ -59,6 +63,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             accountId: account.id,
                         }
                     });
+
 
 
                     await axios.get(`https://ipinfo.io/${getIPAddress(req)}/json?token=${process.env.IPINFO_TOKEN}`).then(async (res) => {
@@ -127,16 +132,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     if (!email) return res.status(400).json({ message: "Invalid Reset Link" });
                     if (email.expires < new Date()) return res.status(400).json({ message: "Reset Link Expired" });
                     if (email.used === true) return res.status(400).json({ message: "Reset Link Already Used" });
-
+                    
                     const account = await prisma.accounts.findFirst({ where: { id: email.accountId } });
                     if (!account) return res.status(400).json({ message: "Account not found" });
-
+                    
                     const password = await bcrypt.hash(data.newPassword, await bcrypt.genSalt(10));
-
+                    
                     await prisma.sessions.deleteMany({ where: { accountId: account.id } });
                     await prisma.accounts.update({ where: { id: account.id }, data: { password } });
                     await prisma.emails.update({ where: { id: email.id }, data: { used: true } });
-
+                    
                     await prisma.logs.create({
                         data: {
                             type: 3,

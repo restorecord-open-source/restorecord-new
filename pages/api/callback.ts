@@ -130,7 +130,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
             
             if (!serverInfo.authorizeOnly) {
                 pCheck = await ProxyCheck.check(IPAddr, { vpn: true, asn: true });
-                if (!pCheck[IPAddr]) return reject(990002 as any);
+                // if (!pCheck[IPAddr]) return reject(990002 as any);
 
                 const blacklistEntries = await prisma.blacklist.findMany({
                     where: {
@@ -178,7 +178,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
                     serverInfo.webhook ? await sendWebhookMessage(serverInfo.webhook, "Failed VPN Check", null, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0) : null;
                     return reject(990044 as any);
                 } else if (altCheck.length > 0 && (serverOwner.role === "premium" || serverOwner.role === "business" || serverOwner.role === "enterprise")) {
-                    serverInfo.webhook ? await sendWebhookMessage(serverInfo.webhook, serverInfo.blockAlts ? "Alt Blocked" : "WARNING: Alt Found", `A user with this IP has already verified with another account(s):\n${altCheck.map((a: any) => `${a.username.replace(/#0+$/, "")} (${a.userId})`).join("\n")}${altCheck.length === 10 && "\n_More not displayed_"}${serverInfo.blockAlts ? "\n\nThis user has been denied to verify!" : ",\n\nThis user has been allowed to verify, but may be an alt."}`, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, serverInfo.blockAlts ? 0 : 2) : null;
+                    serverInfo.webhook ? await sendWebhookMessage(serverInfo.webhook, serverInfo.blockAlts ? "Alt Blocked" : "WARNING: Alt Found", `A user with this IP has already verified with another account(s):\n${altCheck.map((a: any) => `${a.username.replace(/#0+$/, "")} (${a.userId})`).join("\n")}${altCheck.length === 10 ?  "\n_More not displayed_" : null}${serverInfo.blockAlts ? "\n\nThis user has been denied to verify!" : ",\n\nThis user has been allowed to verify, but may be an alt."}`, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, serverInfo.blockAlts ? 0 : 2) : null;
                     if (serverInfo.blockAlts) return reject(990045 as any);
                 } else if (serverInfo.blockWireless && pCheck[IPAddr].type.toLowerCase() === "wireless") {
                     serverInfo.webhook ? await sendWebhookMessage(serverInfo.webhook, "Blocked Wireless Connection", null, serverOwner, pCheck, serverInfo.ipLogging ? IPAddr : null, account, 0) : null;

@@ -39,6 +39,7 @@ import Fade from "@mui/material/Fade";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import { AlertTitle } from "@mui/material";
+import LoadingButton from "../misc/LoadingButton";
 
 function CustomTabPanel(props: any) {
     const { children, value, index, ...other } = props;
@@ -130,59 +131,6 @@ export default function DashServerSettings({ user, id }: any) {
             getBotClient(user.bots.find((bot: any) => bot.id === server.customBotId).botToken);
         }
     }, [server]);
-
-    function handleSubmit(e: any) {
-        e.preventDefault();
-
-        fetch(`/api/v2/self/servers/${server.guildId}/edit`, {
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
-            },
-            body: JSON.stringify({
-                name: newServer.serverName,
-                guildId: newServer.guildId,
-                roleId: newServer.roleId,
-                webhook: newServer.webhook,
-                webhookCheck: newServer.webhookcheck,
-                ipLogging: newServer.ipLogging,
-                blockAlts: newServer.blockAlts,
-                blockWireless: newServer.blockWireless,
-                unlisted: newServer.unlisted,
-                private: newServer.private,
-                discoverable: newServer.discoverable,
-                captcha: newServer.captcha,
-                authorizeOnly: newServer.authorizeOnly,
-                vpnCheck: newServer.vpncheck,
-                picture: newServer.picture,
-                background: newServer.background,
-                minAccountAge: newServer.minAccountAge,
-                description: newServer.description,
-                theme: newServer.theme,
-                themeColor: newServer.themeColor
-            })
-        })
-            .then(res => res.json())
-            .then(res => {
-                if (!res.success) {
-                    setNotiTextE(res.message);
-                    setOpenE(true);
-                }
-                else {
-                    setNotiTextS(res.message);
-                    setOpenS(true);
-                    setTimeout(() => {
-                        router.push("/dashboard/server");
-                    }, 1250);
-                }
-            })
-            .catch(err => {
-                setNotiTextE(err.message);
-                setOpenE(true);
-            });
-
-    }
 
     function handleChange(e: any) {
         const { name, value, checked } = e.target;
@@ -342,7 +290,14 @@ export default function DashServerSettings({ user, id }: any) {
                                     </Alert>
                                 )}
 
-                                <form onSubmit={handleSubmit}>
+                                <form onSubmit={(e) => e.preventDefault()}>
+                                    {server.authorizeOnly && (
+                                        <Alert severity="error" sx={{ mb: "1rem" }}>
+                                            <AlertTitle>Warning</AlertTitle>
+                                            You have enabled the &quot;Authorize Only&quot; feature, this means that RestoreCord will only add the member to your Database, <b>bypass any blacklists</b>, and will <b>NOT</b> give them the Verified Role or send a message to the Webhook URL.
+                                        </Alert>
+                                    )}
+
                                     <Tabs value={settingsTab} onChange={(e, newValue) => setSettingsTab(newValue)}  aria-label="settings tab" sx={{ mb: 2 }} variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile> 
                                         <Tab label="General" id="settings-tabs-0" aria-controls="settings-tabs-0" />
                                         <Tab label="Visual" id="settings-tabs-1" aria-controls="settings-tabs-1" />
@@ -490,12 +445,6 @@ export default function DashServerSettings({ user, id }: any) {
                                     </CustomTabPanel>
 
                                     <CustomTabPanel value={settingsTab} index={2}>
-                                        {server.authorizeOnly && (
-                                            <Alert severity="error" sx={{ mb: "1rem" }}>
-                                                <AlertTitle>Warning</AlertTitle>
-                                                You have enabled the &quot;Authorize Only&quot; feature, this means that RestoreCord will only add the member to your Database, <b>bypass any blacklists</b>, and will <b>NOT</b> give them the Verified Role or send a message to the Webhook URL.
-                                            </Alert>
-                                        )}
                                         <Stack direction="column" spacing={2}>
                                             <Stack direction="row">
                                                 <Typography variant="h6">IP Logging</Typography>
@@ -522,7 +471,7 @@ export default function DashServerSettings({ user, id }: any) {
                                                         <InfoIcon sx={{ fontSize: "1rem", alignSelf: "center", ml: "0.25rem" }} />
                                                     </Tooltip>
                                                 )}
-                                                <Switch onChange={handleChange} name="authorizeOnly" defaultChecked={server.authorizeOnly} disabled={user.role === "free"} />
+                                                <Switch onChange={handleChange} name="authorizeOnly" defaultChecked={server.authorizeOnly} disabled={user.role !== "enterprise"} />
                                             </Stack>
                                             <Stack direction="row">
                                                 <Typography variant="h6">Webhook Logs</Typography>
@@ -644,9 +593,58 @@ export default function DashServerSettings({ user, id }: any) {
                                     </CustomTabPanel>
 
 
-                                    <Button variant="contained" type="submit" sx={{ mb: 2 }} fullWidth>
+                                    <LoadingButton variant="contained" type="submit" sx={{ mb: 2 }} fullWidth event={async() => {
+                                        await fetch(`/api/v2/self/servers/${server.guildId}/edit`, {
+                                            method: "PATCH",
+                                            headers: {
+                                                "Content-Type": "application/json",
+                                                "Authorization": (process.browser && window.localStorage.getItem("token")) ?? token,
+                                            },
+                                            body: JSON.stringify({
+                                                name: newServer.serverName,
+                                                guildId: newServer.guildId,
+                                                roleId: newServer.roleId,
+                                                webhook: newServer.webhook,
+                                                webhookCheck: newServer.webhookcheck,
+                                                ipLogging: newServer.ipLogging,
+                                                blockAlts: newServer.blockAlts,
+                                                blockWireless: newServer.blockWireless,
+                                                unlisted: newServer.unlisted,
+                                                private: newServer.private,
+                                                discoverable: newServer.discoverable,
+                                                captcha: newServer.captcha,
+                                                authorizeOnly: newServer.authorizeOnly,
+                                                vpnCheck: newServer.vpncheck,
+                                                picture: newServer.picture,
+                                                background: newServer.background,
+                                                minAccountAge: newServer.minAccountAge,
+                                                description: newServer.description,
+                                                theme: newServer.theme,
+                                                themeColor: newServer.themeColor
+                                            })
+                                        })
+                                            .then(res => res.json())
+                                            .then(res => {
+                                                if (!res.success) {
+                                                    setNotiTextE(res.message);
+                                                    setOpenE(true);
+                                                }
+                                                else {
+                                                    setNotiTextS(res.message);
+                                                    setOpenS(true);
+                                                    setTimeout(() => {
+                                                        router.push("/dashboard/server");
+                                                    }, 1250);
+                                                }
+                                            })
+                                            .catch(err => {
+                                                setNotiTextE(err.message);
+                                                setOpenE(true);
+                                            });
+                                
+                                    }}>
                                         Save Changes
-                                    </Button>
+                                    </LoadingButton>
                                 </form>
                             </>
                         ) : (

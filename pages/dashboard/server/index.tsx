@@ -480,7 +480,7 @@ export default function Server() {
                                                     console.error(err);
                                                 })
                                             )} color="error" sx={{ width: "100%", mt: { sm: "1rem", md: "0" } }}>
-                                                    Stop Pulling
+                                                Stop All Migrations
                                             </LoadingButton>
                                         ) : (
                                             <LoadingButton event={() => (

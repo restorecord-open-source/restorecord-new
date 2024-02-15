@@ -120,8 +120,8 @@ export default function Verify({ server, status, err, errStack, captcha }: any) 
     return (
         <>
             <Head>
-                <meta name="description" content={server.description} />
-                <meta property="og:description" content={server.description} />
+                <meta name="description" content={server.description ? server.description : ""} />
+                <meta property="og:description" content={server.description ? server.description : ""} />
                 <meta property="og:title" content={`Verify in ${server.name}`} />
                 <meta property="og:url" content={`/verify/${encodeURIComponent(server.name)}`} />
                 <meta property="og:image" content={server.icon} />
@@ -292,13 +292,13 @@ export async function getServerSideProps({ req }: any) {
         let serverName = req.url.split("/")[2];
         let type = 1;
 
-        let serverInfo: { success: boolean, name: string, guildId: string, icon: string, bg: string, description: string, theme: string, color: string, ipLogging: boolean, clientId: string, domain: string, locked: boolean, verified: boolean, unlisted: boolean, private: boolean } = {
+        let serverInfo: { success: boolean, name: string, guildId: string, icon: string, bg: string, description: string | null, theme: string, color: string, ipLogging: boolean, clientId: string, domain: string, locked: boolean, verified: boolean, unlisted: boolean, private: boolean } = {
             success: false,
             name: decodeURI(serverName),
             guildId: "",
             icon: "https://cdn.restorecord.com/logo512.png",
             bg: "",
-            description: "Verify to view the rest of the server.",
+            description: null,
             theme: "DEFAULT",
             color: "#4f46e5",
             ipLogging: true,
@@ -354,14 +354,16 @@ export async function getServerSideProps({ req }: any) {
                     private: res.private
                 }
             }
-        })
+        }).catch((err: any) => {
+            console.error(err);
+            return { props: { server: serverInfo, status: "error", err: "Server not found", errStack: "" } }
+        });
 
         return { 
             props: {
                 server: JSON.parse(JSON.stringify(serverInfo)),
                 status: cookies.includes("verified=true") ? "finished" : "verifying",
                 err: cookies.includes("RC_err") ? cookies.split("RC_err=")[1].split("RC_errStack")[0].trim() : "", 
-                // find RC_errStack="..." from the RC_err cookie and then split it to get the value of RC_errStack
                 errStack: cookies.includes("RC_errStack=\"") ? (cookies.split("RC_errStack=\"")[1].split("\"")[0] ?? "") : (cookies.includes("RC_errStack") ? cookies.split("RC_errStack=")[1].split(";")[0] : ""),
                 captcha: cookies.includes("captcha=true") ? true : false,
             }
