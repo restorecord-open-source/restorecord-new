@@ -212,7 +212,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             data: {
                 guildId: server.guildId,
                 migrationGuildId: BigInt(guildId) as bigint,
-                totalCount: members.length,
+                totalCount: pullCount ? pullCount : members.length
             }
         });
 
@@ -239,11 +239,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             }
         });
 
-        await prisma.migrations.update({ where: { id: migration.id }, data: { startedAt: new Date(), totalCount: members.length } });
+        await prisma.migrations.update({ where: { id: migration.id }, data: { startedAt: new Date(), totalCount: pullCount ? pullCount : members.length } });
 
         new Promise<void>(async (resolve, reject) => {
             let membersNew: members[] = await shuffle(members);
-            console.log(`[${server.name}] Total members: ${members.length}, pulling: ${membersNew.length}`);
+            console.log(`[${server.name}] Total members: ${members.length}, pulling: ${pullCount ? pullCount : membersNew.length}`);
 
             await prisma.logs.create({
                 data: {
@@ -262,7 +262,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             for (const member of membersNew) {
                 console.log(`[${server.name}] [${member.username}] Pulling...`);
 
+                if (!(await getMigration(migration.id).then((m) => m?.status === "PENDING" || m?.status === "PULLING"))) {
+                    console.log(`[${server.name}] Migration is not pending or pulling, stopped pulling...`);
+                    return reject("Migration is not pending or pulling, stopped pulling...");
+                }
+                
                 let isDone = false;
+                await updateMigration(migration.id, "PULLING", successCount, bannedCount, maxGuildsCount, invalidCount, errorCount, blacklistedCount);
+
                 const pullPromise = addMember(guildId.toString(), member.userId.toString(), bot?.botToken, member.accessToken, roleId ? [BigInt(roleId).toString()] : []).then(async (resp: any) => {
                     trysPulled++;
                     let status = resp?.response?.status || resp?.status;
@@ -391,7 +398,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 await pullPromise;
 
                 if (Number(successCount) >= Number(pullCount)) {
-                    console.log(`[${server.name}] [${member.username}] ${pullCount} members have been pulled`);
+                    console.log(`[${server.name}] ${pullCount} members have been pulled`);
                     console.log(`[${server.name}] Finished pulling`);
                     await prisma.servers.update({
                         where: {
@@ -407,7 +414,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     });
 
                     if (await getMigration(migration.id).then((m) => m?.status === "PULLING")) await updateMigration(migration.id, "SUCCESS", successCount, bannedCount, maxGuildsCount, invalidCount, errorCount, blacklistedCount);
-                   
+
                     resolve();
                 }
 
@@ -415,9 +422,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 if (delay < 300) delay += 500;
 
                 console.log(`[${server.name}] [${member.username}] Success: ${successCount}/${(pullCount !== Number.MAX_SAFE_INTEGER) ? pullCount : "∞"} (${trysPulled}/${membersNew.length}) | Errors: ${errorCount} | Delay: ${delay}ms`);
-
-                await updateMigration(migration.id, "PULLING", successCount, bannedCount, maxGuildsCount, invalidCount, errorCount, blacklistedCount);
-
+                
                 await new Promise((resolvePromise) => { setTimeout(resolvePromise, delay); });
             }
 

@@ -16,12 +16,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         if (!server.pulling) return res.status(400).json({ success: false, message: "Server is not pulling" });
 
         await prisma.servers.update({ where: { id: server.id }, data: { pulling: false } });
-        // find latest migrations where guildId = server.guildId then update status to STOPPED
         try {
-            const migrations = await prisma.migrations.findMany({ where: { guildId: server.guildId }, orderBy: { createdAt: "desc" }, take: 1 });
-            if (migrations[0].status !== "SUCCESS" && migrations[0].status !== "FAILED" && migrations[0].status !== "STOPPED") {
-                await prisma.migrations.update({ where: { id: migrations[0].id }, data: { status: "STOPPED" } });
-            }
+            await prisma.migrations.updateMany({ 
+                where: { 
+                    guildId: server.guildId,
+                    status: {
+                        notIn: ["SUCCESS", "FAILED", "STOPPED"]
+                    }
+                },
+                data: {
+                    status: "STOPPED" 
+                }
+            });
         } catch (err) {
             console.error(err);
         }

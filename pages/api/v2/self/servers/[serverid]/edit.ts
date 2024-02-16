@@ -85,24 +85,39 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             }
         });
 
-        let memberCount = await prisma.members.count({ where: { guildId: BigInt(req.query.serverid as string) } });
+        if (BigInt(server.guildId) !== BigInt(guildId)) {
+            let memberCount = await prisma.members.count({ where: { guildId: BigInt(req.query.serverid as string) } });
 
-        while (memberCount >= 100000) {
-            const members = await prisma.members.findMany({
-                where: {
-                    guildId: BigInt(req.query.serverid as string),
-                },
-                take: 100000,
-            });
+            while (memberCount >= 100000) {
+                const members = await prisma.members.findMany({
+                    where: {
+                        guildId: BigInt(req.query.serverid as string),
+                    },
+                    take: 100000,
+                });
 
-            const memberChunks = chunk(members, 50000);
+                const memberChunks = chunk(members, 50000);
 
-            for (const chunk of memberChunks) {
+                for (const chunk of memberChunks) {
+                    await prisma.members.updateMany({
+                        where: {
+                            id: {
+                                in: chunk.map(m => m.id),
+                            },
+                        },
+                        data: {
+                            guildId: BigInt(guildId as any),
+                        },
+                    });
+                }
+
+                memberCount = await prisma.members.count({ where: { guildId: BigInt(req.query.serverid as string) } });
+            }
+
+            if (memberCount <= 100000) {
                 await prisma.members.updateMany({
                     where: {
-                        id: {
-                            in: chunk.map(m => m.id),
-                        },
+                        guildId: BigInt(req.query.serverid as string),
                     },
                     data: {
                         guildId: BigInt(guildId as any),
@@ -110,10 +125,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 });
             }
 
-            memberCount = await prisma.members.count({ where: { guildId: BigInt(req.query.serverid as string) } });
-        }
-
-        if (memberCount <= 100000) {
             await prisma.members.updateMany({
                 where: {
                     guildId: BigInt(req.query.serverid as string),
@@ -122,52 +133,43 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     guildId: BigInt(guildId as any),
                 },
             });
+
+            await prisma.blacklist.updateMany({
+                where: {
+                    guildId: BigInt(req.query.serverid as string),
+                },
+                data: {
+                    guildId: BigInt(guildId as any),
+                },
+            });
+
+            await prisma.backups.updateMany({
+                where: {
+                    guildId: BigInt(req.query.serverid as string),
+                },
+                data: {
+                    guildId: BigInt(guildId as any),
+                },
+            });
+
+            await prisma.migrations.updateMany({
+                where: {
+                    guildId: BigInt(req.query.serverid as string),
+                },
+                data: {
+                    guildId: BigInt(guildId as any),
+                },
+            });
+
+            await prisma.guildMembers.updateMany({
+                where: {
+                    guildId: BigInt(req.query.serverid as string),
+                },
+                data: {
+                    guildId: BigInt(guildId as any),
+                },
+            });
         }
-
-        await prisma.members.updateMany({
-            where: {
-                guildId: BigInt(req.query.serverid as string),
-            },
-            data: {
-                guildId: BigInt(guildId as any),
-            },
-        });
-
-        await prisma.blacklist.updateMany({
-            where: {
-                guildId: BigInt(req.query.serverid as string),
-            },
-            data: {
-                guildId: BigInt(guildId as any),
-            },
-        });
-
-        await prisma.backups.updateMany({
-            where: {
-                guildId: BigInt(req.query.serverid as string),
-            },
-            data: {
-                guildId: BigInt(guildId as any),
-            },
-        });
-
-        await prisma.migrations.updateMany({
-            where: {
-                guildId: BigInt(req.query.serverid as string),
-            },
-            data: {
-                guildId: BigInt(guildId as any),
-            },
-        });
-
-        await prisma.guildMembers.updateMany({
-            where: {
-                guildId: BigInt(req.query.serverid as string),
-            },
-            data: {
-                guildId: BigInt(guildId as any),
-            },
-        });
 
         await redis.del(`server:${server.guildId}`);
 
