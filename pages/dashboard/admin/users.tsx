@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import { useQuery } from "react-query";
 import { useToken } from "../../../src/token";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IntlRelativeTime } from "../../../src/functions";
 
 import NavBar from "../../../components/dashboard/navBar";
@@ -76,6 +76,25 @@ export default function AdminUser() {
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token, 
     }), { retry: false,  refetchOnWindowFocus: false });
 
+    useEffect(() => {
+        if ((data && data.admin) && router.query.q) {
+            setSearchQuery(router.query.q as string);
+            setUsers({});
+            setErrorMessages("");
+            setSuccessMessage("");
+            axios.post("/api/admin/lookup", { query: router.query.q }, {
+                headers: {
+                    Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
+                },
+            }).then((res: any) => {
+                setUsers(res.data.users);
+                setModalData({ ...ModalData, query: { rows: res.data.rows, time: res.data.time } });
+            }).catch((err) => {
+                console.error(err);
+                setErrorMessages(JSON.stringify(err.response.data));
+            });
+        }
+    }, []);
 
     if (isLoading) {
         return <CircularProgress sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
@@ -164,9 +183,6 @@ export default function AdminUser() {
                                     });
                                 });
                             }
-
-                            
-
                         }}>Login</LoadingButton>
                     </Paper>
                 </DialogContent>
@@ -245,7 +261,7 @@ export default function AdminUser() {
                             </FormControl>
                         </Stack>
 
-                        <Button variant="contained" sx={{ mt: 2 }} onClick={async () => {
+                        <LoadingButton variant="contained" sx={{ mt: 2 }} event={async () => {
                             await axios.post("/api/admin/upgrade", { userId: ModalData.info.id, plan: ModalData?.upgrade?.plan, expiry: new Date(ModalData?.upgrade?.duration ? Date.now() + (parseInt(ModalData?.upgrade?.duration) * 30 * 24 * 60 * 60 * 1000) : Date.now()).toISOString() }, {
                                 headers: {
                                     Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
@@ -258,7 +274,7 @@ export default function AdminUser() {
                             });
                             
                             setModals({ ...Modals, upgrade: false });
-                        }}>Upgrade</Button>
+                        }}>Upgrade</LoadingButton>
                     </FormControl>
                 </DialogContent>
             </Dialog>
@@ -288,12 +304,12 @@ export default function AdminUser() {
                             newEmail: e.target.value
                         }})} />
 
-                        <Button variant="contained" color="yellow" sx={{ mt: 2 }} onClick={async () => {
+                        <LoadingButton variant="contained" color="yellow" sx={{ mt: 2 }} event={async () => {
                             setModals({ ...Modals, email: false });
-                        }}>Send Verification Code</Button>
-                        <Button variant="contained" sx={{ mt: 2 }} onClick={async () => {
+                        }}>Send Verification Code</LoadingButton>
+                        <LoadingButton variant="contained" sx={{ mt: 2 }} event={async () => {
                             setModals({ ...Modals, email: false });
-                        }}>Update</Button>
+                        }}>Update</LoadingButton>
                     </FormControl>
                 </DialogContent>
             </Dialog>
@@ -316,9 +332,9 @@ export default function AdminUser() {
                     </Typography>
 
                     <FormControl fullWidth variant="outlined" required>
-                        <Button variant="contained" sx={{ mt: 2 }} onClick={async () => {
+                        <LoadingButton variant="contained" sx={{ mt: 2 }} event={async () => {
                             setModals({ ...Modals, disable2FA: false });
-                        }}>Disable 2FA</Button>
+                        }}>Disable 2FA</LoadingButton>
                     </FormControl>
                 </DialogContent>
             </Dialog>
@@ -351,7 +367,7 @@ export default function AdminUser() {
                             ))}
                         </Select>
 
-                        <Button variant="contained" sx={{ mt: 2 }} onClick={async () => {
+                        <LoadingButton variant="contained" sx={{ mt: 2 }} event={async () => {
                             await axios.post("/api/admin/ban", { userId: ModalData.info.id, reason: ModalData.ban.reason }, {
                                 headers: {
                                     Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
@@ -363,7 +379,7 @@ export default function AdminUser() {
                                 setErrorMessages(JSON.stringify(err.response.data));
                             });
                             setModals({ ...Modals, ban: false });
-                        }}>Ban</Button>
+                        }}>Ban</LoadingButton>
                     </FormControl>
                 </DialogContent>
             </Dialog>
@@ -372,26 +388,34 @@ export default function AdminUser() {
 
     function renderSearch() {
         return (
-            <form onSubmit={async (e) => {
-                e.preventDefault();
-                setUsers({});
-                setErrorMessages("");
-                setSuccessMessage("");
-                await axios.post("/api/admin/lookup", { query: searchQuery }, {
-                    headers: {
-                        Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
-                    },
-                }).then((res: any) => {
-                    setUsers(res.data.users);
-                    setModalData({ ...ModalData, query: { rows: res.data.rows, time: res.data.time } });
-                }).catch((err) => {
-                    console.error(err);
-                    setErrorMessages(JSON.stringify(err.response.data));
-                });
-            }}>
+            <form onSubmit={(e) => e.preventDefault()}>
                 <Stack direction="column" spacing={2}>
-                    <TextField label="Search" variant="outlined" placeholder="User ID/Username/Email" onChange={(e) => setSearchQuery(e.target.value)} />
-                    <Button variant="contained" type="submit">Get user info</Button>
+                    <TextField label="Search" variant="outlined" placeholder="User ID/Username/Email" onChange={(e) => {
+                        if (e.target.value === "") {
+                            history.pushState(null, "", "/dashboard/admin/users");
+                        } else {
+                            history.pushState(null, "", `/dashboard/admin/users?q=${e.target.value}`);
+                        }
+                        
+                        setSearchQuery(e.target.value); 
+                    }} defaultValue={searchQuery ?? ""} value={searchQuery} />
+                    <LoadingButton variant="contained" type="submit" event={async() => {
+                        setUsers({});
+                        setErrorMessages("");
+                        setSuccessMessage("");
+                        
+                        await axios.post("/api/admin/lookup", { query: searchQuery }, {
+                            headers: {
+                                Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
+                            },
+                        }).then((res: any) => {
+                            setUsers(res.data.users);
+                            setModalData({ ...ModalData, query: { rows: res.data.rows, time: res.data.time } });
+                        }).catch((err) => {
+                            console.error(err);
+                            setErrorMessages(JSON.stringify(err.response.data));
+                        });
+                    }}>Get user info</LoadingButton>
                     <Alert severity="info" sx={{ bgcolor: "#000", color: "#fff" }}>{ModalData.query.rows} accounts in {ModalData.query.time} sec</Alert>
                 </Stack>
             </form>

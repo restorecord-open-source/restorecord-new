@@ -21,22 +21,32 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 const accSearchResult = await prisma.accounts.findMany({
                     where: {
                         AND: [
-                            ...(!fullId ? [] : [{ id: { equals: parseInt(fullId) as number } }]),
-                            { id: { equals: idSearch ? parseInt(idSearch) as number : undefined } },
-                            { username: { contains: search ? (idSearch ? "" : (emailSearch ? "" : search)) : undefined } },
-                            { email: { contains: emailSearch ? emailSearch : undefined } }
+                            ...(!fullId ? [] : [{ id: { equals: parseInt(fullId) } }]),
+                            { id: { equals: idSearch } },
+                            { username: { contains: idSearch ? "" : (emailSearch ? "" : search) } },
+                            { email: { contains: emailSearch } }
                         ]
                     },
-                    orderBy: { createdAt: "desc", },
+                    orderBy: { createdAt: "desc" },
+                    take: 100
                 });
                 const endTime = performance.now();
 
                 if (!accSearchResult) return res.status(400).json({ success: false, message: "User not found." });
 
+                const sortedResults = accSearchResult.sort((a, b) => {
+                    const isA = a.id === parseInt(fullId) || a.username.toLowerCase() === search.toLowerCase() || a.email.toLowerCase() === search.toLowerCase();
+                    const isB = b.id === parseInt(fullId) || b.username.toLowerCase() === search.toLowerCase() || b.email.toLowerCase() === search.toLowerCase();
+
+                    if (isA && !isB) return -1;
+                    else if (!isA && isB) return 1;
+                    else return 0;
+                });
+
                 return res.status(200).json({ success: true,
-                    rows: accSearchResult.length,
+                    rows: sortedResults.length,
                     time: ((endTime - startTime) / 1000).toFixed(3),
-                    users: accSearchResult.map((acc: accounts) => {
+                    users: sortedResults.map((acc: accounts) => {
                         if (acc.id === fullId) {
                             return {
                                 id: acc.id,

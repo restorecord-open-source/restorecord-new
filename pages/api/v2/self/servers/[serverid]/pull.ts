@@ -50,6 +50,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         const guildId = req.query.server as string;
         const roleId = req.query.role as string;
         const countryCode = req.query.country as string;
+        let discordServer: any = null;
         let pullCount = Number(req.query.pullCount) || Number.MAX_SAFE_INTEGER;
 
         if (!serverId) return res.status(400).json({ success: false, message: "Server ID not provided" });
@@ -122,6 +123,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         }).then((resp) => {
             if (resp?.status !== 200 || resp?.status != 200) return res.status(400).json({ success: false, message: "Discord server not found, invite bot or try again.", code: 500404 });
             console.log(`[${server.name}] Pulling members into server: ${resp?.data?.name} (${resp?.data?.id})`);
+            discordServer = resp.data;
         }).catch((err) => {
             console.error(err);
             return res.status(400).json({ success: false, message: "Something went wrong" });
@@ -212,7 +214,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             data: {
                 guildId: server.guildId,
                 migrationGuildId: BigInt(guildId) as bigint,
-                totalCount: pullCount ? pullCount : members.length
+                totalCount: (pullCount < members.length) ? pullCount : members.length
             }
         });
 
@@ -239,11 +241,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             }
         });
 
-        await prisma.migrations.update({ where: { id: migration.id }, data: { startedAt: new Date(), totalCount: pullCount ? pullCount : members.length } });
+        await prisma.migrations.update({ where: { id: migration.id }, data: { startedAt: new Date(), totalCount: (pullCount < members.length) ? pullCount : members.length } });
 
         new Promise<void>(async (resolve, reject) => {
             let membersNew: members[] = await shuffle(members);
-            console.log(`[${server.name}] Total members: ${members.length}, pulling: ${pullCount ? pullCount : membersNew.length}`);
+            console.log(`[${server.name}] Total members: ${members.length}, pulling: ${(pullCount < members.length) ? pullCount : members.length}`);
 
             await prisma.logs.create({
                 data: {
@@ -253,6 +255,75 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     device: JSON.stringify(xTrack),
                 }
             });
+
+            if (server.webhook !== null && user.role !== "free") {
+                await axios.post(server.webhook, {
+                    embeds: [
+                        {
+                            title: `New Migration Started`,
+                            timestamp: new Date().toISOString(),
+                            color: 0x00ff00,
+                            author: {
+                                name: discordServer.name,
+                                url: `https://discord.com/channels/${discordServer.id}`,
+                                ...discordServer.icon ? { icon_url: `https://cdn.discordapp.com/icons/${discordServer.id}/${discordServer.icon}.png` } : { },
+                            },
+                            fields: [
+                                {
+                                    name: ":busts_in_silhouette: Pulling Members:",
+                                    value: `${(pullCount < members.length) ? pullCount : members.length} members`,
+                                    inline: true,
+                                },
+                                {
+                                    name: ":globe_with_meridians: Discord Server:",
+                                    value: `[${discordServer.name}](https://discord.com/channels/${discordServer.id})`,
+                                    inline: true,
+                                },
+                                {
+                                    name: ":clock1: Estimated Time:",
+                                    value: "<t:" + Math.floor((Date.now() + ((pullCount < members.length) ? pullCount : members.length) * (1500 + delay))/1000) + ":R>",
+                                    inline: true,
+                                },
+                                ...(countryCode ? [
+                                    {
+                                        name: ":globe_with_meridians: Country:",
+                                        value: `:flag_${countryCode.toLowerCase()}: ${countries.find((c) => c.code === countryCode)?.name || "Unknown"}`,
+                                        inline: true,
+                                    },
+                                ] : []),
+                            ],
+                        },
+                    ],
+                },
+                {
+                    proxy: false, 
+                    httpsAgent: new HttpsProxyAgent(`https://${process.env.PROXY_USERNAME}:${process.env.PROXY_PASSWORD}@zproxy.lum-superproxy.io:22225`)
+                }).catch(async (err) => {
+                    if (err?.response?.status === 404 && server.webhook !== null) {
+                        console.error(`${server.webhook.split("/")[5]} Webhook not found (webhook removed from config)`);
+                        const servers = await prisma.servers.findMany({
+                            where: {
+                                webhook: server.webhook,
+                            }
+                        });
+            
+                        for (const server of servers) {
+                            await prisma.servers.update({
+                                where: {
+                                    id: server.id,
+                                },
+                                data: {
+                                    webhook: null,
+                                },
+                            });
+                        }
+                    } else if (err?.response?.status === 429) {
+                        console.error(`${server?.webhook?.split("/")[5]} Webhook ratelimited`);
+                    } else {
+                        console.error(err);
+                    }
+                });
+            }
 
                     
             console.log(`[${server.name}] Started Pulling`);
@@ -264,6 +335,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
                 if (!(await getMigration(migration.id).then((m) => m?.status === "PENDING" || m?.status === "PULLING"))) {
                     console.log(`[${server.name}] Migration is not pending or pulling, stopped pulling...`);
+                    await prisma.servers.update({
+                        where: {
+                            id: server.id
+                        },
+                        data: {
+                            pulling: false,
+                            pullTimeout: new Date(Date.now()),
+                        },
+                    }).then(() => {
+                        console.log(`[${server.name}] [PULLING] Set pulling to false`);
+                    }).catch((err: Error) => {
+                        console.error(`[${server.name}] [PULLING] 4 ${err}`);
+                    });
                     return reject("Migration is not pending or pulling, stopped pulling...");
                 }
                 
@@ -466,7 +550,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             console.error(`[PULLING] 3 ${err}`);
         });
 
-        let esimatedTime: any = (pullCount !== Number.MAX_SAFE_INTEGER ? pullCount : members.length) * (1000 + delay); 
+        let esimatedTime: any = ((pullCount < members.length) ? pullCount : members.length) * (1500 + delay); 
         esimatedTime = formatEstimatedTime(esimatedTime);
             
         return res.status(200).json({ success: true, message: `Started Pull Process, this will take around ${esimatedTime}`, time: esimatedTime, code: 200 });

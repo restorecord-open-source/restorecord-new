@@ -34,6 +34,7 @@ import LoadingButton from "../../../components/misc/LoadingButton";
 import { IntlRelativeTime } from "../../../src/functions";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
+import Link from "next/link";
 
 export default function AdminServer() {
     const router = useRouter();
@@ -213,6 +214,8 @@ export default function AdminServer() {
 
                                     if (value instanceof Date || key === "createdAt" || key === "updatedAt" || key === "pullTimeout") {
                                         return (<Typography variant="body1" sx={{ mb: 1 }} key={key}>{newKey}: <b><code onClick={() => { navigator.clipboard.writeText(new Date(value as any).toLocaleDateString()); setSuccessMessage("Copied to clipboard!"); setTimeout(() => { setSuccessMessage(""); }, 1500); }} style={{ cursor: "pointer" }}>{new Intl.DateTimeFormat("en-UK", { dateStyle: "medium" }).format(new Date(value as any))} ({IntlRelativeTime(new Date(value as any).getTime()) ?? "Expired"})</code></b></Typography>);
+                                    } else if (key === "ownerId") {
+                                        return (<Typography variant="body1" sx={{ mb: 1 }} key={key}>{newKey}: <Link href={`/dashboard/admin/users?q=${value}`}><b><code>{String(value) as string}</code></b></Link></Typography>);
                                     } else if (typeof value === "boolean") {
                                         return (<Typography variant="body1" sx={{ mb: 1 }} key={key}>{newKey}: <b><code style={{ color: value ? "#00d26a" : "#f92f60" }}>{value ? "✅ Yes" : "❌ No"}</code></b></Typography>);
                                     } else if (typeof value === "string") {

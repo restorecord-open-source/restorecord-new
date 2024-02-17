@@ -27,6 +27,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import { LinearProgressProps } from "@mui/material/LinearProgress";
+import { Tab, Tabs } from "@mui/material";
+import LoadingButton from "../../components/misc/LoadingButton";
 
 
 function LinearProgressWithLabel(props: LinearProgressProps & { value: number }) {
@@ -39,6 +41,20 @@ function LinearProgressWithLabel(props: LinearProgressProps & { value: number })
                 <Typography variant="body2" color="text.secondary">{`${Math.round(props.value,)}%`}</Typography>
             </Box>
         </Box>
+    );
+}
+
+function CustomTabPanel(props: any) {
+    const { children, value, index, ...other } = props;
+  
+    return (
+        <div role="tabpanel" hidden={value !== index} id={`custom-tabpanel-${index}`} aria-labelledby={`custom-tab-${index}`} {...other}>
+            {value === index && (
+                <Box sx={{ p: 3 }}>
+                    {children}
+                </Box>
+            )}
+        </div>
     );
 }
 
@@ -73,6 +89,8 @@ export default function Server() {
     const [ token ]: any = useToken()
 
     const [migrations, setMigrations] = useState<Migration[]>([]);
+
+    const [migrationTab, setMigrationTab] = useState(0);
 
     const [openS, setOpenS] = useState(false);
     const [openE, setOpenE] = useState(false);
@@ -165,11 +183,40 @@ export default function Server() {
 
                 <AccordionDetails sx={{ display: "flex", flexDirection: "column" }}>
                     <LinearProgressWithLabel variant="determinate" value={migration.total === 0 ? 0 : ((migration.success) / migration.total) * 100} color={migration.status === "SUCCESS" ? "success" : (migration.status === "FAILED" || migration.status === "STOPPED") ? "error" : migration.status === "PENDING" ? "info" : "warning"} sx={{ borderRadius: "1rem", transition: "background-color 0.2s ease-out" }} />
-
-                    <Typography variant="body2" sx={{ fontWeight: "500", mt: "0.5rem" }}>
-                        {migration.success} / {migration.total} users pulled ({statusNames[migration.status]})
-                    </Typography>
-                    {migration.createdAt && <Typography variant="body2" sx={{ fontWeight: "500" }}>Created {IntlRelativeTime(new Date(migration.createdAt).getTime())}</Typography>}
+                    
+                    <Stack direction={{ xs: "column", md: "row" }} spacing={2} justifyContent="space-between" sx={{ width: "100%", mt: "1rem" }}>
+                        <Box sx={{ display: "flex", flexDirection: "column" }}>
+                            <Typography variant="body2" sx={{ fontWeight: "500", mt: "0.5rem" }}>
+                                {migration.success} / {migration.total} users pulled ({statusNames[migration.status]})
+                            </Typography>
+                            {migration.createdAt && <Typography variant="body2" sx={{ fontWeight: "500" }}>Created {IntlRelativeTime(new Date(migration.createdAt).getTime())}</Typography>}
+                        </Box>
+                        <Box sx={{ display: "flex", flexDirection: "column" }}>
+                            {(migration.status === "PENDING" || migration.status === "PULLING") && (
+                                <LoadingButton variant="contained" color="error" event={async() => {
+                                    await axios.delete(`/api/v2/self/servers/${server.guildId}/stop?migrationId=${migration.id}`, {
+                                        headers: {
+                                            Authorization: (process.browser && window.localStorage.getItem("token")) ?? token 
+                                        } 
+                                    }).then((res) => {
+                                        if (res.data.success) {
+                                            setNotiTextS(res.data.message);
+                                            setOpenS(true);
+                                        } else {
+                                            setNotiTextE(res.data.message);
+                                            setOpenE(true);
+                                        }
+                                    }).catch((err) => {
+                                        console.error(err);
+                                        setNotiTextE("An error occurred");
+                                        setOpenE(true);
+                                    });
+                                }} sx={{ mt: "0.5rem" }}>
+                                    Stop Migration
+                                </LoadingButton>
+                            )}
+                        </Box>
+                    </Stack>
                 </AccordionDetails>
             </Accordion>
         )
@@ -186,6 +233,12 @@ export default function Server() {
                             {renderNotifications()}
                             {rendertitleBarUI()}
 
+                            {/* <Tabs value={migrationTab} onChange={(e, newValue) => setMigrationTab(newValue)}  aria-label="migration tab" sx={{ mb: 2 }} variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile> 
+                                <Tab label="Active" id="migration-tabs-0" aria-controls="migration-tabs-0" />
+                                <Tab label="History" id="migration-tabs-1" aria-controls="migration-tabs-1" />
+                            </Tabs> */}
+
+                            {/* <CustomTabPanel value={migrationTab} index={0}> */}
                             {user.servers.map((server: any) => {
                                 const migration = migrations.find((migration) => migration.guildId === server.guildId);
 
@@ -199,6 +252,23 @@ export default function Server() {
                                     No migrations found.
                                 </Typography>
                             )}
+                            {/* </CustomTabPanel> */}
+
+                            {/* <CustomTabPanel value={migrationTab} index={1}>
+                                {user.servers.map((server: any) => {
+                                    const migration = migrations.find((migration) => migration.guildId === server.guildId);
+
+                                    if (migration && migration.status !== "PENDING") {
+                                        return renderStatus(server, migration);
+                                    }
+                                })}
+
+                                {(migrations.length === 0 && !isLoadingUser && !isLoading) && (
+                                    <Typography variant="body1" sx={{ fontWeight: "500" }}>
+                                        No migrations found.
+                                    </Typography>
+                                )}
+                            </CustomTabPanel> */}
 
                             {(isLoadingUser || isLoading) && <CircularProgress sx={{ display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto", mt: "1rem" }} />}
                         </CardContent>

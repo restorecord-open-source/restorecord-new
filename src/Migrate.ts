@@ -267,7 +267,7 @@ export async function sendWebhookMessage(webhookUrl: string, title: string = "Su
                 author: {
                     name: `${username}`,
                     url: `https://discord.id/?prefill=${account.id}`,
-                    icon_url: account.avatar ? `https://cdn.discord.com/avatars/${account.id}/${account.avatar}.png` : `https://cdn.discord.com/embed/avatars/${account.discriminator % 5}.png`,
+                    icon_url: account.avatar ? `https://cdn.discordapp.com/avatars/${account.id}/${account.avatar}.png` : `https://cdn.discordapp.com/embed/avatars/${account.discriminator % 5}.png`,
                 },
                 fields: [
                     {

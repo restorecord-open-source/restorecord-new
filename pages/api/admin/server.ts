@@ -20,7 +20,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 if ((query === undefined || query === null || query === "") && (fullId == undefined || fullId == null || fullId == "")) return res.status(400).json({ success: false, message: "No search query provided." });
 
                 const startTime = performance.now();
-                const server = await prisma.servers.findMany({
+                const servers = await prisma.servers.findMany({
                     where: {
                         OR: [
                             ...(fullId ? [{ id: parseInt(fullId) }] : []),
@@ -33,16 +33,24 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             ]),
                         ],
                     },
-                    orderBy: { createdAt: "desc", },
-                });
+                    orderBy: { createdAt: "desc" },
+                    take: 100
+                });                
                 const endTime = performance.now();
 
-                if (!server[0]) return res.status(400).send("Server not found.");
+                if (!servers.length) return res.status(400).send("Server not found.");
+
+                // Sort servers to prioritize exact matches
+                const sortedServers = servers.sort((a, b) => {
+                    const isAExactMatch = a.id === parseInt(fullId) || a.guildId === guildIdSearch || a.name.toLowerCase() === query?.toLowerCase();
+                    const isBExactMatch = b.id === parseInt(fullId) || b.guildId === guildIdSearch || b.name.toLowerCase() === query?.toLowerCase();
+                    return isAExactMatch === isBExactMatch ? 0 : isAExactMatch ? -1 : 1;
+                });
 
                 return res.status(200).json({ success: true, 
-                    rows: server.length,
+                    rows: sortedServers.length,
                     time: ((endTime - startTime) / 1000).toFixed(3),
-                    servers: server.map((server: any) => {
+                    servers: sortedServers.map((server: any) => {
                         if (server.id === fullId) {
                             return {
                                 id: server.id,
