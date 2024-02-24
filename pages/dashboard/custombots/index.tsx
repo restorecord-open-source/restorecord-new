@@ -157,7 +157,7 @@ export default function CustomBots() {
                                             {BotClient.valid ? "Manage" : "Update"}
                                         </Button>
                                         {BotClient.valid && (
-                                            <Button variant="contained" color="success" href={`https://discord.com/oauth2/authorize?client_id=${BotClient.clientId}&scope=bot applications.commands&permissions=8`} target="_blank" rel="noreferrer">
+                                            <Button variant="contained" color="success" href={`https://discord.com/oauth2/authorize?client_id=${BotClient.clientId}&scope=bot applications.commands&permissions=2952916019`} target="_blank" rel="noreferrer">
                                                 Invite
                                             </Button>
                                         )}
