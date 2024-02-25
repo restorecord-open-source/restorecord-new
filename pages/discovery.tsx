@@ -10,11 +10,14 @@ import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import Link from "@mui/material/Link";
+import Fade from "@mui/material/Fade";
 import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
 import Alert from "@mui/material/Alert";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
+import Tooltip from "@mui/material/Tooltip";
+import Skeleton from "@mui/material/Skeleton";
 import CardMedia from "@mui/material/CardMedia";
 import TextField from "@mui/material/TextField";
 import Container from "@mui/material/Container";
@@ -22,8 +25,7 @@ import Typography from "@mui/material/Typography";
 import AlertTitle from "@mui/material/AlertTitle";
 import CardContent from "@mui/material/CardContent";
 import FormControl from "@mui/material/FormControl";
-import CircularProgress from "@mui/material/CircularProgress";
-import { Skeleton } from "@mui/material";
+import VerifiedIcon from "@mui/icons-material/Verified";
 
 
 async function getDiscovery(search?: any, page: number = 1) {
@@ -106,7 +108,7 @@ export default function Discovery() {
                         </FormControl>
                     </Stack>
                 </Paper>
-                <Typography variant="h6" component="h2" fontWeight={600} sx={{ marginTop: "1rem" }}>Featured Servers</Typography>
+                <Typography variant="h6" component="h2" fontWeight={600} sx={{ marginTop: "1rem" }}>Popular Servers</Typography>
                 {(!isLoading && serverList !== null && serverList !== undefined) ? (
                     <Paper sx={{ padding: "0.5rem", marginTop: "1rem", display: "flex", background: "transparent" }}>
                         <Grid container spacing={{ xs: 2, sm: 2, md: 4 }} sx={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", marginBottom: "5rem" }}>
@@ -122,7 +124,10 @@ export default function Discovery() {
                                             </Box>
 
                                             <CardContent>
-                                                <Typography variant="h6" component="h2" fontWeight={600}>{server.name}</Typography>
+                                                <Stack direction="row" spacing={1} alignItems="center">
+                                                    <Typography variant="h6" component="h2" fontWeight={600}>{server.name}</Typography>
+                                                    {server.verified &&  <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} placement="top" disableInteractive title={`This server has been verified by RestoreCord and is deemed to be safe and legitimate.`}><VerifiedIcon /></Tooltip>}
+                                                </Stack>
                                                 <Typography variant="body1" component="div" fontWeight={400}>{server.description}</Typography>
                                                 <Typography variant="body2" component="div" fontWeight={400} sx={{ mt: 2 }}>Since {new Date(server.createdAt).toLocaleString()}</Typography>
                                             </CardContent>

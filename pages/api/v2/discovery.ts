@@ -26,8 +26,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         const limit: number = req.query.max ? parseInt(req.query.max as string) : 39;
         const page: number = req.query.page ? parseInt(req.query.page as string) : 0;
+        const now = new Date();
+        const sevenDaysAgo = new Date(now.setDate(now.getDate() - 7));
 
-        const servers = await prisma.servers.findMany({
+        let servers = await prisma.servers.findMany({
             select: {
                 id: true,
                 name: true,
@@ -36,6 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 bgImage: true,
                 description: true,
                 themeColor: true,
+                verified: true,
                 createdAt: true,
                 customBot: {
                     select: {
@@ -57,20 +60,55 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 ],
                 NOT: [...blockedWords.map(word => ({ name: { contains: word } }))]
             },
-            orderBy: {
-                createdAt: "desc"
-            },
+            take: limit > 99 ? 99 : limit,
             skip: page ? (page - 1) * limit : 0,
-            take: limit > 99 ? 99 : limit
         });
 
         if (!servers || servers.length === 0) return res.status(200).json({ success: true, pages: 0, servers: [] });
+
+        const memberCounts = await Promise.all(servers.map(async server => {
+            const count = await prisma.members.count({
+                where: {
+                    guildId: server.guildId,
+                    createdAt: {
+                        gte: sevenDaysAgo,
+                    },
+                },
+            });
+            return { guildId: server.guildId, count };
+        }));
+
+
+        servers = servers.map(server => ({
+            ...server,
+            memberCount: memberCounts.find(mc => mc.guildId === server.guildId)?.count || 0,
+        })).sort((a, b) => b.memberCount - a.memberCount);
+        
+        servers = servers.map(server => ({
+            id: server.id,
+            name: server.name,
+            guildId: String(server.guildId),
+            picture: server.picture,
+            bgImage: server.bgImage,
+            description: server.description,
+            themeColor: server.themeColor,
+            verified: server.verified,
+            createdAt: server.createdAt,
+            customBot: {
+                clientId: String(server.customBot.clientId),
+                customDomain: server.customBot.customDomain
+            },
+            memberCount: (server as any).memberCount as number,
+        })) as any;
+
+        search ? null : await redis.set("discovery", JSON.stringify(servers), "EX", 1800);
 
         const serverCount = await prisma.servers.count({
             where: {
                 AND: [
                     { locked: false },
                     { discoverable: 1 },
+                    { nsfw: false },
                     ...(search && (search.length >= 3 && search.length <= 99)) ? [{
                         name: {
                             contains: search
@@ -79,21 +117,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 ],
                 NOT: [...blockedWords.map(word => ({ name: { contains: word } }))]
             },
-            take: 1000,
         });
-
-        servers.forEach(server => {
-            server.guildId = String(server.guildId) as any;
-            server.customBot.clientId = server.customBot?.clientId ? String(server.customBot.clientId) : "0" as any;
-            server.customBot.customDomain = server.customBot?.customDomain ? String(server.customBot.customDomain) : "restorecord.com" as any;
-        });
-
-        search ? null : await redis.set("discovery", JSON.stringify(servers), "EX", 1800);
 
         return res.status(200).json({ success: true, pages: Math.ceil(serverCount / limit), servers });
     }
     catch (err: any) {
         console.error(err);
-        return res.status(400).json({ success: false, message: "Something went wrong" });
+        return res.status(400).json({ success: false, message: "Something went wrong", servers: [] });
     }
 }
+

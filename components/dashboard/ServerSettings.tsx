@@ -40,8 +40,8 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import InputLabel from "@mui/material/InputLabel";
 import AlertTitle from "@mui/material/AlertTitle";
+import VerifiedIcon from "@mui/icons-material/Verified";
 import LoadingButton from "../misc/LoadingButton";
-import { Badge } from "@mui/material";
 
 function CustomTabPanel(props: any) {
     const { children, value, index, ...other } = props;
@@ -415,25 +415,27 @@ export default function DashServerSettings({ user, id }: any) {
                                         <Stack direction={isMobile ? "column" : "row"} spacing={2} justifyContent="space-between">
                                             <Box sx={{ width: "100%" }}>
                                                 <Stack direction="column" spacing={2}>
+                                                    {!newServer.nsfw && (
+                                                        <Stack direction="row">
+                                                            <Typography variant="h6">Show on Discovery</Typography>
+                                                            {user.role !== "business" && user.role !== "enterprise" ? (
+                                                                <Tooltip arrow placement="top" title="This feature requires the Business subscription or higher.">
+                                                                    <CloseIcon color="error" sx={{ alignSelf: "center", ml: "0.25rem" }} />
+                                                                </Tooltip>
+                                                            ) : (
+                                                                <Tooltip arrow placement="top" title="If enabled, your server will be shown on the RestoreCord Discovery page, located at https://restorecord.com/discovery.">
+                                                                    <InfoIcon sx={{ fontSize: "1rem", alignSelf: "center", ml: "0.25rem" }} />
+                                                                </Tooltip>
+                                                            )}
+                                                            <Switch onChange={handleChange} name="discoverable" disabled={(user.role !== "business" && user.role !== "enterprise") || newServer.nsfw} defaultChecked={server.discoverable === 1 || !newServer.nsfw} />
+                                                        </Stack>
+                                                    )}
                                                     <Stack direction="row">
-                                                        <Typography variant="h6">Show on Discovery</Typography>
-                                                        {user.role !== "business" && user.role !== "enterprise" ? (
-                                                            <Tooltip arrow placement="top" title="This feature requires the Business subscription or higher.">
-                                                                <CloseIcon color="error" sx={{ alignSelf: "center", ml: "0.25rem" }} />
-                                                            </Tooltip>
-                                                        ) : (
-                                                            <Tooltip arrow placement="top" title="If enabled, your server will be shown on the RestoreCord Discovery page, located at https://restorecord.com/discovery.">
-                                                                <InfoIcon sx={{ fontSize: "1rem", alignSelf: "center", ml: "0.25rem" }} />
-                                                            </Tooltip>
-                                                        )}
-                                                        <Switch onChange={handleChange} name="discoverable" disabled={(user.role !== "business" && user.role !== "enterprise") || newServer.nsfw} defaultChecked={server.discoverable === 1 || !newServer.nsfw} />
-                                                    </Stack>
-                                                    <Stack direction="row">
-                                                        <Typography variant="h6">Unlisted</Typography>
-                                                        <Tooltip arrow placement="top" title="If enabled, your server wont get shown on Search Engines.">
+                                                        <Typography variant="h6">Verified{!newServer.verified && <small> (<Link href="https://forms.gle/pYWK9gLmVehY1C4UA" target="_blank" rel="noreferrer">Apply</Link>)</small>}</Typography>
+                                                        <Tooltip arrow placement="top" title="Your server will be marked as Verified.">
                                                             <InfoIcon sx={{ fontSize: "1rem", alignSelf: "center", ml: "0.25rem" }} />
                                                         </Tooltip>
-                                                        <Switch onChange={handleChange} name="unlisted" defaultChecked={server.unlisted} />
+                                                        <Switch name="verified" defaultChecked={server.verified} disabled />
                                                     </Stack>
                                                     <Stack direction="row">
                                                         <Typography variant="h6">Private Server</Typography>
@@ -491,11 +493,18 @@ export default function DashServerSettings({ user, id }: any) {
                                                 {newServer.background && <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundImage: `url(${newServer.background})`, backgroundSize: "cover", backgroundPosition: "center", filter: "blur(0.5rem)" }} />}
                                                 <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "50vh", flexDirection: "column" }}>
                                                     <Paper sx={{ borderRadius: "1rem", padding: "2rem", marginTop: "1rem", width: { xs: "100%", md: "75%" }, marginBottom: "2rem", boxShadow: "0px 10px 10px 5px rgba(0, 0, 0, 0.25)", backgroundColor: "#00000026", backdropFilter: "blur(1.5rem)" }}>
-                                                        <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} placement="top" disableInteractive title={server.name}>
-                                                            <Typography variant="h1" component="h1" sx={{ fontWeight: "700", fontSize: { xs: "1.5rem", md: "3rem" }, pl: "1rem", mr: "1rem", textShadow: "0px 0px 15px rgba(0, 0, 0, 0.25)", textAlign: "center" }}>
-                                                                {newServer.serverName}
-                                                            </Typography>
-                                                        </Tooltip>
+                                                        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "row", textAlign: "center", width: "100%" }}>
+                                                            <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} placement="top" disableInteractive title={server.name}>
+                                                                <Typography variant="h1" component="h1" sx={{ fontWeight: "700", fontSize: { xs: "1.5rem", md: "3rem" }, pl: "1rem", mr: "1rem", textShadow: "0px 0px 15px rgba(0, 0, 0, 0.25)", textAlign: "center" }}>
+                                                                    {newServer.serverName}
+                                                                </Typography>
+                                                            </Tooltip>
+                                                            {newServer.verified && (
+                                                                <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} placement="top" disableInteractive title={`This server has been verified by RestoreCord and is deemed to be safe and legitimate.`}>
+                                                                    <VerifiedIcon sx={{ width: "2rem", height: "2rem" }} />
+                                                                </Tooltip>
+                                                            )}
+                                                        </Box>
                                                        
                                                         {newServer.description && <Typography variant="body1" component="p" sx={{ textAlign: "center", fontSize: { xs: "1rem", md: "1.75rem" }, whiteSpace: "pre-line", overflowWrap: "break-word" }}>{newServer.description}</Typography>}
 
