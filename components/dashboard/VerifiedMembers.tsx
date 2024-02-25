@@ -87,7 +87,7 @@ export default function VerifiedMembers({ user }: any) {
     const [loading, setLoading] = useState(false);
     const [loadingInfo, setLoadingInfo] = useState(true);
 
-    const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, refetch } = useInfiniteQuery("members", async ({ pageParam = 1 }: any) => await getMembers({
+    const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isRefetching, refetch } = useInfiniteQuery("members", async ({ pageParam = 1 }: any) => await getMembers({
         Authorization: (process.browser && window.localStorage.getItem("token")) ?? token,
     }, serverId, search, pageParam), {
         getNextPageParam: (lastPage, allPages: any) => {
@@ -135,18 +135,20 @@ export default function VerifiedMembers({ user }: any) {
 
             if (!fetching && scrollHeight - scrollTop <= clientHeight * 1.5) {
                 fetching = true;
-                if (hasNextPage) await fetchNextPage();
+                if (hasNextPage) {
+                    await fetchNextPage();
+                }
                 fetching = false;
             }
         }
 
         const delayDebounceFn = setTimeout(() => {
             refetch();
-        }, 1000)
+        }, 500)
 
         document.addEventListener("scroll", onScroll);
         return () => {
-            document.addEventListener("scroll", onScroll);
+            document.removeEventListener("scroll", onScroll);
             clearTimeout(delayDebounceFn);
         }       
     }, [hasNextPage, fetchNextPage, refetch, search]);
@@ -529,7 +531,16 @@ export default function VerifiedMembers({ user }: any) {
                                     )}
                                 </Typography>
                                 <Stack direction={{ xs: "column", sm: "row" }} spacing={0} justifyContent="space-between">
-                                    <TextField id="search" label="Search" variant="outlined" onChange={(e) => setSearch(e.target.value)} sx={{ width: { xs: "100%", sm: "30%" } }} />
+                                    <TextField
+                                        id="search"
+                                        label="Search"
+                                        variant="outlined"
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        sx={{ width: { xs: "100%", sm: "30%" } }}
+                                        InputProps={{
+                                            endAdornment: (isRefetching) && <CircularProgress size={20} />,
+                                        }}
+                                    />
                                     <FormControl fullWidth sx={{ marginLeft: { xs: 0, sm: 1 }, mt: { xs: 1, sm: 0 } }}>
                                         <InputLabel id="server-select-label">Server</InputLabel>
                                         <Select labelId="server-select-label" id="server-select" label="Server" value={serverId} onChange={handleSelect}>

@@ -12,6 +12,9 @@ const blockedWords = [
     "s3x",
     "p0rn",
     "invites",
+    "gun",
+    "🔞",
+    "🔫",
 ]
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -45,6 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 AND: [
                     { locked: false },
                     { discoverable: 1 },
+                    { nsfw: false },
                     ...(search && (search.length >= 3 && search.length <= 99)) ? [{
                         name: {
                             contains: search

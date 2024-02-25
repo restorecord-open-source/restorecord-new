@@ -6,16 +6,17 @@ import { accounts } from "@prisma/client";
 async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts) {
     try {
         const serverId: any = req.query.guild ? req.query.guild : "all";
+        const limit: number = req.query.max ? parseInt(req.query.max as string) : 50;
+        const page: number = req.query.page ? parseInt(req.query.page as string) : 0;
+        const search: string | undefined = req.query.search ? req.query.search as string : undefined;
 
         const servers = await prisma.servers.findMany({ where: { ownerId: user.id, guildId: serverId === "all" ? undefined : BigInt(serverId) } });
         if (!servers || servers.length === 0) {
             return res.status(200).json({ success: true, max: 0, pullable: 0, maxPages: 0, members: [], message: "No servers found." });
         }
 
-        const limit: number = req.query.max ? parseInt(req.query.max as string) : 50;
-        const page: number = req.query.page ? parseInt(req.query.page as string) : 0;
-
-        let guildIds: BigInt[] = [];
+      
+        let guildIds: bigint[] = [];
 
         if (serverId === undefined || serverId.toLowerCase() === "all") {
             guildIds = servers.filter((server: any) => server.ownerId === user.id).map((server: any) => server.guildId);
@@ -23,63 +24,45 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             guildIds = serverId ? (servers.find((server: any) => server.guildId === BigInt(serverId)) ? [BigInt(serverId)] : []) : servers.filter((server: any) => server.ownerId === user.id).map((server: any) => server.guildId);
         }
 
-        const search: string | undefined = req.query.search ? req.query.search as string : undefined;
-        const userIdSearch: string | undefined = search && search.match(/^\d{15,20}$/) ? search : undefined;
-        const ipSearch: string | undefined = search && search.match(/^(\d{1,3}\.){3}\d{1,3}$/) ? search : undefined;
-        const conditions: any[] = [{ guildId: { in: guildIds } }];
 
-        if (ipSearch) conditions.push({ ip: { equals: ipSearch } });
-        else if (userIdSearch) conditions.push({ userId: { equals: BigInt(userIdSearch) as bigint } });
-        else if (search) conditions.push({ username: { contains: search.replace("@", "") } });
+        const whereClause = {
+            guildId: { in: guildIds },
+            ...(search && {
+                OR: [
+                    { userId: /^\d{15,21}$/.test(search) ? BigInt(search) : undefined },
+                    { ip: /^(\d{1,3}\.){3}\d{1,3}$/.test(search) ? search : undefined },
+                    { username: { contains: search.replace("@", "") } },
+                ].filter(Boolean),
+            }),
+        };
 
-        const count = await prisma.members.count({
-            where: {
-                AND: conditions,
-            },
-        });
+        const [countResult, countPullable, members] = await prisma.$transaction([
+            prisma.members.count({ where: whereClause }),
+            prisma.members.count({ where: { ...whereClause, accessToken: { not: "unauthorized" } } }),
+            prisma.members.findMany({
+                select: {
+                    id: true,
+                    userId: true,
+                    accessToken: true,
+                    username: true,
+                    avatar: true,
+                    createdAt: true,
+                    guildId: true,
+                },
+                where: whereClause,
+                orderBy: { createdAt: "desc" },
+                skip: page ? (page - 1) * limit : 0,
+                take: limit,
+            }),
+        ]);
 
-        const countPullable = await prisma.members.count({
-            where: {
-                AND: [...conditions, { accessToken: { not: "unauthorized" } }],
-            },
-        });
 
-        const memberList = await prisma.members.findMany({
-            select: {
-                id: true,
-                userId: true,
-                username: true,
-                avatar: true,
-                createdAt: true,
-                guildId: true,
-                accessToken: true,
-            },
-            where: {
-                AND: conditions,
-            },
-            orderBy: { id: "desc" },
-            skip: page ? (page - 1) * limit : 0,
-            take: limit,
-        });
-
-        if (memberList.length === 0) {
-            return res.status(200).json({
-                success: true,
-                max: count,
-                pullable: countPullable,
-                maxPages: Math.ceil(count / limit),
-                members: [],
-                message: "No members found.",
-            });
-        }
-
-        const memberListFixed = memberList.map((member: any) => {
+        const memberList = members.map((member: any) => {
             return {
                 id: member.id,
                 userId: String(member.userId),
                 username: member.username,
                 avatar: member.avatar,
-                // ip: user.role !== "free" ? member.ip : null,
                 createdAt: member.createdAt,
                 guildId: String(member.guildId),
                 guildName: servers.find((server: any) => server.guildId === member.guildId)?.name,
@@ -89,10 +72,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
         return res.status(200).json({
             success: true,
-            max: count,
+            max: countResult,
             pullable: countPullable,
-            maxPages: Math.ceil(count / limit),
-            members: memberListFixed,
+            maxPages: Math.ceil(countResult / limit),
+            members: memberList,
+            message: memberList.length > 0 ? "" : "No members found.",
         });
     } catch (err: any) {
         console.error(err);

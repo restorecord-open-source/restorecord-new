@@ -23,6 +23,7 @@ import AlertTitle from "@mui/material/AlertTitle";
 import CardContent from "@mui/material/CardContent";
 import FormControl from "@mui/material/FormControl";
 import CircularProgress from "@mui/material/CircularProgress";
+import { Skeleton } from "@mui/material";
 
 
 async function getDiscovery(search?: any, page: number = 1) {
@@ -149,7 +150,30 @@ export default function Discovery() {
                             )}
                         </Grid>
                     </Paper>
-                ) : <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}><CircularProgress /></Box> }
+                ) : (
+                    <Paper sx={{ padding: "0.5rem", marginTop: "1rem", display: "flex", background: "transparent" }}>
+                        <Grid container spacing={{ xs: 2, sm: 2, md: 4 }} sx={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", marginBottom: "5rem" }}>
+                            {Array.from({ length: 18 }, (_, i) => (
+                                <Grid item xs={12} md={6} lg={4} key={i} sx={{ "& *": { transition: "all 0.2s ease-in-out" } }}>
+                                    <Card role="button" sx={{ height: "100%", borderRadius: "1rem", border: `1px solid #000000` }}>
+                                        <Box sx={{ height: "150px", position: "relative", display: "block", mb: "15px" }}>
+                                            <Box sx={{ display: "block", position: "absolute", top: 0, left: 0, width: "100%", height: "100%", transform: "scale(1.01)" }}>
+                                                <Skeleton variant="rectangular" animation="wave" width="100%" height={140} sx={{ filter: "brightness(0.75)" }} />
+                                            </Box>
+                                            <Skeleton variant="circular" animation="wave" width={48} height={48} sx={{ position: "absolute", left: "12px", bottom: "-21px", transform: "scale(1.01) !important", outline: `0.15rem solid ${theme.palette.background.default}` }} />
+                                        </Box>
+
+                                        <CardContent>
+                                            <Skeleton variant="text" animation="wave" height={"32px"} width={Math.floor(Math.random() * 150) + 100} />
+                                            <Skeleton variant="text" animation="wave" height={"24px"} width={Math.floor(Math.random() * 150) + 100} />
+                                            <Skeleton variant="text" animation="wave" height={"20px"} width={Math.floor(Math.random() * 150) + 100} />
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
+                            ))}
+                        </Grid>
+                    </Paper>
+                )}
             </Container>
         </>
     )
