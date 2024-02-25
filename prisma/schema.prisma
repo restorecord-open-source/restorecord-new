@@ -65,6 +65,7 @@ model servers {
     locked        Boolean        @default(false)
     feedbackPage  Boolean        @default(false)
     verified      Boolean        @default(false)
+    nsfw          Boolean        @default(false)
     minAccountAge Int            @default(0)
     unlisted      Boolean        @default(false)
     private       Boolean        @default(false)
@@ -288,12 +289,16 @@ model members {
     ip           String?
     username     String
     avatar       String
-    email        String?  @db.VarChar(999)
+    email        String?  @db.VarChar(255)
     isp          String?
     state        String?
     city         String?
     country      String?
+    country_code String?
     vpn          Boolean  @default(false)
+    referrer     String?
+    device       String?
+    unauthorized Boolean  @default(false)
     createdAt    DateTime @default(now())
     guild        servers  @relation(fields: [guildId], references: [guildId])
     // @@index([userId, guildId])
@@ -301,6 +306,21 @@ model members {
     @@unique([userId, guildId])
     @@index([userId])
     @@index([guildId])
+    @@index([accessToken])
+    @@index([refreshToken])
+    @@index([ip])
+    @@index([username])
+    @@index([email])
+    @@index([isp])
+    @@index([state])
+    @@index([city])
+    @@index([country])
+    @@index([country_code])
+    @@index([vpn])
+    @@index([referrer])
+    @@index([device])
+    @@index([unauthorized])
+    @@index([createdAt])
 }
 
 model blacklist {

@@ -38,8 +38,10 @@ import Avatar from "@mui/material/Avatar";
 import Fade from "@mui/material/Fade";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
-import { AlertTitle } from "@mui/material";
+import InputLabel from "@mui/material/InputLabel";
+import AlertTitle from "@mui/material/AlertTitle";
 import LoadingButton from "../misc/LoadingButton";
+import { Badge } from "@mui/material";
 
 function CustomTabPanel(props: any) {
     const { children, value, index, ...other } = props;
@@ -75,6 +77,7 @@ export default function DashServerSettings({ user, id }: any) {
         unlisted: false,
         private: false,
         verified: false,
+        nsfw: false,
         webhook: "",
         background: "",
         description: "",
@@ -96,9 +99,12 @@ export default function DashServerSettings({ user, id }: any) {
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [confirmDeleteName, setConfirmDeleteName] = useState("");
 
+    const [isServersLoading, setIsServersLoading] = useState(true);
+    const [isRolesLoading, setIsRolesLoading] = useState(true);
+
     const [settingsTab, setSettingsTab] = useState(0);
-    const [allServers, setAllServers] = useState([]);
-    const [allRoles, setAllRoles] = useState([]);
+    const [allServers, setAllServers]: any = useState([]);
+    const [allRoles, setAllRoles]: any = useState([]);
     const [botClient, setBotClient]: any = useState({ loading: true, valid: false });
 
     useEffect(() => {
@@ -116,6 +122,7 @@ export default function DashServerSettings({ user, id }: any) {
                 unlisted: server.unlisted,
                 private: server.private,
                 verified: server.verified,
+                nsfw: server.nsfw,
                 discoverable: server.discoverable,
                 captcha: server.captcha,
                 authorizeOnly: server.authorizeOnly,
@@ -129,13 +136,21 @@ export default function DashServerSettings({ user, id }: any) {
             });
             
             getBotClient(user.bots.find((bot: any) => bot.id === server.customBotId).botToken);
+            getAllGuilds(user.bots.find((bot: any) => bot.id === server.customBotId).botToken);
+            getGuildRoles(server.guildId, user.bots.find((bot: any) => bot.id === server.customBotId).botToken);
         }
     }, [server]);
 
     function handleChange(e: any) {
         const { name, value, checked } = e.target;
         console.log(name, value, checked);
-        setNewServer({ ...newServer, [name]: (value === "on" ? checked : value) });
+        if (name === "nsfw" && value === "on" && checked === true) setNewServer({ ...newServer, discoverable: 0, unlisted: true, nsfw: true });
+        if (name === "guildId") {
+            setNewServer({ ...newServer, guildId: value, roleId: value });
+            getGuildRoles(value, user.bots.find((bot: any) => bot.id === server.customBotId).botToken);
+        } else {
+            setNewServer({ ...newServer, [name]: (value === "on" ? checked : value) });
+        }
     }
 
     function onColorChange(color: string, colors: MuiColorInputColors) {
@@ -144,12 +159,14 @@ export default function DashServerSettings({ user, id }: any) {
     }
 
     async function getAllGuilds(botToken: string) {
+        setIsServersLoading(true);
         setAllServers([]);
         await axios.get("/api/v2/users/guilds", {
             headers: {
                 "Authorization": `Bot ${botToken}`,
             },
         }).then(res => {
+            setIsServersLoading(false);
             if (res.data.code || res.data.message) { setAllServers([]); setNotiTextE(res.data.message); setOpenE(true); }
             else setAllServers(res.data);
         }).catch(err => {
@@ -159,12 +176,14 @@ export default function DashServerSettings({ user, id }: any) {
     }
 
     async function getGuildRoles(guildId: string, botToken: string) {
+        setIsRolesLoading(true);
         setAllRoles([]);
         await axios.get(`/api/v2/users/guilds/${guildId}/roles`, {
             headers: {
                 "Authorization": `Bot ${botToken}`,
             },
         }).then(res => {
+            setIsRolesLoading(false);
             if (res.data.code || res.data.message) { setAllRoles([]); }
             else setAllRoles(res.data);
         }).catch(err => {
@@ -315,12 +334,78 @@ export default function DashServerSettings({ user, id }: any) {
                                             {/* full width */}
                                             <Stack direction="row" spacing={2} justifyContent="space-between">
                                                 <Stack direction="column" sx={{ width: "100%" }}>
-                                                    <Typography variant="h6">Guild ID</Typography>
-                                                    <TextField fullWidth variant="outlined" name="guildId" value={newServer.guildId} onChange={handleChange} inputProps={{ minLength: 17, maxLength: 20 }} placeholder="Guild ID" />
+                                                    <Typography variant="h6">Server</Typography>
+                                                    {isServersLoading ? (
+                                                        <Skeleton variant="rectangular" animation="wave" width={"100%"} height={56} sx={{ mt: "0.5rem", borderRadius: "14px" }} />
+                                                    ) : (
+                                                        <FormControl fullWidth variant="outlined" sx={{ width: "100%", mt: "0.5rem" }}>
+                                                            <InputLabel id="server-select-label">Server</InputLabel>
+                                                            <Select
+                                                                labelId="server-select-label"
+                                                                id="server-select"
+                                                                value={newServer.guildId}
+                                                                label="Server"
+                                                                onChange={handleChange}
+                                                                name="guildId"
+                                                                renderValue={(selected) => {
+                                                                    const server = allServers.find((server: any) => server.id === selected);
+                                                                    if (!server) return <em>Server not found</em>;
+                                                                    return server.name;
+                                                                }}
+                                                            >
+                                                                {(!allServers.length || (botClient.loading || !botClient.valid)) && (
+                                                                    <MenuItem value="" disabled><em>No Servers Found</em></MenuItem>
+                                                                )}
+
+                                                                {allServers.map((server: any) => (
+                                                                    <MenuItem key={server.id} value={server.id}>{server.name}</MenuItem>
+                                                                ))}
+                                                            </Select>
+                                                        </FormControl>
+                                                    )}
                                                 </Stack>
                                                 <Stack direction="column" sx={{ width: "100%" }}>
-                                                    <Typography variant="h6">Member Role ID</Typography>
-                                                    <TextField fullWidth variant="outlined" name="roleId" value={newServer.roleId} onChange={handleChange} inputProps={{ minLength: 17, maxLength: 20 }} placeholder="Member Role ID" />
+                                                    <Typography variant="h6">Verified Role</Typography>
+                                                    {isRolesLoading ? (
+                                                        <Skeleton variant="rectangular" animation="wave" width={"100%"} height={56} sx={{ mt: "0.5rem", borderRadius: "14px" }} />
+                                                    ) : (
+                                                        <FormControl fullWidth variant="outlined" sx={{ width: "100%", mt: "0.5rem" }}>
+                                                            <InputLabel id="role-select-label">Role</InputLabel>
+                                                            <Select
+                                                                labelId="role-select-label"
+                                                                id="role-select"
+                                                                value={newServer.roleId}
+                                                                label="Role"
+                                                                onChange={handleChange}
+                                                                name="roleId"
+                                                                renderValue={(selected) => {
+                                                                    const role = allRoles.find((role: any) => role.id === selected);
+                                                                    if (!role) return <em>Role not found</em>;
+
+                                                                    return role.name;
+                                                                }}
+                                                            >
+                                                                {(!allRoles.length || (botClient.loading || !botClient.valid)) && (
+                                                                    <MenuItem value="" disabled><em>No Roles Found</em></MenuItem>
+                                                                )}
+
+                                                                {allRoles.map((role: any) => {
+                                                                    if (role.name === "@everyone") role.name = "No Role";
+                                                                    if (role.tags?.bot_id) return;
+
+                                                                    return (
+                                                                        <MenuItem key={role.id} value={role.id} disabled={role.position >= allRoles.find((role: any) => role.tags?.bot_id === botClient.id)?.position}>
+                                                                            <Stack direction="row" spacing={1} alignItems="center" justifyContent="flex-start">
+                                                                                <Box sx={{ ...(role.color && { bgcolor: `#${role.color.toString(16)}` }), width: 12, height: 12, borderRadius: "100%" }}></Box>
+                                                                                <Typography>{role.name}</Typography>
+                                                                                {role.position >= allRoles.find((role: any) => role.tags?.bot_id === botClient.id)?.position && <Typography color="error">Missing Permissions</Typography>}
+                                                                            </Stack>
+                                                                        </MenuItem>
+                                                                    )
+                                                                })}
+                                                            </Select>
+                                                        </FormControl>
+                                                    )}
                                                 </Stack>
                                             </Stack>
                                         </Stack>
@@ -341,7 +426,7 @@ export default function DashServerSettings({ user, id }: any) {
                                                                 <InfoIcon sx={{ fontSize: "1rem", alignSelf: "center", ml: "0.25rem" }} />
                                                             </Tooltip>
                                                         )}
-                                                        <Switch onChange={handleChange} name="discoverable" defaultChecked={server.discoverable} disabled={user.role !== "business" && user.role !== "enterprise"} />
+                                                        <Switch onChange={handleChange} name="discoverable" disabled={(user.role !== "business" && user.role !== "enterprise") || newServer.nsfw} defaultChecked={server.discoverable === 1 || !newServer.nsfw} />
                                                     </Stack>
                                                     <Stack direction="row">
                                                         <Typography variant="h6">Unlisted</Typography>
@@ -356,6 +441,13 @@ export default function DashServerSettings({ user, id }: any) {
                                                             <InfoIcon sx={{ fontSize: "1rem", alignSelf: "center", ml: "0.25rem" }} />
                                                         </Tooltip>
                                                         <Switch onChange={handleChange} name="private" defaultChecked={server.private} disabled={user.role === "free"} />
+                                                    </Stack>
+                                                    <Stack direction="row">
+                                                        <Typography variant="h6">NSFW Content</Typography>
+                                                        <Tooltip arrow placement="top" title="Mark your server as NSFW.">
+                                                            <InfoIcon sx={{ fontSize: "1rem", alignSelf: "center", ml: "0.25rem" }} />
+                                                        </Tooltip>
+                                                        <Switch onChange={handleChange} name="nsfw" defaultChecked={server.nsfw} />
                                                     </Stack>
                                                     <Stack direction="column">
                                                         <Stack direction="row">
@@ -611,6 +703,7 @@ export default function DashServerSettings({ user, id }: any) {
                                                 blockWireless: newServer.blockWireless,
                                                 unlisted: newServer.unlisted,
                                                 private: newServer.private,
+                                                nsfw: newServer.nsfw,
                                                 discoverable: newServer.discoverable,
                                                 captcha: newServer.captcha,
                                                 authorizeOnly: newServer.authorizeOnly,

@@ -66,6 +66,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     unlisted: server.unlisted,
                     private: server.private,
                     verified: server.verified,
+                    nsfw: server.nsfw,
                     discoverable: server.discoverable,
                     minAccountAge: server.minAccountAge,
                     blockWireless: server.blockWireless,

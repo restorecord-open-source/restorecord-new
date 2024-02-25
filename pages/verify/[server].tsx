@@ -1,5 +1,6 @@
 import Head from "next/head";
 import { prisma } from "../../src/db";
+import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 
 import Typography from "@mui/material/Typography";
@@ -15,12 +16,23 @@ import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
 import LockIcon from "@mui/icons-material/Lock";
 import PublicOffIcon from "@mui/icons-material/PublicOff";
+import VerifiedIcon from "@mui/icons-material/Verified";
 import Link from "next/link";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
-import { CircularProgress, Stack } from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress";
+import Stack from "@mui/material/Stack";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
 
 export default function Verify({ server, status, err, errStack, captcha }: any) {
+    const router = useRouter();
+
     const [disabled, setDisabled] = useState(false);
+
+    const [nsfwModal, setNsfwModal] = useState(false);
+    const [isAdult, setIsAdult] = useState(false);
 
     const [captchaToken, setCaptchaToken]: any = useState();
     const [loading, setLoading] = useState(false);
@@ -35,7 +47,18 @@ export default function Verify({ server, status, err, errStack, captcha }: any) 
         console.error(err);
     }
 
+    function getCookie(name: string): string {
+        return document.cookie.split("; ").reduce((cookieValue, cookie) => {
+            const [cookieName, value] = cookie.split("=");
+            return cookieName === name ? value : cookieValue;
+        }, "");
+    }
+
     useEffect(() => {
+        if (server.nsfw && !isAdult && getCookie("nsfw") !== "true") {
+            setNsfwModal(true);
+        }
+
         if (status === "finished") {
             setDisabled(true);
             setTimeout(() => { setDisabled(false); }, 10000);
@@ -101,15 +124,12 @@ export default function Verify({ server, status, err, errStack, captcha }: any) 
 
         return (
             <Alert severity="error" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(211, 47, 47, 0.25)", backdropFilter: "blur(0.5rem)" }}>
-                {(err !== undefined && err === "403") ? (
+                <AlertTitle>Error{err !== undefined ? `: ${err}` : ""}</AlertTitle>
+                {errorMessage}
+                {(err !== undefined && err === "403") && (
                     <>
-                        <AlertTitle>Error{err !== undefined ? `: ${err}` : ""}</AlertTitle>
-                        {errorMessage} <Link href={`https://restr.co/perms`}>Click here</Link> to fix this issue.
-                    </>
-                ) : (
-                    <>
-                        <AlertTitle>Error{err !== undefined ? `: ${err}` : ""}</AlertTitle>
-                        {errorMessage}
+                        {' '}
+                        <Link href={`https://restr.co/perms`}>Click here</Link> to fix this issue.
                     </>
                 )}
             </Alert>
@@ -137,13 +157,44 @@ export default function Verify({ server, status, err, errStack, captcha }: any) 
                 <title>{server.name ? server.name : "RestoreCord"}</title>
             </Head>
 
-            {(server.success && server.bg) && ( <Box sx={{ backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${server.bg})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", height: "100vh", width: "100vw", position: "absolute", top: "0", left: "0", zIndex: "-999", filter: "blur(0.5rem)" }} /> )}
+            {(server.success && server.bg && !(nsfwModal)) && ( <Box sx={{ backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${server.bg})`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat", height: "100vh", width: "100vw", position: "absolute", top: "0", left: "0", zIndex: "-999", filter: "blur(0.5rem)" }} /> )}
 
             <Container maxWidth="lg">
                 <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", flexDirection: "column" }}>
                     <Paper sx={{ borderRadius: "1rem", padding: "2rem", marginTop: "1rem", width: { xs: "100%", md: "50%" }, marginBottom: "2rem", boxShadow: "0px 10px 10px 5px rgba(0, 0, 0, 0.25)", backgroundColor: "#00000026", backdropFilter: "blur(1.5rem)" }}>
                         {server.success ? (
                             <>
+
+                                {nsfwModal && (
+                                    <Dialog open={nsfwModal} onClose={() => { setNsfwModal(false); }}>
+                                        <DialogTitle>NSFW Server</DialogTitle>
+                                        <DialogContent>
+                                            <Typography variant="body1" component="p" sx={{ fontSize: { xs: "1rem", md: "1.5rem" }, whiteSpace: "pre-line", overflowWrap: "break-word" }}>
+                                                This server is marked as <b>NSFW</b>.<br/>
+                                                Are you 18 years of age or older?
+                                            </Typography>
+                                        </DialogContent>
+                                        <DialogActions>
+                                            <Stack direction={{ sm: "column", md: "row" }} spacing={2} justifyContent="space-between" alignItems="center" width="100%">
+                                                <Button onClick={() => { 
+                                                    setIsAdult(true); 
+                                                    setNsfwModal(false);
+                                                    document.cookie = `nsfw=true; path=/; expires=${new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toUTCString()}`;
+                                                }} color="success" fullWidth variant="contained">
+                                                    Yes
+                                                </Button>
+                                                <Button onClick={() => {
+                                                    setIsAdult(false); 
+                                                    setNsfwModal(false); 
+                                                    router.push("https://google.com");
+                                                }} color="error" fullWidth variant="contained">
+                                                    No
+                                                </Button>
+                                            </Stack>
+                                        </DialogActions>
+                                    </Dialog>
+                                )}
+
                                 {status === "finished" ? (
                                     <Alert severity="success" variant="filled" sx={{ mb: 2, backgroundColor: "rgba(28, 205, 30, 0.25)", backdropFilter: "blur(0.5rem)" }}>
                                         <AlertTitle>Success</AlertTitle>
@@ -153,20 +204,25 @@ export default function Verify({ server, status, err, errStack, captcha }: any) 
 
                                 <>{err ? ErrorAlert(err) : null}</>
 
-                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "row", textAlign: "center", width: "100%" }}>
                                     {server.locked && (
                                         <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} placement="top" disableInteractive title={`This server is currently disabled.`}>
                                             <LockIcon sx={{ color: theme.palette.grey[500], width: "2rem", height: "2rem", marginLeft: "1rem" }} />
                                         </Tooltip>
                                     )}
                                     <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} placement="top" disableInteractive title={server.name}>
-                                        <Typography variant="h1" component="h1" sx={{ fontWeight: "700", fontSize: { xs: "1.5rem", md: "3rem" }, pl: "1rem", mr: "1rem", textShadow: "0px 0px 15px rgba(0, 0, 0, 0.25)", textAlign: "center" }}>
+                                        <Typography variant="h1" component="h1" sx={{ fontWeight: "700", fontSize: { xs: "1.5rem", md: "3rem" }, mr: "0.5rem", textShadow: "0px 0px 15px rgba(0, 0, 0, 0.25)" }}>
                                             {server.name}
                                         </Typography>
                                     </Tooltip>
                                     {!server.ipLogging && (
-                                        <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} placement="top" disableInteractive title={`This server has IP logging disabled.`}>
+                                        <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} placement="top" disableInteractive title={`Upon joining this server, your IP address will not be logged or saved.`}>
                                             <PublicOffIcon sx={{ color: theme.palette.grey[500], width: "2rem", height: "2rem" }} />
+                                        </Tooltip>
+                                    )}
+                                    {server.verified && (
+                                        <Tooltip TransitionComponent={Fade} TransitionProps={{ timeout: 200 }} placement="top" disableInteractive title={`This server has been verified by RestoreCord and is deemed to be safe and legitimate.`}>
+                                            <VerifiedIcon sx={{ width: "2rem", height: "2rem" }} />
                                         </Tooltip>
                                     )}
                                 </Box>
@@ -197,12 +253,12 @@ export default function Verify({ server, status, err, errStack, captcha }: any) 
                                     <>
                                         {server.description &&
                                         <Typography variant="body1" component="p" sx={{ textAlign: "center", fontSize: { xs: "1rem", md: "1.75rem" }, whiteSpace: "pre-line", overflowWrap: "break-word" }}>
-                                            {server.description}
+                                            {!(nsfwModal) && server.description}
                                         </Typography>}
 
                                         {server.icon &&
                                         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", mt: "1rem" }}>
-                                            <Avatar src={server.icon} sx={{ width: { xs: "6rem", md: "8rem" }, height: { xs: "6rem", md: "8rem" } }} />
+                                            <Avatar src={!(nsfwModal) && server.icon} sx={{ width: { xs: "6rem", md: "8rem" }, height: { xs: "6rem", md: "8rem" } }} />
                                         </Box>}
 
                                         {/* if RC_err is 777 then show captcha */}
@@ -292,7 +348,7 @@ export async function getServerSideProps({ req }: any) {
         let serverName = req.url.split("/")[2];
         let type = 1;
 
-        let serverInfo: { success: boolean, name: string, guildId: string, icon: string, bg: string, description: string | null, theme: string, color: string, ipLogging: boolean, clientId: string, domain: string, locked: boolean, verified: boolean, unlisted: boolean, private: boolean } = {
+        let serverInfo: { success: boolean, name: string, guildId: string, icon: string, bg: string, description: string | null, theme: string, color: string, ipLogging: boolean, clientId: string, domain: string, locked: boolean, verified: boolean, unlisted: boolean, private: boolean, nsfw: boolean } = {
             success: false,
             name: decodeURI(serverName),
             guildId: "",
@@ -307,34 +363,51 @@ export async function getServerSideProps({ req }: any) {
             locked: false,
             verified: false,
             unlisted: false,
-            private: false
+            private: false,
+            nsfw: false
         }
 
-        if (isNaN(Number.parseInt(serverName as any))) type = 0;
-        try {
-            if (isNaN(Number(serverName))) type = 0;
-            if (BigInt(serverName) > 18446744073709551615) type = 0;
-            else type = 1;
-        } catch (e) { type = 0; }
+        const isDiscordId = (id: string): boolean => /^[0-9]{17,19}$/.test(id);
+        type = isDiscordId(serverName) ? 1 : 0;
 
         await prisma.servers.findUnique({
+            select: {
+                id: true,
+                customBotId: true,
+                ownerId: true,
+                name: true,
+                guildId: true,
+                picture: true,
+                bgImage: true,
+                description: true,
+                theme: true,
+                themeColor: true,
+                ipLogging: true,
+                private: true,
+                locked: true,
+                verified: true,
+                unlisted: true,
+                nsfw: true,
+                customBot: {
+                    select: {
+                        clientId: true,
+                        customDomain: true
+                    }
+                },
+                owner: {
+                    select: {
+                        id: true
+                    }
+                }
+            },
             where: {
                 name: type === 0 ? decodeURIComponent(serverName) : undefined,
                 guildId: type === 1 ? BigInt(serverName) as bigint : undefined
             }
-        }).then(async (res: any) => {
+        }).then(async (res) => {
             if (res) {
-                const customBot = await prisma.customBots.findUnique({ where: { id: res.customBotId }});
-                const ownerAccount = await prisma.accounts.findUnique({
-                    select: {
-                        id: true
-                    },
-                    where: {
-                        id: res.ownerId 
-                    } 
-                });
-                if (!ownerAccount) return { props: { server: serverInfo, status: "error", err: "Owner account not found. Contact Owner", errStack: "" } }
-                if (!customBot) return { props: { server: serverInfo, status: "error", err: "Custom bot not found. Contact Owner", errStack: "" } }
+                if (!res.owner) return { props: { server: serverInfo, status: "error", err: "Owner account not found. Contact Owner", errStack: "" } }
+                if (!res.customBot) return { props: { server: serverInfo, status: "error", err: "Custom bot not found. Contact Owner", errStack: "" } }
 
                 serverInfo = {
                     success: true,
@@ -346,12 +419,13 @@ export async function getServerSideProps({ req }: any) {
                     theme: res.theme,
                     color: `#${res.themeColor}`,
                     ipLogging: res.ipLogging,
-                    clientId: res.private ? "0" : customBot?.clientId.toString(),
-                    domain: customBot?.customDomain ? (res.private ? "" : `https://${customBot.customDomain}`) : host,
+                    clientId: res.private ? "0" : res.customBot?.clientId.toString(),
+                    domain: res.customBot?.customDomain ? (res.private ? "" : `https://${res.customBot.customDomain}`) : host,
                     locked: res.locked,
                     verified: res.verified,
                     unlisted: res.unlisted,
-                    private: res.private
+                    private: res.private,
+                    nsfw: res.nsfw
                 }
             }
         }).catch((err: any) => {
