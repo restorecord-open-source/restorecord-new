@@ -26,8 +26,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         const limit: number = req.query.max ? parseInt(req.query.max as string) : 39;
         const page: number = req.query.page ? parseInt(req.query.page as string) : 0;
-        const now = new Date();
-        const sevenDaysAgo = new Date(now.setDate(now.getDate() - 7));
 
         let servers = await prisma.servers.findMany({
             select: {
@@ -66,24 +64,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         if (!servers || servers.length === 0) return res.status(200).json({ success: true, pages: 0, servers: [] });
 
-        const memberCounts = await Promise.all(servers.map(async server => {
-            const count = await prisma.members.count({
-                where: {
-                    guildId: server.guildId,
-                    createdAt: {
-                        gte: sevenDaysAgo,
-                    },
-                },
-            });
-            return { guildId: server.guildId, count };
-        }));
-
-
-        servers = servers.map(server => ({
-            ...server,
-            memberCount: memberCounts.find(mc => mc.guildId === server.guildId)?.count || 0,
-        })).sort((a, b) => b.memberCount - a.memberCount);
-        
         servers = servers.map(server => ({
             id: server.id,
             name: server.name,
@@ -98,7 +78,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 clientId: String(server.customBot.clientId),
                 customDomain: server.customBot.customDomain
             },
-            memberCount: (server as any).memberCount as number,
         })) as any;
 
         search ? null : await redis.set("discovery", JSON.stringify(servers), "EX", 1800);
