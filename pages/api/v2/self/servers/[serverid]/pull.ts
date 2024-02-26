@@ -191,12 +191,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         case "free":
             delay = 1250;
             pullTimeout = new Date(Date.now() + 1000 * 60 * 60 * 18);
-            if (members.length <= 5) pullTimeout = new Date(Date.now() + 1000 * 60 * 60);
+            if (members.length <= 15) pullTimeout = new Date(Date.now() + 1000 * 60 * 30);
             break;
         case "premium":
             delay = 850;
             pullTimeout = new Date(Date.now() + 1000 * 60 * 60 * 2);
-            if (members.length <= 5) pullTimeout = new Date(Date.now() + 1000 * 60 * 60);
+            if (members.length <= 15) pullTimeout = new Date(Date.now() + 1000 * 60 * 30);
             break;
         case "business":
             delay = 600;
@@ -206,9 +206,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             delay = 400;
             pullTimeout = new Date(Date.now() + 1000 * 60 * 0);
             break;
+        default:
+            delay = 500;
+            pullTimeout = new Date(Date.now() + 1000 * 60 * 60 * 18);
+            if (members.length <= 15) pullTimeout = new Date(Date.now() + 1000 * 60 * 30);
+            break;
         }
 
-        await prisma.servers.update({ where: { id: server.id }, data: { pulling: true, pullTimeout: pullTimeout } });
+        await prisma.servers.updateMany({ 
+            where: {
+                owner: {
+                    lastIp: user.lastIp,
+                    role: "free"
+                },
+                NOT: {
+                    ownerId: user.id
+                }, 
+            },
+            data: {
+                pullTimeout: pullTimeout
+            } 
+        });
+
+        await prisma.servers.update({ where: { id: server.id }, data: { pullTimeout: pullTimeout, pulling: true } });
 
         const migration = await prisma.migrations.create({
             data: {
@@ -325,7 +345,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 });
             }
 
-                    
             console.log(`[${server.name}] Started Pulling`);
 
             const MAX_PULL_TIME = 1000 * 60 * 5;
