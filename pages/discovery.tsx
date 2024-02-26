@@ -50,19 +50,16 @@ export default function Discovery() {
         refetchOnWindowFocus: false
     });
 
-    const handleChange = useCallback(
-        debounce(
-            (e) => {
-                if (e.target.value.length >= 3 && e.target.value.length <= 99) {
-                    router.push(`?q=${e.target.value}`);
-                } else if (e.target.value.length === 0) {
-                    router.push("");
-                }
-                refetch();
-            },
-            300
-        ), []
-    );
+    function handleChange(e: any) {
+        if (e.target.value.length >= 3 && e.target.value.length <= 99) {
+            router.push(`?q=${e.target.value}`);
+        } else if (e.target.value.length === 0) {
+            router.push("");
+        }
+        setTimeout(() => {
+            refetch();
+        }, 100);
+    }
 
 
     useEffect(() => {
