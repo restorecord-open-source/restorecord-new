@@ -182,7 +182,7 @@ export default function Server() {
                 </AccordionSummary>
 
                 <AccordionDetails sx={{ display: "flex", flexDirection: "column" }}>
-                    <LinearProgressWithLabel variant="buffer" value={migration.total === 0 ? 0 : ((migration.success) / migration.total) * 100} valueBuffer={(migration.attempted/ migration.total) * 100} color={migration.status === "SUCCESS" ? "success" : (migration.status === "FAILED" || migration.status === "STOPPED") ? "error" : migration.status === "PENDING" ? "info" : "warning"} sx={{ borderRadius: "1rem", transition: "background-color 0.2s ease-out" }} />
+                    <LinearProgressWithLabel variant="determinate" value={migration.total === 0 ? 0 : ((migration.success) / migration.total) * 100} color={migration.status === "SUCCESS" ? "success" : (migration.status === "FAILED" || migration.status === "STOPPED") ? "error" : migration.status === "PENDING" ? "info" : "warning"} sx={{ borderRadius: "1rem", transition: "background-color 0.2s ease-out" }} />
                     <Stack direction={{ xs: "column", md: "row" }} spacing={2} justifyContent="space-between" sx={{ width: "100%", mt: "1rem" }}>
                         <Box sx={{ display: "flex", flexDirection: "column" }}>
                             <Typography variant="body2" sx={{ fontWeight: "500", mt: "0.5rem" }}>

@@ -63,7 +63,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     if (element.refreshToken || element.refresh_token || element.refresh) refreshToken = true;
                 }
 
-                if (!id || !username || !accessToken || !refreshToken) return res.status(400).json({ success: false, message: "Invalid JSON, make sure it contains \"id\", \"username\", \"accessToken\" and \"refreshToken\"" });
+                if (!id || !username || !accessToken || !refreshToken) return res.status(400).json({ success: false, message: "Invalid JSON, make sure it contains \"userId\", \"username\", \"accessToken\" and \"refreshToken\"" });
 
                 for (let i = 0; i < memberData.length; i++) {
                     const element = memberData[i];
