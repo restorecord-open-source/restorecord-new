@@ -127,7 +127,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
             }).catch(err => {
                 console.error(err);
-                return res.status(400).json({ success: false, message: "Couldn't get user information." });
+                return res.status(400).json({ success: false, message: "Error getting user information." });
             });
         }
         catch (err: any) {
