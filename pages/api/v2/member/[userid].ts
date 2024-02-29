@@ -15,10 +15,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
     case "GET":
         try {
             const userId: any = req.query.userid as string;
-            if (!userId) return res.status(400).json({ success: false, message: "No userid provided." });
+            if (!userId) return res.status(400).json({ success: false, message: "userid not provided." });
 
             const servers = await prisma.servers.findMany({ where: { ownerId: user.id } });
-            if (!servers) return res.status(400).json({ success: false, message: "No servers found." });
+            if (!servers) return res.status(400).json({ success: false, message: "Server not found." });
 
             const cached = await redis.get(`member:${user.id}:${userId}`);
             if (cached) return res.status(200).json(JSON.parse(cached));
