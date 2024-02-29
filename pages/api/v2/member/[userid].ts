@@ -20,7 +20,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
             const servers = await prisma.servers.findMany({ where: { ownerId: user.id } });
             if (!servers) return res.status(400).json({ success: false, message: "No servers found." });
 
-            const cached = await redis.get(`member:${userId}`);
+            const cached = await redis.get(`member:${user.id}:${userId}`);
             if (cached) return res.status(200).json(JSON.parse(cached));
 
             let guildIds: any = [];
@@ -78,7 +78,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 };
 
                 if (resp.status !== 200) {
-                    await redis.set(`member:${userId}`, JSON.stringify(response), "EX", 3600);
+                    await redis.set(`member:${user.id}:${userId}`, JSON.stringify(response), "EX", 3600);
                     return res.status(200).json(response);
                 }
                 else if (resp.status === 200) {
@@ -121,7 +121,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         }
                     };
 
-                    await redis.set(`member:${userId}`, JSON.stringify(response), "EX", 3600);
+                    await redis.set(`member:${user.id}:${userId}`, JSON.stringify(response), "EX", 3600);
                     return res.status(200).json(response);
                 }
 
