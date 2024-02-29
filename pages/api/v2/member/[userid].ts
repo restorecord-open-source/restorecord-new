@@ -132,7 +132,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
         }
         catch (err: any) {
             console.error(err);
-            return res.status(400).json({ success: false, message: "Something went wrong" });
+            return res.status(400).json({ success: false, message: "Something went wrong." });
         }
         break;
 
