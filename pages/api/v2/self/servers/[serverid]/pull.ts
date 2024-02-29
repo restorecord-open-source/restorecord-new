@@ -347,7 +347,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
             console.log(`[${server.name}] Started Pulling`);
 
-            const MAX_PULL_TIME = 1000 * 60 * 5;
+            const MAX_PULL_TIME = 1000 * 60 * 30;
 
             for (const member of membersNew) {
                 console.log(`[${server.name}] [${member.username}] Pulling...`);
