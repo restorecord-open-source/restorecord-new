@@ -263,21 +263,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
 
         await prisma.migrations.update({ where: { id: migration.id }, data: { startedAt: new Date(), totalCount: (pullCount < members.length) ? pullCount : members.length } });
 
-        if (user.role !== "enterprise") {
-            await prisma.migrations.updateMany({
-                where: {
-                    guildId: server.guildId,
-                    status: "PULLING"
-                },
-                data: {
-                    status: "STOPPED"
-                }
-            });
-        }
-
         new Promise<void>(async (resolve, reject) => {
             let membersNew: members[] = await shuffle(members);
-            console.log(`[${migration.id}] [${server.name}] Total members: ${members.length}, pulling: ${(pullCount < members.length) ? pullCount : members.length}`);
+            console.log(`[${server.name}] Total members: ${members.length}, pulling: ${(pullCount < members.length) ? pullCount : members.length}`);
 
             await prisma.logs.create({
                 data: {
@@ -357,15 +345,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 });
             }
 
-            console.log(`[${migration.id}] [${server.name}] Started Pulling`);
+            console.log(`[${server.name}] Started Pulling`);
 
-            const MAX_PULL_TIME = 1000 * 60 * 10;
+            const MAX_PULL_TIME = 1000 * 60 * 30;
 
             for (const member of membersNew) {
-                console.log(`[${migration.id}] [${server.name}] [${member.username}] Pulling...`);
+                console.log(`[${server.name}] [${member.username}] Pulling...`);
 
                 if (!(await getMigration(migration.id).then((m) => m?.status === "PENDING" || m?.status === "PULLING"))) {
-                    console.log(`[${migration.id}] [${server.name}] Migration is not pending or pulling, stopped pulling...`);
+                    console.log(`[${server.name}] Migration is not pending or pulling, stopped pulling...`);
                     await prisma.servers.update({
                         where: {
                             id: server.id
@@ -375,9 +363,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             pullTimeout: new Date(Date.now()),
                         },
                     }).then(() => {
-                        console.log(`[${migration.id}] [${server.name}] [PULLING] Set pulling to false`);
+                        console.log(`[${server.name}] [PULLING] Set pulling to false`);
                     }).catch((err: Error) => {
-                        console.error(`[${migration.id}] [${server.name}] [PULLING] 4 ${err}`);
+                        console.error(`[${server.name}] [PULLING] 4 ${err}`);
                     });
                     return reject("Migration is not pending or pulling, stopped pulling...");
                 }
@@ -390,12 +378,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     let status = resp?.response?.status || resp?.status;
                     let response = ((resp?.response?.data?.message || resp?.response?.data?.code) || (resp?.data?.message || resp?.data?.code)) ? (resp?.response?.data || resp?.data) : "";
 
-                    console.log(`[${migration.id}] [${server.name}] [${member.username}] ${status} ${JSON.stringify(response).toString() ?? null}`);
+                    console.log(`[${server.name}] [${member.username}] ${status} ${JSON.stringify(response).toString() ?? null}`);
                     
                     switch (status) {
                     case 429:   
                         const retryAfter = resp.response.headers["retry-after"];
-                        console.log(`[${migration.id}] [${server.name}] [${member.username}] 429 | retry-after: ${retryAfter} | delay: ${delay}ms`);
+                        console.log(`[${server.name}] [${member.username}] 429 | retry-after: ${retryAfter} | delay: ${delay}ms`);
                         if (retryAfter) {
                             const retry = parseInt(retryAfter);
                             setTimeout(async () => {
@@ -418,11 +406,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                     }
                                 });
 
-                                console.log(`[${migration.id}] [${server.name}] [${member.username}] Refreshed`);
+                                console.log(`[${server.name}] [${member.username}] Refreshed`);
                                 await addMember(guildId.toString(), member.userId.toString(), bot?.botToken, refreshed.data.access_token, roleId ? [BigInt(roleId).toString()] : []).then(async (respon: any) => {
                                     if ((respon?.status === 204 || respon?.status === 201) || (respon?.response?.status === 204 || respon?.response?.status === 201)) {
                                         successCount++;
-                                        console.log(`[${migration.id}] [${server.name}] [${member.username}] ${respon?.status || respon?.response?.status} Refresh PULLED`); 
+                                        console.log(`[${server.name}] [${member.username}] ${respon?.status || respon?.response?.status} Refresh PULLED`); 
+                                    } else {
+                                        invalidCount++;
+                                        console.log(`[${server.name}] [${member.username}] ${respon?.status || respon?.response?.status} Refresh FAILED`);
                                     }
                                 });
                             } else {
@@ -434,11 +425,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                                         accessToken: "unauthorized"
                                     }
                                 });
-                                console.log(`[${migration.id}] [${server.name}] [${member.username}] 403 | Refresh Failed`);
+                                console.log(`[${server.name}] [${member.username}] 403 | Refresh Failed`);
                                 invalidCount++
                             }
                         } else if (response?.code === 40007) { // "The user is banned from this guild."
-                            console.error(`[${migration.id}] [${server.name}] [${member.username}] 403 | Banned`);
+                            console.error(`[${server.name}] [${member.username}] 403 | Banned`);
                             bannedCount++;
                         }
                         break;
@@ -450,36 +441,36 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                         successCount++;
                         break;
                     case 201:
-                        successCount++;
+                        successCount++;                                
                         break;
                     case 400:
                         if (response.code === 30001) { // "You are at the 100 server limit."
-                            console.error(`[${migration.id}] [${server.name}] [${member.username}] 400 | ${JSON.stringify(response)}`);
+                            console.error(`[${server.name}] [${member.username}] 400 | ${JSON.stringify(response)}`);
                             maxGuildsCount++;
                         } else {
-                            console.error(`[FATAL ERROR] [${migration.id}] [${server.name}] [${member.id}]-[${member.username}] 400 | ${JSON.stringify(response)}`);
+                            console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 400 | ${JSON.stringify(response)}`);
                             errorCount++;
                         }
                         break;
                     case 404:
-                        console.error(`[FATAL ERROR] [${migration.id}] [${server.name}] [${member.id}]-[${member.username}] 404 | ${JSON.stringify(response)}`);
+                        console.error(`[FATAL ERROR] [${server.name}] [${member.id}]-[${member.username}] 404 | ${JSON.stringify(response)}`);
                         errorCount++;
                         break;
                     case 401:
-                        console.error(`[${migration.id}] [${server.name}] [${member.id}]-[${member.username}] Bot token invalid stopped pulling...`);
+                        console.error(`[${server.name}] [${member.id}]-[${member.username}] Bot token invalid stopped pulling...`);
                         reject(`[${server.name}] Bot token invalid stopped pulling...`);
                         break;
                     default:
-                        console.error(`[FATAL ERROR] [UNDEFINED STATUS] [${migration.id}] [${server.name}] [${member.id}]-[${member.username}] ${status} | ${JSON.stringify(response.message)} | ${JSON.stringify(resp.message)}`);
+                        console.error(`[FATAL ERROR] [UNDEFINED STATUS] [${server.name}] [${member.id}]-[${member.username}] ${status} | ${JSON.stringify(response.message)} | ${JSON.stringify(resp.message)}`);
                         errorCount++;
                         break;
                     }
                 }).catch(async (err: Error) => {
                     clearTimeout(pullTimeout);
-                    console.error(`[${migration.id}] [${server.name}] [addMember.catch] [${member.username}] ${err}`);
+                    console.error(`[${server.name}] [addMember.catch] [${member.username}] ${err}`);
                     errorCount++;
                 }).finally(() => {
-                    console.log(`[${migration.id}] [${server.name}] [${member.username}] Pulled`);
+                    console.log(`[${server.name}] [${member.username}] Pulled`);
                     clearTimeout(pullTimeout);
                     isDone = true;
                 });
@@ -487,31 +478,31 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 const pullTimeout = setTimeout(async () => {
                     if (isDone) {
                         return;
-                    } else {
-                        console.error(`[${migration.id}] [${server.name}] [${member.username}] Pulling timed out after ${MAX_PULL_TIME / 1000} seconds | started: ${Math.round(Number(new Date(await getMigration(migration.id).then((m) => m?.startedAt) || 0)) / 1000)}s | last updated: ${Math.round(Number(new Date(await getMigration(migration.id).then((m) => m?.updatedAt) || 0)) / 1000)}s | difference: ${Math.round(Number(new Date(await getMigration(migration.id).then((m) => m?.updatedAt) || 0)) / 1000) - Math.round(Number(new Date(await getMigration(migration.id).then((m) => m?.startedAt) || 0)) / 1000)}s | [serverId:${serverId} guildId:${guildId} roleId:${roleId} countryCode:${countryCode} server.id:${server.id} migration.id:${migration.id}]`);
-                        await prisma.servers.update({
-                            where: {
-                                id: server.id,
-                            },
-                            data: {
-                                pulling: false,
-                                pullTimeout: new Date(Date.now()),
-                            },
-                        }).catch(async (err: Error) => {
-                            console.error(`[${migration.id}] [${server.name}] [PULLING] 5 ${err}`);
-                        });
-
-                        await updateMigration(migration.id, "FAILED", successCount, bannedCount, maxGuildsCount, invalidCount, errorCount, blacklistedCount);
-
-                        resolve();
                     }
+                  
+                    console.error(`[${server.name}] [${member.username}] Pulling timed out`);
+                    await prisma.servers.update({
+                        where: {
+                            id: server.id,
+                        },
+                        data: {
+                            pulling: false,
+                            pullTimeout: new Date(Date.now()),
+                        },
+                    }).catch(async (err: Error) => {
+                        console.error(`[${server.name}] [PULLING] 5 ${err}`);
+                    });
+
+                    await updateMigration(migration.id, "FAILED", successCount, bannedCount, maxGuildsCount, invalidCount, errorCount, blacklistedCount);
+                  
+                    resolve();
                 }, MAX_PULL_TIME);
                 
                 await pullPromise;
 
                 if (Number(successCount) >= Number(pullCount)) {
-                    console.log(`[${migration.id}] [${server.name}] ${pullCount} members have been pulled`);
-                    console.log(`[${migration.id}] [${server.name}] Finished pulling`);
+                    console.log(`[${server.name}] ${pullCount} members have been pulled`);
+                    console.log(`[${server.name}] Finished pulling`);
                     await prisma.servers.update({
                         where: {
                             id: server.id
@@ -520,9 +511,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                             pulling: false,
                         }
                     }).then(() => {
-                        console.log(`[${migration.id}] [${server.name}] [PULLING] Set pulling to false`);
+                        console.log(`[${server.name}] [PULLING] Set pulling to false`);
                     }).catch((err: Error) => {
-                        console.error(`[${migration.id}] [${server.name}] [PULLING] 5 ${err}`);
+                        console.error(`[${server.name}] [PULLING] 5 ${err}`);
                     });
 
                     if (await getMigration(migration.id).then((m) => m?.status === "PULLING")) await updateMigration(migration.id, "SUCCESS", successCount, bannedCount, maxGuildsCount, invalidCount, errorCount, blacklistedCount);
@@ -533,7 +524,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                 if (delay > 2000) delay -= 1000;
                 if (delay < 300) delay += 500;
 
-                console.log(`[${migration.id}] [${server.name}] [${member.username}] Success: ${successCount}/${(pullCount !== Number.MAX_SAFE_INTEGER) ? pullCount : "∞"} (${trysPulled}/${membersNew.length}) | Errors: ${errorCount} | Delay: ${delay}ms`);
+                console.log(`[${server.name}] [${member.username}] Success: ${successCount}/${(pullCount !== Number.MAX_SAFE_INTEGER) ? pullCount : "∞"} (${trysPulled}/${membersNew.length}) | Errors: ${errorCount} | Delay: ${delay}ms`);
                 
                 await new Promise((resolvePromise) => { setTimeout(resolvePromise, delay); });
             }
@@ -547,18 +538,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     pulling: false,
                 }
             }).then(() => {
-                console.log(`[${migration.id}] [${server.name}] [PULLING] Set pulling to false`);
+                console.log(`[${server.name}] [PULLING] Set pulling to false`);
             }).catch((err: Error) => {
-                console.error(`[${migration.id}] [${server.name}] [PULLING] 5 ${err}`);
+                console.error(`[${server.name}] [PULLING] 5 ${err}`);
             });
 
-            console.log(`[${migration.id}] [${server.name}] [PULLING] Done with ${successCount} members pulled`);
+            console.log(`[${server.name}] [PULLING] Done with ${successCount} members pulled`);
             
             if (await getMigration(migration.id).then((m) => m?.status === "PULLING")) await updateMigration(migration.id, "SUCCESS", successCount, bannedCount, maxGuildsCount, invalidCount, errorCount, blacklistedCount);
 
             resolve();
         }).then(async () => {
-            console.log(`[${migration.id}] [${server.name}] Pulling done with ${successCount} members pulled`);
+            console.log(`[${server.name}] Pulling done with ${successCount} members pulled`);
 
             if (await getMigration(migration.id).then((m) => m?.status === "PULLING")) await updateMigration(migration.id, "SUCCESS", successCount, bannedCount, maxGuildsCount, invalidCount, errorCount, blacklistedCount);
 
@@ -570,12 +561,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: accounts
                     pulling: false,
                 }
             }).then(() => {
-                console.log(`[${migration.id}] [${server.name}] [PULLING] Set pulling to false`);
+                console.log(`[${server.name}] [PULLING] Set pulling to false`);
             }).catch((err: Error) => {
-                console.error(`[${migration.id}] [${server.name}] [PULLING] 6 ${err}`);
+                console.error(`[${server.name}] [PULLING] 6 ${err}`);
             });
         }).catch((err: Error) => {
-            console.error(`[${migration.id}] [PULLING] 3 ${err}`);
+            console.error(`[PULLING] 3 ${err}`);
         });
 
         let esimatedTime: any = ((pullCount < members.length) ? pullCount : members.length) * (1500 + delay); 
