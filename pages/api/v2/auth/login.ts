@@ -10,52 +10,29 @@ import axios from "axios";
 dotenv.config({ path: "../../" });
 
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    if (req.method !== "POST")
-        return res.status(405).json({
-            message: "Method not allowed"
-        });
+export default async function handler(req: NextApiRequest, res: NextApiResponse) { 
+    if (req.method !== "POST") 
+        return res.status(405).json({ message: "Method not allowed" });
 
     try {
-        const data = {
-            ...req.body
-        };
+        const data = { ...req.body };
         const xTrack = getXTrack(req);
-        if (!xTrack) return res.status(400).json({
-            success: false,
-            message: "Invalid Request"
-        });
+        if (!xTrack) return res.status(400).json({ success: false, message: "Invalid Request" });
 
         let tokenExpiry: string = "30d";
         if (!data.username || !data.password) {
-            return res.status(400).json({
-                success: false,
-                message: "Missing username or password"
-            });
+            return res.status(400).json({ success: false, message: "Missing username or password" });
         }
+        
+        if (!data) return res.status(400).json({ message: "Please provide all fields" });
 
-        if (!data) return res.status(400).json({
-            message: "Please provide all fields"
-        });
-
-        const account = await prisma.accounts.findFirst({
-            where: {
-                username: data.username.toLowerCase()
-            }
-        });
-        if (!account) return res.status(400).json({
-            process,
-            message: "Account not found"
-        });
+        const account = await prisma.accounts.findFirst({ where: { username: data.username.toLowerCase() } });
+        if (!account) return res.status(400).json({ message: "Account not found" });
 
         const isValid = await bcrypt.compare(data.password, account.password);
-        if (!isValid) return res.status(400).json({
-            message: "Some Credentials are incorrect"
-        });
+        if (!isValid) return res.status(400).json({ message: "Some Credentials are incorrect" });
 
-        if ((account.twoFactor !== 0 && account.googleAuthCode) && !data.totp) return res.status(400).json({
-            message: "2FA Code Required"
-        });
+        if ((account.twoFactor !== 0 && account.googleAuthCode) && !data.totp) return res.status(400).json({ message: "2FA Code Required" });
 
         if (account.twoFactor !== 0 && account.googleAuthCode) {
             const totpVerify = speakeasy.totp.verify({
@@ -64,30 +41,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 token: data.totp
             });
 
-            if (!totpVerify) return res.status(400).json({
-                message: "Invalid 2FA Code"
-            });
+            if (!totpVerify) return res.status(400).json({ message: "Invalid 2FA Code" });
 
             tokenExpiry = "90d";
         }
 
-        if (account.banned) return res.status(400).json({
-            message: "Account is Banned. Contact: admin@restorecord.com"
-        });
+        if (account.banned) return res.status(400).json({ message: "Account is Banned. Contact: admin@restorecord.com" });
 
-        const token = sign({
-            id: account.id,
-            time: Date.now()
-        }, `${process.env.JWT_SECRET}`, {
-            expiresIn: tokenExpiry
-        });
+        const token = sign({ id: account.id, time: Date.now() }, `${process.env.JWT_SECRET}`, { expiresIn: tokenExpiry });
 
-        await prisma.sessions.deleteMany({
-            where: {
-                accountId: account.id,
-                token: token
-            }
-        });
+        await prisma.sessions.deleteMany({ where: { accountId: account.id, token: token } });
 
         await prisma.sessions.create({
             data: {
@@ -124,7 +87,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     },
                     subject: "New Login Detected",
                     text: `Hello ${account.username},\n\nA new login was detected from ${res.data.city ?? "Unknown City"}, ${res.data.region ?? "Unknown Region"}, ${res.data.country ?? "Unknown Country"}.\n\nIf this was not you, please change your password immediately.\n\nRegards,\nRestoreCord`,
-                    html: `
+                    html: 
+                    `
                         <!DOCTYPE html>
                         <html>
                             <head>
@@ -172,14 +136,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             success: true,
             message: "Login successful",
             token: token,
-            process
         });
-    } catch (err: any) {
-        console.error(err);
-        if (err?.name === "ValidationError") return res.status(400).json({
-            success: false,
-            message: err.errors[0]
-        });
-        return res.status(500);
     }
+    catch (err: any) {
+        console.error(err);
+        if (err?.name === "ValidationError") return res.status(400).json({ success: false, message: err.errors[0] });
+        return res.status(500);
+    } 
 }
