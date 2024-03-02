@@ -38,7 +38,7 @@
 		"jsonwebtoken": "^9.0.0",
 		"lodash": "^4.17.21",
 		"lru-cache": "^7.14.1",
-		"mui-color-input": "^1.0.3",
+		"mui-color-input": "^2.0.3",
 		"next": "^13.5.4",
 		"next-qrcode": "^2.4.1",
 		"nprogress": "^0.2.0",
